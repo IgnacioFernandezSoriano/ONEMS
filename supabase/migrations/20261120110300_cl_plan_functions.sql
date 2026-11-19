@@ -36,6 +36,8 @@ DECLARE
   v_n integer := 0;
   v_o uuid; v_d uuid; v_y integer; v_w integer; v_s integer;
   v_ps date; v_pe date;
+  v_keys text[] := ARRAY[]::text[];
+  v_key text;
 BEGIN
   v_plan := public.cl_plan_authorize(p_plan_id, 'edit');
   IF v_plan.status = 'closed' THEN
@@ -47,33 +49,54 @@ BEGIN
 
   -- Validar todo antes de borrar nada.
   FOR q IN SELECT * FROM jsonb_array_elements(p_quotas) LOOP
-    v_o := (q->>'origin_city_id')::uuid;
-    v_d := (q->>'destination_city_id')::uuid;
-    v_y := (q->>'iso_year')::integer;
-    v_w := (q->>'iso_week')::integer;
-    v_s := coalesce((q->>'samples')::integer, 0);
-    IF v_o IS NULL OR v_d IS NULL OR v_y IS NULL OR v_w IS NULL THEN
-      RAISE EXCEPTION 'Invalid quota: origin, destination, iso_year and iso_week are required' USING ERRCODE = '22023';
+    BEGIN
+      IF jsonb_typeof(q) <> 'object' THEN
+        RAISE EXCEPTION 'Invalid quota: each element must be an object' USING ERRCODE = '22023';
+      END IF;
+      IF jsonb_typeof(q->'samples') IS DISTINCT FROM 'number' THEN
+        RAISE EXCEPTION 'Invalid quota: samples is required and must be an integer' USING ERRCODE = '22023';
+      END IF;
+      v_o := (q->>'origin_city_id')::uuid;
+      v_d := (q->>'destination_city_id')::uuid;
+      v_y := (q->>'iso_year')::integer;
+      v_w := (q->>'iso_week')::integer;
+      v_s := (q->>'samples')::integer;
+      IF v_o IS NULL OR v_d IS NULL OR v_y IS NULL OR v_w IS NULL THEN
+        RAISE EXCEPTION 'Invalid quota: origin, destination, iso_year and iso_week are required' USING ERRCODE = '22023';
+      END IF;
+      IF v_s <= 0 THEN CONTINUE; END IF;
+      v_ps := to_date(v_y::text || '-' || lpad(v_w::text, 2, '0'), 'IYYY-IW');
+    EXCEPTION WHEN invalid_text_representation OR numeric_value_out_of_range
+              OR invalid_datetime_format OR datetime_field_overflow THEN
+      RAISE EXCEPTION 'Invalid quota entry: %', SQLERRM USING ERRCODE = '22023';
+    END;
+    IF extract(isoyear FROM v_ps)::integer <> v_y OR extract(week FROM v_ps)::integer <> v_w THEN
+      RAISE EXCEPTION 'Invalid ISO week %-W%', v_y, v_w USING ERRCODE = '22023';
     END IF;
-    IF v_w < 1 OR v_w > 53 THEN
-      RAISE EXCEPTION 'Invalid ISO week %', v_w USING ERRCODE = '22023';
-    END IF;
-    IF v_s <= 0 THEN CONTINUE; END IF;
+    v_pe := v_ps + 6;
     IF (SELECT count(*) FROM public.cities WHERE id IN (v_o, v_d) AND account_id = v_plan.account_id)
        <> (SELECT count(DISTINCT x) FROM (VALUES (v_o), (v_d)) t(x)) THEN
       RAISE EXCEPTION 'City does not belong to the plan account' USING ERRCODE = '22023';
     END IF;
-    v_ps := to_date(v_y::text || '-' || lpad(v_w::text, 2, '0'), 'IYYY-IW');
-    v_pe := v_ps + 6;
     IF v_pe < v_plan.start_date OR v_ps > v_plan.end_date THEN
       RAISE EXCEPTION 'Week %-W% is outside the plan dates', v_y, v_w USING ERRCODE = '22023';
+    END IF;
+    v_key := v_o::text || '>' || v_d::text || '@' || v_y || '-' || v_w;
+    IF v_key = ANY (v_keys) THEN
+      RAISE EXCEPTION 'CL_DUPLICATE_QUOTA: route % -> % week %-W% appears twice', v_o, v_d, v_y, v_w USING ERRCODE = '22023';
+    END IF;
+    v_keys := v_keys || v_key;
+    IF EXISTS (SELECT 1 FROM public.cl_plan_quotas x
+                WHERE x.plan_id = p_plan_id AND x.origin_city_id = v_o AND x.destination_city_id = v_d
+                  AND x.iso_year = v_y AND x.iso_week = v_w AND x.status <> 'pending') THEN
+      RAISE EXCEPTION 'CL_QUOTA_LOCKED: route % -> % week %-W% already has a non-pending quota', v_o, v_d, v_y, v_w USING ERRCODE = '22023';
     END IF;
   END LOOP;
 
   DELETE FROM public.cl_plan_quotas WHERE plan_id = p_plan_id AND status = 'pending';
 
   FOR q IN SELECT * FROM jsonb_array_elements(p_quotas) LOOP
-    v_s := coalesce((q->>'samples')::integer, 0);
+    v_s := (q->>'samples')::integer;
     IF v_s <= 0 THEN CONTINUE; END IF;
     v_y := (q->>'iso_year')::integer;
     v_w := (q->>'iso_week')::integer;
@@ -81,10 +104,7 @@ BEGIN
     INSERT INTO public.cl_plan_quotas
       (account_id, plan_id, origin_city_id, destination_city_id, iso_year, iso_week, period_start, period_end, samples_planned)
     VALUES (v_plan.account_id, p_plan_id, (q->>'origin_city_id')::uuid, (q->>'destination_city_id')::uuid,
-            v_y, v_w, v_ps, v_ps + 6, v_s)
-    ON CONFLICT (plan_id, origin_city_id, destination_city_id, iso_year, iso_week)
-      DO UPDATE SET samples_planned = public.cl_plan_quotas.samples_planned + EXCLUDED.samples_planned
-      WHERE public.cl_plan_quotas.status = 'pending';
+            v_y, v_w, v_ps, v_ps + 6, v_s);
     v_n := v_n + 1;
   END LOOP;
   RETURN v_n;
@@ -164,6 +184,9 @@ BEGIN
   END IF;
   IF v_plan.feed_id IS NULL THEN
     RAISE EXCEPTION 'CL_NO_FEED: plan has no feed' USING ERRCODE = '22023';
+  END IF;
+  IF (SELECT f.carrier_id FROM public.cl_feeds f WHERE f.id = v_plan.feed_id) IS DISTINCT FROM v_plan.carrier_id THEN
+    RAISE EXCEPTION 'CL_FEED_CARRIER_MISMATCH: feed carrier differs from plan carrier' USING ERRCODE = '22023';
   END IF;
   IF NOT EXISTS (SELECT 1 FROM public.cl_plan_quotas WHERE plan_id = p_plan_id) THEN
     RAISE EXCEPTION 'CL_NO_QUOTAS: plan has no quotas' USING ERRCODE = '22023';

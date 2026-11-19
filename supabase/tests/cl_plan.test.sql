@@ -112,6 +112,62 @@ BEGIN
   PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_plan_quotas WHERE plan_id = '90000000-0000-0000-0000-0000000000a1') = 1, 'un rechazo no borra las cuotas');
 END $$;
 
+-- 3b. JSON mal formado, duplicados, cuotas bloqueadas, semanas ISO, feed de otro carrier.
+INSERT INTO public.carriers (id, account_id, code, name) VALUES
+  ('ca000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','CC','Carrier3');
+INSERT INTO public.cl_feeds (id, account_id, carrier_id, name) VALUES
+  ('f0000000-0000-0000-0000-0000000000a5','a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000003','Feed C3');
+INSERT INTO public.cl_plans (id, account_id, plan_name, carrier_id, product_id, total_samples, start_date, end_date, feed_id) VALUES
+  ('90000000-0000-0000-0000-0000000000b1','a0000000-0000-0000-0000-000000000001','Mismatch','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',10,'2026-11-16','2026-11-29','f0000000-0000-0000-0000-0000000000a5'),
+  ('90000000-0000-0000-0000-0000000000b2','a0000000-0000-0000-0000-000000000001','W53-2025','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',10,'2025-12-22','2026-01-11',NULL),
+  ('90000000-0000-0000-0000-0000000000b3','a0000000-0000-0000-0000-000000000001','W53-2026','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',10,'2026-12-21','2027-01-10',NULL);
+DO $$
+DECLARE n int; r text;
+BEGIN
+  -- JSON mal formado: 22023, no 22P02
+  FOREACH r IN ARRAY ARRAY[
+    '[{ORIG,"iso_year":2026,"iso_week":47,"samples":"abc"}]',
+    '[{ORIG,"iso_year":2026,"iso_week":47,"samples":2.5}]',
+    '[{"origin_city_id":"nope","destination_city_id":"c2000000-0000-0000-0000-000000000002","iso_year":2026,"iso_week":47,"samples":2}]',
+    '[{ORIG,"iso_year":2026,"iso_week":47}]',
+    '[{ORIG,"iso_year":2026,"iso_week":47,"samples":null}]',
+    '[{ORIG,"iso_year":"x","iso_week":47,"samples":2}]',
+    '["texto"]',
+    '[5]'
+  ] LOOP
+    r := replace(r, 'ORIG', '"origin_city_id":"c1000000-0000-0000-0000-000000000001","destination_city_id":"c2000000-0000-0000-0000-000000000002"');
+    PERFORM pg_temp.ok(pg_temp.sqlstate_of(format('SELECT public.cl_plan_set_quotas(%L, %L::jsonb)', '90000000-0000-0000-0000-0000000000a1', r)) = '22023',
+      'JSON invalido da 22023: ' || r);
+  END LOOP;
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_plan_quotas WHERE plan_id = '90000000-0000-0000-0000-0000000000a1') = 1, 'JSON invalido no borra nada');
+
+  -- duplicados
+  PERFORM pg_temp.ok(pg_temp.msg_of($q$SELECT public.cl_plan_set_quotas('90000000-0000-0000-0000-0000000000a1', '[
+    {"origin_city_id":"c1000000-0000-0000-0000-000000000001","destination_city_id":"c2000000-0000-0000-0000-000000000002","iso_year":2026,"iso_week":48,"samples":1},
+    {"origin_city_id":"c1000000-0000-0000-0000-000000000001","destination_city_id":"c2000000-0000-0000-0000-000000000002","iso_year":2026,"iso_week":48,"samples":2}]'::jsonb)$q$) LIKE '22023:CL_DUPLICATE_QUOTA%', 'duplicado: CL_DUPLICATE_QUOTA');
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_plan_quotas WHERE plan_id = '90000000-0000-0000-0000-0000000000a1') = 1, 'duplicado no borra nada');
+
+  -- cuota no pending
+  UPDATE public.cl_plan_quotas SET status = 'open' WHERE plan_id = '90000000-0000-0000-0000-0000000000a1';
+  PERFORM pg_temp.ok(pg_temp.msg_of($q$SELECT public.cl_plan_set_quotas('90000000-0000-0000-0000-0000000000a1', '[
+    {"origin_city_id":"c1000000-0000-0000-0000-000000000001","destination_city_id":"c2000000-0000-0000-0000-000000000002","iso_year":2026,"iso_week":47,"samples":9}]'::jsonb)$q$) LIKE '22023:CL_QUOTA_LOCKED%', 'cuota no pending: CL_QUOTA_LOCKED');
+  PERFORM pg_temp.ok((SELECT samples_planned FROM public.cl_plan_quotas WHERE plan_id = '90000000-0000-0000-0000-0000000000a1') = 5, 'bloqueada no cambia');
+  UPDATE public.cl_plan_quotas SET status = 'pending' WHERE plan_id = '90000000-0000-0000-0000-0000000000a1';
+
+  -- semanas ISO
+  PERFORM pg_temp.ok(pg_temp.sqlstate_of($q$SELECT public.cl_plan_set_quotas('90000000-0000-0000-0000-0000000000b2', '[
+    {"origin_city_id":"c1000000-0000-0000-0000-000000000001","destination_city_id":"c2000000-0000-0000-0000-000000000002","iso_year":2025,"iso_week":53,"samples":1}]'::jsonb)$q$) = '22023', '2025-W53 no existe');
+  n := public.cl_plan_set_quotas('90000000-0000-0000-0000-0000000000b3', '[
+    {"origin_city_id":"c1000000-0000-0000-0000-000000000001","destination_city_id":"c2000000-0000-0000-0000-000000000002","iso_year":2026,"iso_week":53,"samples":1}]'::jsonb);
+  PERFORM pg_temp.ok(n = 1 AND (SELECT period_start FROM public.cl_plan_quotas WHERE plan_id = '90000000-0000-0000-0000-0000000000b3') = DATE '2026-12-28', '2026-W53 empieza 2026-12-28');
+  n := public.cl_plan_set_quotas('90000000-0000-0000-0000-0000000000b2', '[
+    {"origin_city_id":"c1000000-0000-0000-0000-000000000001","destination_city_id":"c2000000-0000-0000-0000-000000000002","iso_year":2026,"iso_week":1,"samples":1}]'::jsonb);
+  PERFORM pg_temp.ok((SELECT period_start FROM public.cl_plan_quotas WHERE plan_id = '90000000-0000-0000-0000-0000000000b2') = DATE '2025-12-29', '2026-W01 empieza 2025-12-29');
+
+  -- feed de otro carrier
+  PERFORM pg_temp.ok(pg_temp.msg_of($q$SELECT public.cl_plan_activate('90000000-0000-0000-0000-0000000000b1')$q$) LIKE '22023:CL_FEED_CARRIER_MISMATCH%', 'feed de otro carrier');
+END $$;
+
 -- 4. Puntos que faltan y activacion.
 DO $$
 BEGIN
