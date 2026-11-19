@@ -46,6 +46,7 @@ Hoy ONEMS mide con envíos de prueba que mueven panelistas (E2E) y con lecturas 
 | R19 | Datos personales: solo se guardan campos de una lista permitida; el resto se descarta en la entrada. |
 | R20 | El estándar de entrega admite, para este tipo de lectura, **un tiempo añadido** que hace equivalentes los análisis con los de panelistas. |
 | R21 | Permisos por rol según la tabla de §7. |
+| R22 | La **barrera de conexión** (el conector del muro) define **cómo** (modelo de extracción) y **cuándo** (calendario local: días de la semana y hora) se conecta ONEMS con cada carrier, para no interferir con su base de datos. Las peticiones solo se emiten en ese hueco. |
 
 ### 1.2. De diseño (revisables)
 
@@ -124,7 +125,7 @@ Convenciones al escribir en `one_db`: `carrier_name = carriers.name`, `product_n
 - `cl_plan_quotas`: `plan_id`, `origin_city_id`, `destination_city_id`, `iso_year`, `iso_week`, `period_start`, `period_end`, `samples_planned` (lo que salió del generador), `samples_carried_in` (déficit recibido de semanas anteriores, R17), `samples_obtained`, `status` (`pending|open|fulfilled|carried|unfilled`).
 
 **Conector y equivalencias** (por cuenta y carrier)
-- `cl_feeds`: `account_id`, `carrier_id`, `name`, `extraction_model` (texto: `push_api`, `pull_rest`, `file_drop`, `db_query`, `manual_upload`…), `config`, `secret_ref` (nunca el secreto), `status` (`testing|active|paused`), `last_batch_at`, `last_error`.
+- `cl_feeds`: `account_id`, `carrier_id`, `name`, `extraction_model` (texto: `push_api`, `pull_rest`, `file_drop`, `db_query`, `manual_upload`…), `config`, `emit_days` (días ISO 1-7), `emit_hour` (0-23), `emit_timezone` (vacío = zona de la cuenta) — calendario de conexión (R22), `secret_ref` (nunca el secreto), `status` (`testing|active|paused`), `last_batch_at`, `last_error`.
 - `cl_field_mappings`: `account_id`, `carrier_id`, `standard_field`, `carrier_field`, `format`, `timezone`. Campos estándar: `item_id`, `product`, `scan_at`, `place_ref`, `mode_ref`. Lecturas sin zona horaria usan la del mapeo; si tampoco la hay, la de la cuenta.
 - `cl_value_mappings`: `account_id`, `carrier_id`, `kind` (`product`), `carrier_value`, `onems_value`.
 - `cl_extra_fields`: `account_id`, `carrier_id`, `carrier_field`: lista de campos adicionales permitidos (R19).
@@ -144,7 +145,7 @@ Todas llevan RLS: lectura con nivel `view` y escritura con nivel `edit` sobre la
 
 ## 4. El contrato con el conector
 
-**Demanda** (ONEMS → conector): `demand_id`, valores de carrier y de producto **tal como los conoce el carrier** (equivalencia inversa), y por estrato: `stratum_id`, periodo (inicio, fin, semana ISO), `start_points` y `end_points` (cada uno `{ place_ref, mode_ref }` con valores del carrier), `samples_required`, `candidates_requested`, y `include_all_scans` si el plan tiene diagnóstico.
+**Demanda** (ONEMS → conector): `demand_id`, el calendario del conector (`schedule`), valores de carrier y de producto **tal como los conoce el carrier** (equivalencia inversa), y por estrato: `stratum_id`, periodo (inicio, fin, semana ISO), `start_points` y `end_points` (cada uno `{ place_ref, mode_ref }` con valores del carrier), `samples_required`, `candidates_requested`, y `include_all_scans` si el plan tiene diagnóstico.
 
 El conector debe, por estrato: tomar los envíos del producto con una lectura en algún punto de inicio y otra en algún punto de fin, con la de fin dentro del periodo (R4); contarlos (`population_size`); extraer al azar `candidates_requested` (o todos si hay menos); y devolver **todas** las lecturas de esos envíos en puntos de inicio o de fin de cualquier ciudad (y todas sus lecturas si `include_all_scans`).
 
