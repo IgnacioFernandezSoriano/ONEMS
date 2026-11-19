@@ -1250,29 +1250,42 @@ onedb.total_records,إجمالي السجلات
 onedb.transit_days,أيام العبور
 onedb.transit_time,وقت العبور
 onedb.validated_postal_quality_analytics_repository,مستودع تحليلات جودة البريد المعتمد
-onedb_api.api_key_label,مفتاح API الخاص بك
 onedb_api.api_tester_title,مختبر API
-onedb_api.auth_note,ملاحظة: يستخدم رأس Authorization مفتاح Supabase anon (المقدم من النظام)، بينما يحتوي X-API-Key على مفتاح API الشخصي الخاص بك.
+onedb_api.auth_note,ملاحظة: أرسل مفتاح API الشخصي الخاص بك في رأس Authorization كرمز Bearer (يُقبل أيضًا رأس X-API-Key). لا حاجة لأي بيانات اعتماد أخرى.
+onedb_api.manage_keys_note,يمكن لمدير حساب UPU فقط إدارة المفاتيح.
 onedb_api.authentication_description,يجب أن تتضمن جميع طلبات API مفتاح API الخاص بك في رأس Authorization باستخدام مصادقة Bearer.
 onedb_api.authentication_title,المصادقة
 onedb_api.base_url,الرابط الأساسي
 onedb_api.calls_last_hour,المكالمات في الساعة الأخيرة
-onedb_api.confirm_regenerate,هل أنت متأكد من رغبتك في إعادة إنشاء مفتاح API الخاص بك؟ سيتم تعطيل المفتاح القديم فورًا.
+onedb_api.col_expires,ينتهي في
+onedb_api.col_key,المفتاح
+onedb_api.col_name,الاسم
+onedb_api.col_status,الحالة
+onedb_api.confirm_deactivate,هل أنت متأكد من تعطيل مفتاح API هذا؟ ستتوقف التطبيقات التي تستخدمه عن العمل.
 onedb_api.copied,تم النسخ!
 onedb_api.copy,نسخ
 onedb_api.created_at,تم الإنشاء
 onedb_api.credentials_section,بيانات اعتماد API
+onedb_api.deactivate_key,تعطيل
 onedb_api.description,"واجهة برمجة تطبيقات REST للاستعلام واستخراج بيانات ONE DB. وصول للقراءة فقط مع التصفية حسب التاريخ والترقيم. محدود بـ 10,000 سجل لكل طلب و 10 طلبات في الدقيقة."
 onedb_api.end_date,تاريخ الانتهاء
-onedb_api.end_date_desc,تاريخ الانتهاء لتصفية السجلات (التنسيق: YYYY-MM-DD)
+onedb_api.end_date_desc,تاريخ الانتهاء (يوم UTC، شامل؛ التنسيق: YYYY-MM-DD)
 onedb_api.endpoint_description,استرجاع سجلات ONE DB مصفاة حسب نطاق التاريخ
 onedb_api.endpoint_section,نقطة نهاية API
 onedb_api.endpoints_title,النقاط النهائية المتاحة
 onedb_api.error_codes_title,رموز حالة HTTP
+onedb_api.error_deactivate,تعذّر تعطيل مفتاح API. يرجى المحاولة مرة أخرى.
+onedb_api.error_issue,تعذّر إصدار مفتاح API. يرجى المحاولة مرة أخرى.
+onedb_api.error_replace_old_active,تم إصدار المفتاح الجديد (انسخه أدناه)، لكن تعذّر تعطيل المفتاح السابق وما زال نشطًا. عطّله من القائمة.
 onedb_api.examples_title,أمثلة الطلبات
 onedb_api.generate_key,إنشاء مفتاح API
 onedb_api.generate_key_first,يرجى إنشاء مفتاح API أولاً لاستخدام المختبر.
 onedb_api.generating,جارٍ الإنشاء...
+onedb_api.key_name_label,اسم المفتاح
+onedb_api.key_name_placeholder,مثال: لوحة BI
+onedb_api.key_name_required,أدخل اسمًا للمفتاح.
+onedb_api.key_name_too_long,يجب ألا يتجاوز الاسم 80 حرفًا.
+onedb_api.keys_list_title,مفاتيح API
 onedb_api.last_call,آخر مكالمة API
 onedb_api.limit,الحد الأقصى
 onedb_api.limit_10_per_minute,الحد: 10 في الدقيقة
@@ -1280,6 +1293,9 @@ onedb_api.limit_desc,الحد الأقصى لعدد السجلات التي سي
 onedb_api.loading_stats,جارٍ تحميل الإحصائيات...
 onedb_api.max_records_note,ملاحظة: تُرجع واجهة برمجة التطبيقات حدًا أقصى قدره 10000 سجل إجمالاً. استخدم نطاقات تاريخ أكثر تحديدًا إذا كنت بحاجة إلى الوصول إلى المزيد من البيانات.
 onedb_api.never,أبدًا
+onedb_api.new_key_dismiss,لقد نسخته، إغلاق
+onedb_api.new_key_title,مفتاح API الجديد الخاص بك
+onedb_api.new_key_warning,انسخه الآن واحفظه في مكان آمن. لأسباب أمنية لا يمكن عرضه مرة أخرى؛ إذا فقدته فعليك إصدار مفتاح جديد.
 onedb_api.no,لا
 onedb_api.no_api_key,أنشئ واحدًا لبدء استخدام API.
 onedb_api.offset,الإزاحة
@@ -1289,25 +1305,30 @@ onedb_api.query_parameters,معلمات الاستعلام
 onedb_api.rate_limit_info,حد المعدل: 10 طلبات في الدقيقة
 onedb_api.rate_limiting_description,لضمان الاستخدام العادل واستقرار النظام
 onedb_api.rate_limiting_title,تحديد المعدل
-onedb_api.regenerate_key,إعادة إنشاء مفتاح API
+onedb_api.replace_hint,سيتم إصدار مفتاح جديد وتعطيل هذا المفتاح فورًا.
+onedb_api.replace_key,استبدال
 onedb_api.required,مطلوب
 onedb_api.response,الاستجابة
 onedb_api.response_format,تنسيق الاستجابة
 onedb_api.security_warning_text,لا تشاركه علنًا أو ترفعه إلى نظام التحكم في الإصدارات. أي شخص لديه هذا المفتاح يمكنه الوصول إلى بيانات ONE DB الخاصة بك.
 onedb_api.security_warning_title,تحذير أمني
 onedb_api.start_date,تاريخ البدء
-onedb_api.start_date_desc,تاريخ البدء لتصفية السجلات (التنسيق: YYYY-MM-DD)
+onedb_api.start_date_desc,تاريخ البدء (يوم UTC، شامل؛ التنسيق: YYYY-MM-DD)
 onedb_api.status_200,نجاح - تم إكمال الطلب بنجاح
 onedb_api.status_400,طلب خاطئ - معلمات أو تنسيق تاريخ غير صالح
 onedb_api.status_401,غير مصرح - مفتاح API غير صالح أو مفقود
 onedb_api.status_429,طلبات كثيرة جدًا - تم تجاوز حد المعدل
 onedb_api.status_500,خطأ داخلي في الخادم - حدث خطأ في جانبنا
+onedb_api.status_active,نشط
 onedb_api.status_code,رمز الحالة
+onedb_api.status_inactive,معطّل
 onedb_api.tab_documentation,التوثيق
 onedb_api.tab_overview,نظرة عامة
 onedb_api.tab_testing,الاختبار
 onedb_api.tab_usage,الاستخدام
 onedb_api.test_api,اختبار طلب API
+onedb_api.tester_key_label,مفتاح API للاختبار
+onedb_api.tester_key_placeholder,الصق مفتاح API (لا يمكن استرجاع المفاتيح بعد إنشائها)
 onedb_api.testing,جارٍ الاختبار...
 onedb_api.title,GET API - ONE DB
 onedb_api.total_calls_month,إجمالي المكالمات هذا الشهر
