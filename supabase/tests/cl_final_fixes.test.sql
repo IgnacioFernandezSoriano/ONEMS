@@ -347,4 +347,50 @@ BEGIN
 END $$;
 ROLLBACK;
 
+-- ===================================================================== 7. Seguridad: v_mobile_readers con permisos del usuario, sin anon
+BEGIN;
+\ir fixtures/incident_city.sql
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+INSERT INTO public.postal_centers (id, account_id, code, name, city, city_id) VALUES
+  ('d1000000-0000-0000-0000-0000000000c1','a0000000-0000-0000-0000-000000000001','PC1','Center 1','City1','c1000000-0000-0000-0000-000000000001');
+INSERT INTO public.regions (id, account_id, name, code) VALUES
+  ('e0000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000002','Reg2','R2');
+INSERT INTO public.cities (id, account_id, region_id, name, code) VALUES
+  ('c3000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000002','e0000000-0000-0000-0000-000000000002','CityB','CB');
+INSERT INTO public.postal_centers (id, account_id, code, name, city, city_id) VALUES
+  ('d3000000-0000-0000-0000-0000000000c3','a0000000-0000-0000-0000-000000000002','PCB','Center B','CityB','c3000000-0000-0000-0000-000000000003');
+INSERT INTO public.readers (id, account_id, postal_center_id, reader_id, name, type) VALUES
+  ('f1000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','d1000000-0000-0000-0000-0000000000c1','LPI-A','RA','Mixed'),
+  ('f2000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000002','d3000000-0000-0000-0000-0000000000c3','LPI-B','RB','Mixed');
+DO $$
+BEGIN
+  PERFORM pg_temp.ok((SELECT reloptions FROM pg_class WHERE oid = 'public.v_mobile_readers'::regclass) @> ARRAY['security_invoker=true'], 'security_invoker');
+  PERFORM pg_temp.ok(NOT has_table_privilege('anon', 'public.v_mobile_readers', 'SELECT')
+                     AND NOT has_table_privilege('anon', 'public.v_mobile_readers', 'INSERT')
+                     AND NOT has_table_privilege('anon', 'public.v_mobile_readers', 'DELETE')
+                     AND NOT has_table_privilege('anon', 'public.v_mobile_readers', 'TRUNCATE'), 'anon sin permisos');
+  PERFORM pg_temp.ok(has_table_privilege('authenticated', 'public.v_mobile_readers', 'SELECT')
+                     AND NOT has_table_privilege('authenticated', 'public.v_mobile_readers', 'INSERT')
+                     AND NOT has_table_privilege('authenticated', 'public.v_mobile_readers', 'UPDATE')
+                     AND NOT has_table_privilege('authenticated', 'public.v_mobile_readers', 'DELETE'), 'authenticated solo SELECT');
+END $$;
+SET ROLE authenticated;
+SELECT pg_temp.as_user('99000000-0000-0000-0000-000000000099', 'authenticated');
+DO $$
+BEGIN
+  PERFORM pg_temp.ok((SELECT array_agg(reader_code ORDER BY reader_code) FROM public.v_mobile_readers) = ARRAY['LPI-A'],
+                     'usuario de A: solo sus lectores');
+  PERFORM pg_temp.ok(NOT EXISTS (SELECT 1 FROM public.v_mobile_readers WHERE account_id = 'a0000000-0000-0000-0000-000000000002'), 'nada de B');
+  PERFORM pg_temp.ok((SELECT current_center_code FROM public.v_mobile_readers WHERE reader_code = 'LPI-A') = 'PC1', 'centro visible');
+END $$;
+RESET ROLE;
+SET ROLE anon;
+SELECT pg_temp.as_user(NULL, 'anon');
+DO $$
+BEGIN
+  PERFORM pg_temp.ok(pg_temp.sqlstate_of('SELECT * FROM public.v_mobile_readers') = '42501', 'anon no lee la vista');
+END $$;
+RESET ROLE;
+ROLLBACK;
+
 \echo cl_final_fixes: OK

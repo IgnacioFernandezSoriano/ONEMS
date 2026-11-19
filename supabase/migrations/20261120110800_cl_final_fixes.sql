@@ -919,8 +919,12 @@ END $function$
 ;
 
 -- ================================================================ I4: v_mobile_readers (definicion VIVA; igual que el baseline)
--- Cambio: solo lectores RFID. Mismas columnas y orden; sin opciones de vista (como la viva).
-CREATE OR REPLACE VIEW public.v_mobile_readers AS
+-- Cambio: solo lectores RFID. Mismas columnas y orden.
+-- Seguridad (exposicion previa en produccion): la vista viva no tenia opciones, asi que corria con los permisos del
+-- propietario (sin RLS) y anon tenia SELECT/INSERT/UPDATE/DELETE/TRUNCATE: lectores de todas las cuentas visibles.
+-- Ahora security_invoker (aplica la RLS de readers, postal_centers y reader_location_history del que consulta) y solo
+-- authenticated puede leerla (service_role conserva sus permisos).
+CREATE OR REPLACE VIEW public.v_mobile_readers WITH (security_invoker = true) AS
  SELECT r.id AS reader_id,
     r.account_id,
     r.reader_id AS reader_code,
@@ -944,6 +948,8 @@ CREATE OR REPLACE VIEW public.v_mobile_readers AS
      LEFT JOIN public.postal_centers pc ON pc.id = r.postal_center_id
      LEFT JOIN public.reader_location_history rlh_current ON rlh_current.reader_id = r.id AND rlh_current.unassigned_at IS NULL
   WHERE r.is_active = true AND r.capture_source = 'rfid';
+REVOKE ALL ON public.v_mobile_readers FROM PUBLIC, anon, authenticated;
+GRANT SELECT ON public.v_mobile_readers TO authenticated;
 
 -- ================================================================ M2: reenrich_processed_events (definicion VIVA; igual que 20261030142158)
 -- Cambio: el enriquecimiento por tag_id solo usa filas one_db de panelistas (las muestras del transportista no
