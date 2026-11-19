@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useTranslation } from '@/hooks/useTranslation';
+import { shouldResetSource } from '@/lib/sourceFilter';
 
 export type DataSource = '' | 'panelist' | 'carrier';
 
@@ -9,15 +10,14 @@ export type DataSource = '' | 'panelist' | 'carrier';
  * Consulta con head:true y acotada a la cuenta, igual que el resto de consultas de filtros.
  */
 export function useSourcePresence(accountId: string | undefined) {
-  const [presence, setPresence] = useState({ carrier: false, panelist: false });
+  const [presence, setPresence] = useState({ loaded: false, carrier: false, panelist: false });
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
-      if (!accountId) {
-        setPresence({ carrier: false, panelist: false });
-        return;
-      }
+      // Al cambiar de cuenta, descartar la presencia de la anterior hasta tener la nueva
+      setPresence({ loaded: false, carrier: false, panelist: false });
+      if (!accountId) return;
       try {
         const [carrierRes, panelistRes] = await Promise.all([
           supabase.from('one_db').select('id', { count: 'exact', head: true }).eq('account_id', accountId).eq('source', 'carrier'),
@@ -25,6 +25,7 @@ export function useSourcePresence(accountId: string | undefined) {
         ]);
         if (cancelled) return;
         setPresence({
+          loaded: true,
           carrier: (carrierRes.count ?? 0) > 0,
           panelist: (panelistRes.count ?? 0) > 0,
         });
@@ -49,7 +50,15 @@ interface SourceFilterProps {
 /** Selector "Origen del dato": solo aparece si la cuenta tiene muestras de carrier. */
 export function SourceFilter({ accountId, value, onChange }: SourceFilterProps) {
   const { t } = useTranslation();
-  const { carrier, panelist } = useSourcePresence(accountId);
+  const presence = useSourcePresence(accountId);
+  const { carrier, panelist } = presence;
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
+  // Cuenta sin carrier (p. ej. tras cambiar de cuenta) con filtro fijado: limpiarlo
+  useEffect(() => {
+    if (shouldResetSource(presence, value)) onChangeRef.current('');
+  }, [presence, value]);
 
   if (!carrier) return null;
 
