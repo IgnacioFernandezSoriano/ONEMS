@@ -45,9 +45,9 @@ BEGIN
     ('rpc_set_city_balance_policy(uuid,boolean,text,boolean,boolean)', '29e3276f58d4a5cafb3f75f2240e9b27'),
     ('rpc_set_working_day(uuid,integer,boolean)', 'c2871ad4451fe0b31bb3b7d1b1a4a2fc'),
     ('generate_delivery_standards(uuid[],uuid[],uuid[],uuid[])', '33357664bad333996587660b796943bf'),
-    ('send_material_shipment(uuid)', '6ab2cf0c1ab0eba69a3a7aa5ffec0e78'),
+    ('send_material_shipment(uuid)', '08d92e0e233ca68087bc5bc90b50bff5'),  -- vivo sin comentarios (19/11: misma lógica que el repo)
     ('receive_material_shipment(uuid)', '472f4cf684db5cda84eab970f07a9912'),
-    ('resolve_panelist_incident(uuid,text,text,text)', 'ce1c1e09c673d35ee68030d5355240c4'),
+    ('resolve_panelist_incident(uuid,text,text,text)', 'e01c12cf55cdf3813abb1b60cc4219eb'),  -- vivo sin comentarios (19/11: misma lógica)
     ('cancel_detail(uuid)', 'a61d88668ef7ea98d8eaf3b0373dcd4e'),
     ('create_unavailability_from_incident(uuid,date,date,text)', 'c1057f8ada38943b3dc8b5ea7ed9caeb'),
     ('reroute_returned_sample(uuid,uuid,date)', '589980d364b9f5e4c2659b2c34084083'),

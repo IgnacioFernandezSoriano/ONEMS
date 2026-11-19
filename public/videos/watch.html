@@ -31,7 +31,8 @@
     el.setAttribute('data-onems-video', q.get('v') || '');
     var titles = {
       'panelist-registration': 'ONE · Panelist registration',
-      'roles-access': 'ONEMS · Roles and access'
+      'roles-access': 'ONEMS · Roles and access',
+      'panelist-guide': 'ONE · Panelist guide (Telegram)'
     };
     var t = titles[q.get('v')];
     if (t) { document.title = t; document.getElementById('title').textContent = t; }

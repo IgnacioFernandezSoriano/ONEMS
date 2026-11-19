@@ -21,7 +21,8 @@
   // id -> fichero MP4 (voz en inglés) e idiomas con subtítulos disponibles.
   var VIDEOS = {
     'panelist-registration': { file: 'ONE_Panelist_Registration_EN.mp4', subs: ['en', 'es', 'fr', 'ar', 'pt'] },
-    'roles-access': { file: 'ONEMS_Roles_and_access_EN.mp4', subs: ['en', 'es', 'fr', 'ar', 'pt'] }
+    'roles-access': { file: 'ONEMS_Roles_and_access_EN.mp4', subs: ['en', 'es', 'fr', 'ar', 'pt'] },
+    'panelist-guide': { file: 'ONE_Panelist_Guide_Telegram_EN.mp4', subs: ['en', 'es', 'fr', 'ar', 'pt'] }
   };
 
   var LANG_NAMES = { en: 'English', es: 'Español', fr: 'Français', ar: 'العربية', pt: 'Português' };
