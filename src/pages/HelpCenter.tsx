@@ -3,13 +3,21 @@ import { useSearchParams } from 'react-router-dom'
 import { ExternalLink, Link2 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLocale } from '@/contexts/LocaleContext'
-import { HELP_DOCS, HELP_LANGS, helpDocUrl, helpLang } from '@/lib/helpDocs'
+import { usePermissions } from '@/contexts/PermissionsContext'
+import { ACCESS_OPTIONS } from '@/lib/access'
+import { HELP_DOCS, HELP_LANGS, canSeeHelpDoc, helpDocUrl, helpLang } from '@/lib/helpDocs'
 
 export function HelpCenter() {
   const { t, locale } = useLocale()
   const { profile } = useAuth()
   const [params, setParams] = useSearchParams()
-  const docs = HELP_DOCS.filter(d => !d.roles || d.roles.includes(profile?.role || ''))
+  const { canEdit, canManageAccess } = usePermissions()
+  const who = {
+    isSuperadmin: profile?.role === 'superadmin',
+    canManageAccess,
+    hasAnyEdit: ACCESS_OPTIONS.some(o => canEdit(o.key)),
+  }
+  const docs = HELP_DOCS.filter(d => canSeeHelpDoc(d, who))
   const current = docs.find(d => d.id === params.get('doc')) ?? docs[0]
   const [lang, setLang] = useState<string>(helpLang(locale))
   const [copied, setCopied] = useState(false)

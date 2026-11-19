@@ -16,8 +16,12 @@ import { formatInTz } from '@/lib/accountTime'
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
 import { fetchLastUndo, undoLast, undoLabel, isUndoChangedError, type UndoEntry } from '@/lib/planUndo'
 import { Undo2 } from 'lucide-react'
+import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge'
+import { usePermissions } from '@/contexts/PermissionsContext'
 export function AllocationPlans() {
   const { t } = useTranslation();
+  const { canEdit } = usePermissions()
+  const readOnly = !canEdit('allocation_plans')
   const { accountTimezone } = useAccount();
   const {
     details,
@@ -490,10 +494,11 @@ export function AllocationPlans() {
   }
 
   const handleBulkReprocess = async () => {
-    const { supabase } = await import('@/lib/supabase')
-    
+    const { rpcWithFallback } = await import('@/lib/rpcFallback')
+
     const idsToReprocess = selectedPlanIds()
-    const { data, error } = await supabase.rpc('reprocess_transfer_errors', {
+    // Envoltorio con control de cuenta y Edit; si aún no existe (migración pendiente), el original.
+    const { error } = await rpcWithFallback('reprocess_transfer_errors_for_account', 'reprocess_transfer_errors', {
       p_detail_ids: idsToReprocess
     })
     
@@ -615,6 +620,7 @@ export function AllocationPlans() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold text-gray-900">{t("allocation_plans.title")}</h1>
+            {readOnly && <ReadOnlyBadge />}
             <SmartTooltip content="Allocation Plans Management - Purpose: View and manage generated allocation plans with detailed shipment assignments between origin and destination nodes. Key Features: Track scheduled shipments, monitor panelist assignments, identify availability issues, and perform bulk operations on multiple records. Usage: Filter plans by criteria, review assignments, update nodes or dates in bulk, cancel or reprocess shipments, and export data for analysis.">
               <svg
                 className="w-5 h-5 text-gray-400 hover:text-gray-600 cursor-help"
@@ -866,7 +872,7 @@ export function AllocationPlans() {
         onClearFilters={handleClearFilters}
       />
 
-      <BulkOperationsPanel
+      {!readOnly && <BulkOperationsPanel
         selectedCount={selectedIds.size}
         selectedDetails={filteredDetails.filter(d => selectedIds.has(d.id))}
         nodes={nodes}
@@ -877,7 +883,7 @@ export function AllocationPlans() {
         onBulkReprocess={handleBulkReprocess}
         onBulkDelete={handleBulkDelete}
         onClearSelection={handleClearSelection}
-      />
+      />}
 
       <div className="bg-white rounded-lg shadow">
         <div className="p-6">
@@ -901,7 +907,7 @@ export function AllocationPlans() {
                 </svg>
                 {showIdColumn ? 'Hide' : 'Show'} ID
               </button>
-              {effectiveAccountId && (
+              {!readOnly && effectiveAccountId && (
                 <button
                   onClick={handleUndo}
                   disabled={!lastUndo || undoing}
@@ -922,6 +928,7 @@ export function AllocationPlans() {
                 </svg>
                 {t('common.export_csv')} {selectedIds.size > 0 ? `(${selectedIds.size})` : ''}
               </button>
+              {!readOnly && (<>
               <button
                 onClick={handleAddRecord}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
@@ -931,6 +938,7 @@ export function AllocationPlans() {
                 </svg>
                 {t('common.add_record')}
               </button>
+              </>)}
             </div>
           </div>
         </div>
@@ -991,6 +999,7 @@ export function AllocationPlans() {
                       onMarkAsSent={markAsSent}
                       onEdit={handleEditRecord}
                       getNodesByCity={getNodesByCity}
+                      readOnly={readOnly}
                     />
                   ))}
                 </tbody>
@@ -1009,7 +1018,7 @@ export function AllocationPlans() {
         )}
       </div>
 
-      <RecordModal
+      {!readOnly && <RecordModal
         isOpen={showRecordModal}
         onClose={handleCloseModal}
         onCreate={createDetail}
@@ -1021,7 +1030,7 @@ export function AllocationPlans() {
         cities={cities}
         nodes={nodes}
         getNodesByCity={getNodesByCity}
-      />
+      />}
     </div>
   )
 }

@@ -1,7 +1,8 @@
 -- Verifica las reglas de cambio de rol sobre public.profiles tras aplicar
 -- 20260715120000_fix_profiles_role_update_policies.sql.
 --   superadmin -> cualquier rol, cualquier cuenta
---   admin      -> sólo admin<->user, sólo en su cuenta
+--   admin      -> (desde 20261119100200: quien tiene users:edit) sólo en su cuenta; no sube a nadie a admin
+--                 ni superadmin (solo el superadmin cambia el rol de 'user' a otro); sí degrada admin -> user
 --   user       -> ningún cambio de rol
 -- Se ejecuta como `postgres`, cambiando a `authenticated` + request.jwt.claim.sub
 -- para suplantar a cada actor y que RLS actúe de verdad.
@@ -28,6 +29,11 @@ INSERT INTO public.profiles (id, email, full_name, role, account_id) VALUES
   ('33333333-0000-0000-0000-000000000003', 'user.a@test.local',  'UserA',  'user',   'aaaaaaaa-0000-0000-0000-000000000001'),
   ('44444444-0000-0000-0000-000000000004', 'user.a2@test.local', 'UserA2', 'user',   'aaaaaaaa-0000-0000-0000-000000000001'),
   ('55555555-0000-0000-0000-000000000005', 'user.b@test.local',  'UserB',  'user',   'bbbbbbbb-0000-0000-0000-000000000002');
+
+-- Desde 20261119100200 (fase 3) editar usuarios exige users:edit en la matriz, no el rol legacy 'admin':
+-- AdminA es upu_account_manager de A (users:edit). Las reglas de rol (admin<->user, su cuenta) siguen igual.
+INSERT INTO public.account_user_role (account_id, user_id, role) VALUES
+  ('aaaaaaaa-0000-0000-0000-000000000001', '22222222-0000-0000-0000-000000000002', 'upu_account_manager');
 
 GRANT USAGE ON SCHEMA public TO authenticated;
 
@@ -89,16 +95,24 @@ RESET ROLE;
 SET ROLE authenticated;
 SELECT pg_temp.login('22222222-0000-0000-0000-000000000002');
 
--- 2a. promueve a un user de SU cuenta -> admin
-UPDATE public.profiles SET role = 'admin' WHERE id = '44444444-0000-0000-0000-000000000004';
+-- 2a. NO promueve a un user de SU cuenta -> admin (fase 3: solo el superadmin)
 DO $$ BEGIN
-  IF pg_temp.role_of('44444444-0000-0000-0000-000000000004') <> 'admin' THEN
-    RAISE EXCEPTION 'FAIL 2a: admin no pudo promover user -> admin en su cuenta';
+  BEGIN
+    UPDATE public.profiles SET role = 'admin' WHERE id = '44444444-0000-0000-0000-000000000004';
+  EXCEPTION WHEN insufficient_privilege THEN
+    NULL; -- rechazo por RLS: correcto
+  END;
+  IF pg_temp.role_of('44444444-0000-0000-0000-000000000004') <> 'user' THEN
+    RAISE EXCEPTION 'FAIL 2a: users:edit promovio user -> admin';
   END IF;
-  RAISE NOTICE 'PASS 2a: admin promueve user -> admin en su cuenta';
+  RAISE NOTICE 'PASS 2a: users:edit no promueve user -> admin';
 END $$;
 
--- 2b. y lo devuelve a user
+-- 2b. sí degrada un admin de su cuenta a user (el superadmin lo hizo admin antes)
+RESET ROLE;
+UPDATE public.profiles SET role = 'admin' WHERE id = '44444444-0000-0000-0000-000000000004';
+SET ROLE authenticated;
+SELECT pg_temp.login('22222222-0000-0000-0000-000000000002');
 UPDATE public.profiles SET role = 'user' WHERE id = '44444444-0000-0000-0000-000000000004';
 DO $$ BEGIN
   IF pg_temp.role_of('44444444-0000-0000-0000-000000000004') <> 'user' THEN

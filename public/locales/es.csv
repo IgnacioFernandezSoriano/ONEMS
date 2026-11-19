@@ -3754,6 +3754,7 @@ hc.user_form.email,Correo electrónico
 hc.user_form.password,Contraseña
 hc.user_form.full_name,Nombre completo
 hc.user_form.role,Rol
+hc.user_form.account_roles,Roles en la cuenta (opcional)
 hc.user_form.account,Cuenta
 hc.user_form.select_account,Selecciona una cuenta
 hc.user_form.status,Estado
@@ -4555,6 +4556,8 @@ hc.accounts.edit,Editar cuenta
 hc.users.loading,Cargando...
 hc.users.title,Gestión de usuarios
 hc.users.create,Crear usuario
+hc.users.roles_warning,No se pudieron asignar algunos roles. Asígnalos en Roles y accesos.
+hc.users.delete_other_accounts,Este usuario pertenece también a otras cuentas; solo un superadmin puede eliminarlo.
 hc.users.edit,Editar usuario
 hc.sla_form.carrier,Operador
 hc.sla_form.product,Producto
@@ -5257,6 +5260,8 @@ help_center.doc.case_analysis.title,Análisis de casos
 help_center.doc.case_analysis.desc,"Analizar un caso desde ONEMS o desde el bot de análisis en Telegram: qué pasó y por qué; mensajes a los panelistas y arreglos sencillos."
 help_center.doc.gps_location.title,Ubicación GPS al declarar
 help_center.doc.gps_location.desc,"Qué registra el ONE bot al declarar, la regla de que nada se bloquea, la incidencia «Ubicación GPS», el informe de operación y qué hacer como manager."
+help_center.doc.roles_access.title,Roles y accesos
+help_center.doc.roles_access.desc,"Los seis roles de la cuenta, qué significan Edit y View, a quién pedir un cambio de acceso y cómo gestionar la pestaña Roles y accesos."
 reported_incidents.category.gps_location,Ubicación GPS
 reported_incidents.gps.col.tag,Etiqueta
 reported_incidents.gps.col.kind,Tipo
@@ -5285,3 +5290,71 @@ allocation_plans.undo_action_edit,Editar
 allocation_plans.undo_action_create,Crear
 allocation_plans.undo_changed,La última acción ha cambiado; revisa antes de deshacer.
 allocation_plans.bulk_only_deferred,Las muestras por compensar solo se pueden borrar.
+menu.account_switch_error,No se pudo cambiar de cuenta. Inténtalo de nuevo.
+roles_access.menu,Roles y accesos
+roles_access.menu_tooltip,Quién puede ver y editar cada opción del menú en esta cuenta
+roles_access.title,Roles y accesos
+roles_access.description,"Contactos de la cuenta, derechos de cada rol y roles de cada usuario."
+roles_access.select_account,Elige una cuenta para gestionar sus roles y accesos.
+roles_access.tab_general,General
+roles_access.tab_roles,Roles y accesos
+roles_access.save_account_first,"Guarda primero la cuenta; después podrás definir aquí sus contactos, derechos y roles."
+roles_access.read_only,"Solo lectura: solo el Account Manager, el UPU account manager o un superadmin pueden cambiar esta pestaña."
+roles_access.load_error,No se pudieron cargar los roles y accesos: {message}
+roles_access.dismiss,Cerrar
+roles_access.saving,Guardando...
+roles_access.saved,Guardado
+roles_access.contacts_save,Guardar contactos
+roles_access.matrix_title,Derechos de cada rol
+roles_access.matrix_help,Edit = puede cambiar datos; View = solo puede mirar; — = la opción no aparece. Un usuario con varios roles tiene el derecho mayor. Los cambios se aplican al momento.
+roles_access.matrix_option,Opción del menú
+roles_access.reset,Volver a la plantilla
+roles_access.reset_confirm,¿Sustituir todos los derechos de esta cuenta por los de la plantilla? Se perderán los cambios hechos en la matriz (los roles de los usuarios y los contactos se mantienen).
+roles_access.no_role,Sin rol
+roles_access.no_role_help,Usuarios de la cuenta sin ningún rol. Es fija: no se cambia por cuenta.
+roles_access.level.edit,Edit
+roles_access.level.view,View
+roles_access.level.none,—
+roles_access.users_title,Usuarios y sus roles
+roles_access.users_help,"Marca los roles de cada usuario de esta cuenta. ""Provisional"" señala los roles asignados automáticamente al arrancar: confírmalos o cámbialos."
+roles_access.user,Usuario
+roles_access.no_users,Esta cuenta aún no tiene usuarios.
+roles_access.provisional,Provisional
+roles_access.provisional_help,Asignado automáticamente al arrancar. Pulsa Confirmar para dejarlo fijo.
+roles_access.confirm_provisional,Confirmar
+roles_access.other_account,Otra cuenta
+roles_access.other_account_help,La cuenta activa de este usuario es otra; también tiene rol en esta cuenta.
+roles_access.add_by_email,Añadir un usuario existente por correo
+roles_access.add_by_email_help,Solo superadmin. El usuario ya debe existir (por ejemplo en otra cuenta); recibe este rol aquí.
+roles_access.role,Rol
+roles_access.add,Añadir
+roles_access.log_title,Últimos cambios
+roles_access.log_empty,Aún no hay cambios.
+roles_access.log_date,Fecha
+roles_access.log_who,Quién
+roles_access.log_what,Cambio
+roles_access.log_system,Sistema
+roles_access.log.access_set,{role} · {option}: {before} → {after}
+roles_access.log.access_reset,Todos los derechos vueltos a la plantilla
+roles_access.log.user_role_added,{user}: rol {role} añadido
+roles_access.log.user_role_removed,{user}: rol {role} quitado
+roles_access.log.user_added_by_email,{user} añadido a la cuenta como {role}
+roles_access.log.contacts_set,Contactos cambiados: {fields}
+roles_access.log.contacts_unchanged,Contactos guardados sin cambios
+roles_access.log.activation,Asignación inicial de roles ({count} asignaciones)
+roles_access.log.other,Otro cambio ({kind})
+roles_access.error.last_editor_role,No puedes quitarte tu último rol de Account Manager / UPU account manager en esta cuenta: perderías la capacidad de gestionar esta pestaña. Pídeselo a otro responsable o a un superadmin.
+roles_access.error.not_member,Este usuario no pertenece a esta cuenta.
+roles_access.error.user_not_found,No existe ningún usuario con ese correo. Crea primero el usuario.
+roles_access.error.superadmin_role,Un superadmin ya tiene todos los derechos y no lleva roles de cuenta.
+roles_access.error.forbidden,No tienes permiso para cambiar roles y accesos en esta cuenta.
+roles_access.error.generic,No se pudo guardar el cambio: {message}
+roles_access.role.account_manager,Account Manager
+roles_access.role.panelist_manager,Panelist Manager
+roles_access.role.materials_supplier,Materials Supplier
+roles_access.role.do_coordinator,DO coordinator
+roles_access.role.upu_account_manager,UPU account manager
+roles_access.role.allocation_plan_manager,Allocation Plan Manager
+common.read_only,Solo consulta
+roles_access.rights_load_error,No se pudieron cargar tus derechos de acceso. Revisa tu conexión e inténtalo de nuevo.
+roles_access.rights_retry,Reintentar

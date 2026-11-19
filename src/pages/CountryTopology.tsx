@@ -4,10 +4,14 @@ import { TopologyTree } from '@/components/topology/TopologyTree'
 import { SmartTooltip } from '@/components/common/SmartTooltip'
 import { Modal } from '@/components/common/Modal'
 import { RegionForm } from '@/components/topology/RegionForm'
+import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge'
+import { usePermissions } from '@/contexts/PermissionsContext'
 
 import { useTranslation } from '@/hooks/useTranslation';
 export function CountryTopology() {
   const { t } = useTranslation();
+  const { canEdit } = usePermissions()
+  const readOnly = !canEdit('topology')
   const {
     regions,
     cities,
@@ -189,10 +193,11 @@ export function CountryTopology() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </SmartTooltip>
+            {readOnly && <ReadOnlyBadge />}
           </div>
           
           {/* Create Region Button */}
-          <button
+          {!readOnly && <button
             onClick={() => setShowRegionModal(true)}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
           >
@@ -200,7 +205,7 @@ export function CountryTopology() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
             {t('topology.create_region')}
-          </button>
+          </button>}
         </div>
         <p className="text-gray-600">
           {t('topology.description')}
@@ -455,6 +460,7 @@ export function CountryTopology() {
               onDeleteRegion={deleteRegion}
               onDeleteCity={deleteCity}
               onDeleteNode={deleteNode}
+              readOnly={readOnly}
             />
           )}
         </div>

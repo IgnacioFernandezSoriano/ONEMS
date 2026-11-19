@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { HelpCircle } from 'lucide-react'
 import { useTranslation } from '@/hooks/useTranslation'
+import { usePermissions } from '@/contexts/PermissionsContext'
+import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge'
 import { useReceiptErrors } from '@/lib/hooks/useReceiptErrors'
 import { ReceiptDaySummary } from '@/components/incidents/receipts/ReceiptDaySummary'
 import { ReceiptRepeatPanelists } from '@/components/incidents/receipts/ReceiptRepeatPanelists'
@@ -17,6 +19,8 @@ const todayStr = () => {
 
 export function ReceiptErrors() {
   const { t } = useTranslation()
+  const { canEdit } = usePermissions()
+  const readOnly = !canEdit('receipts')
   const [date, setDate] = useState(todayStr())
   const r = useReceiptErrors(date)
   const [noticeFor, setNoticeFor] = useState<ReceiptRepeatPanelist | null>(null)
@@ -25,14 +29,14 @@ export function ReceiptErrors() {
   return (
     <div className="p-6">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h2 className="text-xl font-bold">{t('receipt_errors.title')}</h2>
+        <h2 className="text-xl font-bold">{t('receipt_errors.title')} {readOnly && <ReadOnlyBadge />}</h2>
         <div className="flex items-center gap-3">
           <Link to="/help-center?doc=receipt-errors" className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800">
             <HelpCircle className="w-4 h-4" />{t('receipt_errors.help_link')}
           </Link>
           <input type="date" className="border rounded px-2 py-1 text-sm" value={date} onChange={e => e.target.value && setDate(e.target.value)} />
           <button onClick={() => r.refresh()} className="px-3 py-1 text-sm border rounded">{t('receipt_errors.refresh')}</button>
-          <button onClick={() => setShowBroadcast(true)} className="px-3 py-1 text-sm bg-blue-600 text-white rounded">{t('receipt_errors.broadcast_button')}</button>
+          {!readOnly && <button onClick={() => setShowBroadcast(true)} className="px-3 py-1 text-sm bg-blue-600 text-white rounded">{t('receipt_errors.broadcast_button')}</button>}
         </div>
       </div>
       {r.error && <div className="text-red-600 mb-3">{t('common.error')}: {r.error}</div>}
@@ -40,9 +44,9 @@ export function ReceiptErrors() {
         <>
           <ReceiptDaySummary summary={r.summary} trend={r.trend} />
           <ReceiptCasesTable cases={r.openCases} candidates={r.candidates} onFix={r.fixCase} onClose={r.closeCase}
-            title={t('receipt_errors.open_cases_title')} />
-          <ReceiptRepeatPanelists rows={r.repeaters} onNotice={setNoticeFor} />
-          <ReceiptCasesTable cases={r.cases} candidates={r.candidates} onFix={r.fixCase} onClose={r.closeCase} />
+            title={t('receipt_errors.open_cases_title')} readOnly={readOnly} />
+          <ReceiptRepeatPanelists rows={r.repeaters} onNotice={setNoticeFor} readOnly={readOnly} />
+          <ReceiptCasesTable cases={r.cases} candidates={r.candidates} onFix={r.fixCase} onClose={r.closeCase} readOnly={readOnly} />
         </>
       )}
       {noticeFor && <PanelistNoticeDialog panelist={noticeFor} onSend={r.sendNotice} onClose={() => setNoticeFor(null)} />}

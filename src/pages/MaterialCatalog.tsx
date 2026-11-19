@@ -4,10 +4,14 @@ import { Modal } from '@/components/common/Modal'
 import { MaterialCatalogForm } from '@/components/material-catalog/MaterialCatalogForm'
 import { useMaterialCatalog } from '@/hooks/useMaterialCatalog'
 import type { MaterialCatalog } from '@/lib/types'
+import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge'
+import { usePermissions } from '@/contexts/PermissionsContext'
 
 import { useTranslation } from '@/hooks/useTranslation';
 export function MaterialCatalogPage() {
   const { t } = useTranslation();
+  const { canEdit } = usePermissions()
+  const readOnly = !canEdit('material_catalog')
   const {
     catalog,
     loading,
@@ -50,15 +54,18 @@ export function MaterialCatalogPage() {
   return (
     <div className="p-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">{t("material_catalog.title")}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-gray-900">{t("material_catalog.title")}</h1>
+          {readOnly && <ReadOnlyBadge />}
+        </div>
         <p className="text-gray-600 mt-1">{t('hc.material_catalog.subtitle')}</p>
       </div>
 
-      <div className="mb-6">
+      {!readOnly && <div className="mb-6">
         <Button onClick={() => setModal({ title: t('hc.material_catalog.create_material'), onSubmit: handleCreate })}>
           + {t('material.add_material')}
         </Button>
-      </div>
+      </div>}
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
@@ -76,7 +83,7 @@ export function MaterialCatalogPage() {
               >
                 {t('stock.material.blocking')}
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{t('common.actions')}</th>
+              {!readOnly && <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{t('common.actions')}</th>}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -113,11 +120,12 @@ export function MaterialCatalogPage() {
                     type="checkbox"
                     checked={material.is_blocking}
                     onChange={(e) => handleToggleBlocking(material.id, e.target.checked)}
+                    disabled={readOnly}
                     title={t('stock.material.blocking_hint')}
                     className="h-4 w-4 text-blue-600 rounded"
                   />
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                {!readOnly && <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
                     onClick={() =>
                       setModal({
@@ -136,7 +144,7 @@ export function MaterialCatalogPage() {
                   >
                     {t("common.delete")}
                   </button>
-                </td>
+                </td>}
               </tr>
             ))}
           </tbody>
@@ -149,7 +157,7 @@ export function MaterialCatalogPage() {
         )}
       </div>
 
-      {modal && (
+      {!readOnly && modal && (
         <Modal isOpen={true} title={modal.title} onClose={() => setModal(null)}>
           <MaterialCatalogForm
             material={modal.material}

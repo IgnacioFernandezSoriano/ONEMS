@@ -52,9 +52,20 @@ serve(async (req) => {
       )
     }
 
-    if (adminProfile.role !== 'admin' && adminProfile.role !== 'superadmin') {
+    const isLegacyAdmin = adminProfile.role === 'admin' || adminProfile.role === 'superadmin'
+    // Regla nueva: derecho de edición sobre 'users' en su cuenta (JWT del solicitante)
+    let hasMatrixAccess = false
+    if (!isLegacyAdmin && adminProfile.account_id) {
+      const { data: ok } = await supabaseClient.rpc('has_access', {
+        p_account_id: adminProfile.account_id,
+        p_option: 'users',
+        p_level: 'edit',
+      })
+      hasMatrixAccess = ok === true
+    }
+    if (!isLegacyAdmin && !hasMatrixAccess) {
       return new Response(
-        JSON.stringify({ error: 'Forbidden: only admins can delete users' }),
+        JSON.stringify({ error: 'Forbidden: you cannot delete users' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -76,8 +87,14 @@ serve(async (req) => {
       )
     }
 
+    // Cliente admin (service role): lee el perfil objetivo (RLS no deja ver a otros a quien no es admin)
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
+
     // 4. Perfil objetivo (para validar alcance del solicitante)
-    const { data: targetProfile, error: targetError } = await supabaseClient
+    const { data: targetProfile, error: targetError } = await supabaseAdmin
       .from('profiles')
       .select('account_id, role, email')
       .eq('id', user_id)
@@ -91,7 +108,7 @@ serve(async (req) => {
     }
 
     // Un admin (no superadmin) solo puede borrar users de su propia cuenta
-    if (adminProfile.role === 'admin') {
+    if (adminProfile.role !== 'superadmin') {
       if (targetProfile.account_id !== adminProfile.account_id) {
         return new Response(
           JSON.stringify({ error: 'Forbidden: user not in your account' }),
@@ -106,11 +123,30 @@ serve(async (req) => {
       }
     }
 
+    // Borrar el usuario de Auth lo quita de todas las cuentas: si tiene roles en otras
+    // cuentas, solo un superadmin puede hacerlo.
+    if (adminProfile.role !== 'superadmin') {
+      const { count, error: otherError } = await supabaseAdmin
+        .from('account_user_role')
+        .select('user_id', { count: 'exact', head: true })
+        .eq('user_id', user_id)
+        .neq('account_id', adminProfile.account_id)
+      if (otherError) {
+        console.error('Error checking other accounts:', otherError)
+        return new Response(
+          JSON.stringify({ error: 'Could not verify the user accounts' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      if ((count ?? 0) > 0) {
+        return new Response(
+          JSON.stringify({ error: 'User belongs to other accounts; only superadmin can delete' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+    }
+
     // 5. Borrar con service role. El perfil cae por CASCADE (ON DELETE CASCADE).
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
 
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user_id)
     if (deleteError) {

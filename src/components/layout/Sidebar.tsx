@@ -44,13 +44,16 @@ import { supabase } from '../../lib/supabase'
 import { useLocale } from '../../contexts/LocaleContext'
 import { useIncidentAttention } from '../../lib/hooks/useIncidentAttention'
 import { useDeferredSamples } from '../../hooks/useDeferredSamples'
+import { usePermissions } from '../../contexts/PermissionsContext'
+import { canAccess, routeAccess, type RouteAccess } from '../../lib/access'
 
 interface MenuItem {
   path: string
   label: string
   icon: any
   tooltip?: string
-  roles?: string[]
+  /** Opción de la matriz de la cuenta (ROUTE_OPTION); los grupos con hijos no llevan: se ven si algún hijo se ve. */
+  option?: RouteAccess
   children?: MenuItem[]
   module?: 'e2e' | 'diagnosis'
   external?: boolean
@@ -63,7 +66,11 @@ interface MenuGroup {
 
 export function Sidebar() {
   const { profile, signOut } = useAuth()
-  const { selectedAccountId, setSelectedAccountId } = useAccount()
+  const { selectedAccountId, setSelectedAccountId, myAccounts, switchActiveAccount } = useAccount()
+  const { canView, canManageAccess, loading: permissionsLoading } = usePermissions()
+  const isSuperadmin = profile?.role === 'superadmin'
+  const [switchingAccount, setSwitchingAccount] = useState(false)
+  const [switchError, setSwitchError] = useState(false)
   const location = useLocation()
   const { isCollapsed, setIsCollapsed } = useSidebar()
   const { t, locale, setLocale } = useLocale()
@@ -133,35 +140,34 @@ export function Sidebar() {
           path: '/e2e/setup',
           label: t('menu.setup'),
           icon: Settings,
-          roles: ['admin', 'superadmin'],
           tooltip: t('menu.setup.tooltip'),
           children: [
             {
               path: '/topology',
               label: t('menu.country_topology'),
               icon: Map,
-              roles: ['admin', 'superadmin'],
+              option: 'topology',
               tooltip: t('menu.country_topology.tooltip'),
             },
             {
               path: '/carriers',
               label: t('menu.carriers'),
               icon: Truck,
-              roles: ['admin', 'superadmin'],
+              option: 'carriers',
               tooltip: t('menu.carriers.tooltip'),
             },
             {
               path: '/panelists',
               label: t('menu.panelists'),
               icon: UserCircle,
-              roles: ['admin', 'superadmin'],
+              option: 'panelists',
               tooltip: t('menu.panelists.tooltip'),
             },
             {
               path: '/delivery-standards',
               label: t('menu.e2e_sla'),
               icon: Clock,
-              roles: ['admin', 'superadmin'],
+              option: 'e2e_sla',
               tooltip: t('menu.e2e_sla.tooltip'),
             },
           ],
@@ -170,28 +176,27 @@ export function Sidebar() {
           path: '/e2e/allocation',
           label: t('menu.allocation'),
           icon: Target,
-          roles: ['admin', 'superadmin'],
           tooltip: t('menu.allocation.tooltip'),
           children: [
             {
               path: '/allocation-plan-generator',
               label: t('menu.allocation_generator'),
               icon: Target,
-              roles: ['admin', 'superadmin'],
+              option: 'allocation_generator',
               tooltip: t('menu.allocation_generator.tooltip'),
             },
             {
               path: '/node-load-balancing',
               label: t('menu.load_balancing'),
               icon: Scale,
-              roles: ['admin', 'superadmin'],
+              option: 'load_balancing',
               tooltip: t('menu.load_balancing.tooltip'),
             },
             {
               path: '/allocation-plans',
               label: t('menu.allocation_plans'),
               icon: Calendar,
-              roles: ['admin', 'superadmin'],
+              option: 'allocation_plans',
               tooltip: t('menu.allocation_plans.tooltip'),
             },
           ],
@@ -200,28 +205,27 @@ export function Sidebar() {
           path: '/e2e/materials',
           label: t('menu.materials'),
           icon: Package,
-          roles: ['admin', 'superadmin'],
           tooltip: t('menu.materials.tooltip'),
           children: [
             {
               path: '/material-requirements',
               label: t('menu.material_requirements'),
               icon: Package,
-              roles: ['admin', 'superadmin'],
+              option: 'material_requirements',
               tooltip: t('menu.material_requirements.tooltip'),
             },
             {
               path: '/stock-management',
               label: t('menu.stock_management'),
               icon: Warehouse,
-              roles: ['admin', 'superadmin'],
+              option: 'stock_management',
               tooltip: t('menu.stock_management.tooltip'),
             },
             {
               path: '/material-catalog',
               label: t('menu.material_catalog'),
               icon: Database,
-              roles: ['admin', 'superadmin'],
+              option: 'material_catalog',
               tooltip: t('menu.material_catalog.tooltip'),
             },
           ],
@@ -230,21 +234,20 @@ export function Sidebar() {
           path: '/e2e/reporting',
           label: t('menu.reporting'),
           icon: FileText,
-          roles: ['admin', 'superadmin'],
           tooltip: t('menu.reporting.tooltip'),
           children: [
             {
               path: '/reporting/territory-equity',
               label: t('menu.territory_equity'),
               icon: FileText,
-              roles: ['admin', 'superadmin'],
+              option: 'territory_equity',
               tooltip: t('menu.territory_equity.tooltip'),
             },
             {
               path: '/reporting/compliance',
               label: t('menu.compliance'),
               icon: FileText,
-              roles: ['admin', 'superadmin'],
+              option: 'compliance',
               tooltip: t('menu.compliance.tooltip'),
             },
           ],
@@ -253,21 +256,20 @@ export function Sidebar() {
           path: '/e2e/database',
           label: t('menu.database'),
           icon: Database,
-          roles: ['admin', 'superadmin'],
           tooltip: t('menu.database.tooltip'),
           children: [
             {
               path: '/one-db',
               label: t('menu.e2e_db'),
               icon: Database,
-              roles: ['admin', 'superadmin'],
+              option: 'e2e_db',
               tooltip: t('menu.e2e_db.tooltip'),
             },
             {
               path: '/one-db-api',
               label: t('menu.extract_e2e_db_api'),
               icon: DatabaseZap,
-              roles: ['admin', 'superadmin'],
+              option: 'e2e_db_api',
               tooltip: t('menu.extract_e2e_db_api.tooltip'),
             },
           ],
@@ -281,28 +283,27 @@ export function Sidebar() {
           path: '/rfid/setup',
           label: t('menu.setup'),
           icon: Settings,
-          roles: ['admin', 'superadmin'],
           tooltip: t('menu.setup.tooltip'),
           children: [
             {
               path: '/postal-centers',
               label: t('menu.postal_centers'),
               icon: Building2,
-              roles: ['admin', 'superadmin'],
+              option: 'postal_centers',
               tooltip: t('menu.postal_centers.tooltip'),
             },
             {
               path: '/readers-management',
               label: t('menu.readers_management'),
               icon: MapPin,
-              roles: ['admin', 'superadmin'],
+              option: 'readers_management',
               tooltip: t('menu.readers_management.tooltip'),
             },
             {
               path: '/slas-configuration',
               label: t('menu.segment_sla'),
               icon: Target,
-              roles: ['admin', 'superadmin'],
+              option: 'segment_sla',
               tooltip: t('menu.segment_sla.tooltip'),
             },
           ],
@@ -311,21 +312,20 @@ export function Sidebar() {
           path: '/rfid/reporting',
           label: t('menu.reporting'),
           icon: FileText,
-          roles: ['admin', 'superadmin'],
           tooltip: t('menu.reporting.tooltip'),
           children: [
             {
               path: '/diagnosis/route-path-analysis',
               label: t('menu.route_analysis'),
               icon: FileText,
-              roles: ['admin', 'superadmin'],
+              option: 'route_analysis',
               tooltip: t('menu.route_analysis.tooltip'),
             },
             {
               path: '/diagnosis/jk-performance-segments',
               label: t('menu.segment_analysis'),
               icon: FileText,
-              roles: ['admin', 'superadmin'],
+              option: 'segment_analysis',
               tooltip: t('menu.segment_analysis.tooltip'),
             },
           ],
@@ -334,21 +334,20 @@ export function Sidebar() {
           path: '/rfid/database',
           label: t('menu.database'),
           icon: Database,
-          roles: ['admin', 'superadmin'],
           tooltip: t('menu.database.tooltip'),
           children: [
             {
               path: '/epcis-api',
               label: t('menu.epcis_pipeline_api'),
               icon: DatabaseZap,
-              roles: ['admin', 'superadmin'],
+              option: 'epcis_api',
               tooltip: t('menu.epcis_pipeline_api.tooltip'),
             },
             {
               path: '/diagnosis/processed-events',
               label: t('menu.rfid_events_database'),
               icon: CheckCircle,
-              roles: ['admin', 'superadmin'],
+              option: 'rfid_events_db',
               tooltip: t('menu.rfid_events_database.tooltip'),
             },
           ],
@@ -362,21 +361,21 @@ export function Sidebar() {
           path: '/incidents/panelist-reported',
           label: t('reported_incidents.menu'),
           icon: MessageSquareWarning,
-          roles: ['admin', 'superadmin'],
+          option: 'reported_incidents',
           tooltip: t('reported_incidents.badge_tooltip'),
         },
         {
           path: '/incidents/panelist-availability',
           label: t('incidents.panelist_availability'),
           icon: AlertTriangle,
-          roles: ['admin', 'superadmin'],
+          option: 'panelist_availability',
           tooltip: t('incidents.pending_badge_tooltip'),
         },
         {
           path: '/incidents/receipts',
           label: t('receipt_errors.menu'),
           icon: PackageX,
-          roles: ['admin', 'superadmin'],
+          option: 'receipts',
           tooltip: t('receipt_errors.badge_tooltip'),
         },
       ],
@@ -388,31 +387,42 @@ export function Sidebar() {
           path: '/users',
           label: t('menu.users'),
           icon: Users,
-          roles: ['admin', 'superadmin'],
+          option: 'users',
           tooltip: t('menu.users.tooltip'),
         },
         {
           path: '/settings/account-configuration',
+          option: 'account_working_days',
           label: t('menu.account_working_days'),
           icon: Settings,
           tooltip: t('menu.account_working_days.tooltip'),
         },
-        ...(accountName === 'DEMO2' ? [
+        // Roles y accesos: solo quien puede editar la pestaña de la cuenta (AM, UPU account manager, superadmin)
+        ...(canManageAccess ? ([
+          {
+            path: '/settings/roles-access',
+            label: t('roles_access.menu'),
+            icon: Shield,
+            option: 'open',
+            tooltip: t('roles_access.menu_tooltip'),
+          },
+        ] satisfies MenuItem[]) : []),
+        ...(accountName === 'DEMO2' ? ([
           {
             path: '/receive-generator',
             label: t('menu.ondb_generator'),
             icon: RefreshCw,
-            roles: ['admin', 'superadmin'] as string[],
+            option: 'account_working_days',
             tooltip: t('menu.ondb_generator.tooltip'),
           },
           {
             path: '/admin/account-management',
             label: t('menu.demo_reset'),
             icon: RefreshCw,
-            roles: ['admin', 'superadmin'] as string[],
+            option: 'account_working_days',
             tooltip: t('menu.demo_reset.tooltip'),
           },
-        ] : []),
+        ] satisfies MenuItem[]) : []),
       ],
     },
     {
@@ -421,6 +431,7 @@ export function Sidebar() {
       items: [
         {
           path: '/help-center',
+          option: 'help_center',
           label: t('menu.help_center'),
           icon: HelpCircle,
           tooltip: t('menu.help_center.tooltip'),
@@ -433,26 +444,26 @@ export function Sidebar() {
   if (profile?.role === 'superadmin') {
     const allModulesAdminGroup = allModulesMenuGroups.find(g => g.label === t('menu.administration'))
     
-    const superadminItems = [
+    const superadminItems: MenuItem[] = [
       {
         path: '/settings/accounts',
         label: t('menu.accounts'),
         icon: Building2,
-        roles: ['superadmin'],
+        option: 'superadmin',
         tooltip: t('menu.accounts.tooltip'),
       },
       {
         path: '/settings/users',
         label: t('menu.all_users'),
         icon: Users,
-        roles: ['superadmin'],
+        option: 'superadmin',
         tooltip: t('menu.all_users.tooltip'),
       },
       {
         path: 'https://glossary-onems.edgeavs.net',
         label: t('menu.translations'),
         icon: Languages,
-        roles: ['superadmin'],
+        option: 'superadmin',
         tooltip: t('menu.translations.tooltip'),
         external: true,
       }
@@ -466,9 +477,11 @@ export function Sidebar() {
   // Always show the Operations (all modules) menu
   const menuGroups: MenuGroup[] = allModulesMenuGroups
 
-  const hasAccess = (item: MenuItem) => {
-    if (!item.roles) return true
-    return item.roles.includes(profile?.role || '')
+  const hasAccess = (item: MenuItem): boolean => {
+    if (item.children) return item.children.some(hasAccess)
+    // Mientras cargan los derechos no se enseña nada que dependa de ellos (evita parpadeo de opciones).
+    if (permissionsLoading && item.option !== 'open') return false
+    return canAccess(item.option ?? routeAccess(item.path), isSuperadmin, canView)
   }
 
   const isActive = (path: string) => {
@@ -718,6 +731,41 @@ export function Sidebar() {
                 </option>
               ))}
             </select>
+          </div>
+        )}
+
+        {/* Selector de cuenta activa: usuarios no superadmin con rol en más de una cuenta */}
+        {!isSuperadmin && isExpanded && myAccounts.length > 1 && (
+          <div className="mb-3">
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              {t('menu.account')}
+            </label>
+            <select
+              value={profile?.account_id || ''}
+              disabled={switchingAccount}
+              onChange={async (e) => {
+                const target = e.target.value
+                if (!target || target === profile?.account_id) return
+                setSwitchingAccount(true)
+                setSwitchError(false)
+                const ok = await switchActiveAccount(target)
+                // Si ha ido bien la página se recarga; si no, se vuelve a habilitar el selector.
+                if (!ok) {
+                  setSwitchingAccount(false)
+                  setSwitchError(true)
+                }
+              }}
+              className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md"
+            >
+              {myAccounts.map((account) => (
+                <option key={account.account_id} value={account.account_id}>
+                  {account.name}
+                </option>
+              ))}
+            </select>
+            {switchError && (
+              <p className="mt-1 text-xs text-red-600">{t('menu.account_switch_error')}</p>
+            )}
           </div>
         )}
 

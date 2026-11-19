@@ -53,10 +53,23 @@ serve(async (req) => {
       )
     }
 
-    // Verificar que el usuario autenticado es admin o superadmin
-    if (adminProfile.role !== 'admin' && adminProfile.role !== 'superadmin') {
+    // Autorización: superadmin, regla antigua (rol admin; se mantiene por compatibilidad hasta
+    // que el frontend nuevo esté en producción) o derecho de edición sobre 'users' en su cuenta.
+    const isSuperadmin = adminProfile.role === 'superadmin'
+    const isLegacyAdmin = adminProfile.role === 'admin'
+    let hasMatrixAccess = false
+    if (!isSuperadmin && !isLegacyAdmin && adminProfile.account_id) {
+      // has_access con el JWT del solicitante (supabaseClient), igual que create-user/delete-user
+      const { data: ok } = await supabaseClient.rpc('has_access', {
+        p_account_id: adminProfile.account_id,
+        p_option: 'users',
+        p_level: 'edit',
+      })
+      hasMatrixAccess = ok === true
+    }
+    if (!isSuperadmin && !isLegacyAdmin && !hasMatrixAccess) {
       return new Response(
-        JSON.stringify({ error: 'Forbidden: Only admins can reset passwords' }),
+        JSON.stringify({ error: 'Forbidden: you cannot reset passwords' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -79,8 +92,14 @@ serve(async (req) => {
       )
     }
 
-    // Verificar que el usuario objetivo existe y pertenece a la cuenta del admin
-    const { data: targetProfile, error: targetError } = await supabaseClient
+    // Cliente service role: lee el perfil objetivo (RLS puede ocultarlo) y cambia la contraseña
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
+
+    // Verificar que el usuario objetivo existe y pertenece a la cuenta del solicitante
+    const { data: targetProfile, error: targetError } = await supabaseAdmin
       .from('profiles')
       .select('account_id, role, email')
       .eq('id', user_id)
@@ -93,8 +112,8 @@ serve(async (req) => {
       )
     }
 
-    // Si el usuario autenticado es admin (no superadmin), verificar restricciones
-    if (adminProfile.role === 'admin') {
+    // Quien no es superadmin: solo usuarios 'user' de su propia cuenta
+    if (!isSuperadmin) {
       // Verificar que el usuario objetivo pertenece a la misma cuenta
       if (targetProfile.account_id !== adminProfile.account_id) {
         return new Response(
@@ -110,14 +129,30 @@ serve(async (req) => {
           { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
+
+      // La contraseña es global: si el usuario tiene roles en otras cuentas, solo superadmin
+      // (mismo criterio que delete-user).
+      const { count, error: otherError } = await supabaseAdmin
+        .from('account_user_role')
+        .select('user_id', { count: 'exact', head: true })
+        .eq('user_id', user_id)
+        .neq('account_id', adminProfile.account_id)
+      if (otherError) {
+        console.error('Error checking other accounts:', otherError)
+        return new Response(
+          JSON.stringify({ error: 'Could not verify the user accounts' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      if ((count ?? 0) > 0) {
+        return new Response(
+          JSON.stringify({ error: 'User belongs to other accounts; only superadmin can reset' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
     }
 
-    // Usar service role para cambiar contraseña
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
-
+    // Cambiar la contraseña con service role
     const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
       user_id,
       { password: new_password }
@@ -148,7 +183,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Unexpected error:', error)
     return new Response(
-      JSON.stringify({ error: 'Internal server error', details: error.message }),
+      JSON.stringify({ error: 'Internal server error', details: (error as Error).message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }

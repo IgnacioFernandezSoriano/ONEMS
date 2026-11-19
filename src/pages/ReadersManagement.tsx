@@ -10,9 +10,13 @@ import { useReaderLocationHistory } from '@/hooks/useReaderLocationHistory';
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { ReaderFormData } from '@/lib/types_postal_centers';
+import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge';
+import { usePermissions } from '@/contexts/PermissionsContext';
 
 export default function ReadersManagement() {
   const { t } = useTranslation();
+  const { canEdit } = usePermissions();
+  const readOnly = !canEdit('readers_management');
   // Superadmin: usa la cuenta seleccionada en el sidebar (DEMO2, etc.).
   // Usuario normal: su propia cuenta. Antes leía profile.account_id directo,
   // que es null para superadmin -> "No account ID provided" al crear lector.
@@ -148,9 +152,12 @@ export default function ReadersManagement() {
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-          Readers Management
-        </h1>
+        <div className="flex items-center gap-3 mb-2">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Readers Management
+          </h1>
+          {readOnly && <ReadOnlyBadge />}
+        </div>
         <p className="text-gray-600 dark:text-gray-400">
           {t('readers_management.description')}
         </p>
@@ -159,10 +166,10 @@ export default function ReadersManagement() {
       {/* Actions */}
       <div className="mb-6 flex justify-between items-center">
         <div className="flex gap-2">
-          <Button onClick={() => setShowCreateForm(true)}>
+          {!readOnly && <Button onClick={() => setShowCreateForm(true)}>
             <Plus className="w-4 h-4 mr-2" />
             {t('readers_management.create_reader')}
-          </Button>
+          </Button>}
         </div>
         <div className="text-sm text-gray-600 dark:text-gray-400">
           {filteredReaders.length} {t('readers_management.showing')}
@@ -178,7 +185,7 @@ export default function ReadersManagement() {
       </div>
 
       {/* Create Form Modal */}
-      {showCreateForm && (
+      {!readOnly && showCreateForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
@@ -194,7 +201,7 @@ export default function ReadersManagement() {
       )}
 
       {/* Edit Form Modal */}
-      {showEditForm && selectedFullReader && (
+      {!readOnly && showEditForm && selectedFullReader && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
@@ -214,7 +221,7 @@ export default function ReadersManagement() {
       )}
 
       {/* Assign Modal */}
-      {showAssignModal && selectedReader && (
+      {!readOnly && showAssignModal && selectedReader && (
         <AssignReaderModal
           readerId={selectedReader.reader_id}
           readerName={selectedReader.reader_name}
@@ -344,7 +351,7 @@ export default function ReadersManagement() {
                     {/* Actions */}
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end gap-2">
-                        <button
+                        {!readOnly && <button
                           onClick={() => {
                             setSelectedReaderId(reader.reader_id);
                             setShowEditForm(true);
@@ -353,8 +360,8 @@ export default function ReadersManagement() {
                           title={t('common.edit')}
                         >
                           <Edit className="w-4 h-4" />
-                        </button>
-                        <button
+                        </button>}
+                        {!readOnly && <button
                           onClick={() => {
                             setSelectedReaderId(reader.reader_id);
                             setShowAssignModal(true);
@@ -365,7 +372,7 @@ export default function ReadersManagement() {
                             : t('readers_management.assign')}
                         >
                           <Navigation className="w-4 h-4" />
-                        </button>
+                        </button>}
                         <button
                           onClick={() => {
                             setSelectedReaderId(reader.reader_id);
@@ -376,13 +383,13 @@ export default function ReadersManagement() {
                         >
                           <History className="w-4 h-4" />
                         </button>
-                        <button
+                        {!readOnly && <button
                           onClick={() => handleDeleteReader(reader.reader_id)}
                           className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
                           title={t('common.delete')}
                         >
                           <Trash2 className="w-4 h-4" />
-                        </button>
+                        </button>}
                       </div>
                     </td>
                   </tr>

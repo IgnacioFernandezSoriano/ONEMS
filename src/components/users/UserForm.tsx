@@ -3,6 +3,9 @@ import { Button } from '@/components/common/Button'
 import { useAuth } from '@/contexts/AuthContext'
 import { useAccounts } from '@/hooks/useAccounts'
 import { ROLE_LABELS } from '@/utils/constants'
+import { usePermissions } from '@/contexts/PermissionsContext'
+import { ACCOUNT_ROLES, roleLabelKey } from '@/lib/accessAdmin'
+import type { AccountRole } from '@/lib/access'
 import type { ProfileWithAccount } from '@/lib/types'
 
 import { useTranslation } from '@/hooks/useTranslation';
@@ -16,6 +19,8 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
   const { t } = useTranslation();
   const { profile } = useAuth()
   const { accounts } = useAccounts()
+  const { canManageAccess } = usePermissions()
+  const [accountRoles, setAccountRoles] = useState<AccountRole[]>([])
   const [email, setEmail] = useState(user?.email || '')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState(user?.full_name || '')
@@ -44,6 +49,9 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
 
       if (!user) {
         data.password = password
+        if (canManageAccess && role !== 'superadmin' && accountRoles.length > 0) {
+          data.roles = accountRoles
+        }
       }
 
       // La cuenta se manda al crear y, al editar, sólo si quien edita es
@@ -124,12 +132,12 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
         >
           {isSuperadmin && <option value="superadmin">{ROLE_LABELS.superadmin}</option>}
-          <option value="admin">{ROLE_LABELS.admin}</option>
+          {(isSuperadmin || role === 'admin') && <option value="admin">{ROLE_LABELS.admin}</option>}
           <option value="user">{ROLE_LABELS.user}</option>
         </select>
       </div>
 
-      {role !== 'superadmin' && (
+      {isSuperadmin && role !== 'superadmin' && (
         <div>
           <label htmlFor="account" className="block text-sm font-medium mb-1">
             {t('hc.user_form.account')}
@@ -150,6 +158,26 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
             ))}
           </select>
         </div>
+      )}
+
+      {!user && canManageAccess && role !== 'superadmin' && (
+        <fieldset>
+          <legend className="block text-sm font-medium mb-1">{t('hc.user_form.account_roles')}</legend>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+            {ACCOUNT_ROLES.map(r => (
+              <label key={r} className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={accountRoles.includes(r)}
+                  onChange={(e) =>
+                    setAccountRoles(prev => e.target.checked ? [...prev, r] : prev.filter(x => x !== r))
+                  }
+                />
+                {t(roleLabelKey(r))}
+              </label>
+            ))}
+          </div>
+        </fieldset>
       )}
 
       {user && (

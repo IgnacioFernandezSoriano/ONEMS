@@ -1,10 +1,14 @@
 import { useState } from 'react'
 import { useOneDBAPI } from '../hooks/useOneDBAPI'
 import { useLocale } from '../contexts/LocaleContext'
+import { ReadOnlyBadge } from '../components/common/ReadOnlyBadge'
+import { usePermissions } from '../contexts/PermissionsContext'
 import { Key, Copy, RefreshCw, AlertCircle, CheckCircle, Code, BookOpen, TestTube, BarChart3, Shield } from 'lucide-react'
 
 export function OneDBAPI() {
   const { t } = useLocale()
+  const { canEdit } = usePermissions()
+  const readOnly = !canEdit('e2e_db_api')
   const { apiKey, loading, error, usageStats, generateApiKey, regenerateApiKey, refreshStats } = useOneDBAPI()
   const [activeTab, setActiveTab] = useState<'overview' | 'documentation' | 'testing' | 'usage'>('overview')
   const [copied, setCopied] = useState(false)
@@ -91,7 +95,10 @@ export function OneDBAPI() {
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('onedb_api.title')}</h1>
+        <div className="flex items-center gap-2 mb-2">
+          <h1 className="text-3xl font-bold text-gray-900">{t('onedb_api.title')}</h1>
+          {readOnly && <ReadOnlyBadge />}
+        </div>
         <p className="text-gray-600">{t('onedb_api.description')}</p>
       </div>
 
@@ -131,14 +138,14 @@ export function OneDBAPI() {
             {!apiKey ? (
               <div className="space-y-4">
                 <p className="text-gray-600">{t('onedb_api.no_api_key')}</p>
-                <button
+                {!readOnly && <button
                   onClick={handleGenerateKey}
                   disabled={generating || loading}
                   className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
                 >
                   <Key className="w-4 h-4" />
                   {generating ? t('onedb_api.generating') : t('onedb_api.generate_key')}
-                </button>
+                </button>}
               </div>
             ) : (
               <div className="space-y-4">
@@ -149,31 +156,31 @@ export function OneDBAPI() {
                   <div className="flex gap-2">
                     <input
                       type="text"
-                      value={apiKey.api_key}
+                      value={readOnly ? `${'•'.repeat(12)}${apiKey.api_key.slice(-4)}` : apiKey.api_key}
                       readOnly
                       className="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 font-mono text-sm"
                     />
-                    <button
+                    {!readOnly && <button
                       onClick={handleCopyApiKey}
                       className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
                     >
                       {copied ? <CheckCircle className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
                       {copied ? t('onedb_api.copied') : t('onedb_api.copy')}
-                    </button>
+                    </button>}
                   </div>
                   <p className="text-xs text-gray-500 mt-2">
                     {t('onedb_api.created_at')}: {new Date(apiKey.created_at).toLocaleString()}
                   </p>
                 </div>
 
-                <button
+                {!readOnly && <button
                   onClick={handleRegenerateKey}
                   disabled={generating}
                   className="flex items-center gap-2 px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50"
                 >
                   <RefreshCw className="w-4 h-4" />
                   {t('onedb_api.regenerate_key')}
-                </button>
+                </button>}
 
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                   <div className="flex gap-2">

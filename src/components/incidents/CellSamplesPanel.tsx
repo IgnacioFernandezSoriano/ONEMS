@@ -14,6 +14,7 @@ interface Props {
   unavailabilityId: string
   busy: boolean
   draggingDetailId: string | null
+  readOnly?: boolean
   onDragStart: (e: DragEvent, payload: MoveDragPayload) => void
   onDragEnd: () => void
   onClose: () => void
@@ -30,7 +31,7 @@ const SAMPLE_STATUS_CLASS: Record<string, string> = {
 // arrastrables a otra casilla del balance; las demas muestran el motivo.
 export function CellSamplesPanel({
   nodeId, nodeCode, weekStart, samples, loading, error, unavailabilityId, busy, draggingDetailId,
-  onDragStart, onDragEnd, onClose,
+  onDragStart, onDragEnd, onClose, readOnly = false,
 }: Props) {
   const { t } = useTranslation()
   const th = 'px-3 py-2 text-start text-xs font-medium text-gray-500 uppercase'
@@ -93,7 +94,7 @@ export function CellSamplesPanel({
             <tbody className="divide-y divide-gray-200">
               {samples.map(s => {
                 const info = dragInfo(s)
-                const canDrag = !!info.payload && !busy
+                const canDrag = !!info.payload && !busy && !readOnly
                 const sends = s.origin_node_id === nodeId
                 return (
                   <tr

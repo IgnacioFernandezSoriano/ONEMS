@@ -8,7 +8,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { downloadCSV } from '../../lib/exportUtils'
 
 import { useTranslation } from '@/hooks/useTranslation';
-export default function RegulatorStockTab() {
+export default function RegulatorStockTab({ readOnly = false }: { readOnly?: boolean }) {
   const { t } = useTranslation();
   const { regulatorStocks, loading, updateRegulatorStock, reload } = useStockManagement()
   const { catalog: materials } = useMaterialCatalog()
@@ -219,9 +219,9 @@ export default function RegulatorStockTab() {
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     {t('common.status')}
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {!readOnly && <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     {t('common.actions')}
-                  </th>
+                  </th>}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -250,7 +250,7 @@ export default function RegulatorStockTab() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         {getStatusBadge(stock)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      {!readOnly && <td className="px-6 py-4 whitespace-nowrap">
                         <button
                           onClick={() => {
                             setSelectedStock(stock)
@@ -262,7 +262,7 @@ export default function RegulatorStockTab() {
                         >
                           {t('stock.adjust_stock')}
                         </button>
-                      </td>
+                      </td>}
                     </tr>
                   )
                 })}
@@ -273,7 +273,7 @@ export default function RegulatorStockTab() {
       </div>
 
       {/* Adjust Stock Modal */}
-      {showAdjustModal && selectedStock && (
+      {!readOnly && showAdjustModal && selectedStock && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
             <div className="px-6 py-4 border-b border-gray-200">

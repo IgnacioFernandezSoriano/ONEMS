@@ -8,9 +8,10 @@ import { ReaderStatusBadge } from './ReaderStatusBadge';
 
 interface ReadersListProps {
   accountId: string;
+  readOnly?: boolean;
 }
 
-export function ReadersList({ accountId }: ReadersListProps) {
+export function ReadersList({ accountId, readOnly = false }: ReadersListProps) {
   const { t } = useTranslation();
   const {
     readers,
@@ -141,7 +142,7 @@ export function ReadersList({ accountId }: ReadersListProps) {
             {t('readers.total_count', { count: filteredReaders.length })}
           </p>
         </div>
-        <button
+        {!readOnly && <button
           onClick={() => {
             setEditingReader(undefined);
             setIsFormOpen(true);
@@ -149,7 +150,7 @@ export function ReadersList({ accountId }: ReadersListProps) {
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
           {t('readers.add_new')}
-        </button>
+        </button>}
       </div>
 
       {/* Filters */}
@@ -238,7 +239,7 @@ export function ReadersList({ accountId }: ReadersListProps) {
       </div>
 
       {/* Bulk Actions */}
-      {selectedReaders.size > 0 && (
+      {!readOnly && selectedReaders.size > 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between">
           <span className="text-sm text-blue-900">
             {t('readers.selected_count', { count: selectedReaders.size })}
@@ -275,14 +276,14 @@ export function ReadersList({ accountId }: ReadersListProps) {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left">
+                {!readOnly && <th className="px-6 py-3 text-left">
                   <input
                     type="checkbox"
                     checked={selectedReaders.size === paginatedReaders.length && paginatedReaders.length > 0}
                     onChange={handleSelectAll}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
-                </th>
+                </th>}
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {t('readers.reader_id')}
                 </th>
@@ -301,22 +302,22 @@ export function ReadersList({ accountId }: ReadersListProps) {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {t('readers.status')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {!readOnly && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {t('common.actions')}
-                </th>
+                </th>}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {paginatedReaders.map((reader) => (
                 <tr key={reader.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
+                  {!readOnly && <td className="px-6 py-4">
                     <input
                       type="checkbox"
                       checked={selectedReaders.has(reader.id)}
                       onChange={() => handleSelectReader(reader.id)}
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
-                  </td>
+                  </td>}
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {reader.reader_id}
                   </td>
@@ -339,7 +340,7 @@ export function ReadersList({ accountId }: ReadersListProps) {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <ReaderStatusBadge reader={reader} accountId={accountId} />
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {!readOnly && <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleEdit(reader)}
@@ -365,7 +366,7 @@ export function ReadersList({ accountId }: ReadersListProps) {
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
-                  </td>
+                  </td>}
                 </tr>
               ))}
             </tbody>
@@ -409,7 +410,7 @@ export function ReadersList({ accountId }: ReadersListProps) {
       )}
 
       {/* Form Modal */}
-      {isFormOpen && (
+      {!readOnly && isFormOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <ReaderForm

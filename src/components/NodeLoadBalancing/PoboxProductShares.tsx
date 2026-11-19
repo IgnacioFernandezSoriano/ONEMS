@@ -6,12 +6,13 @@ interface PoboxProductSharesProps {
   shares: PoboxProductShare[];
   onSave: (shares: { product_id: string; pct: number }[]) => Promise<{ success: boolean; error?: string }>;
   locked?: boolean;
+  readOnly?: boolean;
 }
 
 const FOCUS = 'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1';
 
 /** Reparto de las muestras POBOX extra por producto (porcentajes enteros que suman 100; todo 0 = sin reparto). */
-export function PoboxProductShares({ shares, onSave, locked = false }: PoboxProductSharesProps) {
+export function PoboxProductShares({ shares, onSave, locked = false, readOnly = false }: PoboxProductSharesProps) {
   const { t } = useTranslation();
   const [draft, setDraft] = useState<Record<string, number>>({});
   const [saving, setSaving] = useState(false);
@@ -66,7 +67,7 @@ export function PoboxProductShares({ shares, onSave, locked = false }: PoboxProd
                     max={100}
                     step={1}
                     value={draft[s.product_id] ?? 0}
-                    disabled={locked || saving}
+                    disabled={locked || saving || readOnly}
                     aria-label={`${s.code} %`}
                     onChange={(e) => {
                       const v = Math.max(0, Math.min(100, Math.round(Number(e.target.value) || 0)));
@@ -85,14 +86,14 @@ export function PoboxProductShares({ shares, onSave, locked = false }: PoboxProd
         <span className={`text-sm font-medium ${valid ? 'text-gray-700' : 'text-red-600'}`}>
           {t('lb2.pobox_shares_total', { total: sum })}
         </span>
-        <button
+        {!readOnly && <button
           type="button"
           onClick={save}
           disabled={locked || saving || !dirty || !valid}
           className={`px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed ${FOCUS}`}
         >
           {t('common.save')}
-        </button>
+        </button>}
         {!valid && <span className="text-xs text-red-600">{t('lb2.pobox_shares_sum_error')}</span>}
         {message && (
           <span className={`text-xs ${message.type === 'ok' ? 'text-green-700' : 'text-red-600'}`}>{message.text}</span>

@@ -8,9 +8,16 @@ import { CompleteJourneysFilters } from '@/components/diagnosis/CompleteJourneys
 import { CompleteJourneysTable } from '@/components/diagnosis/CompleteJourneysTable';
 import { Route, CheckCircle, AlertTriangle, XCircle, Clock, Play, Download } from 'lucide-react';
 import { SmartTooltip } from '@/components/common/SmartTooltip';
+import { usePermissions } from '@/contexts/PermissionsContext';
+import { ROUTE_OPTION, type AccessOption } from '@/lib/access';
+
+// Ejecutar (reconstruir/ensamblar) escribe datos: exige Edit en la opción de esta ruta.
+const RUN_OPTION = ROUTE_OPTION['/diagnosis/complete-journeys'] as AccessOption;
 
 export default function CompleteJourneys() {
   const { t } = useTranslation();
+  const { canEdit } = usePermissions();
+  const canRun = canEdit(RUN_OPTION);
   const { unit } = useTimeUnit();
   const {
     journeys,
@@ -110,16 +117,18 @@ export default function CompleteJourneys() {
         </div>
         <div className="flex items-center gap-2">
           <TimeUnitToggle />
-          <SmartTooltip content={t('complete_journeys.run_assembly')}>
-            <button
-              onClick={handleRunAssembly}
-              disabled={isAssembling}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 flex items-center gap-2"
-            >
-              <Play className="w-4 h-4" />
-              {isAssembling ? t('complete_journeys.assembling') : t('complete_journeys.run_assembly')}
-            </button>
-          </SmartTooltip>
+          {canRun && (
+            <SmartTooltip content={t('complete_journeys.run_assembly')}>
+              <button
+                onClick={handleRunAssembly}
+                disabled={isAssembling}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 flex items-center gap-2"
+              >
+                <Play className="w-4 h-4" />
+                {isAssembling ? t('complete_journeys.assembling') : t('complete_journeys.run_assembly')}
+              </button>
+            </SmartTooltip>
+          )}
           {selectedJourneys.length > 0 && (
             <SmartTooltip content={t('complete_journeys.export_csv', { count: selectedJourneys.length })}>
               <button

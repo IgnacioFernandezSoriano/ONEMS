@@ -13,6 +13,7 @@ interface Props {
   onClose: (caseId: string, note: string) => Promise<void>
   // Titulo del bloque (por defecto, "Casos"); los casos abiertos de cualquier dia usan su propio bloque.
   title?: string
+  readOnly?: boolean
 }
 
 const OPEN_STATUSES = ['pending', 'needs_decision']
@@ -39,7 +40,7 @@ const REASON_GUIDE: Array<[string, string]> = [
   ['wrong_city_cancelled', 'compensated'],
 ]
 
-export function ReceiptCasesTable({ cases, candidates, onFix, onClose, title }: Props) {
+export function ReceiptCasesTable({ cases, candidates, onFix, onClose, title, readOnly = false }: Props) {
   const { t } = useTranslation()
   const { effectiveAccountId } = useAccount()
   const analysisEnabled = useCaseAnalysisEnabledForAccount(effectiveAccountId)
@@ -98,7 +99,7 @@ export function ReceiptCasesTable({ cases, candidates, onFix, onClose, title }: 
                   {analysisEnabled === true && (
                     <button onClick={() => setAnalyzing(c)} className="text-blue-600 hover:text-blue-800 me-3">{t('receipt_errors.analyze')}</button>
                   )}
-                  {OPEN_STATUSES.includes(c.status) && (
+                  {!readOnly && OPEN_STATUSES.includes(c.status) && (
                     <>
                       {!NOT_FIXABLE.includes(c.reason) && (
                         <button onClick={() => setFixing(c)} className="text-blue-600 hover:text-blue-800 me-3">{t('receipt_errors.fix')}</button>
@@ -116,7 +117,7 @@ export function ReceiptCasesTable({ cases, candidates, onFix, onClose, title }: 
       </div>
       {fixing && <FixDialog c={fixing} candidates={candidates} onFix={onFix} onDone={() => setFixing(null)} />}
       {closing && <CloseDialog c={closing} onClose={onClose} onDone={() => setClosing(null)} />}
-      {analyzing && <ReceiptCaseDialog c={analyzing} onDone={() => setAnalyzing(null)} />}
+      {analyzing && <ReceiptCaseDialog c={analyzing} onDone={() => setAnalyzing(null)} readOnly={readOnly} />}
       {showGuide && <ReasonGuideDialog onDone={() => setShowGuide(false)} />}
     </div>
   )

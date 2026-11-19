@@ -4,11 +4,15 @@ import { GenerateCombinationsModal } from '@/components/delivery-standards/Gener
 import { DeliveryStandardForm } from '@/components/delivery-standards/DeliveryStandardForm'
 import { Modal } from '@/components/common/Modal'
 import { Button } from '@/components/common/Button'
+import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge'
+import { usePermissions } from '@/contexts/PermissionsContext'
 import type { DeliveryStandardWithDetails } from '@/lib/types'
 
 import { useTranslation } from '@/hooks/useTranslation';
 export function DeliveryStandards() {
   const { t } = useTranslation();
+  const { canEdit } = usePermissions()
+  const readOnly = !canEdit('e2e_sla')
   const {
     standards,
     carriers,
@@ -281,6 +285,7 @@ export function DeliveryStandards() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold text-gray-900">{ t('delivery_standards.title')}</h1>
+            {readOnly && <ReadOnlyBadge />}
             <div className="group relative">
               <svg className="w-5 h-5 text-gray-400 hover:text-blue-600 cursor-help transition-colors" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
@@ -368,7 +373,7 @@ export function DeliveryStandards() {
       </div>
 
       {/* Bulk Edit Panel */}
-      {showBulkEdit && (
+      {!readOnly && showBulkEdit && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <h3 className="font-medium text-blue-900 mb-3">
             {t('hc.delivery_standards.bulk_edit_records', { count: selectedIds.size })}
@@ -534,16 +539,20 @@ export function DeliveryStandards() {
             )}
           </div>
           <div className="flex items-center gap-2">
+            {!readOnly && (<>
             <Button onClick={() => setShowCreateModal(true)}>+ {t('hc.delivery_standards.create_standard')}</Button>
             <Button onClick={() => setShowGenerateModal(true)}>⚡ {t('hc.delivery_standards.generate_combinations')}</Button>
+            </>)}
             {selectedIds.size > 0 && (
               <>
+                {!readOnly && (<>
                 <Button variant="secondary" onClick={() => setShowBulkEdit(!showBulkEdit)}>
                   ✏️ {t('hc.delivery_standards.bulk_edit')} ({selectedIds.size})
                 </Button>
                 <Button variant="secondary" onClick={handleBulkDelete}>
                   🗑️ {t('hc.delivery_standards.delete_selected')}
                 </Button>
+                </>)}
                 <Button variant="secondary" onClick={handleExportCSV}>
                   📥 {t('hc.delivery_standards.export_csv')} ({selectedIds.size})
                 </Button>
@@ -944,7 +953,7 @@ export function DeliveryStandards() {
                     )}
                   </td>
                   <td className="px-6 py-4">
-                    <input
+                    {readOnly ? <span className="text-sm text-gray-900">{std.standard_time ?? '-'}</span> : <input
                       type="number"
                       step="0.01"
                       value={std.standard_time || ''}
@@ -957,10 +966,10 @@ export function DeliveryStandards() {
                       }
                       className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
                       placeholder="--"
-                    />
+                    />}
                   </td>
                   <td className="px-6 py-4">
-                    <select
+                    {readOnly ? <span className="text-sm text-gray-900">{std.time_unit === 'days' ? t('deliverystandards.days') : t('deliverystandards.hours')}</span> : <select
                       value={std.time_unit}
                       onChange={(e) =>
                         handleInlineUpdate(std.id, 'time_unit', e.target.value)
@@ -969,10 +978,10 @@ export function DeliveryStandards() {
                     >
                       <option value="hours">{t('deliverystandards.hours')}</option>
                       <option value="days">{t('deliverystandards.days')}</option>
-                    </select>
+                    </select>}
                   </td>
                   <td className="px-6 py-4">
-                    <input
+                    {readOnly ? <span className="text-sm text-gray-900">{std.success_percentage ?? '-'}</span> : <input
                       type="number"
                       step="0.01"
                       min="0"
@@ -987,7 +996,7 @@ export function DeliveryStandards() {
                       }
                       className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
                       placeholder="--"
-                    />
+                    />}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
                     {std.warning_threshold != null ? `${std.warning_threshold}%` : '-'}
@@ -1000,6 +1009,7 @@ export function DeliveryStandards() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex gap-2">
+                      {!readOnly && (<>
                       <button
                         onClick={() => {
                           setEditingStandard(std)
@@ -1015,6 +1025,7 @@ export function DeliveryStandards() {
                       >
                         {t('hc.delivery_standards.delete')}
                       </button>
+                      </>)}
                     </div>
                   </td>
                 </tr>

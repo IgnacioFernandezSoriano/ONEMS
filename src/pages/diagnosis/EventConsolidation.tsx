@@ -7,6 +7,8 @@ import { useLatestRequest } from '@/lib/latestRequest';
 import { Button } from '@/components/common/Button';
 import { RefreshCw, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import { IncidentDetailsRow } from '@/components/diagnosis/IncidentDetailsRow';
+import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge';
+import { usePermissions } from '@/contexts/PermissionsContext';
 
 interface ConsolidationMetrics {
   pending_events: number;
@@ -27,6 +29,8 @@ interface Incident {
 
 export function EventConsolidation() {
   const { t } = useTranslation();
+  const { canEdit } = usePermissions();
+  const readOnly = !canEdit('epcis_api');
   const { effectiveAccountId } = useAccount();
   const [metrics, setMetrics] = useState<ConsolidationMetrics>({
     pending_events: 0,
@@ -237,21 +241,24 @@ export function EventConsolidation() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {t('diagnosis.consolidation.title')}
-          </h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-gray-900">
+              {t('diagnosis.consolidation.title')}
+            </h1>
+            {readOnly && <ReadOnlyBadge />}
+          </div>
           <p className="mt-1 text-sm text-gray-500">
             {t('diagnosis.consolidation.description')}
           </p>
         </div>
-        <Button
+        {!readOnly && <Button
           onClick={runConsolidation}
           disabled={isConsolidating}
           className="flex items-center gap-2"
         >
           <RefreshCw className={`w-4 h-4 ${isConsolidating ? 'animate-spin' : ''}`} />
           {t('diagnosis.consolidation.run_button')}
-        </Button>
+        </Button>}
       </div>
 
       {/* Metrics Cards */}
@@ -357,6 +364,7 @@ export function EventConsolidation() {
                     formatDateTime={formatDateTime}
                     onReprocess={runConsolidation}
                     onResolve={handleResolveIncident}
+                    readOnly={readOnly}
                   />
                 ))
               )}

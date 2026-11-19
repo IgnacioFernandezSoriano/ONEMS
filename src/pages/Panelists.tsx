@@ -5,6 +5,8 @@ import type { Node, City, Panelist, SupportedLanguage } from '@/lib/types'
 import { SUPPORTED_LANGUAGES } from '@/lib/types'
 import { PanelistUnavailabilityComponent } from '@/components/PanelistUnavailability'
 import { SmartTooltip } from '@/components/common/SmartTooltip'
+import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge'
+import { usePermissions } from '@/contexts/PermissionsContext'
 
 import { useTranslation } from '@/hooks/useTranslation';
 import { useAccount } from '@/contexts/AccountContext';
@@ -13,6 +15,8 @@ import { useLatestRequest } from '@/lib/latestRequest';
 
 export function Panelists() {
   const { t } = useTranslation();
+  const { canEdit } = usePermissions()
+  const readOnly = !canEdit('panelists')
   const { profile } = useAuth();
   const { effectiveAccountId } = useAccount();
   const beginNodesLoad = useLatestRequest()
@@ -335,6 +339,7 @@ export function Panelists() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </SmartTooltip>
+            {readOnly && <ReadOnlyBadge />}
           </div>
         </div>
         <p className="text-gray-600">
@@ -587,7 +592,7 @@ export function Panelists() {
           </div>
 
       {/* Bulk Operations Panel */}
-      {selectedIds.size > 0 && (
+      {!readOnly && selectedIds.size > 0 && (
         <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-4 mb-6 shadow-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -657,24 +662,28 @@ export function Panelists() {
               {t('hc.panelists.manage_profiles')}
             </p>
           </div>
+          {!readOnly && (<>
           <button
             onClick={() => handleOpenModal()}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
           >
             {t('panelists.add_panelist')}
           </button>
+          </>)}
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 border-b">
               <tr>
                 <th className="px-6 py-3 text-left">
+                  {!readOnly && (<>
                   <input
                     type="checkbox"
                     checked={selectedIds.size === filteredPanelists.length && filteredPanelists.length > 0}
                     onChange={handleSelectAll}
                     className="rounded"
                   />
+                  </>)}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('panelists.code')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('users.name')}</th>
@@ -692,12 +701,14 @@ export function Panelists() {
                 filteredPanelists.map((panelist) => (
                   <tr key={panelist.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
+                      {!readOnly && (<>
                       <input
                         type="checkbox"
                         checked={selectedIds.has(panelist.id)}
                         onChange={() => handleSelectOne(panelist.id)}
                         className="rounded"
                       />
+                      </>)}
                     </td>
                     <td className="px-6 py-4 text-sm font-mono">{panelist.panelist_code}</td>
                     <td className="px-6 py-4 text-sm">{panelist.name}</td>
@@ -719,6 +730,7 @@ export function Panelists() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
+                        {!readOnly && (<>
                         <button
                           onClick={() => handleOpenModal(panelist)}
                           className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -756,6 +768,7 @@ export function Panelists() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
                         </button>
+                        </>)}
                       </div>
                     </td>
                   </tr>
@@ -1001,7 +1014,7 @@ export function Panelists() {
 
       {/* Unavailability Tab Content */}
       {activeTab === 'unavailability' && (
-        <PanelistUnavailabilityComponent />
+        <PanelistUnavailabilityComponent readOnly={readOnly} />
       )}
     </div>
   )

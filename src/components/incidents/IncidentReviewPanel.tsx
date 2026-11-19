@@ -21,6 +21,7 @@ import type { CellSample, MoveDragPayload, MoveSuggestion, ReassignmentProposal,
 interface Props {
   unavailabilityId: string
   onBack: () => void
+  readOnly?: boolean
 }
 
 interface ActionError {
@@ -47,7 +48,7 @@ const errMsg = (err: any) => err?.message ?? String(err)
 // final, balance de la ciudad por semanas (arrastrar y soltar para corregir a mano una muestra),
 // muestras de una casilla y la tabla de lo que el motor hizo con cada muestra afectada.
 // Toda accion recarga cabecera, lineas, balance y casilla (tambien tras un error).
-export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
+export function IncidentReviewPanel({ unavailabilityId, onBack, readOnly = false }: Props) {
   const { t } = useTranslation()
   const {
     fetchHeader, fetchLines, saveResolution, suggestForSampleMove, applySampleMove, fetchCellSamples,
@@ -193,7 +194,7 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
   const handleDropCell = (nodeId: string, nodeCode: string, weekStart: string, payload: MoveDragPayload) => {
     dragActive.current = false
     setDragging(null)
-    if (busyRef.current) return
+    if (readOnly || busyRef.current) return
     const seq = ++moveSeq.current
     const ref = referenceLoad
     const dev = deviationPercent
@@ -271,7 +272,7 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
         <button type="button" onClick={onBack} className="text-blue-600 hover:text-blue-800">← {t('incidents.detail.back')}</button>
       </div>
 
-      <IncidentHeader header={header} onSaveResolution={handleSaveResolution} />
+      <IncidentHeader header={header} onSaveResolution={handleSaveResolution} readOnly={readOnly} />
 
       {actionError && (
         <div role="alert" className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 mb-6 flex items-start justify-between gap-4">
@@ -329,6 +330,7 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
           error={cellError}
           unavailabilityId={unavailabilityId}
           busy={busyId !== null}
+          readOnly={readOnly}
           draggingDetailId={dragging?.detailId ?? null}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
@@ -338,10 +340,10 @@ export function IncidentReviewPanel({ unavailabilityId, onBack }: Props) {
 
       <IncidentLinesTable lines={visibleLines} emptyText={linesEmptyText} />
 
-      <CaseAnalysisPanel kind="unavailability" incidentId={unavailabilityId} />
+      <CaseAnalysisPanel kind="unavailability" incidentId={unavailabilityId} readOnly={readOnly} />
 
       <IncidentConversation kind="unavailability" incidentId={unavailabilityId}
-        panelistLanguage={header?.panelist_language} helpSection="c-vacaciones" />
+        panelistLanguage={header?.panelist_language} helpSection="c-vacaciones" readOnly={readOnly} />
 
       {move && (
         <div

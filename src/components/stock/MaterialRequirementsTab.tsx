@@ -9,7 +9,7 @@ import ReceivePOModal from './ReceivePOModal'
 import { downloadCSV, generatePurchaseOrderPDF, printPDF } from '../../lib/exportUtils'
 
 import { useTranslation } from '@/hooks/useTranslation';
-export default function MaterialRequirementsTab() {
+export default function MaterialRequirementsTab({ readOnly = false }: { readOnly?: boolean }) {
   const { t } = useTranslation();
   const { regulatorStocks, reload } = useStockManagement()
   const { requirements, loading: loadingRequirements, calculate, markAsOrdered, receivePO, deleteRequirement } = useRegulatorRequirements()
@@ -453,6 +453,7 @@ export default function MaterialRequirementsTab() {
 
             {/* Action Buttons */}
             <div className="flex items-center gap-2">
+              {!readOnly && (<>
               <button
                 onClick={handleCalculate}
                 disabled={loadingRequirements || !startDate || !endDate}
@@ -480,6 +481,7 @@ export default function MaterialRequirementsTab() {
               ].join('\n')}>
                 <Info className="h-5 w-5 text-blue-500 cursor-help" />
               </SmartTooltip>
+              </>)}
 
               <button
                 onClick={handleResetFilters}
@@ -503,13 +505,13 @@ export default function MaterialRequirementsTab() {
             <div className="flex items-center gap-2">
               {selectedRequirements.size > 0 && (
                 <>
-                  <button
+                  {!readOnly && (<button
                     onClick={handleMarkSelectedAsOrdered}
                     className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
                     <ShoppingCart className="h-4 w-4 mr-1" />
                     {t('stock.mark_as_ordered', { count: selectedRequirements.size })}
-                  </button>
+                  </button>)}
                   <button
                     onClick={handleExportCSV}
                     className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -524,13 +526,13 @@ export default function MaterialRequirementsTab() {
                     <FileText className="h-4 w-4 mr-1" />
                     {t('stock.purchase_order_pdf')}
                   </button>
-                  <button
+                  {!readOnly && (<button
                     onClick={handleDeleteSelected}
                     className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                   >
                     <Trash2 className="h-4 w-4 mr-1" />
                     {t('stock.delete_selected', { count: selectedRequirements.size })}
-                  </button>
+                  </button>)}
                 </>
               )}
             </div>
@@ -574,9 +576,9 @@ export default function MaterialRequirementsTab() {
                   <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     {t('common.status')}
                   </th>
-                  <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {!readOnly && <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     {t('common.actions')}
-                  </th>
+                  </th>}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -619,7 +621,7 @@ export default function MaterialRequirementsTab() {
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       {getStatusBadge(req.status)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                    {!readOnly && <td className="px-6 py-4 whitespace-nowrap text-center">
                       <div className="flex items-center justify-center gap-2">
                         {req.status === 'pending' && (
                           <button
@@ -646,7 +648,7 @@ export default function MaterialRequirementsTab() {
                           <Trash2 className="h-3 w-3" />
                         </button>
                       </div>
-                    </td>
+                    </td>}
                   </tr>
                 ))}
               </tbody>
@@ -656,7 +658,7 @@ export default function MaterialRequirementsTab() {
       )}
 
       {/* Modals */}
-      {showOrderModal && selectedRequirement && (
+      {!readOnly && showOrderModal && selectedRequirement && (
         <OrderMaterialModal
           requirement={selectedRequirement}
           onClose={() => {
@@ -671,7 +673,7 @@ export default function MaterialRequirementsTab() {
         />
       )}
 
-      {showReceiveModal && selectedRequirement && (
+      {!readOnly && showReceiveModal && selectedRequirement && (
         <ReceivePOModal
           requirement={selectedRequirement}
           onClose={() => {

@@ -16,6 +16,7 @@ interface Props {
   onMarkAsSent: (id: string, data: any) => Promise<void>
   onEdit: (detail: AllocationPlanDetailWithRelations) => void
   getNodesByCity: (cityId: string) => any[]
+  readOnly?: boolean
 }
 
 export function AllocationPlanDetailRow({
@@ -29,6 +30,7 @@ export function AllocationPlanDetailRow({
   onMarkAsSent,
   onEdit,
   getNodesByCity,
+  readOnly = false,
 }: Props) {
   const { t } = useTranslation();
   const [editing, setEditing] = useState<string | null>(null)
@@ -42,7 +44,7 @@ export function AllocationPlanDetailRow({
   // seleccionar para borrarla en bloque
   const isDeferred = detail.status === 'deferred'
   const isNonEditable = isDeferred || ['sent', 'received', 'cancelled', 'invalid'].includes(detail.status) || isCompleted
-  const canEdit = !isNonEditable
+  const canEdit = !isNonEditable && !readOnly
 
   const originNodes = detail.origin_city_id ? getNodesByCity(detail.origin_city_id) : []
   const destinationNodes = detail.destination_city_id ? getNodesByCity(detail.destination_city_id) : []
@@ -358,7 +360,7 @@ export function AllocationPlanDetailRow({
             </button>
           )}
           
-          {detail.status === 'pending' || detail.status === 'notified' ? (
+          {!readOnly && (detail.status === 'pending' || detail.status === 'notified') ? (
             <button
               onClick={() => setShowShipmentModal(true)}
               className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
@@ -368,7 +370,7 @@ export function AllocationPlanDetailRow({
             </button>
           ) : null}
           
-          {detail.status === 'sent' ? (
+          {!readOnly && detail.status === 'sent' ? (
             <button
               onClick={() => setShowReceptionModal(true)}
               className="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700"

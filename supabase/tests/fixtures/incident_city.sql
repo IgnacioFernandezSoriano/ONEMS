@@ -34,3 +34,12 @@ INSERT INTO auth.users (id, email) VALUES
 INSERT INTO public.profiles (id, email, full_name, role, account_id) VALUES
   ('99000000-0000-0000-0000-000000000099','actor@t.l','Actor','user','a0000000-0000-0000-0000-000000000001'),
   ('98000000-0000-0000-0000-000000000098','actor2@t.l','Actor2','user','a0000000-0000-0000-0000-000000000002');
+-- Fase 3 (20261119100200_account_access_writes.sql): escribir exige Edit en la matriz de la cuenta.
+-- Los actores 99 (A1) y 98 (A2) son upu_account_manager de su cuenta (Edit en todas las opciones de gestión).
+-- Los tests de la propia matriz lo desactivan con \set fixture_sin_roles 1 antes del \ir.
+\if :{?fixture_sin_roles}
+\else
+INSERT INTO public.account_user_role (account_id, user_id, role) VALUES
+  ('a0000000-0000-0000-0000-000000000001','99000000-0000-0000-0000-000000000099','upu_account_manager'),
+  ('a0000000-0000-0000-0000-000000000002','98000000-0000-0000-0000-000000000098','upu_account_manager');
+\endif

@@ -1,9 +1,9 @@
 import { useTranslation } from '@/hooks/useTranslation'
 import type { ReceiptRepeatPanelist } from '@/lib/types'
 
-interface Props { rows: ReceiptRepeatPanelist[]; onNotice: (p: ReceiptRepeatPanelist) => void }
+interface Props { rows: ReceiptRepeatPanelist[]; onNotice: (p: ReceiptRepeatPanelist) => void; readOnly?: boolean }
 
-export function ReceiptRepeatPanelists({ rows, onNotice }: Props) {
+export function ReceiptRepeatPanelists({ rows, onNotice, readOnly = false }: Props) {
   const { t } = useTranslation()
   const th = 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase'
   return (
@@ -29,7 +29,7 @@ export function ReceiptRepeatPanelists({ rows, onNotice }: Props) {
                 <td className="px-6 py-3 text-sm">{r.fails_30d}</td>
                 <td className="px-6 py-3 text-sm">{r.top_reason ? t(`receipt_errors.reason.${r.top_reason}`) : '-'}</td>
                 <td className="px-6 py-3 text-sm">{r.last_notice_at ? r.last_notice_at.slice(0, 10) : t('receipt_errors.never')}</td>
-                <td className="px-6 py-3 text-sm"><button onClick={() => onNotice(r)} className="text-blue-600 hover:text-blue-800">{t('receipt_errors.send_notice')}</button></td>
+                <td className="px-6 py-3 text-sm">{!readOnly && <button onClick={() => onNotice(r)} className="text-blue-600 hover:text-blue-800">{t('receipt_errors.send_notice')}</button>}</td>
               </tr>
             )) : (
               <tr><td colSpan={6} className="px-6 py-4 text-center text-gray-500">{t('receipt_errors.no_repeaters')}</td></tr>

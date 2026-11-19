@@ -8,11 +8,12 @@ import type { ReceiptCase } from '@/lib/types'
 interface Props {
   c: ReceiptCase
   onDone: () => void
+  readOnly?: boolean
 }
 
 // Modal del caso de recepcion: analisis del agente y conversacion con el panelista.
 // rpc_receipt_cases no devuelve panelist_id: se lee aparte (RLS de receipt_case ya limita a admins de la cuenta).
-export function ReceiptCaseDialog({ c, onDone }: Props) {
+export function ReceiptCaseDialog({ c, onDone, readOnly = false }: Props) {
   const { t } = useTranslation()
   const [panelistId, setPanelistId] = useState<string | undefined>(undefined)
 
@@ -34,8 +35,8 @@ export function ReceiptCaseDialog({ c, onDone }: Props) {
       <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl p-6 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}
         role="dialog" aria-modal="true" aria-labelledby="receipt-case-title">
         <h3 id="receipt-case-title" className="text-lg font-bold mb-3">{t('receipt_errors.case_dialog_title', { tag: c.tag_raw })}</h3>
-        <CaseAnalysisPanel kind="receipt" incidentId={c.id} />
-        <IncidentConversation kind="receipt" incidentId={c.id} incidentPanelistId={panelistId} />
+        <CaseAnalysisPanel kind="receipt" incidentId={c.id} readOnly={readOnly} />
+        <IncidentConversation kind="receipt" incidentId={c.id} incidentPanelistId={panelistId} readOnly={readOnly} />
         <div className="flex justify-end mt-4">
           <button onClick={onDone} className="px-4 py-2 text-sm border rounded">{t('common.close')}</button>
         </div>

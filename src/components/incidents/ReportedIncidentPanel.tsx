@@ -26,7 +26,7 @@ interface TFn {
   (key: string, params?: Record<string, any>, fallback?: string): string
 }
 
-export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: string; onBack: () => void }) {
+export function ReportedIncidentPanel({ incidentId, onBack, readOnly = false }: { incidentId: string; onBack: () => void; readOnly?: boolean }) {
   const { t } = useTranslation()
   const { fetchIncident, markSeen, resolve, actCancel, rerouteReturnedSample, signedPhotoUrl, listNodesForMove, suggestRerouteReturnedSample } = useReportedIncidents()
   const [inc, setInc] = useState<ReportedIncidentDetail | null>(null)
@@ -67,6 +67,8 @@ export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: stri
   if (!inc) return <div>{t('common.loading')}</div>
   const detailId = inc.allocation_plan_detail_id
   const actionable = inc.status === 'open' || inc.status === 'in_progress'
+  // En modo consulta no se muestran las acciones de las categorias que modifican datos
+  const hideActions = readOnly && (inc.category === 'parcel_returned' || inc.category === 'missing_materials')
 
   return (
     <div className="max-w-3xl">
@@ -77,7 +79,7 @@ export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: stri
       {photo && <img src={photo} alt="" className="max-w-xs rounded border mb-3" />}
 
       {/* Bloque de acción por categoría (playbook) */}
-      <div className="border rounded p-4 mb-4">
+      {!hideActions && <div className="border rounded p-4 mb-4">
         {!actionable && <p className="text-xs text-gray-500 mb-2">{t('reported_incidents.readonly.closed')}</p>}
         {/* Cerrada: fieldset disabled bloquea de verdad los controles (raton y teclado), no solo el aspecto */}
         <fieldset disabled={!actionable} aria-disabled={!actionable} className={`min-w-0 border-0 p-0 m-0 ${actionable ? '' : 'opacity-60'}`}>
@@ -101,16 +103,16 @@ export function ReportedIncidentPanel({ incidentId, onBack }: { incidentId: stri
         )}
         </fieldset>
         {msg && <p className="text-sm mt-2">{msg}</p>}
-      </div>
+      </div>}
 
       {/* Conversación con el panelista */}
-      <CaseAnalysisPanel kind="reported" incidentId={incidentId} />
+      <CaseAnalysisPanel kind="reported" incidentId={incidentId} readOnly={readOnly} />
 
       <IncidentConversation kind="reported" incidentId={incidentId} incidentPanelistId={inc.panelist_id}
-        panelistLanguage={inc.panelist?.language} helpSection={HELP_SECTION[inc.category] ?? 'c-otro'} />
+        panelistLanguage={inc.panelist?.language} helpSection={HELP_SECTION[inc.category] ?? 'c-otro'} readOnly={readOnly} />
 
       {/* Resolver */}
-      {inc.status !== 'auto_resolved' && (
+      {!readOnly && inc.status !== 'auto_resolved' && (
       <div className="border rounded p-4 mt-4">
         <label className="block text-sm font-medium mb-1">{t('reported_incidents.resolution_note')}</label>
         <textarea className="w-full border rounded p-2 text-sm mb-3" rows={2} value={note} onChange={e => setNote(e.target.value)} />

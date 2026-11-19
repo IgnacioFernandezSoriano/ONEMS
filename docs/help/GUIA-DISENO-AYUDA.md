@@ -188,6 +188,7 @@ Todas las conversaciones con el ONE bot se dibujan con este componente. La guía
 | Análisis de casos (botón «Analizar caso» y bot de análisis @PanelistEventsAnalysisBot) | Managers (admin y superadmin) | `public/help/case-analysis.{en,es,fr,ar,pt}.html` | `.tg` (canónico); textos del bot de `ops-agent/src/ops_agent/manager_i18n.py` y `case_i18n.py` |
 | Ubicación GPS al declarar (permiso, incidencia «Ubicación GPS», informe de operación) | Managers (admin y superadmin) | `public/help/gps-location.{en,es,fr,ar,pt}.html`; enlaza a `panelist-guide.<idioma>.html#c-gps` | `.tg` (canónico); textos del bot de los nodos `Send GPS *` del workflow DEV (permiso v2). El teclado de respuesta 📍/🚫 se dibuja como `.tg-kb` bajo el chat. Los nombres del informe se citan en inglés en `ar` y `pt` (el informe solo existe en es/en/fr) |
 | Balanceo de carga de nodos | Managers (admin y superadmin) | `public/help/load-balancing.{en,es,fr,ar}.html` | No lleva |
+| Roles y accesos (roles, Edit/View, pestaña «Roles y accesos», plantilla de derechos) | Todos los usuarios con sesión | `public/help/roles-access.{en,es,fr,ar,pt}.html`; generada con el mismo esqueleto en los 5 idiomas; nombres de pantallas y botones de `roles_access.*`, `common.read_only`, `menu.*` | No lleva |
 | Guía del panelista: el ONE bot en Telegram | Panelistas (pública, sin login) | `public/help/panelist-guide.{en,es,fr,ar}.html` | `.tg` (canónico) |
 
 ### 10.1 Guía del panelista: cómo se llega a ella

@@ -1,11 +1,13 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { AccountProvider } from './contexts/AccountContext'
+import { PermissionsProvider } from './contexts/PermissionsContext'
 import { TimeUnitProvider } from './contexts/TimeUnitContext'
 import { ReportingFiltersProvider } from './contexts/ReportingFiltersContext'
 import { SidebarProvider } from './contexts/SidebarContext'
 import { LocaleProvider } from './contexts/LocaleContext'
-import { ProtectedRoute } from './components/auth/ProtectedRoute'
+import { ProtectedRoute, HomeRedirect } from './components/auth/ProtectedRoute'
+import { DemoOnlyRoute } from './components/auth/DemoOnlyRoute'
 import { MainLayout } from './components/layout/MainLayout'
 import { Login } from './pages/Login'
 import { Dashboard } from './pages/Dashboard'
@@ -38,6 +40,7 @@ import JKPerformance from './pages/Reporting/JKPerformance'
 import JKPerformanceV2 from './pages/Reporting/JKPerformanceV2'
 import AccountReportingConfig from './pages/Settings/AccountReportingConfig'
 import { AccountConfiguration } from './pages/Settings/AccountConfiguration'
+import { RolesAccess } from './pages/Settings/RolesAccess'
 import { PostalCenters } from './pages/PostalCenters'
 import { SLAsConfiguration } from './pages/SLAsConfiguration'
 import { EventConsolidation } from './pages/diagnosis/EventConsolidation'
@@ -63,6 +66,7 @@ function App() {
     <AuthProvider>
       <LocaleProvider>
         <AccountProvider>
+        <PermissionsProvider>
         <TimeUnitProvider>
           <BrowserRouter>
           <Routes>
@@ -72,7 +76,7 @@ function App() {
             <Route
               path="/reporting/jk-performance-v2"
               element={
-                <ProtectedRoute allowedRoles={['superadmin', 'admin', 'user']}>
+                <ProtectedRoute option="segment_analysis">
                   <ReportingFiltersProvider>
                     <JKPerformanceV2 />
                   </ReportingFiltersProvider>
@@ -88,103 +92,103 @@ function App() {
                     <SidebarProvider>
                       <MainLayout>
                   <Routes>
-                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/dashboard" element={<ProtectedRoute option="dashboard"><Dashboard /></ProtectedRoute>} />
                     
-                    {/* Country Topology - for admin and superadmin */}
+                    {/* Country Topology */}
                     <Route
                       path="/topology"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="topology">
                           <CountryTopology />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Carriers - for admin and superadmin */}
+                    {/* Carriers */}
                     <Route
                       path="/carriers"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="carriers">
                           <Carriers />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Material Catalog - for admin and superadmin */}
+                    {/* Material Catalog */}
                     <Route
                       path="/material-catalog"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="material_catalog">
                           <MaterialCatalogPage />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Delivery Standards - for admin and superadmin */}
+                    {/* Delivery Standards */}
                     <Route
                       path="/delivery-standards"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="e2e_sla">
                           <DeliveryStandards />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* SLAs Configuration - for admin and superadmin */}
+                    {/* SLAs Configuration */}
                     <Route
                       path="/slas-configuration"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="segment_sla">
                           <SLAsConfiguration />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Pipeline Monitor - for admin and superadmin */}
+                    {/* Pipeline Monitor */}
                     <Route
                       path="/diagnosis/pipeline-monitor"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="epcis_api">
                           <PipelineMonitor />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Route Path Analysis - for admin and superadmin */}
+                    {/* Route Path Analysis */}
                     <Route
                       path="/diagnosis/route-path-analysis"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="route_analysis">
                           <RoutePathAnalysis />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Event Consolidation - for admin and superadmin */}
+                    {/* Event Consolidation */}
                     <Route
                       path="/diagnosis/event-consolidation"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="epcis_api">
                           <EventConsolidation />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Processed Events - for admin and superadmin */}
+                    {/* Processed Events */}
                     <Route
                       path="/diagnosis/processed-events"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="rfid_events_db">
                           <ProcessedEvents />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Journey Segments - for admin and superadmin */}
+                    {/* Journey Segments */}
                     <Route
                       path="/diagnosis/journey-segments"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="route_analysis">
                           <JourneySegments />
                         </ProtectedRoute>
                       }
@@ -192,177 +196,179 @@ function App() {
                     <Route
                       path="/diagnosis/complete-journeys"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="route_analysis">
                           <CompleteJourneys />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Network Overview - for admin and superadmin */}
+                    {/* Network Overview */}
                     <Route
                       path="/diagnosis/network-overview"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="route_analysis">
                           <NetworkOverview />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Route Analysis - for admin and superadmin */}
+                    {/* Route Analysis */}
                     <Route
                       path="/diagnosis/route-analysis"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="route_analysis">
                           <RouteAnalysis />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Center Analysis - for admin and superadmin */}
+                    {/* Center Analysis */}
                     <Route
                       path="/diagnosis/center-analysis"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="route_analysis">
                           <CenterAnalysis />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Segment Deep Dive - for admin and superadmin */}
+                    {/* Segment Deep Dive */}
                     <Route
                       path="/diagnosis/segment-deep-dive"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="route_analysis">
                           <SegmentDeepDive />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* J+K Performance Segments - for admin and superadmin */}
+                    {/* J+K Performance Segments */}
                     <Route
                       path="/diagnosis/jk-performance-segments"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="segment_analysis">
                           <JKPerformanceSegments />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Postal Centers - for admin and superadmin */}
+                    {/* Postal Centers */}
                     <Route
                       path="/postal-centers"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="postal_centers">
                           <PostalCenters />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Readers Management - for admin and superadmin */}
+                    {/* Readers Management */}
                     <Route
                       path="/readers-management"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="readers_management">
                           <ReadersManagement />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Allocation Plan Generator - for admin and superadmin */}
+                    {/* Allocation Plan Generator */}
                     <Route
                       path="/allocation-plan-generator"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="allocation_generator">
                           <AllocationPlanGenerator />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Node Load Balancing - for admin and superadmin */}
+                    {/* Node Load Balancing */}
                     <Route
                       path="/node-load-balancing"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="load_balancing">
                           <NodeLoadBalancing />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Allocation Plans - for admin and superadmin */}
+                    {/* Allocation Plans */}
                     <Route
                       path="/allocation-plans"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="allocation_plans">
                           <AllocationPlans />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Receive Generator - for admin and superadmin (DEMO only) */}
+                    {/* Receive Generator */}
                     <Route
                       path="/receive-generator"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
-                          <ReceiveGenerator />
+                        <ProtectedRoute option="account_working_days">
+                          <DemoOnlyRoute>
+                            <ReceiveGenerator />
+                          </DemoOnlyRoute>
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Material Requirements - for admin and superadmin */}
+                    {/* Material Requirements */}
                     <Route
                       path="/material-requirements"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="material_requirements">
                           <MaterialRequirements />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Stock Management - for admin and superadmin */}
+                    {/* Stock Management */}
                     <Route
                       path="/stock-management"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="stock_management">
                           <StockManagement />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Panelists - for admin and superadmin */}
+                    {/* Panelists */}
                     <Route
                       path="/panelists"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="panelists">
                           <Panelists />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* ONE DB - for admin and superadmin */}
+                    {/* ONE DB */}
                     <Route
                       path="/one-db"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="e2e_db">
                           <OneDB />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* ONE DB API - for admin and superadmin */}
+                    {/* ONE DB API */}
                     <Route
                       path="/one-db-api"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="e2e_db_api">
                           <OneDBAPI />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* EPCIS API - for admin and superadmin */}
+                    {/* EPCIS API */}
                     <Route
                       path="/epcis-api"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="epcis_api">
                           <EPCISAPI />
                         </ProtectedRoute>
                       }
@@ -374,50 +380,50 @@ function App() {
                       element={<Navigate to="/reporting/territory-equity" replace />}
                     />
                     
-                    {/* Reporting Compliance - for admin and superadmin */}
+                    {/* Reporting Compliance */}
                     <Route
                       path="/reporting/compliance"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="compliance">
                           <ComplianceReport />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Territory Equity Report - for admin and superadmin */}
+                    {/* Territory Equity Report */}
                     <Route
                       path="/reporting/territory-equity"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="territory_equity">
                           <TerritoryEquity />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Territory Equity V2 (Testing) - for admin and superadmin */}
+                    {/* Territory Equity V2 (Testing) */}
                     <Route
                       path="/reporting/territory-equity-v2"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="territory_equity">
                           <TerritoryEquityV2 />
                         </ProtectedRoute>
                       }
                     />
-                                    {/* Reporting J+K Performance - for admin and superadmin */}
+                                    {/* Reporting J+K Performance */}
                     <Route
                       path="/reporting/jk-performance"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="segment_analysis">
                           <JKPerformance />
                         </ProtectedRoute>
                       }
                     />
                  
-                    {/* Settings routes - only for superadmin */}
+                    {/* Settings routes */}
                     <Route
                       path="/settings"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin']}>
+                        <ProtectedRoute option="superadmin">
                           <Settings />
                         </ProtectedRoute>
                       }
@@ -425,7 +431,7 @@ function App() {
                     <Route
                       path="/settings/accounts"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin']}>
+                        <ProtectedRoute option="superadmin">
                           <Accounts />
                         </ProtectedRoute>
                       }
@@ -433,7 +439,7 @@ function App() {
                     <Route
                       path="/settings/users"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin']}>
+                        <ProtectedRoute option="superadmin">
                           <AllUsers />
                         </ProtectedRoute>
                       }
@@ -441,74 +447,79 @@ function App() {
                     <Route
                       path="/settings/reporting-config"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin']}>
+                        <ProtectedRoute option="superadmin">
                           <AccountReportingConfig />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Account Configuration - for admin and superadmin (all users in DEMO2) */}
-                    <Route path="/settings/account-configuration" element={<AccountConfiguration />} />
+                    {/* Account Configuration */}
+                    <Route path="/settings/account-configuration" element={<ProtectedRoute option="account_working_days"><AccountConfiguration /></ProtectedRoute>} />
+
+                    {/* Roles y accesos de la cuenta (la página redirige si no puede gestionarla) */}
+                    <Route path="/settings/roles-access" element={<ProtectedRoute option="open"><RolesAccess /></ProtectedRoute>} />
                     
-                    {/* Change Password - for all authenticated users */}
-                    <Route path="/settings/change-password" element={<ChangePassword />} />
+                    {/* Change Password */}
+                    <Route path="/settings/change-password" element={<ProtectedRoute option="open"><ChangePassword /></ProtectedRoute>} />
                     
 
-                    {/* Users route - for admin and superadmin */}
+                    {/* Users route */}
                     <Route
                       path="/users"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="users">
                           <Users />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Account Management - for admin and superadmin */}
+                    {/* Account Management */}
                     <Route
                       path="/admin/account-management"
                       element={
-                        <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
-                          <AccountManagement />
+                        <ProtectedRoute option="account_working_days">
+                          <DemoOnlyRoute>
+                            <AccountManagement />
+                          </DemoOnlyRoute>
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Translation Manager - only for superadmin */}
+                    {/* Translation Manager */}
                     <Route
                       path="/admin/translations"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin']}>
+                        <ProtectedRoute option="superadmin">
                           <TranslationManager />
                         </ProtectedRoute>
                       }
                     />
                     
-                    {/* Panelist Availability Incidents - for admin and superadmin */}
+                    {/* Panelist Availability Incidents */}
                     <Route
                       path="/incidents/panelist-availability"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="panelist_availability">
                           <PanelistAvailabilityIncidents />
                         </ProtectedRoute>
                       }
                     />
 
-                    {/* Panelist Reported Incidents - for admin and superadmin */}
+                    {/* Panelist Reported Incidents */}
                     <Route
                       path="/incidents/panelist-reported"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="reported_incidents">
                           <PanelistReportedIncidents />
                         </ProtectedRoute>
                       }
                     />
 
-                    {/* Receipt errors - for admin and superadmin */}
+                    {/* Receipt errors */}
                     <Route
                       path="/incidents/receipts"
                       element={
-                        <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                        <ProtectedRoute option="receipts">
                           <ReceiptErrors />
                         </ProtectedRoute>
                       }
@@ -518,13 +529,13 @@ function App() {
                     <Route
                       path="/help-center"
                       element={
-                        <ProtectedRoute>
+                        <ProtectedRoute option="help_center">
                           <HelpCenter />
                         </ProtectedRoute>
                       }
                     />
 
-                    <Route path="/" element={<Navigate to="/dashboard" />} />
+                    <Route path="/" element={<HomeRedirect />} />
                   </Routes>
                     </MainLayout>
                   </SidebarProvider>
@@ -535,6 +546,7 @@ function App() {
           </Routes>
         </BrowserRouter>
         </TimeUnitProvider>
+        </PermissionsProvider>
         </AccountProvider>
       </LocaleProvider>
     </AuthProvider>
