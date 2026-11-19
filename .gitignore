@@ -43,4 +43,4 @@ graphify-out/
 .obsidian/
 
 # Videos de formacion (se publican en Supabase Storage, no en git)
-Videos/
+/Videos/

@@ -1,0 +1,263 @@
+{
+  "langs": [
+    "en",
+    "es",
+    "fr",
+    "ar",
+    "pt"
+  ],
+  "cues": [
+    {
+      "start": "00:00:06.670",
+      "end": "00:00:11.070",
+      "en": "Before you can use the ONE bot, you need to register as a panelist.",
+      "es": "Antes de usar el ONE bot, tienes que registrarte como panelista.",
+      "fr": "Avant d’utiliser le ONE bot, vous devez vous inscrire comme panéliste.",
+      "ar": "قبل استخدام ONE bot، عليك التسجيل كمشارك في اللوحة.",
+      "pt": "Antes de usares o ONE bot, tens de te registar como painelista."
+    },
+    {
+      "start": "00:00:11.070",
+      "end": "00:00:15.550",
+      "en": "It only takes a few minutes, and you do it from your mobile phone, in Telegram.",
+      "es": "Solo lleva unos minutos y se hace desde el móvil, en Telegram.",
+      "fr": "Cela ne prend que quelques minutes, depuis votre téléphone, dans Telegram.",
+      "ar": "لا يستغرق الأمر سوى بضع دقائق، وتقوم به من هاتفك المحمول في Telegram.",
+      "pt": "Demora só alguns minutos e fazes tudo no telemóvel, no Telegram."
+    },
+    {
+      "start": "00:00:15.550",
+      "end": "00:00:18.750",
+      "en": "This short guide shows you how.",
+      "es": "Esta breve guía te enseña cómo.",
+      "fr": "Ce court guide vous montre comment faire.",
+      "ar": "يوضح لك هذا الدليل القصير الطريقة.",
+      "pt": "Este pequeno guia mostra-te como."
+    },
+    {
+      "start": "00:00:18.750",
+      "end": "00:00:21.430",
+      "en": "Before you start, check two things.",
+      "es": "Antes de empezar, comprueba dos cosas.",
+      "fr": "Avant de commencer, vérifiez deux choses.",
+      "ar": "قبل أن تبدأ، تحقّق من أمرين.",
+      "pt": "Antes de começares, verifica duas coisas."
+    },
+    {
+      "start": "00:00:21.430",
+      "end": "00:00:24.270",
+      "en": "First, Telegram is installed on your phone.",
+      "es": "Primero, que tienes Telegram instalado en el móvil.",
+      "fr": "D’abord, que Telegram est installé sur votre téléphone.",
+      "ar": "أولًا، أن تطبيق Telegram مثبّت على هاتفك.",
+      "pt": "Primeiro, que tens o Telegram instalado no telemóvel."
+    },
+    {
+      "start": "00:00:24.270",
+      "end": "00:00:33.290",
+      "en": "Second, you know the email address your manager used to register you in ONEMS.",
+      "es": "Segundo, que sabes el correo con el que tu responsable te dio de alta en ONEMS.",
+      "fr": "Ensuite, que vous connaissez l’adresse e-mail utilisée par votre responsable pour vous inscrire dans ONEMS.",
+      "ar": "ثانيًا، أنك تعرف البريد الإلكتروني الذي استخدمه مسؤولك لتسجيلك في ONEMS.",
+      "pt": "Segundo, que sabes o email com que o teu responsável te registou no ONEMS."
+    },
+    {
+      "start": "00:00:33.290",
+      "end": "00:00:38.970",
+      "en": "In Telegram, tap the search icon and type @OneMSBot.",
+      "es": "En Telegram, toca la lupa y escribe @OneMSBot.",
+      "fr": "Dans Telegram, touchez l’icône de recherche et tapez @OneMSBot.",
+      "ar": "في Telegram، اضغط على أيقونة البحث واكتب ‎@OneMSBot.",
+      "pt": "No Telegram, toca na lupa e escreve @OneMSBot."
+    },
+    {
+      "start": "00:00:38.970",
+      "end": "00:00:46.740",
+      "en": "Open the bot and tap Start, or type /start.",
+      "es": "Abre el bot y toca Iniciar, o escribe /start.",
+      "fr": "Ouvrez le bot et touchez Démarrer, ou tapez /start.",
+      "ar": "افتح البوت واضغط على «ابدأ» أو اكتب ‎/start.",
+      "pt": "Abre o bot e toca em Iniciar, ou escreve /start."
+    },
+    {
+      "start": "00:00:46.740",
+      "end": "00:00:51.020",
+      "en": "The bot doesn’t recognise you yet, so it asks for your email.",
+      "es": "El bot todavía no te reconoce, así que te pide tu correo.",
+      "fr": "Le bot ne vous reconnaît pas encore, il vous demande donc votre e-mail.",
+      "ar": "البوت لا يتعرّف عليك بعد، لذلك يطلب بريدك الإلكتروني.",
+      "pt": "O bot ainda não te reconhece, por isso pede o teu email."
+    },
+    {
+      "start": "00:00:51.020",
+      "end": "00:00:57.500",
+      "en": "The message appears in four languages at once: English, French, Spanish and Arabic.",
+      "es": "El mensaje sale en cuatro idiomas a la vez: inglés, francés, español y árabe.",
+      "fr": "Le message s’affiche en quatre langues à la fois : anglais, français, espagnol et arabe.",
+      "ar": "تظهر الرسالة بأربع لغات في آن واحد: الإنجليزية والفرنسية والإسبانية والعربية.",
+      "pt": "A mensagem aparece em quatro línguas ao mesmo tempo: inglês, francês, espanhol e árabe."
+    },
+    {
+      "start": "00:00:57.500",
+      "end": "00:01:04.700",
+      "en": "Type only your email address, with no other text.",
+      "es": "Escribe solo tu correo, sin ningún otro texto.",
+      "fr": "Tapez uniquement votre adresse e-mail, sans autre texte.",
+      "ar": "اكتب بريدك الإلكتروني فقط، دون أي نص آخر.",
+      "pt": "Escreve só o teu email, sem mais nenhum texto."
+    },
+    {
+      "start": "00:01:04.700",
+      "end": "00:01:09.860",
+      "en": "If your manager has already registered you, the bot finds your email and links your account.",
+      "es": "Si tu responsable ya te dio de alta, el bot encuentra tu correo y enlaza tu cuenta.",
+      "fr": "Si votre responsable vous a déjà inscrit, le bot trouve votre e-mail et relie votre compte.",
+      "ar": "إذا كان مسؤولك قد سجّلك من قبل، يجد البوت بريدك ويربط حسابك.",
+      "pt": "Se o teu responsável já te registou, o bot encontra o teu email e liga a tua conta."
+    },
+    {
+      "start": "00:01:09.860",
+      "end": "00:01:11.740",
+      "en": "It replies with a welcome message.",
+      "es": "Te responde con un mensaje de bienvenida.",
+      "fr": "Il répond par un message de bienvenue.",
+      "ar": "ويردّ برسالة ترحيب.",
+      "pt": "Responde com uma mensagem de boas-vindas."
+    },
+    {
+      "start": "00:01:11.740",
+      "end": "00:01:13.940",
+      "en": "That’s it. You are registered.",
+      "es": "Listo. Ya estás registrado.",
+      "fr": "C’est tout. Vous êtes inscrit.",
+      "ar": "هذا كل شيء. لقد تم تسجيلك.",
+      "pt": "Pronto. Já estás registado."
+    },
+    {
+      "start": "00:01:14.100",
+      "end": "00:01:20.460",
+      "en": "Type /start and the menu appears.",
+      "es": "Escribe /start y aparece el menú.",
+      "fr": "Tapez /start et le menu s’affiche.",
+      "ar": "اكتب ‎/start فتظهر القائمة.",
+      "pt": "Escreve /start e aparece o menu."
+    },
+    {
+      "start": "00:01:20.460",
+      "end": "00:01:26.660",
+      "en": "If your email is not in ONEMS, the bot registers you with seven questions, one at a time.",
+      "es": "Si tu correo no está en ONEMS, el bot te registra con siete preguntas, una a una.",
+      "fr": "Si votre e-mail n’est pas dans ONEMS, le bot vous inscrit avec sept questions, une à une.",
+      "ar": "إذا لم يكن بريدك في ONEMS، يسجّلك البوت عبر سبعة أسئلة، سؤالًا تلو الآخر.",
+      "pt": "Se o teu email não estiver no ONEMS, o bot regista-te com sete perguntas, uma de cada vez."
+    },
+    {
+      "start": "00:01:26.660",
+      "end": "00:01:28.540",
+      "en": "Answer each one by typing.",
+      "es": "Contesta cada una escribiendo.",
+      "fr": "Répondez à chacune en tapant votre réponse.",
+      "ar": "أجب عن كل سؤال بالكتابة.",
+      "pt": "Responde a cada uma escrevendo."
+    },
+    {
+      "start": "00:01:28.540",
+      "end": "00:01:35.020",
+      "en": "Your full name, your mobile number, your street: only the street where your parcels will arrive.",
+      "es": "Tu nombre completo, tu móvil y tu calle: solo la calle donde te llegarán los paquetes.",
+      "fr": "Votre nom complet, votre numéro de portable, votre rue : seulement la rue où arriveront vos colis.",
+      "ar": "اسمك الكامل، رقم هاتفك المحمول، وشارعك: فقط الشارع الذي ستصل إليه طرودك.",
+      "pt": "O teu nome completo, o teu telemóvel e a tua rua: só a rua onde chegarão as encomendas."
+    },
+    {
+      "start": "00:01:35.020",
+      "end": "00:01:39.700",
+      "en": "Extra address details such as floor or door, or type no.",
+      "es": "Detalles de la dirección como piso o puerta, o escribe no.",
+      "fr": "Des précisions d’adresse comme l’étage ou la porte, ou tapez non.",
+      "ar": "تفاصيل إضافية للعنوان مثل الطابق أو الباب، أو اكتب لا.",
+      "pt": "Detalhes da morada como andar ou porta, ou escreve não."
+    },
+    {
+      "start": "00:01:39.700",
+      "end": "00:01:43.220",
+      "en": "Your postal code, your city and your country.",
+      "es": "Tu código postal, tu ciudad y tu país.",
+      "fr": "Votre code postal, votre ville et votre pays.",
+      "ar": "رمزك البريدي، ومدينتك، وبلدك.",
+      "pt": "O teu código postal, a tua cidade e o teu país."
+    },
+    {
+      "start": "00:01:43.220",
+      "end": "00:01:46.740",
+      "en": "When you finish, the bot tells you that your registration is complete.",
+      "es": "Al terminar, el bot te dice que el registro está completo.",
+      "fr": "À la fin, le bot vous indique que votre inscription est terminée.",
+      "ar": "عند الانتهاء، يخبرك البوت بأن تسجيلك قد اكتمل.",
+      "pt": "No fim, o bot diz-te que o registo está concluído."
+    },
+    {
+      "start": "00:01:46.740",
+      "end": "00:01:50.580",
+      "en": "Type /start to see the menu.",
+      "es": "Escribe /start para ver el menú.",
+      "fr": "Tapez /start pour voir le menu.",
+      "ar": "اكتب ‎/start لرؤية القائمة.",
+      "pt": "Escreve /start para ver o menu."
+    },
+    {
+      "start": "00:01:50.580",
+      "end": "00:01:55.620",
+      "en": "If you see the message “Something went wrong”, the bot did not recognise your country.",
+      "es": "Si ves el mensaje «Algo ha salido mal», el bot no ha reconocido tu país.",
+      "fr": "Si vous voyez le message « Un problème est survenu », le bot n’a pas reconnu votre pays.",
+      "ar": "إذا ظهرت لك رسالة «حدث خطأ ما»، فهذا يعني أن البوت لم يتعرّف على بلدك.",
+      "pt": "Se vires a mensagem «Algo correu mal», o bot não reconheceu o teu país."
+    },
+    {
+      "start": "00:01:55.620",
+      "end": "00:02:03.240",
+      "en": "Write to the email address shown in the message and you will be registered manually.",
+      "es": "Escribe al correo que aparece en el mensaje y te darán de alta a mano.",
+      "fr": "Écrivez à l’adresse e-mail indiquée dans le message et vous serez inscrit manuellement.",
+      "ar": "راسل البريد الإلكتروني الظاهر في الرسالة وسيتم تسجيلك يدويًا.",
+      "pt": "Escreve para o email indicado na mensagem e serás registado manualmente."
+    },
+    {
+      "start": "00:02:03.240",
+      "end": "00:02:06.880",
+      "en": "After registration, everything is done with the menu buttons.",
+      "es": "Después del registro, todo se hace con los botones del menú.",
+      "fr": "Après l’inscription, tout se fait avec les boutons du menu.",
+      "ar": "بعد التسجيل، يتم كل شيء عبر أزرار القائمة.",
+      "pt": "Depois do registo, tudo se faz com os botões do menu."
+    },
+    {
+      "start": "00:02:06.880",
+      "end": "00:02:11.240",
+      "en": "The guide is under the Help button, or type /help.",
+      "es": "La guía está en el botón Ayuda, o escribe /help.",
+      "fr": "Le guide se trouve sous le bouton Aide, ou tapez /help.",
+      "ar": "الدليل موجود تحت زر «المساعدة»، أو اكتب ‎/help.",
+      "pt": "O guia está no botão Ajuda, ou escreve /help."
+    },
+    {
+      "start": "00:02:11.240",
+      "end": "00:02:18.160",
+      "en": "To change your language, phone, email or address, tap Report incident, then Change my details.",
+      "es": "Para cambiar idioma, teléfono, correo o dirección, toca Reportar incidente y luego Cambiar mis datos.",
+      "fr": "Pour changer de langue, de téléphone, d’e-mail ou d’adresse, touchez Signaler un incident, puis Modifier mes coordonnées.",
+      "ar": "لتغيير اللغة أو الهاتف أو البريد أو العنوان، اضغط «الإبلاغ عن حادثة» ثم «تغيير بياناتي».",
+      "pt": "Para mudar a língua, o telefone, o email ou a morada, toca em Reportar incidência e depois em Alterar os meus dados."
+    },
+    {
+      "start": "00:02:18.160",
+      "end": "00:02:19.440",
+      "en": "Welcome to the panel.",
+      "es": "Bienvenido al panel.",
+      "fr": "Bienvenue dans le panel.",
+      "ar": "مرحبًا بك في اللوحة.",
+      "pt": "Bem-vindo ao painel."
+    }
+  ]
+}
