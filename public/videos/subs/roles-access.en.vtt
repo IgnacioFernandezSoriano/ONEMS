@@ -1,0 +1,192 @@
+WEBVTT
+
+1
+00:00:00.650 --> 00:00:03.210
+Roles and access in ONEMS.
+
+2
+00:00:04.150 --> 00:00:06.720
+What each person sees, and what they can
+do,
+
+3
+00:00:06.770 --> 00:00:09.590
+depends on their roles in their country's
+account.
+
+4
+00:00:09.740 --> 00:00:11.090
+Here is how it works.
+
+5
+00:00:12.730 --> 00:00:15.630
+Every account has the same six roles.
+
+6
+00:00:15.880 --> 00:00:19.770
+The Account Manager heads the account and
+decides the team's access.
+
+7
+00:00:20.210 --> 00:00:23.510
+The Allocation Plan Manager prepares the
+shipment plans.
+
+8
+00:00:23.740 --> 00:00:28.410
+The Panelist Manager looks after the
+panelists, their incidents and their
+availability.
+
+9
+00:00:29.130 --> 00:00:31.550
+The Materials Supplier manages materials.
+
+10
+00:00:31.600 --> 00:00:35.330
+The DO coordinator handles the RFID side.
+
+11
+00:00:35.550 --> 00:00:39.090
+And the UPU account manager follows the
+account for the UPU.
+
+12
+00:00:40.850 --> 00:00:44.610
+For each menu option, a role gives one of
+three rights.
+
+13
+00:00:44.700 --> 00:00:47.930
+Edit: you see the screen and you can
+change data.
+
+14
+00:00:48.170 --> 00:00:51.000
+View: you see the screen, but the create,
+save
+
+15
+00:00:51.050 --> 00:00:55.370
+and delete buttons are hidden, and a View
+only badge appears.
+
+16
+00:00:55.670 --> 00:00:59.050
+Or no access: the option does not appear
+in the menu.
+
+17
+00:00:59.480 --> 00:01:02.730
+If you have several roles, the highest
+right wins.
+
+18
+00:01:02.810 --> 00:01:06.780
+For example, the Panelist Manager has View
+on Stock Management,
+
+19
+00:01:06.830 --> 00:01:09.220
+and the Materials Supplier has Edit.
+
+20
+00:01:09.270 --> 00:01:11.770
+With both roles, you have Edit.
+
+21
+00:01:12.230 --> 00:01:16.350
+And a user with no role only sees the
+reporting screens and the Help centre.
+
+22
+00:01:18.170 --> 00:01:23.210
+If a menu option is missing, or you need
+Edit where you only have View,
+
+23
+00:01:23.340 --> 00:01:27.730
+ask the Account Manager or the UPU account
+manager of your account.
+
+24
+00:01:27.920 --> 00:01:30.410
+Only they can change its roles and rights.
+
+25
+00:01:30.730 --> 00:01:32.540
+The change is saved at once.
+
+26
+00:01:32.590 --> 00:01:35.170
+Reload the page to see your updated menu.
+
+27
+00:01:36.730 --> 00:01:40.540
+Account Managers and UPU account managers
+use the tab
+
+28
+00:01:40.590 --> 00:01:43.090
+Administration, Roles and access.
+
+29
+00:01:43.680 --> 00:01:48.110
+In Account contacts, type the emails that
+receive the automatic notices.
+
+30
+00:01:48.320 --> 00:01:50.490
+A contact does not give access to ONEMS.
+
+31
+00:01:51.670 --> 00:01:57.390
+In Rights of each role, choose Edit, View
+or no access for each menu option.
+
+32
+00:01:57.710 --> 00:01:59.250
+There is no save button:
+
+33
+00:01:59.400 --> 00:02:01.010
+the change is saved at once.
+
+34
+00:02:01.480 --> 00:02:05.950
+In Users and their roles, tick or untick a
+role for each user.
+
+35
+00:02:06.190 --> 00:02:08.880
+Review any role marked Provisional:
+
+36
+00:02:08.930 --> 00:02:12.150
+confirm it, or replace it with the right
+one.
+
+37
+00:02:12.500 --> 00:02:15.710
+Back to template undoes all changes to the
+rights.
+
+38
+00:02:15.980 --> 00:02:19.630
+And Latest changes shows who changed what,
+and when.
+
+39
+00:02:21.090 --> 00:02:25.130
+Each account keeps its own rights,
+contacts and roles.
+
+40
+00:02:25.330 --> 00:02:28.130
+A change in yours does not affect other
+countries.
+
+41
+00:02:28.540 --> 00:02:32.350
+For the full guide, open Roles and access
+in the Help centre.

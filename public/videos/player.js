@@ -20,7 +20,8 @@
 
   // id -> fichero MP4 (voz en inglés) e idiomas con subtítulos disponibles.
   var VIDEOS = {
-    'panelist-registration': { file: 'ONE_Panelist_Registration_EN.mp4', subs: ['en', 'es', 'fr', 'ar', 'pt'] }
+    'panelist-registration': { file: 'ONE_Panelist_Registration_EN.mp4', subs: ['en', 'es', 'fr', 'ar', 'pt'] },
+    'roles-access': { file: 'ONEMS_Roles_and_access_EN.mp4', subs: ['en', 'es', 'fr', 'ar', 'pt'] }
   };
 
   var LANG_NAMES = { en: 'English', es: 'Español', fr: 'Français', ar: 'العربية', pt: 'Português' };
@@ -100,10 +101,15 @@
     bar.appendChild(label);
 
     var buttons = [];
+    // Solo mandan nuestras pistas .vtt. Si el MP4 trae subtítulos incrustados (Safari los muestra),
+    // se apagan siempre para que no salgan duplicados.
+    var ours = Array.prototype.map.call(video.querySelectorAll('track'), function (te) { return te.track; });
+    var current = '';
     function select(l) {
+      current = l;
       for (var i = 0; i < video.textTracks.length; i++) {
         var t = video.textTracks[i];
-        t.mode = t.language === l ? 'showing' : 'disabled';
+        t.mode = ours.indexOf(t) >= 0 && t.language === l ? 'showing' : 'disabled';
       }
       buttons.forEach(function (b) {
         b.setAttribute('aria-pressed', String(b.getAttribute('data-l') === l));
@@ -129,6 +135,7 @@
     // Las pistas aparecen en textTracks al insertarse; se fija el estado inicial y se mantiene
     // sincronizado si el usuario cambia desde el menú CC del navegador.
     select(initial);
+    video.textTracks.addEventListener('addtrack', function () { select(current); });
     video.textTracks.addEventListener('change', function () {
       var on = '';
       for (var i = 0; i < video.textTracks.length; i++) {
