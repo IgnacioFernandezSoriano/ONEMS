@@ -5312,7 +5312,8 @@ roles_access.users_help,"حدد أدوار كل مستخدم في هذا الح�
 roles_access.user,المستخدم
 roles_access.no_users,لا يوجد مستخدمون في هذا الحساب بعد.
 roles_access.provisional,مؤقت
-roles_access.provisional_help,عُيّن تلقائيًا عند البدء؛ إعادة تحديد الدور تؤكده.
+roles_access.provisional_help,عُيّن تلقائيًا عند البدء. اضغط تأكيد لتثبيته.
+roles_access.confirm_provisional,تأكيد
 roles_access.other_account,حساب آخر
 roles_access.other_account_help,الحساب النشط لهذا المستخدم حساب آخر؛ ولديه دور في هذا الحساب أيضًا.
 roles_access.add_by_email,إضافة مستخدم موجود عبر البريد الإلكتروني

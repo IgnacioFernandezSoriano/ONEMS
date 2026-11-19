@@ -32,6 +32,15 @@ export function UserRolesSection({ users, canEdit, isSuperadmin, onToggle, onAdd
     setBusy(null)
   }
 
+  // Confirma de una vez todos los roles provisionales del usuario (activar un rol que ya tiene lo deja fijo).
+  const confirm = async (u: AccountUser) => {
+    setBusy(`${u.user_id}|confirm`)
+    for (const r of ACCOUNT_ROLES) {
+      if (u.provisional.has(r) && !(await onToggle(u.user_id, r, true))) break
+    }
+    setBusy(null)
+  }
+
   const add = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!email.trim()) return
@@ -78,6 +87,16 @@ export function UserRolesSection({ users, canEdit, isSuperadmin, onToggle, onAdd
                       >
                         {t('roles_access.provisional')}
                       </span>
+                    )}
+                    {u.provisional.size > 0 && canEdit && (
+                      <button
+                        type="button"
+                        onClick={() => confirm(u)}
+                        disabled={busy !== null}
+                        className="text-xs px-1.5 py-0.5 rounded border border-amber-400 text-amber-800 hover:bg-amber-50 disabled:opacity-50"
+                      >
+                        {t('roles_access.confirm_provisional')}
+                      </button>
                     )}
                     {!u.activeHere && (
                       <span className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600" title={t('roles_access.other_account_help')}>

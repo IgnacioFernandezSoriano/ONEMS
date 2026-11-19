@@ -5312,7 +5312,8 @@ roles_access.users_help,Cochez les rôles de chaque utilisateur de ce compte. «
 roles_access.user,Utilisateur
 roles_access.no_users,Ce compte n'a pas encore d'utilisateurs.
 roles_access.provisional,Provisoire
-roles_access.provisional_help,Attribué automatiquement au démarrage ; cocher à nouveau le rôle le confirme.
+roles_access.provisional_help,Attribué automatiquement au démarrage. Cliquez sur Confirmer pour le rendre définitif.
+roles_access.confirm_provisional,Confirmer
 roles_access.other_account,Autre compte
 roles_access.other_account_help,Le compte actif de cet utilisateur est un autre ; il a aussi un rôle dans ce compte.
 roles_access.add_by_email,Ajouter un utilisateur existant par e-mail

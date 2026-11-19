@@ -2,10 +2,10 @@
 import type { AccessLevel, AccountRole } from './access'
 import type { AccountContactField } from './types'
 
-/** Los seis roles fijos, en el orden de la matriz. */
+/** Los seis roles fijos, en el orden de la matriz (el del documento de roles: UPU el último). */
 export const ACCOUNT_ROLES: AccountRole[] = [
-  'account_manager', 'panelist_manager', 'materials_supplier',
-  'do_coordinator', 'upu_account_manager', 'allocation_plan_manager',
+  'account_manager', 'allocation_plan_manager', 'panelist_manager',
+  'materials_supplier', 'do_coordinator', 'upu_account_manager',
 ]
 
 /** Clave i18n del nombre de un rol (los nombres se muestran en inglés: son nombres propios del documento). */

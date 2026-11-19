@@ -5320,7 +5320,8 @@ roles_access.users_help,"Tick the roles of each user of this account. ""Provisio
 roles_access.user,User
 roles_access.no_users,This account has no users yet.
 roles_access.provisional,Provisional
-roles_access.provisional_help,Assigned automatically at start-up; ticking the role again confirms it.
+roles_access.provisional_help,Assigned automatically at start-up. Press Confirm to make it permanent.
+roles_access.confirm_provisional,Confirm
 roles_access.other_account,Other account
 roles_access.other_account_help,This user's active account is another one; they have a role in this account too.
 roles_access.add_by_email,Add an existing user by email

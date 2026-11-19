@@ -5320,7 +5320,8 @@ roles_access.users_help,"Marque as funções de cada utilizador desta conta. ""P
 roles_access.user,Utilizador
 roles_access.no_users,Esta conta ainda não tem utilizadores.
 roles_access.provisional,Provisória
-roles_access.provisional_help,Atribuída automaticamente no arranque; voltar a marcar a função confirma-a.
+roles_access.provisional_help,Atribuída automaticamente no arranque. Prima Confirmar para a tornar definitiva.
+roles_access.confirm_provisional,Confirmar
 roles_access.other_account,Outra conta
 roles_access.other_account_help,A conta ativa deste utilizador é outra; também tem uma função nesta conta.
 roles_access.add_by_email,Adicionar um utilizador existente por email
