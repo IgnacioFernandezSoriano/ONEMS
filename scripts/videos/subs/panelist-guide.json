@@ -1,0 +1,578 @@
+{
+  "langs": [
+    "en",
+    "es",
+    "fr",
+    "ar",
+    "pt"
+  ],
+  "cues": [
+    {
+      "start": "00:00:06.640",
+      "end": "00:00:12.640",
+      "en": "In many countries, people like Amina and Brian help measure the quality of the postal service.",
+      "es": "En muchos países, personas como Amina y Brian ayudan a medir la calidad del servicio postal.",
+      "fr": "Dans de nombreux pays, des personnes comme Amina et Brian aident à mesurer la qualité du service postal.",
+      "ar": "في كثير من البلدان، يساعد أشخاص مثل أمينة وبراين في قياس جودة الخدمة البريدية.",
+      "pt": "Em muitos países, pessoas como a Amina e o Brian ajudam a medir a qualidade do serviço postal."
+    },
+    {
+      "start": "00:00:12.640",
+      "end": "00:00:16.640",
+      "en": "They are panelists: they send and receive test parcels,",
+      "es": "Son panelistas: envían y reciben paquetes de prueba",
+      "fr": "Ce sont des panélistes : ils envoient et reçoivent des colis de test",
+      "ar": "إنهم مشاركون في اللوحة: يرسلون طرود الاختبار ويستلمونها،",
+      "pt": "São painelistas: enviam e recebem encomendas de teste"
+    },
+    {
+      "start": "00:00:16.640",
+      "end": "00:00:21.640",
+      "en": "and they report everything from their mobile phone, using Telegram and the ONE bot.",
+      "es": "y lo comunican todo desde el móvil, con Telegram y el ONE bot.",
+      "fr": "et signalent tout depuis leur téléphone, avec Telegram et le ONE bot.",
+      "ar": "ويُبلغون عن كل شيء من هواتفهم المحمولة باستخدام Telegram وONE bot.",
+      "pt": "e comunicam tudo a partir do telemóvel, com o Telegram e o ONE bot."
+    },
+    {
+      "start": "00:00:21.640",
+      "end": "00:00:27.830",
+      "en": "This short guide shows you how.",
+      "es": "Esta breve guía te enseña cómo.",
+      "fr": "Ce court guide vous montre comment faire.",
+      "ar": "يوضح لك هذا الدليل القصير الطريقة.",
+      "pt": "Este pequeno guia mostra-te como."
+    },
+    {
+      "start": "00:00:27.830",
+      "end": "00:00:29.830",
+      "en": "First, install Telegram.",
+      "es": "Primero, instala Telegram.",
+      "fr": "D’abord, installez Telegram.",
+      "ar": "أولًا، ثبّت تطبيق Telegram.",
+      "pt": "Primeiro, instala o Telegram."
+    },
+    {
+      "start": "00:00:29.830",
+      "end": "00:00:32.830",
+      "en": "Open the Google Play Store, or the App Store on an iPhone,",
+      "es": "Abre Google Play Store, o App Store en un iPhone,",
+      "fr": "Ouvrez le Google Play Store, ou l’App Store sur un iPhone,",
+      "ar": "افتح متجر Google Play، أو App Store على iPhone،",
+      "pt": "Abre a Google Play Store, ou a App Store num iPhone,"
+    },
+    {
+      "start": "00:00:32.830",
+      "end": "00:00:35.830",
+      "en": "search for Telegram and tap Install.",
+      "es": "busca Telegram y toca Instalar.",
+      "fr": "cherchez Telegram et touchez Installer.",
+      "ar": "ابحث عن Telegram واضغط «تثبيت».",
+      "pt": "procura o Telegram e toca em Instalar."
+    },
+    {
+      "start": "00:00:35.830",
+      "end": "00:00:37.830",
+      "en": "Then open the app.",
+      "es": "Después abre la aplicación.",
+      "fr": "Puis ouvrez l’application.",
+      "ar": "ثم افتح التطبيق.",
+      "pt": "Depois abre a aplicação."
+    },
+    {
+      "start": "00:00:37.830",
+      "end": "00:00:41.830",
+      "en": "How to set up your Telegram account is explained in a separate video.",
+      "es": "Cómo configurar tu cuenta de Telegram se explica en otro vídeo.",
+      "fr": "La configuration de votre compte Telegram est expliquée dans une autre vidéo.",
+      "ar": "يُشرح إعداد حسابك على Telegram في فيديو منفصل.",
+      "pt": "Como configurar a tua conta do Telegram é explicado noutro vídeo."
+    },
+    {
+      "start": "00:00:41.830",
+      "end": "00:00:46.830",
+      "en": "Now open the ONE bot chat using the link your manager shared with you.",
+      "es": "Ahora abre el chat del ONE bot con el enlace que te dio tu responsable.",
+      "fr": "Ouvrez maintenant la conversation avec le ONE bot grâce au lien partagé par votre responsable.",
+      "ar": "الآن افتح محادثة ONE bot باستخدام الرابط الذي أرسله إليك مسؤولك.",
+      "pt": "Agora abre o chat do ONE bot com o link que o teu responsável te enviou."
+    },
+    {
+      "start": "00:00:46.830",
+      "end": "00:00:49.830",
+      "en": "Tap Start or type /start.",
+      "es": "Toca Iniciar o escribe /start.",
+      "fr": "Touchez Démarrer ou tapez /start.",
+      "ar": "اضغط «ابدأ» أو اكتب ‎/start.",
+      "pt": "Toca em Iniciar ou escreve /start."
+    },
+    {
+      "start": "00:00:49.830",
+      "end": "00:00:51.830",
+      "en": "The menu appears.",
+      "es": "Aparece el menú.",
+      "fr": "Le menu s’affiche.",
+      "ar": "تظهر القائمة.",
+      "pt": "Aparece o menu."
+    },
+    {
+      "start": "00:00:51.830",
+      "end": "00:00:54.830",
+      "en": "With the ONE bot, everything is done with buttons.",
+      "es": "Con el ONE bot, todo se hace con botones.",
+      "fr": "Avec le ONE bot, tout se fait avec des boutons.",
+      "ar": "مع ONE bot، يتم كل شيء بالأزرار.",
+      "pt": "Com o ONE bot, tudo se faz com botões."
+    },
+    {
+      "start": "00:00:54.830",
+      "end": "00:00:57.830",
+      "en": "Tap the buttons. You don’t need to type commands.",
+      "es": "Toca los botones. No hace falta escribir comandos.",
+      "fr": "Touchez les boutons. Pas besoin de taper des commandes.",
+      "ar": "اضغط على الأزرار. لا تحتاج إلى كتابة أوامر.",
+      "pt": "Toca nos botões. Não precisas de escrever comandos."
+    },
+    {
+      "start": "00:00:57.830",
+      "end": "00:01:00.830",
+      "en": "If you have a problem, tap Report incident,",
+      "es": "Si tienes un problema, toca Reportar incidente,",
+      "fr": "Si vous avez un problème, touchez Signaler un incident,",
+      "ar": "إذا واجهتك مشكلة، اضغط «الإبلاغ عن حادثة»،",
+      "pt": "Se tiveres um problema, toca em Reportar incidência,"
+    },
+    {
+      "start": "00:01:00.830",
+      "end": "00:01:05.830",
+      "en": "and type only when the bot asks you: for example, a number or a code.",
+      "es": "y escribe solo cuando el bot te lo pida: por ejemplo, un número o un código.",
+      "fr": "et ne tapez que lorsque le bot vous le demande : par exemple un numéro ou un code.",
+      "ar": "ولا تكتب إلا عندما يطلب منك البوت ذلك: مثل رقم أو رمز.",
+      "pt": "e escreve só quando o bot te pedir: por exemplo, um número ou um código."
+    },
+    {
+      "start": "00:01:05.830",
+      "end": "00:01:10.830",
+      "en": "If you are ever lost, type /start and you are back at the menu.",
+      "es": "Si te pierdes, escribe /start y vuelves al menú.",
+      "fr": "Si vous êtes perdu, tapez /start et vous revenez au menu.",
+      "ar": "إذا ضعت في أي وقت، اكتب ‎/start وستعود إلى القائمة.",
+      "pt": "Se te perderes, escreve /start e voltas ao menu."
+    },
+    {
+      "start": "00:01:10.830",
+      "end": "00:01:18.320",
+      "en": "Before you confirm a shipment, prepare the parcel.",
+      "es": "Antes de confirmar un envío, prepara el paquete.",
+      "fr": "Avant de confirmer un envoi, préparez le colis.",
+      "ar": "قبل تأكيد الشحنة، جهّز الطرد.",
+      "pt": "Antes de confirmares um envio, prepara a encomenda."
+    },
+    {
+      "start": "00:01:18.320",
+      "end": "00:01:21.320",
+      "en": "In the ONE bot, tap View pending shipments.",
+      "es": "En el ONE bot, toca Ver envíos pendientes.",
+      "fr": "Dans le ONE bot, touchez Voir envois en attente.",
+      "ar": "في ONE bot، اضغط «عرض الشحنات المعلقة».",
+      "pt": "No ONE bot, toca em Ver envios pendentes."
+    },
+    {
+      "start": "00:01:21.320",
+      "end": "00:01:24.320",
+      "en": "You will see the parcels you have to send and where to send them.",
+      "es": "Verás los paquetes que tienes que enviar y adónde.",
+      "fr": "Vous verrez les colis à envoyer et leur destination.",
+      "ar": "سترى الطرود التي عليك إرسالها وإلى أين.",
+      "pt": "Vais ver as encomendas que tens de enviar e para onde."
+    },
+    {
+      "start": "00:01:24.320",
+      "end": "00:01:27.320",
+      "en": "Write the destination address on the parcel.",
+      "es": "Escribe la dirección de destino en el paquete.",
+      "fr": "Écrivez l’adresse de destination sur le colis.",
+      "ar": "اكتب عنوان الوجهة على الطرد.",
+      "pt": "Escreve a morada de destino na encomenda."
+    },
+    {
+      "start": "00:01:27.320",
+      "end": "00:01:31.320",
+      "en": "Then take one of your labels and stick it on top of the parcel.",
+      "es": "Después coge una de tus etiquetas y pégala encima del paquete.",
+      "fr": "Prenez ensuite une de vos étiquettes et collez-la sur le dessus du colis.",
+      "ar": "ثم خذ إحدى ملصقاتك وألصقها أعلى الطرد.",
+      "pt": "Depois pega numa das tuas etiquetas e cola-a em cima da encomenda."
+    },
+    {
+      "start": "00:01:31.320",
+      "end": "00:01:36.050",
+      "en": "Now take a photo of the label.",
+      "es": "Ahora haz una foto de la etiqueta.",
+      "fr": "Prenez maintenant une photo de l’étiquette.",
+      "ar": "الآن التقط صورة للملصق.",
+      "pt": "Agora tira uma fotografia à etiqueta."
+    },
+    {
+      "start": "00:01:36.050",
+      "end": "00:01:38.050",
+      "en": "Hold your phone above it,",
+      "es": "Pon el móvil encima,",
+      "fr": "Tenez votre téléphone au-dessus,",
+      "ar": "أمسك هاتفك فوقه،",
+      "pt": "Segura o telemóvel por cima,"
+    },
+    {
+      "start": "00:01:38.050",
+      "end": "00:01:42.050",
+      "en": "in good light, up close and without glare.",
+      "es": "con buena luz, de cerca y sin reflejos.",
+      "fr": "avec une bonne lumière, de près et sans reflet.",
+      "ar": "في إضاءة جيدة، من قريب ودون انعكاسات.",
+      "pt": "com boa luz, de perto e sem reflexos."
+    },
+    {
+      "start": "00:01:42.050",
+      "end": "00:01:45.050",
+      "en": "The whole barcode and the number must be sharp.",
+      "es": "El código de barras entero y el número tienen que verse nítidos.",
+      "fr": "Le code-barres entier et le numéro doivent être nets.",
+      "ar": "يجب أن يظهر الرمز الشريطي كاملًا والرقم بوضوح.",
+      "pt": "O código de barras inteiro e o número têm de ficar nítidos."
+    },
+    {
+      "start": "00:01:45.050",
+      "end": "00:01:48.050",
+      "en": "This is the photo you will send to the bot.",
+      "es": "Esa es la foto que enviarás al bot.",
+      "fr": "C’est cette photo que vous enverrez au bot.",
+      "ar": "هذه هي الصورة التي سترسلها إلى البوت.",
+      "pt": "Essa é a fotografia que vais enviar ao bot."
+    },
+    {
+      "start": "00:01:48.050",
+      "end": "00:01:53.050",
+      "en": "Every morning at 9, the bot sends you the list of parcels you have to send that day.",
+      "es": "Cada mañana a las 9, el bot te manda la lista de paquetes que tienes que enviar ese día.",
+      "fr": "Chaque matin à 9 h, le bot vous envoie la liste des colis à envoyer ce jour-là.",
+      "ar": "كل صباح في الساعة 9، يرسل إليك البوت قائمة الطرود التي عليك إرسالها في ذلك اليوم.",
+      "pt": "Todas as manhãs às 9h, o bot envia-te a lista de encomendas que tens de enviar nesse dia."
+    },
+    {
+      "start": "00:01:53.050",
+      "end": "00:01:57.050",
+      "en": "Parcels are sent Monday to Friday only.",
+      "es": "Los paquetes se envían solo de lunes a viernes.",
+      "fr": "Les colis sont envoyés du lundi au vendredi uniquement.",
+      "ar": "تُرسل الطرود من الاثنين إلى الجمعة فقط.",
+      "pt": "As encomendas enviam-se só de segunda a sexta-feira."
+    },
+    {
+      "start": "00:01:57.050",
+      "end": "00:02:01.050",
+      "en": "When you have sent a parcel, tap Confirm a shipment.",
+      "es": "Cuando hayas enviado un paquete, toca Confirmar un envío.",
+      "fr": "Quand vous avez envoyé un colis, touchez Confirmer un envoi.",
+      "ar": "عندما ترسل طردًا، اضغط «تأكيد شحنة».",
+      "pt": "Quando tiveres enviado uma encomenda, toca em Confirmar um envio."
+    },
+    {
+      "start": "00:02:01.050",
+      "end": "00:02:03.050",
+      "en": "Type the number of the parcel in the list.",
+      "es": "Escribe el número del paquete en la lista.",
+      "fr": "Tapez le numéro du colis dans la liste.",
+      "ar": "اكتب رقم الطرد في القائمة.",
+      "pt": "Escreve o número da encomenda na lista."
+    },
+    {
+      "start": "00:02:03.050",
+      "end": "00:02:07.050",
+      "en": "Then take a photo of the barcode label and send it,",
+      "es": "Después haz una foto de la etiqueta con el código de barras y envíala,",
+      "fr": "Puis prenez une photo de l’étiquette code-barres et envoyez-la,",
+      "ar": "ثم التقط صورة لملصق الرمز الشريطي وأرسلها،",
+      "pt": "Depois tira uma fotografia à etiqueta com o código de barras e envia-a,"
+    },
+    {
+      "start": "00:02:07.050",
+      "end": "00:02:11.050",
+      "en": "or type the label code. Your shipment is registered.",
+      "es": "o escribe el código de la etiqueta. Tu envío queda registrado.",
+      "fr": "ou tapez le code de l’étiquette. Votre envoi est enregistré.",
+      "ar": "أو اكتب رمز الملصق. تم تسجيل شحنتك.",
+      "pt": "ou escreve o código da etiqueta. O teu envio fica registado."
+    },
+    {
+      "start": "00:02:11.050",
+      "end": "00:02:17.340",
+      "en": "When a test parcel arrives at your home,",
+      "es": "Cuando te llegue a casa un paquete de prueba,",
+      "fr": "Quand un colis de test arrive chez vous,",
+      "ar": "عندما يصل طرد اختبار إلى منزلك،",
+      "pt": "Quando uma encomenda de teste chegar a tua casa,"
+    },
+    {
+      "start": "00:02:17.340",
+      "end": "00:02:21.340",
+      "en": "take your phone and photograph the label in the same way,",
+      "es": "coge el móvil y haz una foto de la etiqueta de la misma forma,",
+      "fr": "prenez votre téléphone et photographiez l’étiquette de la même façon,",
+      "ar": "خذ هاتفك وصوّر الملصق بالطريقة نفسها،",
+      "pt": "pega no telemóvel e fotografa a etiqueta da mesma forma,"
+    },
+    {
+      "start": "00:02:21.340",
+      "end": "00:02:24.340",
+      "en": "in good light, up close and without glare.",
+      "es": "con buena luz, de cerca y sin reflejos.",
+      "fr": "avec une bonne lumière, de près et sans reflet.",
+      "ar": "في إضاءة جيدة، من قريب ودون انعكاسات.",
+      "pt": "com boa luz, de perto e sem reflexos."
+    },
+    {
+      "start": "00:02:24.340",
+      "end": "00:02:27.340",
+      "en": "Then send the photo to the bot.",
+      "es": "Después envía la foto al bot.",
+      "fr": "Puis envoyez la photo au bot.",
+      "ar": "ثم أرسل الصورة إلى البوت.",
+      "pt": "Depois envia a fotografia ao bot."
+    },
+    {
+      "start": "00:02:27.340",
+      "end": "00:02:31.340",
+      "en": "When a parcel arrives, tap Confirm a reception.",
+      "es": "Cuando llegue un paquete, toca Confirmar una recepción.",
+      "fr": "Quand un colis arrive, touchez Confirmer une réception.",
+      "ar": "عندما يصل طرد، اضغط «تأكيد استلام».",
+      "pt": "Quando chegar uma encomenda, toca em Confirmar uma receção."
+    },
+    {
+      "start": "00:02:31.340",
+      "end": "00:02:36.340",
+      "en": "Send a photo of the parcel’s label, or type the alphanumeric code on the label.",
+      "es": "Envía una foto de la etiqueta del paquete, o escribe el código alfanumérico de la etiqueta.",
+      "fr": "Envoyez une photo de l’étiquette du colis, ou tapez le code alphanumérique de l’étiquette.",
+      "ar": "أرسل صورة لملصق الطرد، أو اكتب الرمز الأبجدي الرقمي الموجود على الملصق.",
+      "pt": "Envia uma fotografia da etiqueta da encomenda, ou escreve o código alfanumérico da etiqueta."
+    },
+    {
+      "start": "00:02:36.340",
+      "end": "00:02:39.340",
+      "en": "The bot replies: “Receipt registered. Thank you.”",
+      "es": "El bot responde: «Recepción registrada. Gracias».",
+      "fr": "Le bot répond : « Réception enregistrée. Merci. »",
+      "ar": "يرد البوت: «تم تسجيل الاستلام. شكرًا».",
+      "pt": "O bot responde: «Receção registada. Obrigado»."
+    },
+    {
+      "start": "00:02:39.340",
+      "end": "00:02:47.860",
+      "en": "If something goes wrong, tap Report incident and pick what happened from the list.",
+      "es": "Si algo va mal, toca Reportar incidente y elige en la lista lo que ha pasado.",
+      "fr": "En cas de problème, touchez Signaler un incident et choisissez dans la liste ce qui s’est passé.",
+      "ar": "إذا حدث خطأ ما، اضغط «الإبلاغ عن حادثة» واختر من القائمة ما حدث.",
+      "pt": "Se algo correr mal, toca em Reportar incidência e escolhe na lista o que aconteceu."
+    },
+    {
+      "start": "00:02:47.860",
+      "end": "00:02:51.860",
+      "en": "For example: missing materials, a broken parcel,",
+      "es": "Por ejemplo: falta de material, un paquete roto,",
+      "fr": "Par exemple : du matériel manquant, un colis cassé,",
+      "ar": "مثلًا: نقص في المواد، طرد مكسور،",
+      "pt": "Por exemplo: falta de material, uma encomenda partida,"
+    },
+    {
+      "start": "00:02:51.860",
+      "end": "00:02:54.860",
+      "en": "a parcel returned to you, or a label you can’t read.",
+      "es": "un paquete que te han devuelto o una etiqueta que no puedes leer.",
+      "fr": "un colis qui vous a été retourné ou une étiquette illisible.",
+      "ar": "طرد أُعيد إليك، أو ملصق لا تستطيع قراءته.",
+      "pt": "uma encomenda que te devolveram ou uma etiqueta que não consegues ler."
+    },
+    {
+      "start": "00:02:54.860",
+      "end": "00:02:58.860",
+      "en": "Let’s say a parcel arrives broken, wet or open.",
+      "es": "Imagina que un paquete llega roto, mojado o abierto.",
+      "fr": "Imaginons qu’un colis arrive cassé, mouillé ou ouvert.",
+      "ar": "لنفترض أن طردًا وصل مكسورًا أو مبللًا أو مفتوحًا.",
+      "pt": "Imagina que uma encomenda chega partida, molhada ou aberta."
+    },
+    {
+      "start": "00:02:58.860",
+      "end": "00:03:01.860",
+      "en": "Choose Broken or damaged parcel.",
+      "es": "Elige Paquete roto o dañado.",
+      "fr": "Choisissez Colis cassé ou abîmé.",
+      "ar": "اختر «طرد مكسور أو تالف».",
+      "pt": "Escolhe Pacote partido ou danificado."
+    },
+    {
+      "start": "00:03:01.860",
+      "end": "00:03:04.860",
+      "en": "It is recorded and you don’t have to do anything else.",
+      "es": "Queda registrado y no tienes que hacer nada más.",
+      "fr": "C’est enregistré et vous n’avez rien d’autre à faire.",
+      "ar": "يتم تسجيل ذلك ولا تحتاج إلى فعل أي شيء آخر.",
+      "pt": "Fica registado e não tens de fazer mais nada."
+    },
+    {
+      "start": "00:03:04.860",
+      "end": "00:03:07.860",
+      "en": "If you can read the label, confirm the reception as usual.",
+      "es": "Si puedes leer la etiqueta, confirma la recepción como siempre.",
+      "fr": "Si vous pouvez lire l’étiquette, confirmez la réception comme d’habitude.",
+      "ar": "إذا كان بإمكانك قراءة الملصق، أكّد الاستلام كالمعتاد.",
+      "pt": "Se conseguires ler a etiqueta, confirma a receção como de costume."
+    },
+    {
+      "start": "00:03:07.860",
+      "end": "00:03:10.860",
+      "en": "Is the problem about a specific parcel?",
+      "es": "¿El problema es de un paquete concreto?",
+      "fr": "Le problème concerne un colis précis ?",
+      "ar": "هل المشكلة تخص طردًا معيّنًا؟",
+      "pt": "O problema é de uma encomenda concreta?"
+    },
+    {
+      "start": "00:03:10.860",
+      "end": "00:03:15.860",
+      "en": "First open it in View pending shipments and tap Report incident on that parcel.",
+      "es": "Ábrelo antes en Ver envíos pendientes y toca Reportar incidente en ese paquete.",
+      "fr": "Ouvrez-le d’abord dans Voir envois en attente et touchez Signaler un incident sur ce colis.",
+      "ar": "افتحه أولًا في «عرض الشحنات المعلقة» واضغط «الإبلاغ عن حادثة» على ذلك الطرد.",
+      "pt": "Abre-a primeiro em Ver envios pendentes e toca em Reportar incidência nessa encomenda."
+    },
+    {
+      "start": "00:03:15.860",
+      "end": "00:03:22.320",
+      "en": "That way your manager knows which one you mean.",
+      "es": "Así tu responsable sabe de cuál hablas.",
+      "fr": "Ainsi, votre responsable sait de quel colis il s’agit.",
+      "ar": "بهذه الطريقة يعرف مسؤولك أي طرد تقصد.",
+      "pt": "Assim o teu responsável sabe de qual estás a falar."
+    },
+    {
+      "start": "00:03:22.320",
+      "end": "00:03:26.320",
+      "en": "Holiday, illness or training? Tell the bot in advance.",
+      "es": "¿Vacaciones, enfermedad o formación? Avisa al bot con antelación.",
+      "fr": "Vacances, maladie ou formation ? Prévenez le bot à l’avance.",
+      "ar": "عطلة أو مرض أو تدريب؟ أخبر البوت مسبقًا.",
+      "pt": "Férias, doença ou formação? Avisa o bot com antecedência."
+    },
+    {
+      "start": "00:03:26.320",
+      "end": "00:03:31.320",
+      "en": "Tap Unavailable days, then Declare unavailable days.",
+      "es": "Toca Días no disponibles y después Declarar días no disponibles.",
+      "fr": "Touchez Jours d’indisponibilité, puis Déclarer des jours d’indisponibilité.",
+      "ar": "اضغط «أيام عدم التوفر» ثم «تسجيل أيام عدم التوفر».",
+      "pt": "Toca em Dias de indisponibilidade e depois em Declarar dias de indisponibilidade."
+    },
+    {
+      "start": "00:03:31.320",
+      "end": "00:03:33.320",
+      "en": "Tap Today or Tomorrow.",
+      "es": "Toca Hoy o Mañana.",
+      "fr": "Touchez Aujourd’hui ou Demain.",
+      "ar": "اضغط «اليوم» أو «غدًا».",
+      "pt": "Toca em Hoje ou Amanhã."
+    },
+    {
+      "start": "00:03:33.320",
+      "end": "00:03:38.320",
+      "en": "For other days, tap From–to and type the dates as shown on the screen.",
+      "es": "Para otros días, toca Desde–hasta y escribe las fechas como se ve en la pantalla.",
+      "fr": "Pour d’autres jours, touchez Du–au et tapez les dates comme indiqué à l’écran.",
+      "ar": "لأيام أخرى، اضغط «من - إلى» واكتب التواريخ كما تظهر على الشاشة.",
+      "pt": "Para outros dias, toca em De–até e escreve as datas como aparece no ecrã."
+    },
+    {
+      "start": "00:03:38.320",
+      "end": "00:03:41.320",
+      "en": "Check the dates and tap Confirm.",
+      "es": "Revisa las fechas y toca Confirmar.",
+      "fr": "Vérifiez les dates et touchez Confirmer.",
+      "ar": "تحقّق من التواريخ واضغط «تأكيد».",
+      "pt": "Verifica as datas e toca em Confirmar."
+    },
+    {
+      "start": "00:03:41.320",
+      "end": "00:03:46.320",
+      "en": "Your parcels for those days move to another date or to another panelist in your city,",
+      "es": "Tus paquetes de esos días pasan a otra fecha o a otro panelista de tu ciudad,",
+      "fr": "Vos colis de ces jours-là passent à une autre date ou à un autre panéliste de votre ville,",
+      "ar": "تنتقل طرودك في تلك الأيام إلى تاريخ آخر أو إلى مشارك آخر في مدينتك،",
+      "pt": "As tuas encomendas desses dias passam para outra data ou para outro painelista da tua cidade,"
+    },
+    {
+      "start": "00:03:46.320",
+      "end": "00:03:49.320",
+      "en": "and the bot won’t send you the morning reminder.",
+      "es": "y el bot no te manda el aviso de la mañana.",
+      "fr": "et le bot ne vous envoie pas le rappel du matin.",
+      "ar": "ولن يرسل إليك البوت تذكير الصباح.",
+      "pt": "e o bot não te envia o aviso da manhã."
+    },
+    {
+      "start": "00:03:49.320",
+      "end": "00:03:53.320",
+      "en": "With View my unavailable days, you can see or cancel them.",
+      "es": "Con Ver mis días no disponibles puedes verlos o cancelarlos.",
+      "fr": "Avec Voir mes jours d’indisponibilité, vous pouvez les consulter ou les annuler.",
+      "ar": "عبر «عرض أيام عدم توفري» يمكنك رؤيتها أو إلغاؤها.",
+      "pt": "Com Ver os meus dias de indisponibilidade podes vê-los ou cancelá-los."
+    },
+    {
+      "start": "00:03:53.320",
+      "end": "00:03:58.320",
+      "en": "Remember: future dates only, and at most 90 days in a row.",
+      "es": "Recuerda: solo fechas futuras y como mucho 90 días seguidos.",
+      "fr": "N’oubliez pas : dates futures uniquement, et 90 jours d’affilée au maximum.",
+      "ar": "تذكّر: تواريخ مستقبلية فقط، و90 يومًا متتالية كحد أقصى.",
+      "pt": "Lembra-te: só datas futuras e no máximo 90 dias seguidos."
+    },
+    {
+      "start": "00:03:58.320",
+      "end": "00:04:04.320",
+      "en": "So remember: tap the buttons, report problems with Report incident,",
+      "es": "En resumen: toca los botones, avisa de los problemas con Reportar incidente",
+      "fr": "En résumé : touchez les boutons, signalez les problèmes avec Signaler un incident",
+      "ar": "إذن تذكّر: اضغط على الأزرار، وأبلغ عن المشكلات عبر «الإبلاغ عن حادثة»،",
+      "pt": "Resumindo: toca nos botões, comunica os problemas com Reportar incidência"
+    },
+    {
+      "start": "00:04:04.320",
+      "end": "00:04:06.320",
+      "en": "and type only when asked.",
+      "es": "y escribe solo cuando te lo pidan.",
+      "fr": "et ne tapez que lorsqu’on vous le demande.",
+      "ar": "ولا تكتب إلا عندما يُطلب منك.",
+      "pt": "e escreve só quando te pedirem."
+    },
+    {
+      "start": "00:04:06.320",
+      "end": "00:04:12.320",
+      "en": "Need more help? Tap Help or type /help to open the full panelist guide.",
+      "es": "¿Necesitas más ayuda? Toca Ayuda o escribe /help para abrir la guía completa del panelista.",
+      "fr": "Besoin d’aide ? Touchez Aide ou tapez /help pour ouvrir le guide complet du panéliste.",
+      "ar": "تحتاج إلى مساعدة إضافية؟ اضغط «مساعدة» أو اكتب ‎/help لفتح دليل المشارك الكامل.",
+      "pt": "Precisas de mais ajuda? Toca em Ajuda ou escreve /help para abrir o guia completo do painelista."
+    },
+    {
+      "start": "00:04:12.320",
+      "end": "00:04:14.320",
+      "en": "Thank you for being a panelist.",
+      "es": "Gracias por ser panelista.",
+      "fr": "Merci d’être panéliste.",
+      "ar": "شكرًا لكونك مشاركًا في اللوحة.",
+      "pt": "Obrigado por seres painelista."
+    }
+  ]
+}
