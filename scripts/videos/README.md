@@ -32,6 +32,9 @@ con los botones bajo el vídeo o con el menú CC del reproductor.
 
 Para corregir una frase: cambia el JSON y repite el paso 5.
 
+**Si ya tienes los subtítulos en .srt** (uno por idioma, mismos tiempos, terminados en _EN/_ES/_FR/_AR/_PT.srt),
+sustituye los pasos 2 a 4 por:  `python -I scripts/videos/srt_to_json.py <id> "<carpeta de los srt>"`
+
 ## Nota técnica
 
 El entorno `C:/Users/fernandezi/tools/whisper-venv` lleva `faster-whisper` 1.2.1 con `av==14.2.0`
