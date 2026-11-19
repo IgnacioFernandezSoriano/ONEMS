@@ -44,3 +44,32 @@ export function parseRoute(url: URL): 'demands' | 'batches' | null {
 export function parseDryRun(url: URL): boolean {
   return url.searchParams.get('dry_run') === 'true'
 }
+
+export const MAX_DEMANDS = 100
+
+export function extractApiKey(headers: Headers): string | null {
+  const direct = headers.get('x-api-key')?.trim()
+  if (direct) return direct
+  const auth = headers.get('authorization')
+  if (auth && /^Bearer\s/i.test(auth)) {
+    const k = auth.replace(/^Bearer\s+/i, '').trim()
+    if (k) return k
+  }
+  return null
+}
+
+// Sampling is (re)run only while the stored batch is still 'validated'. A replayed batch that is
+// 'sampled', 'undone' or 'rejected' just returns its stored summary.
+export function needsSampling(batchStatus: unknown): boolean {
+  return batchStatus === 'validated'
+}
+
+// Stratum ids to sample, taken from the ingest summary (never from the request body).
+export function summaryStratumIds(summary: unknown): string[] {
+  if (!isObj(summary) || !Array.isArray(summary.strata)) return []
+  const out: string[] = []
+  for (const s of summary.strata) {
+    if (isObj(s) && typeof s.stratum_id === 'string') out.push(s.stratum_id)
+  }
+  return out
+}

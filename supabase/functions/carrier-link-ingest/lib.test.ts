@@ -52,3 +52,25 @@ Deno.test('parseDryRun', () => {
   assertEquals(parseDryRun(u('/b')), false)
   assertEquals(parseDryRun(u('/b?dry_run=1')), false)
 })
+
+import { extractApiKey, needsSampling, summaryStratumIds } from './lib.ts'
+
+Deno.test('extractApiKey: x-api-key wins over Bearer', () => {
+  const h = new Headers({ 'x-api-key': ' k1 ', authorization: 'Bearer k2' })
+  assertEquals(extractApiKey(h), 'k1')
+})
+Deno.test('extractApiKey: Bearer fallback, none, empty bearer', () => {
+  assertEquals(extractApiKey(new Headers({ authorization: 'bearer  k2 ' })), 'k2')
+  assertEquals(extractApiKey(new Headers()), null)
+  assertEquals(extractApiKey(new Headers({ authorization: 'Bearer ' })), null)
+  assertEquals(extractApiKey(new Headers({ authorization: 'Basic abc' })), null)
+})
+Deno.test('needsSampling only for validated', () => {
+  assertEquals(needsSampling('validated'), true)
+  for (const s of ['sampled', 'undone', 'rejected', 'received', null, undefined]) assertEquals(needsSampling(s), false)
+})
+Deno.test('summaryStratumIds', () => {
+  assertEquals(summaryStratumIds({ strata: [{ stratum_id: 'a' }, { stratum_id: 'b' }, {}] }), ['a', 'b'])
+  assertEquals(summaryStratumIds(null), [])
+  assertEquals(summaryStratumIds({}), [])
+})
