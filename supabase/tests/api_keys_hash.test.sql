@@ -1,5 +1,5 @@
 -- Claves de API hasheadas (20261120100000_api_keys_hash.sql):
---   backfill de filas antiguas (api_key en claro) -> resuelven por hash; api_key_issue (AM con Edit en e2e_db_api)
+--   filas heredadas (solo hash) resuelven; sin columna api_key (20261120100100); api_key_issue (AM con Edit en e2e_db_api)
 --   devuelve 'onems_...' y no guarda la clave; api_key_resolve respeta is_active y expires_at;
 --   sin rol / otra cuenta / ámbito inválido -> error.
 \set ON_ERROR_STOP on
@@ -40,11 +40,10 @@ INSERT INTO public.account_access (account_id, role, option, level) VALUES
   ('a0000000-0000-0000-0000-000000000001','account_manager','e2e_db_api','edit')
 ON CONFLICT (account_id, role, option) DO UPDATE SET level = EXCLUDED.level;
 
--- Fila antigua (clave en claro, sin hash) y backfill.
-INSERT INTO public.api_keys (id, account_id, api_key)
-VALUES ('b1000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','legacy-key-1');
-SELECT public.api_keys_backfill_hash();
-SELECT public.api_keys_backfill_hash();  -- idempotente
+-- Fila heredada: solo hash (la columna en claro ya no existe).
+INSERT INTO public.api_keys (id, account_id, key_hash, key_prefix, name)
+VALUES ('b1000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001',
+        encode(extensions.digest('legacy-key-1','sha256'),'hex'),'legacy-key-1','Clave legacy-key-1');
 
 SET ROLE service_role;
 SELECT pg_temp.as_user('', 'service_role');
@@ -58,12 +57,17 @@ BEGIN
 END $$;
 RESET ROLE;
 
+-- Retirada del texto en claro.
 DO $$
-DECLARE r record;
 BEGIN
-  SELECT * INTO r FROM public.api_keys WHERE id = 'b1000000-0000-0000-0000-000000000001';
-  PERFORM pg_temp.ok(r.key_prefix = 'legacy-key-1', 'prefix legacy = left(key,12)');
-  PERFORM pg_temp.ok(r.name = 'Clave legacy-key-1', 'name legacy');
+  PERFORM pg_temp.ok(NOT EXISTS (SELECT 1 FROM information_schema.columns
+                                  WHERE table_schema='public' AND table_name='api_keys' AND column_name='api_key'),
+                     'columna api_key eliminada');
+  PERFORM pg_temp.ok(NOT EXISTS (SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+                                  WHERE n.nspname='public' AND p.proname='api_keys_backfill_hash'),
+                     'api_keys_backfill_hash eliminada');
+  PERFORM pg_temp.ok(pg_temp.raises($q$INSERT INTO public.api_keys (account_id, key_hash) VALUES ('a0000000-0000-0000-0000-000000000001', NULL)$q$),
+                     'key_hash NULL falla');
 END $$;
 
 -- Emisión como AM de A1.
@@ -89,7 +93,6 @@ DECLARE i record; r record;
 BEGIN
   SELECT * INTO i FROM issued;
   SELECT * INTO r FROM public.api_keys WHERE id = i.id;
-  PERFORM pg_temp.ok(r.api_key IS NULL, 'api_key NULL');
   PERFORM pg_temp.ok(length(r.key_hash) = 64, 'hash de 64');
   PERFORM pg_temp.ok(r.key_prefix = left(i.api_key, 12), 'prefix');
   PERFORM pg_temp.ok(r.created_by = '93000000-0000-0000-0000-000000000093', 'created_by');
