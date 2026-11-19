@@ -5379,3 +5379,9 @@ roles_access.role.allocation_plan_manager,Allocation Plan Manager
 common.read_only,View only
 roles_access.rights_load_error,Your access rights could not be loaded. Check your connection and try again.
 roles_access.rights_retry,Retry
+menu.carrier_link,Carrier Link
+menu.cl_plans,Sampling plans
+menu.cl_samples,Samples
+menu.cl_reading_points,Reading points
+menu.cl_connectors,Connectors
+menu.cl_monitor,Capture monitor

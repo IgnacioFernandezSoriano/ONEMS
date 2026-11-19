@@ -1,5 +1,5 @@
 // Catálogo de opciones de menú y mapeo ruta -> opción para roles y derechos por cuenta.
-// Las 28 claves coinciden con public.access_option (migración 20261119100000_account_access.sql).
+// Las 33 claves coinciden con public.access_option (migración 20261119100000_account_access.sql).
 
 export type AccessOption =
   | 'dashboard' | 'topology' | 'carriers' | 'panelists' | 'e2e_sla'
@@ -10,6 +10,7 @@ export type AccessOption =
   | 'route_analysis' | 'segment_analysis' | 'epcis_api' | 'rfid_events_db'
   | 'reported_incidents' | 'panelist_availability' | 'receipts'
   | 'users' | 'account_working_days' | 'help_center'
+  | 'cl_plans' | 'cl_samples' | 'cl_reading_points' | 'cl_connectors' | 'cl_monitor'
 
 export type AccessLevel = 'edit' | 'view'
 
@@ -34,6 +35,11 @@ export const ACCESS_OPTIONS: { key: AccessOption; group: string; labelKey: strin
   { key: 'compliance', group: 'e2e_reporting', labelKey: 'menu.compliance' },
   { key: 'e2e_db', group: 'e2e_database', labelKey: 'menu.e2e_db' },
   { key: 'e2e_db_api', group: 'e2e_database', labelKey: 'menu.extract_e2e_db_api' },
+  { key: 'cl_plans', group: 'carrier_link', labelKey: 'menu.cl_plans' },
+  { key: 'cl_samples', group: 'carrier_link', labelKey: 'menu.cl_samples' },
+  { key: 'cl_reading_points', group: 'carrier_link', labelKey: 'menu.cl_reading_points' },
+  { key: 'cl_connectors', group: 'carrier_link', labelKey: 'menu.cl_connectors' },
+  { key: 'cl_monitor', group: 'carrier_link', labelKey: 'menu.cl_monitor' },
   { key: 'postal_centers', group: 'rfid_setup', labelKey: 'menu.postal_centers' },
   { key: 'readers_management', group: 'rfid_setup', labelKey: 'menu.readers_management' },
   { key: 'segment_sla', group: 'rfid_setup', labelKey: 'menu.segment_sla' },
@@ -103,7 +109,8 @@ export const ROUTE_OPTION: Record<string, AccessOption | 'superadmin' | 'open'> 
 }
 
 /** Ruta de entrada de cada opción (para elegir la primera pantalla permitida). */
-const OPTION_ROUTE: Record<AccessOption, string> = {
+// Las opciones cl_* (Carrier Link) no tienen ruta hasta la fase 2.
+const OPTION_ROUTE: Partial<Record<AccessOption, string>> = {
   dashboard: '/dashboard',
   topology: '/topology',
   carriers: '/carriers',
@@ -136,8 +143,8 @@ const OPTION_ROUTE: Record<AccessOption, string> = {
 
 /** Primera ruta permitida siguiendo el orden del menú; null si no hay ninguna. */
 export function firstAllowedPath(levels: Map<AccessOption, AccessLevel>): string | null {
-  const first = ACCESS_OPTIONS.find(o => levels.has(o.key))
-  return first ? OPTION_ROUTE[first.key] : null
+  const first = ACCESS_OPTIONS.find(o => levels.has(o.key) && OPTION_ROUTE[o.key])
+  return first ? OPTION_ROUTE[first.key] ?? null : null
 }
 
 /** True mientras los derechos cargados no correspondan a la clave (usuario+cuenta) actual. key null = nada que cargar. */

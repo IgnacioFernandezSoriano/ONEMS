@@ -5379,3 +5379,9 @@ roles_access.role.allocation_plan_manager,Allocation Plan Manager
 common.read_only,Solo consulta
 roles_access.rights_load_error,No se pudieron cargar tus derechos de acceso. Revisa tu conexión e inténtalo de nuevo.
 roles_access.rights_retry,Reintentar
+menu.carrier_link,Carrier Link
+menu.cl_plans,Planes de muestreo
+menu.cl_samples,Muestras
+menu.cl_reading_points,Puntos de lectura
+menu.cl_connectors,Conectores
+menu.cl_monitor,Monitor de capturas

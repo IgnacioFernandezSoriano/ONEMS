@@ -17,13 +17,19 @@ describe('access', () => {
     expect(missing).toEqual([])
   })
 
-  it('el catálogo tiene 28 opciones únicas y las rutas apuntan a opciones válidas', () => {
+  it('el catálogo tiene 33 opciones únicas y las rutas apuntan a opciones válidas', () => {
     const keys = new Set<string>(ACCESS_OPTIONS.map(o => o.key))
-    expect(ACCESS_OPTIONS.length).toBe(28)
-    expect(keys.size).toBe(28)
+    expect(ACCESS_OPTIONS.length).toBe(33)
+    expect(keys.size).toBe(33)
     for (const v of Object.values(ROUTE_OPTION)) {
       expect(v === 'open' || v === 'superadmin' || keys.has(v)).toBe(true)
     }
+  })
+
+  it('ninguna opción cl_* tiene ruta (fase 2)', () => {
+    const cl = ACCESS_OPTIONS.filter(o => o.key.startsWith('cl_')).map(o => o.key)
+    expect(cl.length).toBe(5)
+    for (const v of Object.values(ROUTE_OPTION)) expect(cl).not.toContain(v)
   })
 
   it('firstAllowedPath: solo reporting -> territory-equity', () => {
@@ -63,7 +69,7 @@ describe('access', () => {
   })
 
   it('cada opción entra por una ruta que exige esa misma opción', () => {
-    for (const o of ACCESS_OPTIONS) {
+    for (const o of ACCESS_OPTIONS.filter(x => !x.key.startsWith('cl_'))) {
       const path = firstAllowedPath(new Map<AccessOption, AccessLevel>([[o.key, 'view']]))!
       expect([o.key, routeAccess(path)]).toEqual([o.key, o.key])
     }
