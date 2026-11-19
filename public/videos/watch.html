@@ -30,7 +30,8 @@
     var el = document.getElementById('player');
     el.setAttribute('data-onems-video', q.get('v') || '');
     var titles = {
-      'panelist-registration': 'ONE · Panelist registration'
+      'panelist-registration': 'ONE · Panelist registration',
+      'roles-access': 'ONEMS · Roles and access'
     };
     var t = titles[q.get('v')];
     if (t) { document.title = t; document.getElementById('title').textContent = t; }

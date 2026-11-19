@@ -1,0 +1,198 @@
+WEBVTT
+
+1
+00:00:00.650 --> 00:00:03.210
+Roles and access dans ONEMS.
+
+2
+00:00:04.150 --> 00:00:06.720
+Ce que chaque personne voit et ce qu'elle
+peut faire
+
+3
+00:00:06.770 --> 00:00:09.590
+dépend de ses rôles dans le compte de son
+pays.
+
+4
+00:00:09.740 --> 00:00:11.090
+Voici comment cela fonctionne.
+
+5
+00:00:12.730 --> 00:00:15.630
+Chaque compte possède les six mêmes rôles.
+
+6
+00:00:15.880 --> 00:00:19.770
+L'Account Manager dirige le compte et
+décide des accès de l'équipe.
+
+7
+00:00:20.210 --> 00:00:23.510
+L'Allocation Plan Manager prépare les
+plans d'expédition.
+
+8
+00:00:23.740 --> 00:00:28.410
+Le Panelist Manager s'occupe des
+panélistes, de leurs incidents et de leur
+disponibilité.
+
+9
+00:00:29.130 --> 00:00:31.550
+Le Materials Supplier gère le matériel.
+
+10
+00:00:31.600 --> 00:00:35.330
+Le DO coordinator gère la partie RFID.
+
+11
+00:00:35.550 --> 00:00:39.090
+Et l'UPU account manager suit le compte
+pour l'UPU.
+
+12
+00:00:40.850 --> 00:00:44.610
+Pour chaque option du menu, un rôle donne
+l'un des trois droits.
+
+13
+00:00:44.700 --> 00:00:47.930
+Edit : vous voyez l'écran et vous pouvez
+modifier les données.
+
+14
+00:00:48.170 --> 00:00:51.000
+View : vous voyez l'écran, mais les
+boutons créer, enregistrer
+
+15
+00:00:51.050 --> 00:00:55.370
+et supprimer sont masqués, et un badge
+View only apparaît.
+
+16
+00:00:55.670 --> 00:00:59.050
+Ou aucun accès : l'option n'apparaît pas
+dans le menu.
+
+17
+00:00:59.480 --> 00:01:02.730
+Si vous avez plusieurs rôles, le droit le
+plus élevé l'emporte.
+
+18
+00:01:02.810 --> 00:01:06.780
+Par exemple, le Panelist Manager a le
+droit View sur Stock Management,
+
+19
+00:01:06.830 --> 00:01:09.220
+et le Materials Supplier a le droit Edit.
+
+20
+00:01:09.270 --> 00:01:11.770
+Avec les deux rôles, vous avez Edit.
+
+21
+00:01:12.230 --> 00:01:16.350
+Et un utilisateur sans rôle ne voit que
+les écrans de rapports et le Help centre.
+
+22
+00:01:18.170 --> 00:01:23.210
+S'il manque une option de menu, ou si vous
+avez besoin de Edit là où vous n'avez que
+View,
+
+23
+00:01:23.340 --> 00:01:27.730
+demandez au Account Manager ou au UPU
+account manager de votre compte.
+
+24
+00:01:27.920 --> 00:01:30.410
+Eux seuls peuvent modifier ses rôles et
+droits.
+
+25
+00:01:30.730 --> 00:01:32.540
+La modification est enregistrée
+immédiatement.
+
+26
+00:01:32.590 --> 00:01:35.170
+Rechargez la page pour voir votre menu mis
+à jour.
+
+27
+00:01:36.730 --> 00:01:40.540
+Les Account Managers et les UPU account
+managers utilisent l'onglet
+
+28
+00:01:40.590 --> 00:01:43.090
+Administration, Roles and access.
+
+29
+00:01:43.680 --> 00:01:48.110
+Dans Account contacts, saisissez les
+e-mails qui reçoivent les notifications
+automatiques.
+
+30
+00:01:48.320 --> 00:01:50.490
+Un contact ne donne pas accès à ONEMS.
+
+31
+00:01:51.670 --> 00:01:57.390
+Dans Rights of each role, choisissez Edit,
+View ou aucun accès pour chaque option de
+menu.
+
+32
+00:01:57.710 --> 00:01:59.250
+Il n'y a pas de bouton d'enregistrement :
+
+33
+00:01:59.400 --> 00:02:01.010
+la modification est enregistrée
+immédiatement.
+
+34
+00:02:01.480 --> 00:02:05.950
+Dans Users and their roles, cochez ou
+décochez un rôle pour chaque utilisateur.
+
+35
+00:02:06.190 --> 00:02:08.880
+Vérifiez tout rôle marqué Provisional :
+
+36
+00:02:08.930 --> 00:02:12.150
+confirmez-le, ou remplacez-le par le bon.
+
+37
+00:02:12.500 --> 00:02:15.710
+Back to template annule toutes les
+modifications des droits.
+
+38
+00:02:15.980 --> 00:02:19.630
+Et Latest changes montre qui a modifié
+quoi, et quand.
+
+39
+00:02:21.090 --> 00:02:25.130
+Chaque compte conserve ses propres droits,
+contacts et rôles.
+
+40
+00:02:25.330 --> 00:02:28.130
+Une modification du vôtre n'affecte pas
+les autres pays.
+
+41
+00:02:28.540 --> 00:02:32.350
+Pour le guide complet, ouvrez Roles and
+access dans le Help centre.
