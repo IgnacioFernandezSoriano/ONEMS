@@ -54,7 +54,12 @@ INSERT INTO public.postal_centers (id, account_id, code, name, city, city_id) VA
 INSERT INTO public.readers (id, account_id, postal_center_id, name, type, capture_source, carrier_id, carrier_place_ref, carrier_mode_ref, e2e_role) VALUES
   ('ad000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','d1000000-0000-0000-0000-0000000000c1','NBO ADM','Entry','carrier_scan','ca000000-0000-0000-0000-000000000001','NBO','ADM','origin'),
   ('ad000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','d1000000-0000-0000-0000-0000000000c1','NBO any','Entry','carrier_scan','ca000000-0000-0000-0000-000000000001','NBO',NULL,'none'),
-  ('ad000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','d2000000-0000-0000-0000-0000000000c2','MBA any','Exit','carrier_scan','ca000000-0000-0000-0000-000000000001','MBA',NULL,'destination');
+  ('ad000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','d2000000-0000-0000-0000-0000000000c2','MBA any','Exit','carrier_scan','ca000000-0000-0000-0000-000000000001','MBA',NULL,'destination'),
+  -- KSM: "cualquier modo" de origen y un punto especifico intermedio (D4: el especifico manda).
+  ('ad000000-0000-0000-0000-000000000004','a0000000-0000-0000-0000-000000000001','d1000000-0000-0000-0000-0000000000c1','KSM any','Entry','carrier_scan','ca000000-0000-0000-0000-000000000001','KSM',NULL,'origin'),
+  ('ad000000-0000-0000-0000-000000000005','a0000000-0000-0000-0000-000000000001','d1000000-0000-0000-0000-0000000000c1','KSM SRT','Entry','carrier_scan','ca000000-0000-0000-0000-000000000001','KSM','SRT','none'),
+  -- NBO BTH: punto de inicio y fin (ruta intraurbana City1 -> City1).
+  ('ad000000-0000-0000-0000-000000000006','a0000000-0000-0000-0000-000000000001','d1000000-0000-0000-0000-0000000000c1','NBO BTH','Entry','carrier_scan','ca000000-0000-0000-0000-000000000001','NBO','BTH','both');
 INSERT INTO public.cl_feeds (id, account_id, carrier_id, name, status) VALUES
   ('f0000000-0000-0000-0000-0000000000a1','a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000001','Feed A1','active'),
   ('f0000000-0000-0000-0000-0000000000a2','a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000001','Feed A2','active');
@@ -71,8 +76,10 @@ INSERT INTO public.cl_extra_fields (account_id, carrier_id, carrier_field) VALUE
 INSERT INTO public.cl_plans (id, account_id, plan_name, carrier_id, product_id, total_samples, start_date, end_date, status, feed_id) VALUES
   ('90000000-0000-0000-0000-0000000000a1','a0000000-0000-0000-0000-000000000001','P1','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',2,'2026-10-19','2026-10-25','active','f0000000-0000-0000-0000-0000000000a1');
 INSERT INTO public.cl_plan_quotas (id, account_id, plan_id, origin_city_id, destination_city_id, iso_year, iso_week, period_start, period_end, samples_planned) VALUES
-  ('91000000-0000-0000-0000-0000000000b1','a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-0000000000a1','c1000000-0000-0000-0000-000000000001','c2000000-0000-0000-0000-000000000002',2026,43,'2026-10-19','2026-10-25',2);
-SELECT set_config('t.demand', public.cl_build_demand('90000000-0000-0000-0000-0000000000a1', ARRAY['91000000-0000-0000-0000-0000000000b1']::uuid[])::text, true);
+  ('91000000-0000-0000-0000-0000000000b1','a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-0000000000a1','c1000000-0000-0000-0000-000000000001','c2000000-0000-0000-0000-000000000002',2026,43,'2026-10-19','2026-10-25',2),
+  ('91000000-0000-0000-0000-0000000000b2','a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-0000000000a1','c1000000-0000-0000-0000-000000000001','c1000000-0000-0000-0000-000000000001',2026,43,'2026-10-19','2026-10-25',2);
+SELECT set_config('t.demand', public.cl_build_demand('90000000-0000-0000-0000-0000000000a1',
+  ARRAY['91000000-0000-0000-0000-0000000000b1','91000000-0000-0000-0000-0000000000b2']::uuid[])::text, true);
 
 -- 1. Permisos.
 DO $$
@@ -220,6 +227,70 @@ BEGIN
   PERFORM pg_temp.ok(public.cl_ingest_batch('f0000000-0000-0000-0000-0000000000a1', pg_temp.mk('B-METHOD', pg_temp.rows_main(), 'first_n')) = r, 'rechazo idempotente');
 END $$;
 
+-- 8b. Precedencia D4, lugar con espacios, hora mala, campo ausente, valores enormes y extras no escalares.
+DO $$
+DECLARE r jsonb; s jsonb; v_batch uuid;
+BEGIN
+  r := public.cl_ingest_batch('f0000000-0000-0000-0000-0000000000a1', pg_temp.mk('B-MISC', jsonb_build_array(
+         pg_temp.rd('C1', 'EXP', '21/10/2026 08:00', 'NBO', 'ADM') || jsonb_build_object('weight', jsonb_build_object('a', 1)),
+         pg_temp.rd('C1', 'EXP', '22/10/2026 08:00', 'MBA ', 'DLV') || jsonb_build_object('weight', repeat('w', 501)),
+         pg_temp.rd('C2', 'EXP', 'garbage',          'NBO', 'ADM'),
+         pg_temp.rd('C2', 'EXP', '22/10/2026 08:00', 'MBA', 'DLV'),
+         pg_temp.rd('C3', 'EXP', '21/10/2026 08:00', 'NBO', 'ADM'),
+         pg_temp.rd('C3', 'EXP', NULL,               'MBA', 'DLV'),
+         pg_temp.rd(repeat('X', 201), 'EXP', '21/10/2026 08:00', 'NBO', 'ADM'),
+         pg_temp.rd('C5', 'EXP', '21/10/2026 08:00', 'NBO', 'ADM'),
+         pg_temp.rd('C5', 'EXP', '22/10/2026 08:00', repeat('P', 201), 'DLV'),
+         pg_temp.rd('C7', 'EXP', '21/10/2026 08:00', 'KSM', 'SRT'),
+         pg_temp.rd('C7', 'EXP', '22/10/2026 08:00', 'MBA', 'DLV'),
+         pg_temp.rd('C8', 'EXP', '21/10/2026 08:00', 'KSM', 'ANY'),
+         pg_temp.rd('C8', 'EXP', '22/10/2026 08:00', 'MBA', 'DLV'))));
+  v_batch := (r->>'batch')::uuid;
+  s := r->'strata'->0;
+  PERFORM pg_temp.ok((s->>'candidates')::int = 6 AND (s->>'candidates_valid')::int = 2, 'C1 y C8 validos de 6: ' || s::text);
+  PERFORM pg_temp.ok(s->'rejected' = '{"no_start":2,"no_end":2}'::jsonb, 'motivos B-MISC: ' || (s->'rejected')::text);
+  PERFORM pg_temp.ok(s->'rows_rejected' = '{"bad_timestamp":1,"missing_field":1,"bad_value":2}'::jsonb, 'filas B-MISC: ' || (s->'rows_rejected')::text);
+  PERFORM pg_temp.ok((SELECT reader_id FROM public.cl_batch_scans WHERE batch_id = v_batch AND item_id = 'C1' AND place_ref = 'MBA')
+                     = 'ad000000-0000-0000-0000-000000000003', 'lugar con espacio final recortado y resuelto');
+  PERFORM pg_temp.ok((SELECT bool_and(status = 'valid' AND extra IS NULL) FROM public.cl_batch_scans WHERE batch_id = v_batch AND item_id = 'C1'),
+                     'extras no escalares o largos descartados, fila conservada');
+  PERFORM pg_temp.ok((SELECT reject_reason FROM public.cl_batch_scans WHERE batch_id = v_batch AND item_id = 'C2' AND place_ref = 'NBO') = 'bad_timestamp', 'bad_timestamp');
+  PERFORM pg_temp.ok((SELECT reject_reason FROM public.cl_batch_scans WHERE batch_id = v_batch AND item_id = 'C3' AND place_ref = 'MBA') = 'missing_field', 'missing_field');
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_batch_scans WHERE batch_id = v_batch AND item_id IS NULL AND reject_reason = 'bad_value') = 1, 'item_id enorme: bad_value sin valor');
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_batch_scans WHERE batch_id = v_batch AND item_id = 'C5' AND place_ref IS NULL AND reject_reason = 'bad_value') = 1, 'place_ref enorme: bad_value sin valor');
+  PERFORM pg_temp.ok((SELECT reader_id FROM public.cl_batch_scans WHERE batch_id = v_batch AND item_id = 'C7' AND place_ref = 'KSM')
+                     = 'ad000000-0000-0000-0000-000000000005', 'KSM SRT -> punto especifico intermedio');
+  PERFORM pg_temp.ok((SELECT bool_and(reject_reason = 'no_start') FROM public.cl_batch_scans WHERE batch_id = v_batch AND item_id = 'C7'),
+                     'el punto especifico intermedio no cuenta como inicio por el cualquier-modo de origen');
+  PERFORM pg_temp.ok((SELECT bool_and(status = 'valid') FROM public.cl_batch_scans WHERE batch_id = v_batch AND item_id = 'C8'), 'KSM otro modo -> origen');
+  PERFORM pg_temp.ok(NOT EXISTS (SELECT 1 FROM public.cl_batch_scans WHERE length(item_id) > 200 OR length(place_ref) > 200), 'nada enorme guardado');
+END $$;
+
+-- 8c. Una sola lectura no es inicio y fin a la vez (punto both, ruta City1 -> City1).
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.cl_ingest_batch('f0000000-0000-0000-0000-0000000000a1', pg_temp.mk('B-BOTH', jsonb_build_array(
+         pg_temp.rd('S1', 'EXP', '21/10/2026 08:00', 'NBO', 'BTH'),
+         pg_temp.rd('S2', 'EXP', '21/10/2026 08:00', 'NBO', 'BTH'),
+         pg_temp.rd('S2', 'EXP', '21/10/2026 10:00', 'NBO', 'BTH')), p_stratum => '91000000-0000-0000-0000-0000000000b2'));
+  PERFORM pg_temp.ok((r->'strata'->0->>'candidates_valid')::int = 1, 'S2 valido: ' || r::text);
+  PERFORM pg_temp.ok(r->'strata'->0->'rejected' = '{"same_reading":1}'::jsonb, 'S1 same_reading');
+END $$;
+
+-- 8d. Conector pausado: ni lote ni prueba; testing acepta.
+DO $$
+BEGIN
+  UPDATE public.cl_feeds SET status = 'paused' WHERE id = 'f0000000-0000-0000-0000-0000000000a1';
+  PERFORM pg_temp.ok(pg_temp.errmsg_of(format('SELECT public.cl_ingest_batch(%L, %L::jsonb)', 'f0000000-0000-0000-0000-0000000000a1',
+                     pg_temp.mk('B-P', pg_temp.rows_main()))) LIKE 'CL_FEED_PAUSED%', 'pausado rechaza el lote');
+  PERFORM pg_temp.ok(pg_temp.sqlstate_of(format('SELECT public.cl_ingest_batch(%L, %L::jsonb, true)', 'f0000000-0000-0000-0000-0000000000a1',
+                     pg_temp.mk('B-P', pg_temp.rows_main()))) = '22023', 'pausado rechaza el dry_run');
+  UPDATE public.cl_feeds SET status = 'testing' WHERE id = 'f0000000-0000-0000-0000-0000000000a1';
+  PERFORM pg_temp.ok(public.cl_ingest_batch('f0000000-0000-0000-0000-0000000000a1', pg_temp.mk('B-P', pg_temp.rows_main()), true) ? 'strata', 'testing acepta');
+  UPDATE public.cl_feeds SET status = 'active' WHERE id = 'f0000000-0000-0000-0000-0000000000a1';
+END $$;
+
 -- 9. Errores: otro conector, demanda inexistente, estrato ajeno, tamano, demanda cerrada.
 DO $$
 DECLARE v_big jsonb;
@@ -230,9 +301,11 @@ BEGIN
                      pg_temp.mk('B-X', pg_temp.rows_main()) || '{"demand_id":"not-a-uuid"}')) LIKE 'CL_DEMAND_NOT_OPEN%', 'demand_id invalido');
   PERFORM pg_temp.ok(pg_temp.sqlstate_of(format('SELECT public.cl_ingest_batch(%L, %L::jsonb)', 'f0000000-0000-0000-0000-0000000000a1',
                      pg_temp.mk('B-X', pg_temp.rows_main(), p_stratum => '91000000-0000-0000-0000-0000000000ff'))) = '22023', 'estrato ajeno a la demanda');
-  SELECT jsonb_agg(pg_temp.rd('T' || g, 'EXP', '21/10/2026 08:00', 'NBO', 'ADM')) INTO v_big FROM generate_series(1, 20001) g;
+  SELECT jsonb_agg(pg_temp.rd('T' || g, 'EXP', '21/10/2026 08:00', 'NBO', 'ADM')) INTO v_big FROM generate_series(1, 5001) g;
+  PERFORM pg_temp.ok(pg_temp.errmsg_of(format('SELECT public.cl_ingest_batch(%L, %L::jsonb)', 'f0000000-0000-0000-0000-0000000000a1',
+                     pg_temp.mk('B-BIG', v_big))) LIKE 'CL_TOO_MANY_ROWS%', 'mas de 5000 filas');
   PERFORM pg_temp.ok(pg_temp.sqlstate_of(format('SELECT public.cl_ingest_batch(%L, %L::jsonb)', 'f0000000-0000-0000-0000-0000000000a1',
-                     pg_temp.mk('B-BIG', v_big))) = '22023', 'mas de 20000 filas');
+                     pg_temp.mk('B-BIG', v_big))) = '22023', 'mas de 5000 filas: 22023');
   PERFORM pg_temp.ok(NOT EXISTS (SELECT 1 FROM public.cl_batches WHERE connector_batch_id IN ('B-X','B-BIG')), 'nada escrito en errores');
 
   UPDATE public.cl_demands SET status = 'fulfilled';

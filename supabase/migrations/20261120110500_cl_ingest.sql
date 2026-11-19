@@ -5,6 +5,8 @@
 -- Datos personales (R19): solo se conservan los campos mapeados (cl_field_mappings) y los permitidos
 -- (cl_extra_fields). El resto se descarta antes de tocar cualquier tabla, incluido raw_payload, que guarda el lote
 -- ya filtrado (para trazar valores originales, p. ej. una hora mal formada) y nunca el cuerpo recibido tal cual.
+-- Limites: maximo 5000 lecturas por lote; item_id / place_ref / mode_ref de mas de 200 caracteres -> lectura
+-- rechazada (bad_value) y guardada sin ese valor; un campo adicional solo se guarda si es escalar y <= 500 caracteres.
 
 -- Campos permitidos de cada lectura (Task 8 los copia a cl_samples.extra).
 ALTER TABLE public.cl_batch_scans ADD COLUMN extra jsonb;
@@ -40,7 +42,9 @@ CREATE OR REPLACE FUNCTION public.cl_ingest_batch(p_feed_id uuid, p_payload json
 AS $$
 DECLARE
   c_method   constant text := 'uniform_random_within_stratum';
-  c_max_rows constant integer := 20000;
+  c_max_rows constant integer := 5000;     -- margen frente al statement timeout de la instancia
+  c_max_id   constant integer := 200;      -- item_id / place_ref / mode_ref (limite de fila del indice btree)
+  c_max_extra constant integer := 500;     -- valor de un campo adicional
   v_dry      boolean := COALESCE(p_dry_run, false);
   v_demand   public.cl_demands;
   v_feed     public.cl_feeds;
@@ -60,6 +64,7 @@ DECLARE
   v_acc_tz   text;
   v_extra    text[];
   v_allowed  text[];
+  v_mapped   text[];
   v_st       record;
   v_denom    bigint;
   v_rej      bigint;
@@ -76,6 +81,12 @@ BEGIN
   v_cbatch := p_payload->>'batch_id';   -- se guarda tal cual
   IF v_cbatch IS NULL OR btrim(v_cbatch) = '' OR length(v_cbatch) > 200 THEN
     RAISE EXCEPTION 'CL_BAD_PAYLOAD: batch_id is required (max 200 characters)' USING ERRCODE = '22023';
+  END IF;
+
+  -- 0. Conector pausado: no acepta lotes (ni de prueba).
+  SELECT f.* INTO v_feed FROM public.cl_feeds f WHERE f.id = p_feed_id;
+  IF FOUND AND v_feed.status = 'paused' THEN
+    RAISE EXCEPTION 'CL_FEED_PAUSED: the connector is paused' USING ERRCODE = '22023';
   END IF;
 
   -- 1. La demanda tiene que ser del conector autenticado (p_feed_id viene de la clave, nunca del cuerpo).
@@ -97,7 +108,6 @@ BEGIN
     RAISE EXCEPTION 'CL_DEMAND_NOT_OPEN: demand is %', v_demand.status USING ERRCODE = 'P0001';
   END IF;
 
-  SELECT f.* INTO v_feed FROM public.cl_feeds f WHERE f.id = p_feed_id;
   SELECT p.* INTO v_plan FROM public.cl_plans p WHERE p.id = v_demand.plan_id;
   IF v_feed.carrier_id IS DISTINCT FROM v_plan.carrier_id THEN
     RAISE EXCEPTION 'CL_FEED_CARRIER_MISMATCH: connector and plan use different carriers' USING ERRCODE = '22023';
@@ -170,7 +180,8 @@ BEGIN
   SELECT COALESCE(array_agg(x.carrier_field), ARRAY[]::text[]) INTO v_extra
     FROM public.cl_extra_fields x
    WHERE x.account_id = v_plan.account_id AND x.carrier_id = v_plan.carrier_id;
-  v_allowed := array_remove(ARRAY[f_item, f_product, f_scan, f_place, f_mode], NULL) || v_extra;
+  v_mapped := array_remove(ARRAY[f_item, f_product, f_scan, f_place, f_mode], NULL);
+  v_allowed := v_mapped || v_extra;
 
   -- Zonas: lecturas sin desfase -> zona del mapeo (si es valida) o de la cuenta; fecha local del fin -> cuenta.
   v_acc_tz := COALESCE((SELECT a.timezone FROM public.accounts a
@@ -197,6 +208,7 @@ BEGIN
     product_id  uuid,
     scan_at     timestamptz,
     reader_id   uuid,
+    resolved_mode text,    -- modo del punto resuelto por D4 (NULL = punto "cualquier modo")
     is_start    boolean NOT NULL DEFAULT false,
     is_end      boolean NOT NULL DEFAULT false,
     row_reason  text,      -- motivo propio de la lectura
@@ -205,7 +217,9 @@ BEGIN
   CREATE TEMP TABLE cl_ingest_cands (
     stratum_id  uuid NOT NULL,
     item_id     text NOT NULL,
+    start_r_ord bigint,
     start_at    timestamptz,
+    n_end       bigint NOT NULL DEFAULT 0,
     end_at      timestamptz,
     unknown_product  boolean NOT NULL,
     product_mismatch boolean NOT NULL,
@@ -215,13 +229,18 @@ BEGIN
   INSERT INTO pg_temp.cl_ingest_rows (s_ord, r_ord, stratum_id, is_obj, row_obj, extra, item_id, product_raw, scan_raw, place_ref, mode_ref)
   SELECT s.o, r.o, (s.e->>'stratum_id')::uuid, jsonb_typeof(r.v) = 'object',
          CASE WHEN jsonb_typeof(r.v) = 'object' THEN
-           (SELECT jsonb_object_agg(j.key, j.value) FROM jsonb_each(r.v) j WHERE j.key = ANY (v_allowed)) END,
+           (SELECT jsonb_object_agg(j.key, j.value) FROM jsonb_each(r.v) j
+             WHERE j.key = ANY (v_allowed)
+               AND (j.key = ANY (v_mapped)
+                    OR (jsonb_typeof(j.value) IN ('string','number','boolean') AND length(j.value #>> '{}') <= c_max_extra))) END,
          CASE WHEN jsonb_typeof(r.v) = 'object' THEN
-           (SELECT jsonb_object_agg(j.key, j.value) FROM jsonb_each(r.v) j WHERE j.key = ANY (v_extra)) END,
+           (SELECT jsonb_object_agg(j.key, j.value) FROM jsonb_each(r.v) j
+             WHERE j.key = ANY (v_extra)
+               AND jsonb_typeof(j.value) IN ('string','number','boolean') AND length(j.value #>> '{}') <= c_max_extra) END,
          CASE WHEN jsonb_typeof(r.v) = 'object' THEN r.v->>f_item END,
          CASE WHEN jsonb_typeof(r.v) = 'object' AND f_product IS NOT NULL THEN r.v->>f_product END,
          CASE WHEN jsonb_typeof(r.v) = 'object' THEN r.v->>f_scan END,
-         CASE WHEN jsonb_typeof(r.v) = 'object' THEN r.v->>f_place END,
+         CASE WHEN jsonb_typeof(r.v) = 'object' THEN NULLIF(btrim(r.v->>f_place), '') END,
          CASE WHEN jsonb_typeof(r.v) = 'object' AND f_mode IS NOT NULL THEN NULLIF(btrim(r.v->>f_mode), '') END
     FROM jsonb_array_elements(v_strata) WITH ORDINALITY s(e, o)
    CROSS JOIN LATERAL jsonb_array_elements(s.e->'rows') WITH ORDINALITY r(v, o);
@@ -245,8 +264,10 @@ BEGIN
   END IF;
 
   -- 5. Punto de lectura (D4): lugar + modo exacto; si no, el punto "cualquier modo" del lugar.
-  UPDATE pg_temp.cl_ingest_rows t SET reader_id = (
-    SELECT r.id FROM public.readers r
+  --    Solo puntos vivos: una lectura en un punto borrado o desactivado despues de emitir la demanda queda
+  --    unknown_reading_point aunque el punto este en la foto de la demanda (aceptado en la fase 1).
+  UPDATE pg_temp.cl_ingest_rows t SET (reader_id, resolved_mode) = (
+    SELECT r.id, r.carrier_mode_ref FROM public.readers r
      WHERE r.account_id = v_plan.account_id
        AND r.capture_source = 'carrier_scan'
        AND r.carrier_id = v_plan.carrier_id
@@ -256,7 +277,7 @@ BEGIN
        AND (r.carrier_mode_ref = t.mode_ref OR r.carrier_mode_ref IS NULL)
      ORDER BY (r.carrier_mode_ref IS NULL), r.id
      LIMIT 1)
-   WHERE t.place_ref IS NOT NULL;
+   WHERE t.place_ref IS NOT NULL AND length(t.place_ref) <= c_max_id;
 
   -- 6. Motivo por lectura.
   UPDATE pg_temp.cl_ingest_rows t SET row_reason = CASE
@@ -265,32 +286,49 @@ BEGIN
         OR t.scan_raw IS NULL OR btrim(t.scan_raw) = ''
         OR t.place_ref IS NULL OR btrim(t.place_ref) = ''
         OR (f_product IS NOT NULL AND (t.product_raw IS NULL OR btrim(t.product_raw) = '')) THEN 'missing_field'
+      WHEN length(t.item_id) > c_max_id OR length(t.place_ref) > c_max_id OR length(t.mode_ref) > c_max_id THEN 'bad_value'
       WHEN t.scan_at IS NULL   THEN 'bad_timestamp'
       WHEN t.product_id IS NULL THEN 'unknown_product'
       WHEN t.reader_id IS NULL THEN 'unknown_reading_point'
     END;
 
-  -- Inicio / fin contra la foto de la demanda (D13): punto con el mismo lugar y el mismo modo o sin modo.
+  -- Inicio / fin contra la foto de la demanda (D13), con la precedencia de D4: cuenta el punto al que se resolvio
+  -- la lectura (mismo lugar y mismo modo del punto resuelto). Asi una lectura en un punto especifico intermedio no
+  -- cuenta como inicio por un punto "cualquier modo" del mismo lugar.
   UPDATE pg_temp.cl_ingest_rows t
      SET is_start = EXISTS (SELECT 1 FROM jsonb_array_elements(sn.d->'start_points') p
                              WHERE p->>'place_ref' = t.place_ref
-                               AND (p->>'mode_ref' IS NULL OR p->>'mode_ref' = t.mode_ref)),
+                               AND (p->>'mode_ref') IS NOT DISTINCT FROM t.resolved_mode),
          is_end   = EXISTS (SELECT 1 FROM jsonb_array_elements(sn.d->'end_points') p
                              WHERE p->>'place_ref' = t.place_ref
-                               AND (p->>'mode_ref' IS NULL OR p->>'mode_ref' = t.mode_ref))
+                               AND (p->>'mode_ref') IS NOT DISTINCT FROM t.resolved_mode)
     FROM jsonb_array_elements(v_demand.payload->'strata') sn(d)
    WHERE sn.d->>'stratum_id' = t.stratum_id::text AND t.row_reason IS NULL;
 
-  -- 7. Candidatos por estrato e item_id (D5): inicio = primera lectura de inicio; fin = ultima de fin.
-  INSERT INTO pg_temp.cl_ingest_cands (stratum_id, item_id, start_at, end_at, unknown_product, product_mismatch)
+  -- 7. Candidatos por estrato e item_id (D5): inicio = primera lectura de inicio; fin = ultima lectura de fin que no
+  --    sea la misma lectura que el inicio (una sola lectura en un punto 'both' no hace un envio: same_reading).
+  CREATE INDEX ON pg_temp.cl_ingest_rows (stratum_id, item_id);
+  INSERT INTO pg_temp.cl_ingest_cands (stratum_id, item_id, unknown_product, product_mismatch)
   SELECT t.stratum_id, t.item_id,
-         min(t.scan_at) FILTER (WHERE t.row_reason IS NULL AND t.is_start),
-         max(t.scan_at) FILTER (WHERE t.row_reason IS NULL AND t.is_end),
          COALESCE(bool_or(t.row_reason = 'unknown_product'), false),
          COALESCE(bool_or(t.row_reason IS NULL AND t.product_id <> v_plan.product_id), false)
     FROM pg_temp.cl_ingest_rows t
-   WHERE t.item_id IS NOT NULL AND btrim(t.item_id) <> ''
+   WHERE t.item_id IS NOT NULL AND btrim(t.item_id) <> '' AND length(t.item_id) <= c_max_id
    GROUP BY t.stratum_id, t.item_id;
+
+  UPDATE pg_temp.cl_ingest_cands c SET start_r_ord = x.r_ord, start_at = x.scan_at
+    FROM (SELECT DISTINCT ON (t.stratum_id, t.item_id) t.stratum_id, t.item_id, t.r_ord, t.scan_at
+            FROM pg_temp.cl_ingest_rows t
+           WHERE t.row_reason IS NULL AND t.is_start
+           ORDER BY t.stratum_id, t.item_id, t.scan_at, t.r_ord) x
+   WHERE x.stratum_id = c.stratum_id AND x.item_id = c.item_id;
+
+  UPDATE pg_temp.cl_ingest_cands c SET
+         n_end  = (SELECT count(*) FROM pg_temp.cl_ingest_rows t
+                    WHERE t.stratum_id = c.stratum_id AND t.item_id = c.item_id AND t.row_reason IS NULL AND t.is_end),
+         end_at = (SELECT max(t.scan_at) FROM pg_temp.cl_ingest_rows t
+                    WHERE t.stratum_id = c.stratum_id AND t.item_id = c.item_id AND t.row_reason IS NULL AND t.is_end
+                      AND t.r_ord IS DISTINCT FROM c.start_r_ord);
 
   UPDATE pg_temp.cl_ingest_cands c SET reason = CASE
       WHEN EXISTS (SELECT 1 FROM public.cl_samples sm
@@ -299,6 +337,7 @@ BEGIN
       WHEN c.unknown_product  THEN 'unknown_product'
       WHEN c.product_mismatch THEN 'product_mismatch'
       WHEN c.start_at IS NULL THEN 'no_start'
+      WHEN c.end_at IS NULL AND c.n_end > 0 THEN 'same_reading'
       WHEN c.end_at IS NULL   THEN 'no_end'
       WHEN c.start_at > c.end_at THEN 'start_after_end'
       WHEN (c.end_at AT TIME ZONE v_acc_tz)::date NOT BETWEEN (sn.d->'period'->>'start')::date
@@ -360,7 +399,10 @@ BEGIN
 
   INSERT INTO public.cl_batch_scans (account_id, batch_id, stratum_id, item_id, product_id, scan_at, place_ref, mode_ref,
                                      reader_id, status, reject_reason, extra)
-  SELECT v_plan.account_id, v_batch, t.stratum_id, t.item_id, t.product_id, t.scan_at, t.place_ref, t.mode_ref,
+  SELECT v_plan.account_id, v_batch, t.stratum_id,
+         CASE WHEN length(t.item_id) > c_max_id THEN NULL ELSE t.item_id END, t.product_id, t.scan_at,
+         CASE WHEN length(t.place_ref) > c_max_id THEN NULL ELSE t.place_ref END,
+         CASE WHEN length(t.mode_ref) > c_max_id THEN NULL ELSE t.mode_ref END,
          t.reader_id, CASE WHEN t.reject_reason IS NULL THEN 'valid' ELSE 'rejected' END, t.reject_reason, t.extra
     FROM pg_temp.cl_ingest_rows t
    ORDER BY t.s_ord, t.r_ord;
