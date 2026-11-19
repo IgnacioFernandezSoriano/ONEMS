@@ -2,7 +2,7 @@
 
 > **Fecha:** 2026-10-23
 > **Proyecto:** ONEMS · Supabase `onems-dev` (`sehbnpgzqljrsqimwyuz`)
-> **Estado:** diseño propuesto, pendiente de aprobación del responsable
+> **Estado:** SUSTITUIDO el 2026-11-19 por [2026-11-19-carrier-link-design.md](2026-11-19-carrier-link-design.md). Se conserva como detalle de referencia.
 > **Relacionados:** [ETL_RFID_PIPELINE_TECNICO.md](../../ETL/ETL_RFID_PIPELINE_TECNICO.md) · [2026-06-11-rfid-aws-ingestion-design.md](2026-06-11-rfid-aws-ingestion-design.md) · [reporting_module_design.md](../../reporting_module_design.md) · [DIRECTORIO_TABLAS.md](../../database/DIRECTORIO_TABLAS.md)
 
 ---

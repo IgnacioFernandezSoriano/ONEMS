@@ -43,7 +43,7 @@ SELECT a, '0000000' || n, 'operational', 'd1000000-0000-0000-0000-000000000001',
        '2027-03-01 08:00+00', '2027-03-01 10:00+00', '2027-03-01 08:00+00', '2027-03-01 10:00+00', 120, 120
 FROM (VALUES ('a0000000-0000-0000-0000-000000000001'::uuid, 1), ('a0000000-0000-0000-0000-000000000002'::uuid, 2)) v(a, n);
 
-INSERT INTO public.api_keys (account_id, api_key, is_active) VALUES
+INSERT INTO public.api_keys (account_id, key_hash, is_active) VALUES
   ('a0000000-0000-0000-0000-000000000001', 'onedb_live_test_a1', true),
   ('a0000000-0000-0000-0000-000000000002', 'onedb_live_test_a2', true);
 
@@ -109,7 +109,7 @@ BEGIN
     PERFORM pg_temp.fail_if(NOT ok, 'anon puede leer ' || t);
   END LOOP;
   ok := false;
-  BEGIN INSERT INTO public.api_keys (account_id, api_key) VALUES ('a0000000-0000-0000-0000-000000000001', 'evil');
+  BEGIN INSERT INTO public.api_keys (account_id, key_hash) VALUES ('a0000000-0000-0000-0000-000000000001', 'evil');
   EXCEPTION WHEN insufficient_privilege THEN ok := true; END;
   PERFORM pg_temp.fail_if(NOT ok, 'anon inserta api_keys');
   ok := false;
@@ -148,10 +148,14 @@ BEGIN
   GET DIAGNOSTICS n = ROW_COUNT;
   PERFORM pg_temp.fail_if(n <> 0, 'A1 borra tramo de A2');
   ok := false;
-  BEGIN INSERT INTO public.api_keys (account_id, api_key) VALUES (A2, 'evil_a2');
+  BEGIN INSERT INTO public.api_keys (account_id, key_hash) VALUES (A2, 'evil_a2');
   EXCEPTION WHEN insufficient_privilege THEN ok := true; END;
   PERFORM pg_temp.fail_if(NOT ok, 'A1 crea api_key en A2');
-  INSERT INTO public.api_keys (account_id, api_key) VALUES (A1, 'onedb_live_test_a1_bis');
+  -- Escrituras directas cerradas (20261120100100): la clave se emite solo con api_key_issue.
+  ok := false;
+  BEGIN INSERT INTO public.api_keys (account_id, key_hash) VALUES (A1, 'onedb_live_test_a1_bis');
+  EXCEPTION WHEN insufficient_privilege THEN ok := true; END;
+  PERFORM pg_temp.fail_if(NOT ok, 'A1 inserta api_key directamente');
 
   -- Tabla de backend: sin acceso.
   ok := false;
@@ -165,7 +169,7 @@ RESET ROLE;
 SET ROLE authenticated;
 SELECT pg_temp.as_user('97000000-0000-0000-0000-000000000097', 'authenticated');
 DO $$
-DECLARE n int;
+DECLARE n int; ok boolean;
   A2 constant uuid := 'a0000000-0000-0000-0000-000000000002';
 BEGIN
   SELECT count(*) INTO n FROM public.processed_events;
@@ -175,10 +179,19 @@ BEGIN
   SELECT count(*) INTO n FROM public.api_keys WHERE account_id = A2;
   PERFORM pg_temp.fail_if(n <> 1, 'super api_keys de A2: ' || n);
   -- Página OneDB API: genera y desactiva clave de la cuenta elegida.
-  INSERT INTO public.api_keys (account_id, api_key, is_active) VALUES (A2, 'onedb_live_test_a2_bis', true);
-  UPDATE public.api_keys SET is_active = false WHERE api_key = 'onedb_live_test_a2';
-  GET DIAGNOSTICS n = ROW_COUNT;
-  PERFORM pg_temp.fail_if(n <> 1, 'super no desactiva clave de A2');
+  -- Emite con api_key_issue y desactiva con api_key_deactivate (escritura directa cerrada, también para superadmin).
+  PERFORM pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM public.api_key_issue(A2, 'bis')), 'super no emite clave en A2');
+  ok := false;
+  BEGIN INSERT INTO public.api_keys (account_id, key_hash, is_active) VALUES (A2, 'onedb_live_test_a2_bis', true);
+  EXCEPTION WHEN insufficient_privilege THEN ok := true; END;
+  PERFORM pg_temp.fail_if(NOT ok, 'super inserta api_key directamente');
+  ok := false;
+  BEGIN UPDATE public.api_keys SET is_active = false WHERE key_hash = 'onedb_live_test_a2';
+  EXCEPTION WHEN insufficient_privilege THEN ok := true; END;
+  PERFORM pg_temp.fail_if(NOT ok, 'super hace UPDATE directo en api_keys');
+  PERFORM public.api_key_deactivate((SELECT id FROM public.api_keys WHERE key_hash = 'onedb_live_test_a2'));
+  PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM public.api_keys WHERE key_hash = 'onedb_live_test_a2' AND is_active),
+                          'super no desactiva clave de A2');
   -- Reseteo DEMO2 (useAccountManagement.ts): borra tramos y eventos de otra cuenta.
   DELETE FROM public.journey_segments WHERE account_id = A2;
   GET DIAGNOSTICS n = ROW_COUNT;
@@ -198,7 +211,7 @@ BEGIN
   SELECT count(*) INTO n FROM public.processed_events;
   PERFORM pg_temp.fail_if(n <> 1, 'service_role processed_events: ' || n);
   SELECT count(*) INTO n FROM public.api_keys;
-  PERFORM pg_temp.fail_if(n <> 4, 'service_role api_keys: ' || n);
+  PERFORM pg_temp.fail_if(n <> 3, 'service_role api_keys: ' || n);
   SELECT count(*) INTO n FROM public.panelist_context;
   PERFORM count(*) FROM public.cleanup_processed_rfid_events(NULL, 100000);
 END $$;

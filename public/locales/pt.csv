@@ -1250,29 +1250,42 @@ onedb.total_records,Total de registos
 onedb.transit_days,Dias de trânsito
 onedb.transit_time,Tempo de trânsito
 onedb.validated_postal_quality_analytics_repository,Repositório validado de análise da qualidade postal
-onedb_api.api_key_label,A sua chave de API
 onedb_api.api_tester_title,Testador de API
-onedb_api.auth_note,"Nota: o cabeçalho Authorization utiliza a chave anon do Supabase (fornecida pelo sistema), enquanto X-API-Key contém a sua chave de API pessoal."
+onedb_api.auth_note,Nota: envie a sua chave de API pessoal no cabeçalho Authorization como token Bearer (o cabeçalho X-API-Key também é aceite). Não é necessária nenhuma outra credencial.
+onedb_api.manage_keys_note,Apenas o UPU Account Manager pode gerir as chaves.
 onedb_api.authentication_description,Todos os pedidos à API têm de incluir a sua chave de API no cabeçalho Authorization, através de autenticação Bearer.
 onedb_api.authentication_title,Autenticação
 onedb_api.base_url,URL base
 onedb_api.calls_last_hour,Chamadas na última hora
-onedb_api.confirm_regenerate,Tem a certeza de que pretende regenerar a sua chave de API? A chave antiga será desativada imediatamente.
+onedb_api.col_expires,Expira
+onedb_api.col_key,Chave
+onedb_api.col_name,Nome
+onedb_api.col_status,Estado
+onedb_api.confirm_deactivate,Tem a certeza de que quer desativar esta chave de API? As aplicações que a usam deixarão de funcionar.
 onedb_api.copied,Copiado!
 onedb_api.copy,Copiar
 onedb_api.created_at,Criada
 onedb_api.credentials_section,Credenciais da API
+onedb_api.deactivate_key,Desativar
 onedb_api.description,"API REST para consultar e extrair dados da ONE DB. Acesso apenas de leitura com filtragem por data e paginação. Limitado a 10 000 registos por pedido e 10 pedidos por minuto."
 onedb_api.end_date,Data de fim
-onedb_api.end_date_desc,Data de fim para filtrar registos (formato: AAAA-MM-DD)
+onedb_api.end_date_desc,"Data de fim (dia UTC, inclusive; formato: AAAA-MM-DD)"
 onedb_api.endpoint_description,Obter registos da ONE DB filtrados por intervalo de datas
 onedb_api.endpoint_section,Endpoint da API
 onedb_api.endpoints_title,Endpoints disponíveis
 onedb_api.error_codes_title,Códigos de estado HTTP
+onedb_api.error_deactivate,Não foi possível desativar a chave de API. Tente novamente.
+onedb_api.error_issue,Não foi possível emitir a chave de API. Tente novamente.
+onedb_api.error_replace_old_active,"A nova chave foi emitida (copie-a abaixo), mas a chave anterior não pôde ser desativada e continua ativa. Desative-a a partir da lista."
 onedb_api.examples_title,Exemplos de pedidos
 onedb_api.generate_key,Gerar chave de API
 onedb_api.generate_key_first,Gere primeiro uma chave de API para utilizar o testador.
 onedb_api.generating,A gerar...
+onedb_api.key_name_label,Nome da chave
+onedb_api.key_name_placeholder,ex. Painel de BI
+onedb_api.key_name_required,Introduza um nome para a chave.
+onedb_api.key_name_too_long,O nome pode ter no máximo 80 caracteres.
+onedb_api.keys_list_title,Chaves de API
 onedb_api.last_call,Última chamada à API
 onedb_api.limit,Limite
 onedb_api.limit_10_per_minute,Limite: 10 por minuto
@@ -1280,6 +1293,9 @@ onedb_api.limit_desc,Número máximo de registos a devolver (predefinição: 100
 onedb_api.loading_stats,A carregar estatísticas...
 onedb_api.max_records_note,"Nota: a API devolve um máximo de 10 000 registos no total. Utilize intervalos de datas mais específicos se precisar de aceder a mais dados."
 onedb_api.never,Nunca
+onedb_api.new_key_dismiss,"Já a copiei, fechar"
+onedb_api.new_key_title,A sua nova chave de API
+onedb_api.new_key_warning,"Copie-a agora e guarde-a num local seguro. Por segurança, não poderá voltar a ser mostrada; se a perder, terá de emitir uma nova."
 onedb_api.no,Não
 onedb_api.no_api_key,Ainda não tem uma chave de API ativa. Gere uma para começar a utilizar a API.
 onedb_api.offset,Desvio
@@ -1289,25 +1305,30 @@ onedb_api.query_parameters,Parâmetros de consulta
 onedb_api.rate_limit_info,Limite de pedidos: 10 pedidos por minuto
 onedb_api.rate_limiting_description,Para garantir uma utilização justa e a estabilidade do sistema
 onedb_api.rate_limiting_title,Limitação de pedidos
-onedb_api.regenerate_key,Regenerar chave de API
+onedb_api.replace_hint,Será emitida uma nova chave e esta será desativada de imediato.
+onedb_api.replace_key,Substituir
 onedb_api.required,Obrigatório
 onedb_api.response,Resposta
 onedb_api.response_format,Formato da resposta
 onedb_api.security_warning_text,Mantenha a sua chave de API segura. Não a partilhe publicamente nem a inclua no controlo de versões. Qualquer pessoa com esta chave pode aceder aos seus dados da ONE DB.
 onedb_api.security_warning_title,Aviso de segurança
 onedb_api.start_date,Data de início
-onedb_api.start_date_desc,Data de início para filtrar registos (formato: AAAA-MM-DD)
+onedb_api.start_date_desc,"Data de início (dia UTC, inclusive; formato: AAAA-MM-DD)"
 onedb_api.status_200,Êxito - Pedido concluído com sucesso
 onedb_api.status_400,Pedido inválido - Parâmetros ou formato de data inválidos
 onedb_api.status_401,Não autorizado - Chave de API inválida ou em falta
 onedb_api.status_429,Demasiados pedidos - Limite de pedidos excedido
 onedb_api.status_500,Erro interno do servidor - Ocorreu um problema do nosso lado
+onedb_api.status_active,Ativa
 onedb_api.status_code,Código de estado
+onedb_api.status_inactive,Desativada
 onedb_api.tab_documentation,Documentação
 onedb_api.tab_overview,Visão geral
 onedb_api.tab_testing,Testes
 onedb_api.tab_usage,Utilização
 onedb_api.test_api,Testar pedido à API
+onedb_api.tester_key_label,Chave de API para o teste
+onedb_api.tester_key_placeholder,Cole uma chave de API (as chaves não podem ser recuperadas após a criação)
 onedb_api.testing,A testar...
 onedb_api.title,API GET - ONE DB
 onedb_api.total_calls_month,Total de chamadas este mês

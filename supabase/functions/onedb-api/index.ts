@@ -1,9 +1,10 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { parseQuery, nextDay, extractApiKey } from './lib.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-api-key, x-client-info, apikey, content-type',
 }
 
 interface RateLimitCheck {
@@ -25,13 +26,13 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Extract API key from Authorization header
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    // API key: X-API-Key header first, Authorization: Bearer as fallback
+    const apiKey = extractApiKey(req.headers)
+    if (!apiKey) {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'Missing or invalid Authorization header. Use: Authorization: Bearer <api_key>' 
+          error: 'Missing API key. Use: Authorization: Bearer <api_key> (or X-API-Key: <api_key>)' 
         }),
         { 
           status: 401, 
@@ -40,17 +41,12 @@ serve(async (req) => {
       )
     }
 
-    const apiKey = authHeader.replace('Bearer ', '').trim()
+    // Validate API key by hash (api_key_resolve only returns active, non-expired keys)
+    const { data: resolved, error: apiKeyError } = await supabaseClient
+      .rpc('api_key_resolve', { p_key: apiKey })
+    const apiKeyData = Array.isArray(resolved) ? resolved[0] : resolved
 
-    // Validate API key and get account_id
-    const { data: apiKeyData, error: apiKeyError } = await supabaseClient
-      .from('api_keys')
-      .select('id, account_id, is_active')
-      .eq('api_key', apiKey)
-      .eq('is_active', true)
-      .single()
-
-    if (apiKeyError || !apiKeyData) {
+    if (apiKeyError || !apiKeyData || apiKeyData.scope !== 'onedb_read') {
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -84,40 +80,15 @@ serve(async (req) => {
     }
 
     // Parse query parameters
-    const url = new URL(req.url)
-    const startDate = url.searchParams.get('start_date')
-    const endDate = url.searchParams.get('end_date')
-    const limit = Math.min(parseInt(url.searchParams.get('limit') || '100'), 1000)
-    const offset = parseInt(url.searchParams.get('offset') || '0')
-
-    // Validate date parameters
-    if (!startDate || !endDate) {
+    const parsed = parseQuery(new URL(req.url))
+    if (!parsed.ok) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Missing required parameters: start_date and end_date (format: YYYY-MM-DD)' 
-        }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        JSON.stringify({ success: false, error: parsed.error }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
-
-    // Validate date format
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/
-    if (!dateRegex.test(startDate) || !dateRegex.test(endDate)) {
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Invalid date format. Use YYYY-MM-DD' 
-        }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
-    }
+    const { startDate, endDate, limit, offset } = parsed
+    // parsed.source is validated but not applied yet (one_db.source does not exist)
 
     // Log API usage
     const requestStartTime = Date.now()
@@ -125,12 +96,12 @@ serve(async (req) => {
 
     // Query ONE DB data
     let query = supabaseClient
-      .from('onedb')
+      .from('one_db')
       .select('*', { count: 'exact' })
       .eq('account_id', apiKeyData.account_id)
-      .gte('sent', startDate)
-      .lte('sent', endDate)
-      .order('sent', { ascending: false })
+      .gte('sent_at', startDate)
+      .lt('sent_at', nextDay(endDate))
+      .order('sent_at', { ascending: false })
       .range(offset, offset + limit - 1)
 
     const { data, error, count } = await query
@@ -153,8 +124,7 @@ serve(async (req) => {
     await supabaseClient
       .from('api_keys')
       .update({ 
-        last_used_at: new Date().toISOString(),
-        usage_count: apiKeyData.usage_count + 1
+        last_used_at: new Date().toISOString()
       })
       .eq('id', apiKeyData.id)
 
