@@ -5385,3 +5385,13 @@ menu.cl_samples,Samples
 menu.cl_reading_points,Reading points
 menu.cl_connectors,Connectors
 menu.cl_monitor,Capture monitor
+reporting.data_source,Data source
+reporting.source_all,All
+reporting.source_panelists,Panelists
+reporting.source_carrier,Carrier
+reporting.source_method_note,Carrier samples measure scan-to-scan time plus an equivalence time; panelist samples measure deposit-to-receipt time.
+onedb.source,Source
+onedb.source_panelist,Panelist
+onedb.source_carrier,Carrier
+onedb.measured_time,Measured
+onedb.equivalence_added,Equivalence added

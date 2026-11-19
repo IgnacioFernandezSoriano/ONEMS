@@ -5385,3 +5385,13 @@ menu.cl_samples,Amostras
 menu.cl_reading_points,Pontos de leitura
 menu.cl_connectors,Conectores
 menu.cl_monitor,Monitor de capturas
+reporting.data_source,Origem do dado
+reporting.source_all,Todos
+reporting.source_panelists,Painelistas
+reporting.source_carrier,Transportadora
+reporting.source_method_note,As amostras da transportadora medem o tempo de leitura a leitura mais um tempo de equivalência; as dos painelistas medem do depósito à receção.
+onedb.source,Origem
+onedb.source_panelist,Painelista
+onedb.source_carrier,Transportadora
+onedb.measured_time,Medido
+onedb.equivalence_added,Equivalência adicionada

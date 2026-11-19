@@ -1,3 +1,4 @@
+import { applySourceFilter } from '@/lib/e2eCalculations';
 import React, { useState, useMemo } from 'react';
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId';
 import { supabase } from '@/lib/supabase';
@@ -194,6 +195,7 @@ export default function TerritoryEquity() {
           created_at
         `)
         .eq('account_id', effectiveAccountId);
+      query = applySourceFilter(query, filters.source ?? '');
 
       // Apply filters (mismos criterios que el hook: nombres y sent_at)
       if (filters.startDate) {

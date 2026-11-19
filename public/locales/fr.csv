@@ -5377,3 +5377,13 @@ menu.cl_samples,Échantillons
 menu.cl_reading_points,Points de lecture
 menu.cl_connectors,Connecteurs
 menu.cl_monitor,Moniteur de captures
+reporting.data_source,Origine de la donnée
+reporting.source_all,Toutes
+reporting.source_panelists,Panélistes
+reporting.source_carrier,Transporteur
+reporting.source_method_note,Les échantillons du transporteur mesurent le temps de scan à scan plus un temps d'équivalence ; ceux des panélistes mesurent le temps du dépôt à la réception.
+onedb.source,Origine
+onedb.source_panelist,Panéliste
+onedb.source_carrier,Transporteur
+onedb.measured_time,Mesuré
+onedb.equivalence_added,Équivalence ajoutée

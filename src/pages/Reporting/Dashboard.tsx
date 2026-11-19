@@ -27,7 +27,8 @@ export default function Dashboard() {
     carrier: filters.carrier,
     product: filters.product,
     dateFrom: filters.startDate,
-    dateTo: filters.endDate
+    dateTo: filters.endDate,
+    source: filters.source
   });
 
   const { data: carrierProductData, loading: carrierProductLoading, globalWarningThreshold: cpWarningThreshold, globalCriticalThreshold: cpCriticalThreshold } = useCarrierProductOverview(
@@ -38,7 +39,8 @@ export default function Dashboard() {
       originCity: filters.originCity,
       destinationCity: filters.destinationCity,
       carrier: filters.carrier,
-      product: filters.product
+      product: filters.product,
+      source: filters.source
     }
   );
 
@@ -46,6 +48,7 @@ export default function Dashboard() {
   const { globalWarningThreshold, globalCriticalThreshold } = useComplianceData(accountId, {
     startDate: filters.startDate,
     endDate: filters.endDate,
+    source: filters.source,
   });
 
   if (loading) {
