@@ -1251,7 +1251,8 @@ onedb.transit_days,Días en tránsito
 onedb.transit_time,Tiempo en tránsito
 onedb.validated_postal_quality_analytics_repository,Repositorio validado de análisis de calidad postal
 onedb_api.api_tester_title,Probador de API
-onedb_api.auth_note,"Nota: El header Authorization usa la clave anon de Supabase (proporcionada por el sistema), mientras que X-API-Key contiene tu clave API personal."
+onedb_api.auth_note,Nota: envía tu clave API personal en el header Authorization como token Bearer (también se acepta el header X-API-Key). No hace falta ninguna otra credencial.
+onedb_api.manage_keys_note,Solo el UPU Account Manager puede gestionar las claves.
 onedb_api.authentication_description,Todas las solicitudes de API deben incluir su clave API en el encabezado Authorization usando autenticación Bearer.
 onedb_api.authentication_title,Autenticación
 onedb_api.base_url,URL base
@@ -1268,7 +1269,7 @@ onedb_api.credentials_section,Credenciales API
 onedb_api.deactivate_key,Desactivar
 onedb_api.description,"API REST para consultar y extraer datos de ONE DB. Acceso de solo lectura con filtrado por fechas y paginación. Limitado a 10,000 registros por solicitud y 10 solicitudes por minuto."
 onedb_api.end_date,Fecha de fin
-onedb_api.end_date_desc,Fecha de fin para filtrar registros (formato: YYYY-MM-DD)
+onedb_api.end_date_desc,"Fecha de fin (día UTC, inclusive; formato: YYYY-MM-DD)"
 onedb_api.endpoint_description,Recuperar registros de ONE DB filtrados por rango de fechas
 onedb_api.endpoint_section,Endpoint de la API
 onedb_api.endpoints_title,Endpoints disponibles
@@ -1312,7 +1313,7 @@ onedb_api.response_format,Formato de respuesta
 onedb_api.security_warning_text,No la compartas públicamente ni la subas a control de versiones. Cualquiera con esta clave puede acceder a tus datos de ONE DB.
 onedb_api.security_warning_title,Advertencia de seguridad
 onedb_api.start_date,Fecha de inicio
-onedb_api.start_date_desc,Fecha de inicio para filtrar registros (formato: YYYY-MM-DD)
+onedb_api.start_date_desc,"Fecha de inicio (día UTC, inclusive; formato: YYYY-MM-DD)"
 onedb_api.status_200,Éxito - Solicitud completada con éxito
 onedb_api.status_400,Solicitud incorrecta - Parámetros o formato de fecha inválidos
 onedb_api.status_401,No autorizado - Clave API inválida o ausente

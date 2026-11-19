@@ -35,6 +35,43 @@ REVOKE ALL ON FUNCTION public.api_keys_backfill_hash() FROM PUBLIC, anon, authen
 
 SELECT public.api_keys_backfill_hash();
 
+-- Ventana de despliegue: la web antigua inserta filas con solo api_key (sin key_hash).
+-- Este trigger completa hash, prefijo y nombre; se elimina en la migración siguiente.
+CREATE OR REPLACE FUNCTION public.api_keys_sync_hash()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SET search_path = public, extensions
+AS $$
+BEGIN
+  IF NEW.api_key IS NOT NULL THEN
+    NEW.key_hash   := encode(digest(NEW.api_key, 'sha256'), 'hex');
+    NEW.key_prefix := left(NEW.api_key, 12);
+    NEW.name       := COALESCE(NEW.name, 'Clave ' || NEW.key_prefix);
+  END IF;
+  RETURN NEW;
+END $$;
+REVOKE ALL ON FUNCTION public.api_keys_sync_hash() FROM PUBLIC, anon, authenticated;
+
+DROP TRIGGER IF EXISTS api_keys_sync_hash ON public.api_keys;
+CREATE TRIGGER api_keys_sync_hash
+  BEFORE INSERT OR UPDATE OF api_key ON public.api_keys
+  FOR EACH ROW EXECUTE FUNCTION public.api_keys_sync_hash();
+
+-- Gestionan las claves: superadmin (personal de UPU) o el UPU Account Manager de la cuenta.
+CREATE OR REPLACE FUNCTION public.is_upu_account_manager(p_account_id uuid)
+ RETURNS boolean
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path = public, extensions
+AS $$
+  SELECT auth.uid() IS NOT NULL AND p_account_id IS NOT NULL AND EXISTS (
+    SELECT 1 FROM public.account_user_role r
+     WHERE r.account_id = p_account_id AND r.user_id = auth.uid() AND r.role = 'upu_account_manager')
+$$;
+REVOKE ALL ON FUNCTION public.is_upu_account_manager(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.is_upu_account_manager(uuid) TO authenticated;
+
+
 -- Emisión: devuelve la clave en claro una sola vez; solo se guarda su hash.
 CREATE OR REPLACE FUNCTION public.api_key_issue(
   p_account_id uuid,
@@ -51,8 +88,14 @@ DECLARE
   v_key text;
   v_id  uuid;
 BEGIN
-  IF NOT (public.is_superadmin() OR public.has_any_access(p_account_id, 'edit', 'e2e_db_api')) THEN
-    RAISE EXCEPTION 'No autorizado para emitir claves de API en esta cuenta' USING ERRCODE = '42501';
+  IF NOT (public.is_superadmin() OR public.is_upu_account_manager(p_account_id)) THEN
+    RAISE EXCEPTION 'No autorizado para gestionar claves de API en esta cuenta' USING ERRCODE = '42501';
+  END IF;
+  IF p_name IS NULL OR btrim(p_name) = '' OR length(btrim(p_name)) > 80 THEN
+    RAISE EXCEPTION 'El nombre de la clave es obligatorio (máx. 80 caracteres)' USING ERRCODE = '22023';
+  END IF;
+  IF p_expires_at IS NOT NULL AND p_expires_at <= now() THEN
+    RAISE EXCEPTION 'La fecha de caducidad debe ser futura' USING ERRCODE = '22023';
   END IF;
   IF p_scope IS NULL OR p_scope NOT IN ('onedb_read', 'carrier_feed') THEN
     RAISE EXCEPTION 'Ámbito de clave no válido: %', p_scope USING ERRCODE = '22023';
@@ -60,7 +103,7 @@ BEGIN
 
   v_key := 'onems_' || encode(gen_random_bytes(24), 'hex');
   INSERT INTO public.api_keys (account_id, key_hash, key_prefix, name, scope, feed_id, expires_at, created_by)
-  VALUES (p_account_id, encode(digest(v_key, 'sha256'), 'hex'), left(v_key, 12), p_name, p_scope,
+  VALUES (p_account_id, encode(digest(v_key, 'sha256'), 'hex'), left(v_key, 12), btrim(p_name), p_scope,
           p_feed_id, p_expires_at, auth.uid())
   RETURNING public.api_keys.id INTO v_id;
 
@@ -84,3 +127,22 @@ AS $$
 $$;
 REVOKE ALL ON FUNCTION public.api_key_resolve(text) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.api_key_resolve(text) TO service_role;
+
+-- Desactivación: misma regla que la emisión; es la única vía de escritura sobre la tabla desde la web.
+CREATE OR REPLACE FUNCTION public.api_key_deactivate(p_key_id uuid)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path = public, extensions
+AS $$
+DECLARE
+  v_account uuid;
+BEGIN
+  SELECT k.account_id INTO v_account FROM public.api_keys k WHERE k.id = p_key_id;
+  IF v_account IS NULL OR NOT (public.is_superadmin() OR public.is_upu_account_manager(v_account)) THEN
+    RAISE EXCEPTION 'No autorizado para gestionar claves de API en esta cuenta' USING ERRCODE = '42501';
+  END IF;
+  UPDATE public.api_keys SET is_active = false WHERE id = p_key_id;
+END $$;
+REVOKE ALL ON FUNCTION public.api_key_deactivate(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.api_key_deactivate(uuid) TO authenticated;

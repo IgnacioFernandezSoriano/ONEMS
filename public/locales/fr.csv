@@ -1251,7 +1251,8 @@ onedb.transit_days,Jours de transit
 onedb.transit_time,Temps de transit
 onedb.validated_postal_quality_analytics_repository,Répertoire validé d'analyses de qualité postale
 onedb_api.api_tester_title,Testeur API
-onedb_api.auth_note,"Remarque : L'en-tête Authorization utilise la clé anon Supabase (fournie par le système), tandis que X-API-Key contient votre clé API personnelle."
+onedb_api.auth_note,Remarque : envoyez votre clé API personnelle dans l'en-tête Authorization comme jeton Bearer (l'en-tête X-API-Key est aussi accepté). Aucun autre identifiant n'est nécessaire.
+onedb_api.manage_keys_note,Seul l'UPU Account Manager peut gérer les clés.
 onedb_api.authentication_description,Toutes les requêtes API doivent inclure votre clé API dans l'en-tête Authorization en utilisant l'authentification Bearer.
 onedb_api.authentication_title,Authentification
 onedb_api.base_url,URL de base
@@ -1268,7 +1269,7 @@ onedb_api.credentials_section,Identifiants API
 onedb_api.deactivate_key,Désactiver
 onedb_api.description,"API REST pour interroger et extraire les données ONE DB. Accès en lecture seule avec filtrage par date et pagination. Limité à 10,000 enregistrements par requête et 10 requêtes par minute."
 onedb_api.end_date,Date de fin
-onedb_api.end_date_desc,Date de fin pour filtrer les enregistrements (format : AAAA-MM-JJ)
+onedb_api.end_date_desc,"Date de fin (jour UTC, incluse ; format : AAAA-MM-JJ)"
 onedb_api.endpoint_description,Récupérer les enregistrements ONE DB filtrés par plage de dates
 onedb_api.endpoint_section,Point de terminaison API
 onedb_api.endpoints_title,Points de terminaison disponibles
@@ -1312,7 +1313,7 @@ onedb_api.response_format,Format de réponse
 onedb_api.security_warning_text,Gardez votre clé API sécurisée. Ne la partagez pas publiquement et ne la commettez pas dans un contrôle de version. Toute personne disposant de cette clé peut accéder à vos données ONE DB.
 onedb_api.security_warning_title,Avertissement de sécurité
 onedb_api.start_date,Date de début
-onedb_api.start_date_desc,Date de début pour filtrer les enregistrements (format : AAAA-MM-JJ)
+onedb_api.start_date_desc,"Date de début (jour UTC, incluse ; format : AAAA-MM-JJ)"
 onedb_api.status_200,Succès - Requête terminée avec succès
 onedb_api.status_400,Mauvaise requête - Paramètres ou format de date invalides
 onedb_api.status_401,Non autorisé - Clé API invalide ou manquante

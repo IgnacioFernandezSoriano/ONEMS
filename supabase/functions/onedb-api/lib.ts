@@ -36,3 +36,15 @@ export function nextDay(date: string): string {
   d.setUTCDate(d.getUTCDate() + 1)
   return d.toISOString().slice(0, 10)
 }
+
+/** API key from `x-api-key` (preferred) or `Authorization: Bearer <key>`. Null if missing/blank. */
+export function extractApiKey(headers: Headers): string | null {
+  const direct = headers.get('x-api-key')?.trim()
+  if (direct) return direct
+  const auth = headers.get('authorization')
+  if (auth && /^Bearer\s/i.test(auth)) {
+    const k = auth.replace(/^Bearer\s+/i, '').trim()
+    if (k) return k
+  }
+  return null
+}

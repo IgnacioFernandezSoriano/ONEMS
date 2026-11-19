@@ -37,8 +37,21 @@ export function useOneDBAPI() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [usageStats, setUsageStats] = useState<ApiUsageStats | null>(null)
+  const [isUpuAm, setIsUpuAm] = useState(false)
   const beginKeyLoad = useLatestRequest()
   const beginStatsLoad = useLatestRequest()
+
+  // Gestionar claves: superadmin o UPU Account Manager de la cuenta (el servidor lo vuelve a comprobar).
+  useEffect(() => {
+    setIsUpuAm(false)
+    if (!accountId || profile?.role === 'superadmin') return
+    let cancelled = false
+    supabase.rpc('is_upu_account_manager', { p_account_id: accountId }).then(({ data, error }) => {
+      if (!cancelled && !error) setIsUpuAm(data === true)
+    })
+    return () => { cancelled = true }
+  }, [accountId, profile?.role])
+  const canManageKeys = profile?.role === 'superadmin' || isUpuAm
 
   useEffect(() => {
     if (accountId) {
@@ -154,10 +167,7 @@ export function useOneDBAPI() {
     if (!accountId) throw new Error('No active account')
     try {
       setError(null)
-      const { error } = await supabase
-        .from('api_keys')
-        .update({ is_active: false })
-        .eq('id', id)
+      const { error } = await supabase.rpc('api_key_deactivate', { p_key_id: id })
       if (error) throw error
       await loadApiKey()
     } catch (err: any) {
@@ -184,6 +194,7 @@ export function useOneDBAPI() {
   return {
     accountId,
     hasAccount: !!accountId,
+    canManageKeys,
     apiKeys,
     loading,
     error,

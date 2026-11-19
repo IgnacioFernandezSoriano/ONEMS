@@ -1,5 +1,5 @@
 import { assertEquals } from 'https://deno.land/std@0.224.0/assert/mod.ts'
-import { parseQuery, nextDay } from './lib.ts'
+import { parseQuery, nextDay, extractApiKey } from './lib.ts'
 
 const u = (qs: string) => new URL('https://x.test/onedb-api?' + qs)
 
@@ -34,4 +34,20 @@ Deno.test('source validation', () => {
 Deno.test('nextDay handles month/year rollover', () => {
   assertEquals(nextDay('2026-01-31'), '2026-02-01')
   assertEquals(nextDay('2026-12-31'), '2027-01-01')
+})
+
+Deno.test('extractApiKey: x-api-key wins over Bearer', () => {
+  const h = new Headers({ 'x-api-key': ' k1 ', authorization: 'Bearer k2' })
+  assertEquals(extractApiKey(h), 'k1')
+})
+
+Deno.test('extractApiKey: Bearer fallback', () => {
+  assertEquals(extractApiKey(new Headers({ authorization: 'Bearer k2 ' })), 'k2')
+})
+
+Deno.test('extractApiKey: missing or blank -> null', () => {
+  assertEquals(extractApiKey(new Headers()), null)
+  assertEquals(extractApiKey(new Headers({ 'x-api-key': '   ' })), null)
+  assertEquals(extractApiKey(new Headers({ authorization: 'Bearer    ' })), null)
+  assertEquals(extractApiKey(new Headers({ authorization: 'Basic abc' })), null)
 })

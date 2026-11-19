@@ -1251,7 +1251,8 @@ onedb.transit_days,أيام العبور
 onedb.transit_time,وقت العبور
 onedb.validated_postal_quality_analytics_repository,مستودع تحليلات جودة البريد المعتمد
 onedb_api.api_tester_title,مختبر API
-onedb_api.auth_note,ملاحظة: يستخدم رأس Authorization مفتاح Supabase anon (المقدم من النظام)، بينما يحتوي X-API-Key على مفتاح API الشخصي الخاص بك.
+onedb_api.auth_note,ملاحظة: أرسل مفتاح API الشخصي الخاص بك في رأس Authorization كرمز Bearer (يُقبل أيضًا رأس X-API-Key). لا حاجة لأي بيانات اعتماد أخرى.
+onedb_api.manage_keys_note,يمكن لمدير حساب UPU فقط إدارة المفاتيح.
 onedb_api.authentication_description,يجب أن تتضمن جميع طلبات API مفتاح API الخاص بك في رأس Authorization باستخدام مصادقة Bearer.
 onedb_api.authentication_title,المصادقة
 onedb_api.base_url,الرابط الأساسي
@@ -1268,7 +1269,7 @@ onedb_api.credentials_section,بيانات اعتماد API
 onedb_api.deactivate_key,تعطيل
 onedb_api.description,"واجهة برمجة تطبيقات REST للاستعلام واستخراج بيانات ONE DB. وصول للقراءة فقط مع التصفية حسب التاريخ والترقيم. محدود بـ 10,000 سجل لكل طلب و 10 طلبات في الدقيقة."
 onedb_api.end_date,تاريخ الانتهاء
-onedb_api.end_date_desc,تاريخ الانتهاء لتصفية السجلات (التنسيق: YYYY-MM-DD)
+onedb_api.end_date_desc,تاريخ الانتهاء (يوم UTC، شامل؛ التنسيق: YYYY-MM-DD)
 onedb_api.endpoint_description,استرجاع سجلات ONE DB مصفاة حسب نطاق التاريخ
 onedb_api.endpoint_section,نقطة نهاية API
 onedb_api.endpoints_title,النقاط النهائية المتاحة
@@ -1312,7 +1313,7 @@ onedb_api.response_format,تنسيق الاستجابة
 onedb_api.security_warning_text,لا تشاركه علنًا أو ترفعه إلى نظام التحكم في الإصدارات. أي شخص لديه هذا المفتاح يمكنه الوصول إلى بيانات ONE DB الخاصة بك.
 onedb_api.security_warning_title,تحذير أمني
 onedb_api.start_date,تاريخ البدء
-onedb_api.start_date_desc,تاريخ البدء لتصفية السجلات (التنسيق: YYYY-MM-DD)
+onedb_api.start_date_desc,تاريخ البدء (يوم UTC، شامل؛ التنسيق: YYYY-MM-DD)
 onedb_api.status_200,نجاح - تم إكمال الطلب بنجاح
 onedb_api.status_400,طلب خاطئ - معلمات أو تنسيق تاريخ غير صالح
 onedb_api.status_401,غير مصرح - مفتاح API غير صالح أو مفقود

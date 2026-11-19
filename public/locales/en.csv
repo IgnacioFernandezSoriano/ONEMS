@@ -1251,7 +1251,8 @@ onedb.transit_days,Transit Days
 onedb.transit_time,Transit time
 onedb.validated_postal_quality_analytics_repository,Validated postal quality analytics repository
 onedb_api.api_tester_title,API Tester
-onedb_api.auth_note,"Note: The Authorization header uses the Supabase anon key (provided by the system), while X-API-Key contains your personal API key."
+onedb_api.auth_note,Note: send your personal API key in the Authorization header as a Bearer token (the X-API-Key header is also accepted). No other credential is needed.
+onedb_api.manage_keys_note,Only the UPU Account Manager can manage API keys.
 onedb_api.authentication_description,All API requests must include your API key in the Authorization header using Bearer authentication.
 onedb_api.authentication_title,Authentication
 onedb_api.base_url,Base URL
@@ -1268,7 +1269,7 @@ onedb_api.credentials_section,API Credentials
 onedb_api.deactivate_key,Deactivate
 onedb_api.description,"REST API for querying and extracting ONE DB data. Read-only access with date filtering and pagination. Limited to 10,000 records per request and 10 requests per minute."
 onedb_api.end_date,End Date
-onedb_api.end_date_desc,End date for filtering records (format: YYYY-MM-DD)
+onedb_api.end_date_desc,"End date (UTC day, inclusive; format: YYYY-MM-DD)"
 onedb_api.endpoint_description,Retrieve ONE DB records filtered by date range
 onedb_api.endpoint_section,API Endpoint
 onedb_api.endpoints_title,Available Endpoints
@@ -1312,7 +1313,7 @@ onedb_api.response_format,Response Format
 onedb_api.security_warning_text,Keep your API key secure. Do not share it publicly or commit it to version control. Anyone with this key can access your ONE DB data.
 onedb_api.security_warning_title,Security Warning
 onedb_api.start_date,Start Date
-onedb_api.start_date_desc,Start date for filtering records (format: YYYY-MM-DD)
+onedb_api.start_date_desc,"Start date (UTC day, inclusive; format: YYYY-MM-DD)"
 onedb_api.status_200,Success - Request completed successfully
 onedb_api.status_400,Bad Request - Invalid parameters or date format
 onedb_api.status_401,Unauthorized - Invalid or missing API key

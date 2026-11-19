@@ -1,10 +1,10 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { parseQuery, nextDay } from './lib.ts'
+import { parseQuery, nextDay, extractApiKey } from './lib.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-api-key, x-client-info, apikey, content-type',
 }
 
 interface RateLimitCheck {
@@ -26,13 +26,13 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Extract API key from Authorization header
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    // API key: X-API-Key header first, Authorization: Bearer as fallback
+    const apiKey = extractApiKey(req.headers)
+    if (!apiKey) {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'Missing or invalid Authorization header. Use: Authorization: Bearer <api_key>' 
+          error: 'Missing API key. Use: Authorization: Bearer <api_key> (or X-API-Key: <api_key>)' 
         }),
         { 
           status: 401, 
@@ -40,8 +40,6 @@ serve(async (req) => {
         }
       )
     }
-
-    const apiKey = authHeader.replace('Bearer ', '').trim()
 
     // Validate API key by hash (api_key_resolve only returns active, non-expired keys)
     const { data: resolved, error: apiKeyError } = await supabaseClient

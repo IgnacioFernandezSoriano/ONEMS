@@ -8,8 +8,9 @@ import { Key, Copy, RefreshCw, Ban, AlertCircle, CheckCircle, Code, BookOpen, Te
 export function OneDBAPI() {
   const { t } = useLocale()
   const { canEdit } = usePermissions()
-  const { accountId, hasAccount, apiKeys, loading, usageStats, generateApiKey, replaceApiKey, deactivateApiKey, refreshStats } = useOneDBAPI()
+  const { accountId, hasAccount, canManageKeys, apiKeys, loading, usageStats, generateApiKey, replaceApiKey, deactivateApiKey, refreshStats } = useOneDBAPI()
   const readOnly = !canEdit('e2e_db_api') || !hasAccount
+  const canManage = !readOnly && canManageKeys
   const [actionError, setActionError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'overview' | 'documentation' | 'testing' | 'usage'>('overview')
   const [copied, setCopied] = useState(false)
@@ -114,8 +115,7 @@ export function OneDBAPI() {
       
       const response = await fetch(url, {
         headers: {
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlaGJucGd6cWxqcnNxaW13eXV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4OTQzMTEsImV4cCI6MjA4MDQ3MDMxMX0.C-LsSmfOo38Tqc_PwP1c-nFyK1PeVj_mCBqanYsgoeg',
-          'X-API-Key': testKey.trim(),
+          'Authorization': `Bearer ${testKey.trim()}`,
           'Content-Type': 'application/json'
         }
       })
@@ -146,6 +146,9 @@ export function OneDBAPI() {
           {readOnly && <ReadOnlyBadge />}
         </div>
         <p className="text-gray-600">{t('onedb_api.description')}</p>
+        {!readOnly && !canManageKeys && (
+          <p className="text-sm text-gray-500 mt-1">{t('onedb_api.manage_keys_note')}</p>
+        )}
       </div>
 
       {/* Tabs */}
@@ -218,7 +221,7 @@ export function OneDBAPI() {
                 </div>
               )}
 
-              {formMode && !readOnly && (
+              {formMode && canManage && (
                 <div className="border border-gray-200 rounded-lg p-4 space-y-3">
                   <label className="block text-sm font-medium text-gray-700">
                     {t('onedb_api.key_name_label')}
@@ -255,7 +258,7 @@ export function OneDBAPI() {
                 </div>
               )}
 
-              {!formMode && !readOnly && (
+              {!formMode && canManage && (
                 <button
                   onClick={() => openForm('create')}
                   disabled={generating || loading}
@@ -281,7 +284,7 @@ export function OneDBAPI() {
                           <th className="text-left p-2 font-semibold">{t('onedb_api.last_call')}</th>
                           <th className="text-left p-2 font-semibold">{t('onedb_api.col_expires')}</th>
                           <th className="text-left p-2 font-semibold">{t('onedb_api.col_status')}</th>
-                          {!readOnly && <th className="p-2" />}
+                          {canManage && <th className="p-2" />}
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200">
@@ -293,7 +296,7 @@ export function OneDBAPI() {
                             <td className="p-2">{k.last_used_at ? new Date(k.last_used_at).toLocaleString() : t('onedb_api.never')}</td>
                             <td className="p-2">{k.expires_at ? new Date(k.expires_at).toLocaleDateString() : '—'}</td>
                             <td className="p-2">{k.is_active ? t('onedb_api.status_active') : t('onedb_api.status_inactive')}</td>
-                            {!readOnly && (
+                            {canManage && (
                               <td className="p-2 whitespace-nowrap text-right">
                                 {k.is_active && (
                                   <>
@@ -376,8 +379,7 @@ export function OneDBAPI() {
             <p className="text-gray-600 mb-4">{t('onedb_api.authentication_description')}</p>
             
             <div className="bg-gray-50 rounded-lg p-4 font-mono text-sm space-y-2">
-              <div className="text-gray-700">Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</div>
-              <div className="text-gray-700">X-API-Key: YOUR_API_KEY</div>
+              <div className="text-gray-700">Authorization: Bearer YOUR_API_KEY</div>
             </div>
             <p className="text-sm text-gray-500 mt-2">
               {t('onedb_api.auth_note')}
@@ -450,8 +452,7 @@ export function OneDBAPI() {
               <h3 className="font-semibold text-gray-900 mb-2">cURL</h3>
               <div className="bg-gray-900 text-gray-100 rounded-lg p-4 font-mono text-sm overflow-x-auto">
                 <pre>{`curl -X GET "${apiEndpoint}?start_date=2024-01-01&end_date=2024-12-31&limit=100" \\
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \\
-  -H "X-API-Key: YOUR_API_KEY" \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json"`}</pre>
               </div>
             </div>
@@ -464,8 +465,7 @@ export function OneDBAPI() {
 
 url = "${apiEndpoint}"
 headers = {
-    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "X-API-Key": "YOUR_API_KEY",
+    "Authorization": "Bearer YOUR_API_KEY",
     "Content-Type": "application/json"
 }
 params = {
@@ -497,8 +497,7 @@ url.searchParams.append("limit", "100");
 
 const response = await fetch(url, {
   headers: {
-    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "X-API-Key": "YOUR_API_KEY",
+    "Authorization": "Bearer YOUR_API_KEY",
     "Content-Type": "application/json"
   }
 });
@@ -524,13 +523,19 @@ if (data.success) {
   "data": [
     {
       "id": "uuid",
-      "sent": "2024-06-15",
-      "origin_city": "Madrid",
-      "destination_city": "Barcelona",
-      "carrier": "Carrier A",
-      "product": "Express",
-      "material": "Material X",
-      "quantity": 100,
+      "account_id": "uuid",
+      "allocation_detail_id": "uuid",
+      "tag_id": "12345678",
+      "plan_name": "Plan 2024",
+      "carrier_name": "Carrier A",
+      "product_name": "Express",
+      "origin_city_name": "Madrid",
+      "destination_city_name": "Barcelona",
+      "sent_at": "2024-06-15T09:30:00Z",
+      "received_at": "2024-06-17T14:10:00Z",
+      "total_transit_days": 2,
+      "business_transit_days": 2,
+      "on_time_delivery": true,
       // ... all other fields from ONE DB
     }
   ],
