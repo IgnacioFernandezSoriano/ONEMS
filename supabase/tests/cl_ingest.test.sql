@@ -12,6 +12,12 @@ CREATE OR REPLACE FUNCTION pg_temp.errmsg_of(p_sql text) RETURNS text LANGUAGE p
 BEGIN EXECUTE p_sql; RETURN NULL; EXCEPTION WHEN OTHERS THEN RETURN SQLERRM; END $$;
 
 -- Una lectura con los nombres de campo del carrier (y dos campos no mapeados: uno permitido y uno personal).
+-- Tarea 9: cada estrato se entrega una vez por demanda. Para reutilizar el estrato en los escenarios siguientes, los
+-- lotes ya cargados se dan por deshechos (estado directo, sin tocar sus lecturas).
+CREATE OR REPLACE FUNCTION pg_temp.free() RETURNS void LANGUAGE sql AS $$
+  UPDATE public.cl_batches SET status = 'undone' WHERE status IN ('validated','sampled')
+$$;
+
 CREATE OR REPLACE FUNCTION pg_temp.rd(p_trk text, p_svc text, p_ts text, p_office text, p_evt text) RETURNS jsonb
 LANGUAGE sql AS $$
   SELECT jsonb_build_object('trk', p_trk, 'svc', p_svc, 'ts', p_ts, 'office', p_office, 'evt', p_evt,
@@ -177,6 +183,7 @@ BEGIN
   PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_alerts) = n_alerts, 'sin alertas nuevas');
 END $$;
 
+SELECT pg_temp.free();
 -- 6. dry_run: resumen sin filas.
 DO $$
 DECLARE r jsonb; n_b bigint; n_s bigint; n_a bigint;
@@ -195,6 +202,7 @@ BEGIN
   PERFORM pg_temp.ok(r->>'batch' IS NOT NULL AND NOT (r ? 'dry_run'), 'tras dry_run se carga de verdad');
 END $$;
 
+SELECT pg_temp.free();
 -- 7. Poblacion incoherente y estrato vacio; ya muestreado no cuenta como rechazo.
 DO $$
 DECLARE r jsonb;
@@ -203,6 +211,7 @@ BEGIN
          pg_temp.mk('B-POP', jsonb_build_array(pg_temp.rd('A3', 'EXP', '21/10/2026 08:00', 'NBO', 'ADM')), p_pop => 0));
   PERFORM pg_temp.ok(EXISTS (SELECT 1 FROM public.cl_alerts WHERE alert_type = 'population_incoherent'), 'alerta population_incoherent');
   PERFORM pg_temp.ok(EXISTS (SELECT 1 FROM public.cl_alerts WHERE alert_type = 'empty_stratum'), 'alerta empty_stratum');
+  PERFORM pg_temp.free();
 
   INSERT INTO public.cl_samples (account_id, plan_id, carrier_id, item_id)
   VALUES ('a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-0000000000a1','ca000000-0000-0000-0000-000000000001','A1');
@@ -215,6 +224,7 @@ BEGIN
   PERFORM pg_temp.ok(r->'strata'->0->'rejected' = '{"already_sampled":1}'::jsonb, 'motivo already_sampled');
 END $$;
 
+SELECT pg_temp.free();
 -- 8. selection_method distinto: lote rejected con alerta y sin lecturas.
 DO $$
 DECLARE r jsonb;
@@ -227,6 +237,7 @@ BEGIN
   PERFORM pg_temp.ok(public.cl_ingest_batch('f0000000-0000-0000-0000-0000000000a1', pg_temp.mk('B-METHOD', pg_temp.rows_main(), 'first_n')) = r, 'rechazo idempotente');
 END $$;
 
+SELECT pg_temp.free();
 -- 8b. Precedencia D4, lugar con espacios, hora mala, campo ausente, valores enormes y extras no escalares.
 DO $$
 DECLARE r jsonb; s jsonb; v_batch uuid;
@@ -287,6 +298,7 @@ BEGIN
   PERFORM pg_temp.ok(r->'strata'->0->'rejected' = '{"same_reading":1}'::jsonb, 'S1 same_reading');
 END $$;
 
+SELECT pg_temp.free();
 -- 8d. Conector pausado: ni lote nuevo ni prueba (un lote ya guardado si se devuelve); testing acepta.
 DO $$
 BEGIN

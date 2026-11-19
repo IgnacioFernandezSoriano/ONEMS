@@ -9,6 +9,9 @@ BEGIN IF p_cond IS NOT TRUE THEN RAISE EXCEPTION 'FAIL: %', p_msg; END IF; END $
 CREATE OR REPLACE FUNCTION pg_temp.sqlstate_of(p_sql text) RETURNS text LANGUAGE plpgsql AS $$
 BEGIN EXECUTE p_sql; RETURN NULL; EXCEPTION WHEN OTHERS THEN RETURN SQLSTATE; END $$;
 
+CREATE OR REPLACE FUNCTION pg_temp.msg_of(p_sql text) RETURNS text LANGUAGE plpgsql AS $$
+BEGIN EXECUTE p_sql; RETURN NULL; EXCEPTION WHEN OTHERS THEN RETURN SQLSTATE || ':' || SQLERRM; END $$;
+
 CREATE OR REPLACE FUNCTION pg_temp.as_user(p_uid text, p_role text) RETURNS void LANGUAGE plpgsql AS $$
 BEGIN
   PERFORM set_config('request.jwt.claim.sub', coalesce(p_uid, ''), true);
@@ -202,10 +205,10 @@ BEGIN;
 GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
 SELECT pg_temp.setup(ARRAY[43,44], ARRAY[2,4], '2026-11-01');
 DO $$
-DECLARE v_d uuid;
+DECLARE v_d uuid; v_b uuid;
 BEGIN
   v_d := pg_temp.emit('2026-11-02 03:00+00');            -- vencen W43 y W44
-  PERFORM pg_temp.batch(v_d, 'B1', jsonb_build_array(pg_temp.stratum(43, 2, ARRAY['P1','P2']), pg_temp.stratum(44, 1, ARRAY['P3'])));
+  v_b := pg_temp.batch(v_d, 'B1', jsonb_build_array(pg_temp.stratum(43, 2, ARRAY['P1','P2']), pg_temp.stratum(44, 1, ARRAY['P3'])));
   PERFORM pg_temp.ok((pg_temp.qcol(43)).status = 'fulfilled', 'W43 fulfilled');
   PERFORM pg_temp.ok((pg_temp.qcol(44)).status = 'unfilled', 'W44 unfilled: ' || row_to_json(pg_temp.qcol(44))::text);
   PERFORM pg_temp.ok((pg_temp.qcol(43)).samples_carried_in = 0, 'una cuota anterior no recibe deficit');
@@ -213,6 +216,12 @@ BEGIN
                         AND (details->>'missing')::int = 3) = 1, 'alerta quota_unfilled con lo que falta');
   PERFORM pg_temp.ok(public.cl_settle_quota(pg_temp.qw(44)) = 'unfilled', 'settle de unfilled idempotente');
   PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_alerts WHERE alert_type = 'quota_unfilled') = 1, 'una sola alerta');
+  -- deshacer: la cuota unfilled vuelve a pending y su alerta quota_unfilled se descarta
+  PERFORM public.cl_undo_batch(v_b);
+  PERFORM pg_temp.ok((pg_temp.qcol(44)).status = 'pending' AND (pg_temp.qcol(44)).samples_obtained = 0, 'W44 unfilled -> pending');
+  PERFORM pg_temp.ok((pg_temp.qcol(43)).status = 'pending', 'W43 fulfilled -> pending');
+  PERFORM pg_temp.ok((SELECT status = 'dismissed' AND details->>'dismissed_by_undo' = v_b::text
+                        FROM public.cl_alerts WHERE alert_type = 'quota_unfilled' AND quota_id = pg_temp.qw(44)), 'alerta quota_unfilled dismissed');
 END $$;
 ROLLBACK;
 
@@ -337,5 +346,127 @@ BEGIN
   PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_alerts WHERE alert_type = 'undo_after_carry' AND quota_id = pg_temp.qw(42)
                         AND details->>'batch_id' = v_b::text) = 1, 'alerta undo_after_carry');
   PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_samples WHERE status = 'voided') = 2 AND (SELECT count(*) FROM public.one_db) = 0, 'muestras anuladas');
+END $$;
+ROLLBACK;
+
+-- ===================================================================== 9. Una demanda en dos lotes (un estrato cada uno)
+BEGIN;
+\set fixture_sin_roles 1
+\ir fixtures/incident_city.sql
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+SELECT pg_temp.setup(ARRAY[42,43,44], ARRAY[2,6,2]);
+DO $$
+DECLARE v_d uuid; v_b1 uuid; v_b2 uuid; f jsonb; v_m text;
+BEGIN
+  v_d := pg_temp.emit('2026-10-26 03:00+00');            -- vencen W42 y W43
+  v_b1 := pg_temp.batch(v_d, 'B1', jsonb_build_array(pg_temp.stratum(42, 2, ARRAY['P1','P2'])));
+  PERFORM pg_temp.ok((SELECT status FROM public.cl_demands WHERE id = v_d) = 'open', 'falta W43: la demanda sigue open');
+  PERFORM pg_temp.ok((pg_temp.qcol(42)).status = 'fulfilled', 'W42 fulfilled');
+  PERFORM pg_temp.ok((pg_temp.qcol(43)).status = 'open' AND (pg_temp.qcol(44)).samples_carried_in = 0, 'W43 sin liquidar');
+  -- el mismo estrato en otro lote: rechazado (tambien en dry_run), nada escrito
+  v_m := pg_temp.msg_of(format('SELECT public.cl_ingest_batch(%L, %L::jsonb)', 'f0000000-0000-0000-0000-0000000000a1',
+           jsonb_build_object('demand_id', v_d, 'batch_id', 'B1-again', 'strata', jsonb_build_array(pg_temp.stratum(42, 2, ARRAY['P3'])))));
+  PERFORM pg_temp.ok(v_m LIKE '22023:CL_STRATUM_ALREADY_DELIVERED%', 'estrato repetido: ' || COALESCE(v_m, 'sin error'));
+  v_m := pg_temp.msg_of(format('SELECT public.cl_ingest_batch(%L, %L::jsonb, true)', 'f0000000-0000-0000-0000-0000000000a1',
+           jsonb_build_object('demand_id', v_d, 'batch_id', 'B1-dry', 'strata', jsonb_build_array(pg_temp.stratum(42, 2, ARRAY['P3'])))));
+  PERFORM pg_temp.ok(v_m LIKE '22023:CL_STRATUM_ALREADY_DELIVERED%', 'estrato repetido en dry_run');
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_batches WHERE demand_id = v_d) = 1, 'nada escrito');
+  -- el reenvio del mismo lote sigue devolviendo su resumen
+  PERFORM pg_temp.ok((public.cl_ingest_batch('f0000000-0000-0000-0000-0000000000a1',
+           jsonb_build_object('demand_id', v_d, 'batch_id', 'B1', 'strata', jsonb_build_array(pg_temp.stratum(42, 2, ARRAY['P1','P2']))))->>'batch')::uuid = v_b1,
+           'reenvio de B1: su resumen');
+  -- segundo lote con W43: se liquida W43 (y solo W43) y la demanda se cierra
+  v_b2 := pg_temp.batch(v_d, 'B2', jsonb_build_array(pg_temp.stratum(43, 2, ARRAY['Q1','Q2'])));
+  PERFORM pg_temp.ok((pg_temp.qcol(43)).status = 'carried' AND (pg_temp.qcol(44)).samples_carried_in = 4, 'W43 carried, W44 +4');
+  PERFORM pg_temp.ok((pg_temp.qcol(42)).status = 'fulfilled', 'W42 sigue fulfilled');
+  PERFORM pg_temp.ok((SELECT status FROM public.cl_demands WHERE id = v_d) = 'partial', 'demanda partial tras el segundo lote');
+  f := public.cl_finish_batch(v_b2);
+  PERFORM pg_temp.ok(f->>'demand_status' = 'partial' AND (pg_temp.qcol(44)).samples_carried_in = 4, 'finish idempotente, sin doble reparto');
+END $$;
+ROLLBACK;
+
+-- ===================================================================== 10. Demanda sin respuesta en 7 dias: failed + feed_silent
+BEGIN;
+\set fixture_sin_roles 1
+\ir fixtures/incident_city.sql
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+SELECT pg_temp.setup(ARRAY[42,43,44], ARRAY[2,3,3]);
+DO $$
+DECLARE v_d uuid;
+BEGIN
+  v_d := pg_temp.emit('2026-10-26 03:00+00');            -- W42 y W43
+  PERFORM pg_temp.batch(v_d, 'B1', jsonb_build_array(pg_temp.stratum(42, 2, ARRAY['P1','P2'])));
+  PERFORM pg_temp.ok(public.cl_emit_due_demands('2026-11-02 02:00+00') = 0
+                     AND (SELECT status FROM public.cl_demands WHERE id = v_d) = 'open', 'a los 6 dias y 23 h sigue open');
+  PERFORM pg_temp.ok(public.cl_emit_due_demands('2026-11-03 10:00+00') = 0, 'fuera del calendario no emite');
+  PERFORM pg_temp.ok((SELECT status FROM public.cl_demands WHERE id = v_d) = 'failed', 'demanda caducada: failed');
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_alerts WHERE alert_type = 'feed_silent' AND details->>'demand_id' = v_d::text) = 1, 'alerta feed_silent');
+  PERFORM pg_temp.ok((pg_temp.qcol(43)).status = 'pending' AND (pg_temp.qcol(43)).demands_count = 1, 'W43 (sin sorteo) vuelve a pending');
+  PERFORM pg_temp.ok((pg_temp.qcol(44)).samples_carried_in = 0, 'sin reparto');
+  PERFORM pg_temp.ok((pg_temp.qcol(42)).status = 'fulfilled', 'W42 entregada no cambia');
+END $$;
+ROLLBACK;
+
+BEGIN;
+\set fixture_sin_roles 1
+\ir fixtures/incident_city.sql
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+SELECT pg_temp.setup(ARRAY[42,43,44], ARRAY[2,3,3]);
+DO $$
+DECLARE v_d uuid;
+BEGIN
+  v_d := pg_temp.emit('2026-10-26 03:00+00');
+  PERFORM pg_temp.batch(v_d, 'B1', jsonb_build_array(pg_temp.stratum(42, 2, ARRAY['P1','P2'])));
+  UPDATE public.cl_plan_quotas SET demands_count = 3 WHERE id = pg_temp.qw(43);
+  PERFORM public.cl_emit_due_demands('2026-11-03 10:00+00');
+  PERFORM pg_temp.ok((SELECT status FROM public.cl_demands WHERE id = v_d) = 'failed', 'failed');
+  PERFORM pg_temp.ok((pg_temp.qcol(43)).status = 'carried' AND (pg_temp.qcol(44)).samples_carried_in = 3, 'demands_count 3: W43 carried, W44 +3');
+END $$;
+ROLLBACK;
+
+-- ===================================================================== 11. Recibidos sin lotes deshechos: B1 (30, deshecho) + B2 (20 de 40) -> se vuelve a pedir
+BEGIN;
+\set fixture_sin_roles 1
+\ir fixtures/incident_city.sql
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+SELECT pg_temp.setup(ARRAY[42,43], ARRAY[35,3]);
+DO $$
+DECLARE v_d uuid; v_b uuid;
+BEGIN
+  v_d := pg_temp.emit('2026-10-19 03:00+00');
+  v_b := pg_temp.batch(v_d, 'B1', jsonb_build_array(pg_temp.stratum(42, 40,
+            ARRAY(SELECT 'X' || lpad(g::text, 2, '0') FROM generate_series(1, 30) g))));
+  PERFORM public.cl_undo_batch(v_b);
+  PERFORM pg_temp.ok((pg_temp.qcol(42)).status = 'pending' AND (pg_temp.qcol(42)).samples_obtained = 0, 'tras deshacer: pending con 0');
+  v_d := pg_temp.emit('2026-10-26 03:00+00');
+  PERFORM pg_temp.batch(v_d, 'B2', jsonb_build_array(pg_temp.stratum(42, 40,
+            ARRAY(SELECT 'R' || lpad(g::text, 2, '0') FROM generate_series(1, 20) g))));
+  PERFORM pg_temp.ok((pg_temp.qcol(42)).status = 'pending' AND (pg_temp.qcol(42)).samples_obtained = 20
+                     AND (pg_temp.qcol(42)).demands_count = 2, 'poblacion 40 > 20 recibidos (sin los 30 deshechos): pending; '
+                     || row_to_json(pg_temp.qcol(42))::text);
+  PERFORM pg_temp.ok((pg_temp.qcol(43)).samples_carried_in = 0, 'sin reparto');
+END $$;
+ROLLBACK;
+
+-- ===================================================================== 12. Lotes received / rejected no se deshacen
+BEGIN;
+\set fixture_sin_roles 1
+\ir fixtures/incident_city.sql
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+SELECT pg_temp.setup(ARRAY[42,43], ARRAY[2,3]);
+DO $$
+DECLARE v_d uuid; v_rej uuid; v_rec uuid := gen_random_uuid(); v_m text;
+BEGIN
+  v_d := pg_temp.emit('2026-10-19 03:00+00');
+  v_rej := (public.cl_ingest_batch('f0000000-0000-0000-0000-0000000000a1', jsonb_build_object('demand_id', v_d, 'batch_id', 'B-REJ',
+             'strata', jsonb_build_array(pg_temp.stratum(42, 2, ARRAY['P1']) || '{"selection_method":"first_n"}'::jsonb)))->>'batch')::uuid;
+  PERFORM pg_temp.ok((SELECT status FROM public.cl_batches WHERE id = v_rej) = 'rejected', 'lote rejected');
+  v_m := pg_temp.msg_of(format('SELECT public.cl_undo_batch(%L)', v_rej));
+  PERFORM pg_temp.ok(v_m LIKE '22023:CL_BATCH_NOT_UNDOABLE%', 'rejected: ' || COALESCE(v_m, 'sin error'));
+  INSERT INTO public.cl_batches (id, account_id, demand_id, connector_batch_id, status)
+  VALUES (v_rec, 'a0000000-0000-0000-0000-000000000001', v_d, 'B-REC', 'received');
+  v_m := pg_temp.msg_of(format('SELECT public.cl_undo_batch(%L)', v_rec));
+  PERFORM pg_temp.ok(v_m LIKE '22023:CL_BATCH_NOT_UNDOABLE%', 'received: ' || COALESCE(v_m, 'sin error'));
+  PERFORM pg_temp.ok((SELECT status FROM public.cl_demands WHERE id = v_d) = 'open', 'la demanda no cambia');
 END $$;
 ROLLBACK;
