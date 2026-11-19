@@ -8,6 +8,12 @@ BEGIN IF p_cond IS NOT TRUE THEN RAISE EXCEPTION 'FAIL: %', p_msg; END IF; END $
 CREATE OR REPLACE FUNCTION pg_temp.sqlstate_of(p_sql text) RETURNS text LANGUAGE plpgsql AS $$
 BEGIN EXECUTE p_sql; RETURN NULL; EXCEPTION WHEN OTHERS THEN RETURN SQLSTATE; END $$;
 
+CREATE OR REPLACE FUNCTION pg_temp.as_user(p_uid text, p_role text) RETURNS void LANGUAGE plpgsql AS $$
+BEGIN
+  PERFORM set_config('request.jwt.claim.sub', coalesce(p_uid, ''), true);
+  PERFORM set_config('request.jwt.claim.role', coalesce(p_role, ''), true);
+END $$;
+
 BEGIN;
 \set fixture_sin_roles 1
 \ir fixtures/incident_city.sql
@@ -138,6 +144,112 @@ BEGIN
   PERFORM pg_temp.ok(pg_temp.sqlstate_of($q$UPDATE public.cl_feeds SET emit_hour = 24$q$) = '23514', 'emit_hour 24 rechazado');
   PERFORM pg_temp.ok(pg_temp.sqlstate_of($q$UPDATE public.cl_feeds SET emit_timezone = NULL, emit_days = '{1,7}', emit_hour = 0$q$) IS NULL, 'valores validos aceptados');
 END $$;
+
+-- 8. Robustez de la emision (todo en A1, zona UTC salvo donde se indica).
+UPDATE public.accounts SET timezone = 'UTC' WHERE id = 'a0000000-0000-0000-0000-000000000001';
+INSERT INTO public.cl_feeds (id, account_id, carrier_id, name, status, emit_days, emit_hour) VALUES
+  ('f0000000-0000-0000-0000-0000000000a2','a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000001','Feed A2 (zona de la cuenta)','active','{1,2,3,4,5,6,7}',3);
+-- Plan M: cuota c2 -> c1 sin punto de inicio (c2 solo tiene destino).
+INSERT INTO public.cl_plans (id, account_id, plan_name, carrier_id, product_id, total_samples, start_date, end_date, status, feed_id) VALUES
+  ('90000000-0000-0000-0000-0000000000b1','a0000000-0000-0000-0000-000000000001','M','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',6,'2026-11-16','2026-11-22','active','f0000000-0000-0000-0000-0000000000a2');
+INSERT INTO public.cl_plan_quotas (id, account_id, plan_id, origin_city_id, destination_city_id, iso_year, iso_week, period_start, period_end, samples_planned) VALUES
+  ('91000000-0000-0000-0000-0000000000c1','a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-0000000000b1','c2000000-0000-0000-0000-000000000002','c1000000-0000-0000-0000-000000000001',2026,47,'2026-11-16','2026-11-22',6);
+DO $$
+BEGIN
+  PERFORM pg_temp.ok(public.cl_emit_due_demands(TIMESTAMPTZ '2026-12-14 03:00:00+00') = 0, 'cuota sin puntos: no hay demanda');
+  PERFORM pg_temp.ok((SELECT status = 'pending' AND demands_count = 0 FROM public.cl_plan_quotas WHERE id = '91000000-0000-0000-0000-0000000000c1'), 'cuota sin puntos sigue pending');
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_alerts WHERE plan_id = '90000000-0000-0000-0000-0000000000b1' AND alert_type = 'missing_points') = 1, 'alerta missing_points');
+  PERFORM pg_temp.ok(public.cl_emit_due_demands(TIMESTAMPTZ '2026-12-14 03:30:00+00') = 0, 'segunda llamada sin demanda');
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_alerts WHERE plan_id = '90000000-0000-0000-0000-0000000000b1' AND alert_type = 'missing_points') = 1, 'alerta missing_points no se duplica el mismo dia');
+END $$;
+
+-- Zona de la cuenta NULL -> UTC; zona invalida -> UTC + alerta.
+ALTER TABLE public.accounts ALTER COLUMN timezone DROP NOT NULL;
+ALTER TABLE public.accounts DROP CONSTRAINT accounts_valid_timezone;
+UPDATE public.accounts SET timezone = NULL WHERE id = 'a0000000-0000-0000-0000-000000000001';
+INSERT INTO public.cl_plans (id, account_id, plan_name, carrier_id, product_id, total_samples, start_date, end_date, status, feed_id) VALUES
+  ('90000000-0000-0000-0000-0000000000b2','a0000000-0000-0000-0000-000000000001','P2','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',6,'2026-11-16','2026-11-22','active','f0000000-0000-0000-0000-0000000000a2');
+INSERT INTO public.cl_plan_quotas (id, account_id, plan_id, origin_city_id, destination_city_id, iso_year, iso_week, period_start, period_end, samples_planned) VALUES
+  ('91000000-0000-0000-0000-0000000000c2','a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-0000000000b2','c1000000-0000-0000-0000-000000000001','c2000000-0000-0000-0000-000000000002',2026,47,'2026-11-16','2026-11-22',6);
+DO $$
+BEGIN
+  PERFORM pg_temp.ok(public.cl_emit_due_demands(TIMESTAMPTZ '2026-12-14 03:00:00+00') = 1, 'cuenta sin zona: UTC, emite a las 03:00Z');
+  PERFORM pg_temp.ok((SELECT payload->'schedule'->>'timezone' FROM public.cl_demands WHERE plan_id = '90000000-0000-0000-0000-0000000000b2') = 'UTC', 'schedule.timezone UTC');
+  UPDATE public.accounts SET timezone = 'Mars/Base' WHERE id = 'a0000000-0000-0000-0000-000000000001';
+  UPDATE public.cl_plan_quotas SET status = 'pending' WHERE id = '91000000-0000-0000-0000-0000000000c2';
+  PERFORM pg_temp.ok(public.cl_emit_due_demands(TIMESTAMPTZ '2026-12-15 03:00:00+00') = 1, 'zona invalida: UTC, emite a las 03:00Z');
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_alerts WHERE plan_id = '90000000-0000-0000-0000-0000000000b2' AND alert_type = 'invalid_timezone') = 1, 'alerta invalid_timezone');
+  UPDATE public.accounts SET timezone = 'UTC' WHERE id = 'a0000000-0000-0000-0000-000000000001';
+END $$;
+
+-- Aislamiento: P3 falla (trigger de prueba), P4 emite igualmente.
+INSERT INTO public.cl_plans (id, account_id, plan_name, carrier_id, product_id, total_samples, start_date, end_date, status, feed_id) VALUES
+  ('90000000-0000-0000-0000-0000000000b3','a0000000-0000-0000-0000-000000000001','P3 falla','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',6,'2026-11-16','2026-11-22','active','f0000000-0000-0000-0000-0000000000a2'),
+  ('90000000-0000-0000-0000-0000000000b4','a0000000-0000-0000-0000-000000000001','P4 ok','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',6,'2026-11-16','2026-11-22','active','f0000000-0000-0000-0000-0000000000a2');
+INSERT INTO public.cl_plan_quotas (id, account_id, plan_id, origin_city_id, destination_city_id, iso_year, iso_week, period_start, period_end, samples_planned) VALUES
+  ('91000000-0000-0000-0000-0000000000c3','a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-0000000000b3','c1000000-0000-0000-0000-000000000001','c2000000-0000-0000-0000-000000000002',2026,47,'2026-11-16','2026-11-22',6),
+  ('91000000-0000-0000-0000-0000000000c4','a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-0000000000b4','c1000000-0000-0000-0000-000000000001','c2000000-0000-0000-0000-000000000002',2026,47,'2026-11-16','2026-11-22',6);
+CREATE FUNCTION public.t_fail_demand() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF NEW.plan_id = '90000000-0000-0000-0000-0000000000b3' THEN RAISE EXCEPTION 'fallo forzado'; END IF;
+  RETURN NEW;
+END $$;
+CREATE TRIGGER t_fail_demand BEFORE INSERT ON public.cl_demands FOR EACH ROW EXECUTE FUNCTION public.t_fail_demand();
+DO $$
+BEGIN
+  PERFORM pg_temp.ok(public.cl_emit_due_demands(TIMESTAMPTZ '2026-12-16 03:00:00+00') = 1, 'un plan falla y el otro emite');
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_demands WHERE plan_id = '90000000-0000-0000-0000-0000000000b4') = 1, 'P4 tiene su demanda');
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_demands WHERE plan_id = '90000000-0000-0000-0000-0000000000b3') = 0, 'P3 sin demanda');
+  PERFORM pg_temp.ok((SELECT status = 'pending' FROM public.cl_plan_quotas WHERE id = '91000000-0000-0000-0000-0000000000c3'), 'cuota de P3 intacta');
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_alerts WHERE plan_id = '90000000-0000-0000-0000-0000000000b3' AND alert_type = 'emit_failed' AND severity = 'high'
+                         AND details->>'error' = 'fallo forzado') = 1, 'alerta emit_failed con el error');
+END $$;
+DROP TRIGGER t_fail_demand ON public.cl_demands;
+
+-- Plan activo sin conector: se cierra al pasar la ventana (zona de la cuenta).
+INSERT INTO public.cl_plans (id, account_id, plan_name, carrier_id, product_id, total_samples, start_date, end_date, status) VALUES
+  ('90000000-0000-0000-0000-0000000000b5','a0000000-0000-0000-0000-000000000001','Sin feed','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',6,'2026-11-16','2026-11-22','active');
+DO $$
+BEGIN
+  PERFORM public.cl_emit_due_demands(TIMESTAMPTZ '2026-11-29 12:00:00+00');
+  PERFORM pg_temp.ok((SELECT status FROM public.cl_plans WHERE id = '90000000-0000-0000-0000-0000000000b5') = 'active', 'sin feed: aun dentro de la ventana');
+  PERFORM public.cl_emit_due_demands(TIMESTAMPTZ '2026-11-30 12:00:00+00');
+  PERFORM pg_temp.ok((SELECT status FROM public.cl_plans WHERE id = '90000000-0000-0000-0000-0000000000b5') = 'closed', 'plan sin feed se cierra');
+END $$;
+
+-- 9. Endurecimiento: CHECKs, privilegios y estado solo por funciones.
+DO $$
+DECLARE f text;
+BEGIN
+  PERFORM pg_temp.ok(pg_temp.sqlstate_of($q$UPDATE public.cl_plans SET oversampling_factor = 0.5$q$) = '23514', 'oversampling < 1 rechazado');
+  PERFORM pg_temp.ok(pg_temp.sqlstate_of($q$UPDATE public.cl_plans SET oversampling_factor = 101$q$) = '23514', 'oversampling > 100 rechazado');
+  PERFORM pg_temp.ok(pg_temp.sqlstate_of($q$UPDATE public.cl_plans SET close_lag_days = 366$q$) = '23514', 'close_lag > 365 rechazado');
+  PERFORM pg_temp.ok(pg_temp.sqlstate_of($q$UPDATE public.cl_plans SET close_lag_days = -1$q$) = '23514', 'close_lag < 0 rechazado');
+  PERFORM pg_temp.ok(pg_temp.sqlstate_of($q$UPDATE public.cl_plans SET total_samples = 0$q$) = '23514', 'total_samples 0 rechazado');
+  FOREACH f IN ARRAY ARRAY['cl_build_demand(uuid,uuid[])','cl_active_points(uuid,uuid)','cl_effective_tz(uuid,uuid)','cl_raise_alert(uuid,uuid,text,text,jsonb)'] LOOP
+    PERFORM pg_temp.ok(NOT has_function_privilege('service_role', ('public.' || f)::regprocedure, 'EXECUTE'), f || ' sin EXECUTE para service_role');
+    PERFORM pg_temp.ok(NOT has_function_privilege('authenticated', ('public.' || f)::regprocedure, 'EXECUTE'), f || ' sin EXECUTE para authenticated');
+  END LOOP;
+END $$;
+
+INSERT INTO auth.users (id, email) VALUES ('93000000-0000-0000-0000-000000000093','am@t.l');
+INSERT INTO public.profiles (id, email, full_name, role, account_id) VALUES
+  ('93000000-0000-0000-0000-000000000093','am@t.l','AM','user','a0000000-0000-0000-0000-000000000001');
+INSERT INTO public.account_user_role (account_id, user_id, role) VALUES
+  ('a0000000-0000-0000-0000-000000000001','93000000-0000-0000-0000-000000000093','account_manager');
+SET ROLE authenticated;
+SELECT pg_temp.as_user('93000000-0000-0000-0000-000000000093', 'authenticated');
+DO $$
+BEGIN
+  PERFORM pg_temp.ok(pg_temp.sqlstate_of($q$UPDATE public.cl_plans SET status = 'active' WHERE id = '90000000-0000-0000-0000-0000000000a5'$q$) = '42501', 'AM no fija status por UPDATE');
+  PERFORM pg_temp.ok(pg_temp.sqlstate_of($q$UPDATE public.cl_plans SET plan_name = 'Renombrado' WHERE id = '90000000-0000-0000-0000-0000000000a5'$q$) IS NULL, 'AM si edita el nombre');
+  INSERT INTO public.cl_plans (id, account_id, plan_name, carrier_id, product_id, total_samples, start_date, end_date, status)
+  VALUES ('90000000-0000-0000-0000-0000000000b6','a0000000-0000-0000-0000-000000000001','Nuevo','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',6,'2026-11-16','2026-11-22','active');
+  PERFORM pg_temp.ok((SELECT status FROM public.cl_plans WHERE id = '90000000-0000-0000-0000-0000000000b6') = 'draft', 'INSERT con status active nace draft');
+  PERFORM public.cl_plan_activate('90000000-0000-0000-0000-0000000000a5');
+  PERFORM pg_temp.ok((SELECT status FROM public.cl_plans WHERE id = '90000000-0000-0000-0000-0000000000a5') = 'active', 'cl_plan_activate sigue funcionando');
+END $$;
+RESET ROLE;
 
 \echo cl_demands: OK
 ROLLBACK;
