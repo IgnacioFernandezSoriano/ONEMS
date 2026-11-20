@@ -68,3 +68,9 @@ export function planWeekKeys(startDate: string, endDate: string): string[] {
   }
   return out
 }
+
+/** Página válida más cercana (0-based): si el total se reduce y la página queda fuera de rango, vuelve a la última (o a 0). */
+export function clampPage(page: number, total: number, pageSize: number = SAMPLES_PAGE_SIZE): number {
+  const last = Math.max(0, Math.ceil(total / pageSize) - 1)
+  return Math.min(Math.max(0, page), last)
+}

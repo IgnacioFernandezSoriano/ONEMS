@@ -97,7 +97,8 @@ export function useClSamples(accountId: string | null, planId: string | null, fi
       .range(from, from + SAMPLES_PAGE_SIZE - 1)
       .then(({ data, count, error: e }) => {
         if (isStale()) return
-        setError(e ?? null)
+        // 416 / PGRST103 = página fuera de rango: no es un error para el usuario, la pantalla ajusta la página.
+        setError(e && e.code !== 'PGRST103' ? e : null)
         setTotal(count ?? 0)
         setSamples(
           ((data ?? []) as any[]).map((r) => {

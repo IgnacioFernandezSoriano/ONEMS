@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { filterSamples, transitLabel, planWeekKeys } from '../carrierLink/sampleView'
+import { filterSamples, transitLabel, planWeekKeys, clampPage } from '../carrierLink/sampleView'
 
 const rows = [
   { id: 1, quota_week: '2026-W45', route_key: 'a>b', possible_misrouting: false },
@@ -28,4 +28,11 @@ describe('planWeekKeys', () => {
     const w = planWeekKeys('2026-12-21', '2027-01-10')
     expect(w).toEqual(['2026-W52', '2026-W53', '2027-W01'])
   })
+})
+
+describe('clampPage', () => {
+  it('deja una página válida', () => expect(clampPage(2, 150, 50)).toBe(2))
+  it('fuera de rango pasa a la última', () => expect(clampPage(5, 120, 50)).toBe(2))
+  it('sin resultados vuelve a 0', () => expect(clampPage(3, 0, 50)).toBe(0))
+  it('total exacto múltiplo de página', () => expect(clampPage(3, 150, 50)).toBe(2))
 })

@@ -8,7 +8,7 @@ import { SelectAccountNotice } from '@/components/carrier-link/SelectAccountNoti
 import { clErrorKey } from '@/lib/carrierLink/clErrors'
 import { useClPlans } from '@/hooks/carrierLink/useClPlans'
 import { useClSamples, type ClSampleScan } from '@/hooks/carrierLink/useClSamples'
-import { SAMPLES_PAGE_SIZE, planWeekKeys, transitLabel } from '@/lib/carrierLink/sampleView'
+import { SAMPLES_PAGE_SIZE, clampPage, planWeekKeys, transitLabel } from '@/lib/carrierLink/sampleView'
 
 const input = 'border border-gray-300 rounded-lg px-3 py-2 text-sm'
 
@@ -55,6 +55,13 @@ export function ClSamples() {
     setOpenId(null)
   }
   const lastPage = Math.max(0, Math.ceil(total / SAMPLES_PAGE_SIZE) - 1)
+
+  // Si el total se reduce (o el servidor responde 416) y la página queda fuera de rango, se ajusta y se recarga.
+  useEffect(() => {
+    if (loading) return
+    const c = clampPage(page, total)
+    if (c !== page) setPage(c)
+  }, [loading, page, total])
 
   useEffect(() => {
     if (!openId) {
@@ -238,7 +245,10 @@ export function ClSamples() {
                   <button
                     className="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50"
                     disabled={page === 0 || loading}
-                    onClick={() => setPage((p) => Math.max(0, p - 1))}
+                    onClick={() => {
+                      setPage((p) => Math.max(0, p - 1))
+                      setOpenId(null)
+                    }}
                   >
                     {t('cl.samples.prev')}
                   </button>
@@ -246,7 +256,10 @@ export function ClSamples() {
                   <button
                     className="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50"
                     disabled={page >= lastPage || loading}
-                    onClick={() => setPage((p) => p + 1)}
+                    onClick={() => {
+                      setPage((p) => p + 1)
+                      setOpenId(null)
+                    }}
                   >
                     {t('cl.samples.next')}
                   </button>
