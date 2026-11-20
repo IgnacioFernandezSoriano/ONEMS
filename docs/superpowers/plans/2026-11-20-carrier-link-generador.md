@@ -61,3 +61,13 @@ Carrier Link tab = same groups as E2E:
 - **Reporting** (proposed to owner): same report pages as E2E (they already have the origin filter).
 - **Incidencias**: only in the E2E tab (pending owner answer: also remove from Diagnosis?).
 Task 2 (menu) implements this; shared pages must be reachable from both tabs without duplicating code (same route or a carrier-link route rendering the same page with a "carrier" context prop: topology hides nodes, E2E DB pre-filters source=carrier). Permissions: shared pages keep their existing options (country_topology, carriers, e2e_sla, e2e_db…).
+
+---
+# v4 (20/11, owner): NO third tab
+Owner: "lo que cambia es la forma de obtener el dato y se adapta a cada forma (panelista o link) que irá determinado por cada carrier. Incluso dentro de un carrier podemos tener los dos sistemas de captura". → Capture method is per carrier (possibly both). Tabs stay E2E and Diagnosis only; Carrier Link items become submenus inside E2E:
+- E2E ▸ Setup: Topología del país, Carriers y Productos, E2E: SLA, Panelistas (panelists) | Puntos de lectura, Conectores (Carrier Link sub-heading).
+- E2E ▸ Asignación: sub-heading "Panelistas": Generador de Asignaciones, Balanceo de Carga, Planes de Asignación (existing) | sub-heading "Carrier Link": Generador de Asignaciones, Balanceo de Carga, Planes de Asignación (copies).
+- E2E ▸ Materiales (panelists only, unchanged); E2E ▸ Incidencias (panelists only) — moved inside E2E if today it is a separate group; Reporting unchanged; Base de datos: Base de datos E2E, API (both origins) | "Carrier Link": Muestras, Monitor de capturas.
+- Diagnosis unchanged. The Carrier Link tab and its tab button are removed; /carrier-link/* routes stay.
+Pending owner answer: per-carrier capture-method setting (Panelistas / Carrier Link / Ambos) in Carriers y Productos to filter carriers in each generator.
+Task 2 is redefined accordingly (menu inside E2E; badge "Carrier Link" on its pages; accent colour on the Carrier Link sub-headings).
