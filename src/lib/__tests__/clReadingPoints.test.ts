@@ -59,3 +59,13 @@ describe('excludeRegistered', () => {
     expect(out).toEqual([u('B', 'M2'), u('C', null)])
   })
 })
+
+describe('excludeRegistered (inactivos)', () => {
+  it('un punto inactivo no excluye su lugar', () => {
+    const out = excludeRegistered(
+      [{ place_ref: 'A', mode_ref: null, readings: 2 }],
+      [{ carrier_place_ref: 'A', carrier_mode_ref: null, is_active: false }],
+    )
+    expect(out).toHaveLength(1)
+  })
+})

@@ -152,6 +152,7 @@ export function useClReadingPoints(accountId: string | null, carrierId: string |
     const registered = ((pts.data ?? []) as any[]).map((r) => ({
       carrier_place_ref: r.carrier_place_ref as string,
       carrier_mode_ref: (r.carrier_mode_ref ?? null) as string | null,
+      is_active: r.is_active as boolean,
     }))
     setUnknown(scans.error ? [] : excludeRegistered(unknownPlaces((scans.data ?? []) as any[]), registered))
     setLoading(false)
