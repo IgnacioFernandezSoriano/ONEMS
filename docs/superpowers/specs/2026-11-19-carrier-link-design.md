@@ -47,6 +47,7 @@ Hoy ONEMS mide con envíos de prueba que mueven panelistas (E2E) y con lecturas 
 | R20 | El estándar de entrega admite, para este tipo de lectura, **un tiempo añadido** que hace equivalentes los análisis con los de panelistas. |
 | R21 | Permisos por rol según la tabla de §7. |
 | R22 | La **barrera de conexión** (el conector del muro) define **cómo** (modelo de extracción) y **cuándo** (calendario local: días de la semana y hora) se conecta ONEMS con cada carrier, para no interferir con su base de datos. Las peticiones solo se emiten en ese hueco. |
+| R23 | (20/11) Se seleccionan solo registros **ya cerrados** (lectura de inicio y de llegada): en la salida no se conoce el destino y no se podría asignar la ruta del plan. Se acepta no ver los envíos que nunca llegan o que se quedan en otra ciudad; no habrá muestra de seguimiento de salidas. No hay rutas dentro de una misma ciudad. El estándar de entrega solo afecta al análisis de informes, nunca a la captura ni al plan. |
 
 ### 1.2. De diseño (revisables)
 
