@@ -79,6 +79,8 @@ export function useDeliveryStandards() {
     standard_time?: number | null
     success_percentage?: number | null
     time_unit: 'hours' | 'days'
+    cl_first_mile_time?: number
+    cl_last_mile_time?: number
   }) => {
     const { error } = await supabase
       .from('delivery_standards')
@@ -111,6 +113,8 @@ export function useDeliveryStandards() {
       standard_time?: number | null
       success_percentage?: number | null
       time_unit?: 'hours' | 'days'
+      cl_first_mile_time?: number
+      cl_last_mile_time?: number
     }
   ) => {
     const { error } = await supabase
@@ -128,6 +132,8 @@ export function useDeliveryStandards() {
       standard_time?: number | null
       success_percentage?: number | null
       time_unit?: 'hours' | 'days'
+      cl_first_mile_time?: number
+      cl_last_mile_time?: number
     }
   ) => {
     const { error } = await supabase

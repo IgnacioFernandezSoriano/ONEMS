@@ -5395,3 +5395,333 @@ onedb.source_panelist,Panelist
 onedb.source_carrier,Carrier
 onedb.measured_time,Measured
 onedb.equivalence_added,Equivalence added
+cl.error.cl_bad_payload,The data sent is not valid.
+cl.error.cl_batch_already_undone,This batch has already been undone.
+cl.error.cl_batch_not_found,The batch was not found.
+cl.error.cl_batch_not_undoable,This batch can no longer be undone.
+cl.error.cl_batch_not_validated,The batch has not been validated yet.
+cl.error.cl_demand_not_open,"The demand is not open, so it cannot be changed."
+cl.error.cl_duplicate_quota,There is already a quota with the same values in this plan.
+cl.error.cl_feed_carrier_mismatch,The connector belongs to a different carrier than the plan.
+cl.error.cl_feed_paused,The connector is paused. Resume it to continue.
+cl.error.cl_mapping_incomplete,The field mapping is incomplete. Complete it before continuing.
+cl.error.cl_missing_points,Some cities in the plan are missing start or end points.
+cl.error.cl_no_feed,The plan has no connector assigned.
+cl.error.cl_no_quotas,The plan has no quotas yet. Add at least one.
+cl.error.cl_plan_closed,The plan is closed and cannot be changed.
+cl.error.cl_plan_locked_field,This field can no longer be changed because the plan has already started.
+cl.error.cl_plan_not_draft,Only plans in draft status can be changed this way.
+cl.error.cl_quota_locked,This quota can no longer be changed because it already has samples.
+cl.error.cl_quota_not_found,The quota no longer exists. Reload the page.
+cl.error.cl_stratum_already_delivered,A stratum of this batch was already delivered for this demand.
+cl.error.cl_too_many_rows,The file has too many rows. Split it into smaller files.
+cl.error.cl_unknown_stratum,Some rows refer to a city or route that is not in the plan.
+cl.error.cl_forbidden,You do not have permission to do this in Carrier Link.
+cl.error.cl_demand_testing_dry_run_only,This demand is in testing mode and only allows a trial run.
+cl.error.forbidden,You do not have permission to do this.
+cl.error.generic,Something went wrong. Please try again.
+cl.select_account.title,Select an account
+cl.select_account.body,Choose an account in the top bar to work with Carrier Link.
+cl.plans.title,Sampling plans
+cl.plans.help,Define which routes and volumes are sampled from carrier scans.
+cl.samples.title,Samples
+cl.samples.help,Review the samples generated from carrier scans.
+cl.reading_points.title,Reading points
+cl.reading_points.help,Manage the carrier points where scans are captured.
+cl.connectors.title,Connectors
+cl.connectors.help,Configure how carrier scan data reaches ONEMS.
+cl.monitor.title,Capture monitor
+cl.monitor.help,Follow the status of data capture from carriers.
+cl.reading_points.carrier,Carrier
+cl.reading_points.add,Add reading point
+cl.reading_points.edit,Edit reading point
+cl.reading_points.place,Place (carrier code)
+cl.reading_points.mode,Mode
+cl.reading_points.mode_hint,Leave empty to accept any mode at this place.
+cl.reading_points.any_mode,Any mode
+cl.reading_points.center,Postal center
+cl.reading_points.select_center,Select a postal center
+cl.reading_points.center_no_city,This center has no city: it can only be an intermediate point.
+cl.reading_points.city,City
+cl.reading_points.role,Role in the route
+cl.reading_points.role.origin,Start
+cl.reading_points.role.destination,End
+cl.reading_points.role.both,Start and end
+cl.reading_points.role.none,Intermediate
+cl.reading_points.name,Name (optional)
+cl.reading_points.empty,No reading points for this carrier yet.
+cl.reading_points.no_carriers,There are no active carriers in this account.
+cl.reading_points.unknown_title,Places without a reading point
+cl.reading_points.unknown_help,Scans from the last 90 days arrived from these places and could not be matched.
+cl.reading_points.readings,Readings
+cl.reading_points.register,Register
+cl.reading_points.delete_title,Delete reading point
+cl.reading_points.delete_confirm,Delete the reading point {name}?
+cl.reading_points.error.no_account,Select an account first.
+cl.reading_points.error.missing_place,Enter the place code.
+cl.reading_points.error.missing_carrier,Select a carrier.
+cl.reading_points.error.missing_center,Select a postal center.
+cl.reading_points.error.duplicate,There is already a reading point for this carrier with this place and mode.
+cl.connectors.carrier,Carrier
+cl.connectors.connector,Connector
+cl.connectors.add,New connector
+cl.connectors.edit,Edit connector
+cl.connectors.empty,This carrier has no connector yet.
+cl.connectors.name,Name
+cl.connectors.extraction_model,Extraction model
+cl.connectors.emit_days,Request days
+cl.connectors.emit_hour,Hour
+cl.connectors.emit_timezone,Time zone
+cl.connectors.account_timezone,(account time zone)
+cl.connectors.calendar_hint,Requests to the carrier are sent on these days and at this hour. Leave the time zone empty to use the account one (e.g. Europe/Madrid).
+cl.connectors.calendar,Calendar
+cl.connectors.last_batch,Last batch
+cl.connectors.last_error,Last error
+cl.connectors.testing_hint,In testing mode the connector only accepts trial runs; no samples are created.
+cl.connectors.mapping_incomplete,The field equivalences are incomplete: the carrier data cannot be read yet.
+cl.connectors.status.testing,Testing
+cl.connectors.status.active,Active
+cl.connectors.status.paused,Paused
+cl.connectors.set_status.testing,Back to testing
+cl.connectors.set_status.active,Activate
+cl.connectors.set_status.paused,Pause
+cl.connectors.status_confirm.testing,The connector will only accept trial runs again.
+cl.connectors.status_confirm.active,The connector will receive real batches and create samples. Open requests in testing mode will be closed.
+cl.connectors.status_confirm.paused,The connector will stop receiving batches and no requests will be sent until it is resumed.
+cl.connectors.delete_title,Delete connector
+cl.connectors.delete_confirm,Delete the connector {name}?
+cl.connectors.error.name_required,Enter a name for the connector.
+cl.connectors.error.no_days,Choose at least one day.
+cl.connectors.error.bad_day,The days are not valid.
+cl.connectors.error.bad_hour,The hour must be between 00:00 and 23:00.
+cl.connectors.error.duplicate,That value already exists for this carrier.
+cl.connectors.error.in_use,It cannot be deleted because it is in use (keys or plans). Pause it instead.
+cl.connectors.error.invalid_value,Some value is not valid (check the time zone).
+cl.connectors.fields.title,Field equivalences
+cl.connectors.fields.help,Which carrier field holds each piece of data. Shared by all connectors of this carrier.
+cl.connectors.fields.missing,Required fields missing: {fields}
+cl.connectors.fields.standard,ONEMS field
+cl.connectors.fields.carrier_field,Carrier field
+cl.connectors.fields.format,Format
+cl.connectors.fields.timezone,Time zone
+cl.connectors.field.item_id,Item identifier
+cl.connectors.field.product,Product
+cl.connectors.field.scan_at,Scan date and time
+cl.connectors.field.place_ref,Place
+cl.connectors.field.mode_ref,Mode
+cl.connectors.values.title,Product equivalences
+cl.connectors.values.help,Translate the carrier product values into ONEMS products.
+cl.connectors.values.empty,No product equivalences yet.
+cl.connectors.values.carrier_value,Carrier value
+cl.connectors.values.product,ONEMS product
+cl.connectors.values.select_product,Select a product
+cl.connectors.extras.title,Allowed extra fields
+cl.connectors.extras.help,Other carrier fields that are kept with each scan. Any other field is ignored.
+cl.connectors.extras.empty,No extra fields.
+cl.connectors.extras.field,Carrier field
+cl.connectors.keys.title,Connector keys
+cl.connectors.keys.help,The carrier uses a key to send its batches. Only a superadmin or the UPU Account Manager can issue keys.
+cl.connectors.keys.invalid,Check the name and the expiry date (it must be in the future).
+cl.connectors.keys.empty,This connector has no keys.
+cl.connectors.keys.name,Name
+cl.connectors.keys.prefix,Prefix
+cl.connectors.keys.expires,Expires
+cl.connectors.keys.expires_optional,Expires (optional)
+cl.connectors.keys.last_used,Last used
+cl.connectors.keys.never,Never
+cl.connectors.keys.inactive,Deactivated
+cl.connectors.keys.deactivate_confirm,Deactivate this key? The carrier will no longer be able to use it.
+cl.connectors.keys.new,New key
+cl.connectors.keys.issue,Issue key
+cl.connectors.dry_run.title,Test a batch (trial run)
+cl.connectors.dry_run.help,Upload a batch file in JSON format. It is checked as if it were real but nothing is saved.
+cl.connectors.dry_run.choose,Choose JSON file
+cl.connectors.dry_run.running,Checking...
+cl.connectors.dry_run.bad_json,The file is not valid JSON.
+cl.connectors.dry_run.replayed,This batch was already tested: the result shown is the one saved at that time.
+cl.connectors.dry_run.validated,The batch would be accepted. Result per stratum:
+cl.connectors.dry_run.rejected,The batch would be rejected.
+cl.connectors.dry_run.bad_method,The selection method is not the expected one ({expected}).
+cl.connectors.dry_run.stratum,Stratum
+cl.connectors.dry_run.rows,Scans
+cl.connectors.dry_run.candidates,Candidates
+cl.connectors.dry_run.valid,Valid
+cl.connectors.dry_run.rejected_by_reason,Rejected by reason
+cl.connectors.dry_run.rows_rejected,Scans rejected
+cl.reason.already_sampled,Already sampled
+cl.reason.bad_timestamp,Wrong date or time
+cl.reason.bad_value,Wrong value
+cl.reason.end_out_of_period,End outside the period
+cl.reason.missing_field,Missing field
+cl.reason.no_end,No end scan
+cl.reason.no_start,No start scan
+cl.reason.product_mismatch,Different product
+cl.reason.same_reading,Start and end are the same scan
+cl.reason.start_after_end,Start after end
+cl.reason.unknown_product,Unknown product
+cl.reason.unknown_reading_point,Unknown reading point
+cl.plans.new,New plan
+cl.plans.edit,Edit plan
+cl.plans.name,Name
+cl.plans.product,Product
+cl.plans.carrier,Carrier
+cl.plans.connector,Connector
+cl.plans.no_connector,No connector yet
+cl.plans.connector_hint,Only connectors of the same carrier. The plan cannot be activated without one.
+cl.plans.select,Select...
+cl.plans.start,Start date
+cl.plans.end,End date
+cl.plans.period,Period
+cl.plans.total,Total samples
+cl.plans.total_hint,"If you change the total or the dates, generate and save the quotas again."
+cl.plans.status,Status
+cl.plans.status.draft,Draft
+cl.plans.status.active,Active
+cl.plans.status.closed,Closed
+cl.plans.empty,There are no plans yet.
+cl.plans.samples,{count} samples
+cl.plans.feed_diagnosis,Connector diagnosis (keep extra data for analysis)
+cl.plans.locked_hint,"The plan is no longer a draft: carrier, product, connector and start date cannot be changed."
+cl.plans.error.no_account,Select an account first.
+cl.plans.error.bad_period,The end date cannot be before the start date.
+cl.plans.error.bad_total,The total must be a whole number of at least 1.
+cl.plans.error.missing_field,"Fill in the name, carrier, product and dates."
+cl.plans.generate,Generate quotas
+cl.plans.no_routes,The carrier has no active reading points with a start and an end city: there are no routes.
+cl.plans.preview_title,Preview (not saved yet)
+cl.plans.save_quotas,Save quotas
+cl.plans.saving_quotas,Saving {count} quotas...
+cl.plans.discard,Discard
+cl.plans.quotas_saved,{count} quotas saved.
+cl.plans.quotas_title,Quotas
+cl.plans.no_quotas,"This plan has no quotas yet. Use ""Generate quotas""."
+cl.plans.missing_points_title,Reading points missing
+cl.plans.missing_points_help,Register an active point of the carrier in these cities before activating the plan.
+cl.plans.missing.origin,no start point
+cl.plans.missing.destination,no end point
+cl.plans.missing_standards_title,{count} routes without a delivery standard
+cl.plans.missing_standards_help,"These routes are sampled, but without a standard the on-time result cannot be calculated. It does not block activation."
+cl.plans.no_standard,counted without on-time
+cl.plans.more,and {count} more (marked with ⚠ in the table)
+cl.plans.activate,Activate plan
+cl.plans.activate_confirm,"Activate the plan {name}? Afterwards the carrier, product, connector, start date and quotas can no longer be changed."
+cl.plans.activate_blocked,The plan cannot be activated while reading points are missing.
+cl.plans.matrix.filter,Filter by route...
+cl.plans.matrix.by_week,By week
+cl.plans.matrix.by_month,By month
+cl.plans.matrix.summary,"{routes} routes, {total} samples"
+cl.plans.matrix.legend,Each cell: planned (+carried over).
+cl.plans.matrix.legend_obtained,Each cell: planned (+carried over) ✓obtained.
+cl.plans.matrix.expand_hint,Open an origin city to see its routes; above {cells} cells only one city stays open.
+cl.plans.matrix.no_match,No route matches the filter.
+cl.plans.matrix.route,Route
+cl.plans.matrix.total,Total
+cl.plans.matrix.routes,{count} routes
+cl.plans.error.quotas_mismatch,The quotas do not match the plan dates: generate them again.
+cl.plans.regenerate_notice,The total or the dates have changed: generate and save the quotas again.
+cl.samples.plan,Plan
+cl.samples.week,Week
+cl.samples.all,All
+cl.samples.origin,Origin
+cl.samples.destination,Destination
+cl.samples.misrouted_only,Only possible misrouting
+cl.samples.item,Item
+cl.samples.route,Route
+cl.samples.start,Start
+cl.samples.end,End
+cl.samples.transit,Transit
+cl.samples.transit_value,{days} days ({hours} h)
+cl.samples.on_time,On time
+cl.samples.yes,Yes
+cl.samples.no,No
+cl.samples.misrouted,Possible misrouting
+cl.samples.empty,There are no samples for these filters.
+cl.samples.total,{count} samples
+cl.samples.prev,Previous
+cl.samples.next,Next
+cl.samples.page,Page {page} of {pages}
+cl.samples.scans,Scans
+cl.samples.close,Close
+cl.samples.no_scans,This sample has no scans.
+cl.samples.role.start,Start scan
+cl.samples.role.end,End scan
+cl.samples.role.intermediate,Intermediate scan
+cl.monitor.plan,Plan
+cl.monitor.all_plans,All plans
+cl.monitor.demands,Requests to the carrier (including test requests)
+cl.monitor.demand.open,Open
+cl.monitor.demand.fulfilled,Fulfilled
+cl.monitor.demand.partial,Partial
+cl.monitor.demand.failed,Failed
+cl.monitor.batches,Batches received
+cl.monitor.batches_empty,No batches yet.
+cl.monitor.col.date,Received
+cl.monitor.col.status,Status
+cl.monitor.col.shipments,Shipments
+cl.monitor.col.rejected,Rejected
+cl.monitor.col.selected,Selected
+cl.monitor.batch.received,Received
+cl.monitor.batch.validated,Validated
+cl.monitor.batch.sampled,Sampled
+cl.monitor.batch.rejected,Rejected
+cl.monitor.batch.undone,Undone
+cl.monitor.batch.expired,Expired
+cl.monitor.undo,Undo
+cl.monitor.undo_title,Undo this batch?
+cl.monitor.undo_effect,The samples selected from this batch will be removed from the E2E reports and the affected quotas will be recalculated.
+cl.monitor.undo_confirm,"Yes, undo batch"
+cl.monitor.undo_cancel,Cancel
+cl.monitor.undo_done,Batch undone. Quotas back to pending: {pending}; carried over (needs review): {carried}; kept open by another request: {kept}.
+cl.monitor.alerts,Alerts
+cl.monitor.alerts_empty,No alerts.
+cl.monitor.alert_filter_open,Open only
+cl.monitor.alert_filter_all,All
+cl.monitor.alert.open,Open
+cl.monitor.alert.acknowledged,Seen
+cl.monitor.alert.dismissed,Dismissed
+cl.monitor.acknowledge,Mark as seen
+cl.monitor.dismiss,Dismiss
+cl.monitor.severity.low,Low
+cl.monitor.severity.medium,Medium
+cl.monitor.severity.high,High
+cl.monitor.total,{count} in total
+cl.alert.insufficient_candidates,Not enough candidates
+cl.alert.empty_stratum,Empty stratum
+cl.alert.population_drop,Population dropped
+cl.alert.population_incoherent,Incoherent population
+cl.alert.suspicious_distribution,Suspicious distribution
+cl.alert.late_batch,Late batch
+cl.alert.unknown_product,Unknown product
+cl.alert.unknown_reading_point,Unknown reading point
+cl.alert.possible_misrouting,Possible misrouted shipment
+cl.alert.missing_standard,Missing delivery standard
+cl.alert.rejected_ratio,Many readings rejected
+cl.alert.quota_unfilled,Quota not filled
+cl.alert.feed_silent,Carrier did not answer
+cl.alert.missing_points,Missing start or end points
+cl.alert.invalid_timezone,Invalid account time zone
+cl.alert.emit_failed,Request could not be sent
+cl.alert.selection_method,Wrong selection method
+cl.alert.reader_without_city,Reader without city
+cl.alert.undo_after_carry,Batch undone after quota carry-over
+cl.alert.route,Route: {origin} -> {destination}
+cl.alert.detail.insufficient_candidates,{valid} valid candidates for {required} samples required.
+cl.alert.detail.quota_unfilled,{missing} samples missing out of {planned} planned.
+cl.alert.detail.rejected_ratio,{rejected} of {candidates} readings rejected ({percent}%).
+cl.alert.detail.population_incoherent,The carrier reports a population of {population} but sent {candidates} candidates.
+cl.alert.detail.suspicious_distribution,All {samples} samples were delivered on time.
+cl.alert.detail.missing_points,Start points: {start}; end points: {end}.
+cl.alert.detail.items,Items: {items}
+cl.alert.detail.products,Products received: {values}
+cl.alert.detail.points,Reading points: {points}
+cl.alert.detail.feed_silent,Request of {date} was never answered.
+cl.alert.detail.selection_method,Expected method: {expected}.
+hc.delivery_standards.cl_first_mile,Carrier first leg
+hc.delivery_standards.cl_last_mile,Carrier last leg
+hc.delivery_standards.cl_equivalence_tip,Only added to carrier samples
+hc.delivery_standard_form.cl_equivalence_invalid,Invalid first/last leg time (use a number >= 0)
+hc.delivery_standard_form.cl_first_mile_time,First-leg equivalence time
+hc.delivery_standard_form.cl_last_mile_time,Last-leg equivalence time
+help_center.doc.carrier_link.title,Carrier Link
+help_center.doc.carrier_link.desc,"What Carrier Link is, the order to set it up in, what each screen does and what each alert means."
+cl.help_link,Help

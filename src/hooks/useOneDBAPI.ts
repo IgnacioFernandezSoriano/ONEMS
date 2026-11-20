@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { useEffectiveAccountId } from './useEffectiveAccountId'
 import { useLatestRequest } from '../lib/latestRequest'
+import { useIsUpuAccountManager } from './useIsUpuAccountManager'
 
 export interface ApiKey {
   id: string
@@ -37,20 +38,11 @@ export function useOneDBAPI() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [usageStats, setUsageStats] = useState<ApiUsageStats | null>(null)
-  const [isUpuAm, setIsUpuAm] = useState(false)
   const beginKeyLoad = useLatestRequest()
   const beginStatsLoad = useLatestRequest()
 
   // Gestionar claves: superadmin o UPU Account Manager de la cuenta (el servidor lo vuelve a comprobar).
-  useEffect(() => {
-    setIsUpuAm(false)
-    if (!accountId || profile?.role === 'superadmin') return
-    let cancelled = false
-    supabase.rpc('is_upu_account_manager', { p_account_id: accountId }).then(({ data, error }) => {
-      if (!cancelled && !error) setIsUpuAm(data === true)
-    })
-    return () => { cancelled = true }
-  }, [accountId, profile?.role])
+  const { isUpuAm } = useIsUpuAccountManager(accountId ?? null)
   const canManageKeys = profile?.role === 'superadmin' || isUpuAm
 
   useEffect(() => {

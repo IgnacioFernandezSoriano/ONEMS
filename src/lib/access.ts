@@ -106,11 +106,15 @@ export const ROUTE_OPTION: Record<string, AccessOption | 'superadmin' | 'open'> 
   '/incidents/panelist-reported': 'reported_incidents',
   '/incidents/receipts': 'receipts',
   '/help-center': 'help_center',
+  '/carrier-link/plans': 'cl_plans',
+  '/carrier-link/samples': 'cl_samples',
+  '/carrier-link/reading-points': 'cl_reading_points',
+  '/carrier-link/connectors': 'cl_connectors',
+  '/carrier-link/monitor': 'cl_monitor',
 }
 
 /** Ruta de entrada de cada opción (para elegir la primera pantalla permitida). */
-// Las opciones cl_* (Carrier Link) no tienen ruta hasta la fase 2.
-const OPTION_ROUTE: Partial<Record<AccessOption, string>> = {
+export const OPTION_ROUTE: Partial<Record<AccessOption, string>> = {
   dashboard: '/dashboard',
   topology: '/topology',
   carriers: '/carriers',
@@ -127,6 +131,11 @@ const OPTION_ROUTE: Partial<Record<AccessOption, string>> = {
   e2e_db: '/one-db',
   e2e_db_api: '/one-db-api',
   postal_centers: '/postal-centers',
+  cl_plans: '/carrier-link/plans',
+  cl_samples: '/carrier-link/samples',
+  cl_reading_points: '/carrier-link/reading-points',
+  cl_connectors: '/carrier-link/connectors',
+  cl_monitor: '/carrier-link/monitor',
   readers_management: '/readers-management',
   segment_sla: '/slas-configuration',
   route_analysis: '/diagnosis/route-path-analysis',

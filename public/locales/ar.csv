@@ -5387,3 +5387,333 @@ onedb.source_panelist,مشارك
 onedb.source_carrier,ناقل
 onedb.measured_time,المقاس
 onedb.equivalence_added,الزمن المكافئ المضاف
+cl.error.cl_bad_payload,البيانات المرسلة غير صالحة.
+cl.error.cl_batch_already_undone,تم التراجع عن هذه الدفعة مسبقًا.
+cl.error.cl_batch_not_found,لم يتم العثور على الدفعة.
+cl.error.cl_batch_not_undoable,لا يمكن التراجع عن هذه الدفعة بعد الآن.
+cl.error.cl_batch_not_validated,لم يتم التحقق من الدفعة بعد.
+cl.error.cl_demand_not_open,الطلب غير مفتوح، لذا لا يمكن تعديله.
+cl.error.cl_duplicate_quota,توجد حصة بالقيم نفسها في هذه الخطة.
+cl.error.cl_feed_carrier_mismatch,الموصل تابع لناقل مختلف عن ناقل الخطة.
+cl.error.cl_feed_paused,الموصل متوقف مؤقتًا. أعد تشغيله للمتابعة.
+cl.error.cl_mapping_incomplete,ربط الحقول غير مكتمل. أكمله قبل المتابعة.
+cl.error.cl_missing_points,تنقص نقاط البداية أو النهاية في بعض مدن الخطة.
+cl.error.cl_no_feed,لا يوجد موصل مرتبط بالخطة.
+cl.error.cl_no_quotas,لا تحتوي الخطة على حصص بعد. أضف حصة واحدة على الأقل.
+cl.error.cl_plan_closed,الخطة مغلقة ولا يمكن تعديلها.
+cl.error.cl_plan_locked_field,لم يعد بالإمكان تغيير هذا الحقل لأن الخطة بدأت بالفعل.
+cl.error.cl_plan_not_draft,لا يمكن تعديل بهذه الطريقة إلا الخطط في حالة المسودة.
+cl.error.cl_quota_locked,لم يعد بالإمكان تغيير هذه الحصة لأنها تحتوي على عينات بالفعل.
+cl.error.cl_quota_not_found,لم تعد هذه الحصة موجودة. أعد تحميل الصفحة.
+cl.error.cl_stratum_already_delivered,تم بالفعل تسليم طبقة من هذه الدفعة لهذا الطلب.
+cl.error.cl_too_many_rows,يحتوي الملف على عدد كبير جدًا من الصفوف. قسّمه إلى ملفات أصغر.
+cl.error.cl_unknown_stratum,تشير بعض الصفوف إلى مدينة أو مسار غير موجود في الخطة.
+cl.error.cl_forbidden,ليس لديك إذن للقيام بذلك في Carrier Link.
+cl.error.cl_demand_testing_dry_run_only,هذا الطلب في وضع الاختبار ويسمح بتشغيل تجريبي فقط.
+cl.error.forbidden,ليس لديك إذن للقيام بذلك.
+cl.error.generic,حدث خطأ ما. حاول مرة أخرى.
+cl.select_account.title,اختر حسابًا
+cl.select_account.body,اختر حسابًا من الشريط العلوي للعمل مع Carrier Link.
+cl.plans.title,خطط أخذ العينات
+cl.plans.help,حدد المسارات والأحجام التي يتم أخذ عينات منها من عمليات مسح الناقل.
+cl.samples.title,العينات
+cl.samples.help,راجع العينات الناتجة عن عمليات مسح الناقل.
+cl.reading_points.title,نقاط القراءة
+cl.reading_points.help,أدر نقاط الناقل التي يتم فيها التقاط عمليات المسح.
+cl.connectors.title,الموصلات
+cl.connectors.help,اضبط كيفية وصول بيانات مسح الناقل إلى ONEMS.
+cl.monitor.title,مراقب الالتقاط
+cl.monitor.help,تابع حالة التقاط البيانات من الناقلين.
+cl.reading_points.carrier,الناقل
+cl.reading_points.add,إضافة نقطة قراءة
+cl.reading_points.edit,تعديل نقطة القراءة
+cl.reading_points.place,المكان (رمز الناقل)
+cl.reading_points.mode,الوضع
+cl.reading_points.mode_hint,اتركه فارغا لقبول أي وضع في هذا المكان.
+cl.reading_points.any_mode,أي وضع
+cl.reading_points.center,المركز البريدي
+cl.reading_points.select_center,اختر مركزا بريديا
+cl.reading_points.center_no_city,هذا المركز بلا مدينة: يمكن أن يكون نقطة وسيطة فقط.
+cl.reading_points.city,المدينة
+cl.reading_points.role,الدور في المسار
+cl.reading_points.role.origin,البداية
+cl.reading_points.role.destination,النهاية
+cl.reading_points.role.both,البداية والنهاية
+cl.reading_points.role.none,وسيط
+cl.reading_points.name,الاسم (اختياري)
+cl.reading_points.empty,لا توجد نقاط قراءة لهذا الناقل بعد.
+cl.reading_points.no_carriers,لا يوجد ناقلون نشطون في هذا الحساب.
+cl.reading_points.unknown_title,أماكن بلا نقطة قراءة
+cl.reading_points.unknown_help,وصلت خلال آخر 90 يوما عمليات مسح من هذه الأماكن دون مطابقة.
+cl.reading_points.readings,القراءات
+cl.reading_points.register,تسجيل
+cl.reading_points.delete_title,حذف نقطة القراءة
+cl.reading_points.delete_confirm,هل تريد حذف نقطة القراءة {name}؟
+cl.reading_points.error.no_account,اختر حسابا أولا.
+cl.reading_points.error.missing_place,أدخل رمز المكان.
+cl.reading_points.error.missing_carrier,اختر ناقلا.
+cl.reading_points.error.missing_center,اختر مركزا بريديا.
+cl.reading_points.error.duplicate,توجد بالفعل نقطة قراءة لهذا الناقل بنفس المكان والوضع.
+cl.connectors.carrier,شركة النقل
+cl.connectors.connector,الموصل
+cl.connectors.add,موصل جديد
+cl.connectors.edit,تعديل الموصل
+cl.connectors.empty,لا يوجد موصل لشركة النقل هذه بعد.
+cl.connectors.name,الاسم
+cl.connectors.extraction_model,نموذج الاستخراج
+cl.connectors.emit_days,أيام الطلب
+cl.connectors.emit_hour,الساعة
+cl.connectors.emit_timezone,المنطقة الزمنية
+cl.connectors.account_timezone,(منطقة الحساب الزمنية)
+cl.connectors.calendar_hint,تُرسل الطلبات إلى شركة النقل في هذه الأيام وفي هذه الساعة. اترك المنطقة الزمنية فارغة لاستخدام منطقة الحساب (مثل Europe/Madrid).
+cl.connectors.calendar,الجدول
+cl.connectors.last_batch,آخر دفعة
+cl.connectors.last_error,آخر خطأ
+cl.connectors.testing_hint,في وضع الاختبار يقبل الموصل التجارب فقط؛ ولا تُنشأ عينات.
+cl.connectors.mapping_incomplete,مطابقات الحقول غير مكتملة: لا يمكن قراءة بيانات شركة النقل بعد.
+cl.connectors.status.testing,اختبار
+cl.connectors.status.active,نشط
+cl.connectors.status.paused,متوقف مؤقتًا
+cl.connectors.set_status.testing,العودة إلى الاختبار
+cl.connectors.set_status.active,تفعيل
+cl.connectors.set_status.paused,إيقاف مؤقت
+cl.connectors.status_confirm.testing,سيقبل الموصل التجارب فقط من جديد.
+cl.connectors.status_confirm.active,سيستقبل الموصل دفعات حقيقية وينشئ عينات. ستُغلق الطلبات المفتوحة في وضع الاختبار.
+cl.connectors.status_confirm.paused,سيتوقف الموصل عن استقبال الدفعات ولن تُرسل طلبات حتى يُستأنف.
+cl.connectors.delete_title,حذف الموصل
+cl.connectors.delete_confirm,هل تريد حذف الموصل {name}؟
+cl.connectors.error.name_required,أدخل اسمًا للموصل.
+cl.connectors.error.no_days,اختر يومًا واحدًا على الأقل.
+cl.connectors.error.bad_day,الأيام غير صالحة.
+cl.connectors.error.bad_hour,يجب أن تكون الساعة بين 00:00 و23:00.
+cl.connectors.error.duplicate,هذه القيمة موجودة بالفعل لشركة النقل هذه.
+cl.connectors.error.in_use,لا يمكن حذفه لأنه قيد الاستخدام (مفاتيح أو خطط). أوقفه مؤقتًا بدلًا من ذلك.
+cl.connectors.error.invalid_value,إحدى القيم غير صالحة (تحقق من المنطقة الزمنية).
+cl.connectors.fields.title,مطابقة الحقول
+cl.connectors.fields.help,أي حقل لدى شركة النقل يحتوي كل معلومة. مشترك بين جميع موصلات شركة النقل هذه.
+cl.connectors.fields.missing,حقول إلزامية مفقودة: {fields}
+cl.connectors.fields.standard,حقل ONEMS
+cl.connectors.fields.carrier_field,حقل شركة النقل
+cl.connectors.fields.format,التنسيق
+cl.connectors.fields.timezone,المنطقة الزمنية
+cl.connectors.field.item_id,معرّف الإرسالية
+cl.connectors.field.product,المنتج
+cl.connectors.field.scan_at,تاريخ ووقت القراءة
+cl.connectors.field.place_ref,المكان
+cl.connectors.field.mode_ref,الوضع
+cl.connectors.values.title,مطابقة المنتجات
+cl.connectors.values.help,حوّل قيم منتجات شركة النقل إلى منتجات ONEMS.
+cl.connectors.values.empty,لا توجد مطابقات للمنتجات بعد.
+cl.connectors.values.carrier_value,قيمة شركة النقل
+cl.connectors.values.product,منتج ONEMS
+cl.connectors.values.select_product,اختر منتجًا
+cl.connectors.extras.title,الحقول الإضافية المسموح بها
+cl.connectors.extras.help,حقول أخرى لدى شركة النقل تُحفظ مع كل قراءة. يُتجاهل أي حقل آخر.
+cl.connectors.extras.empty,لا توجد حقول إضافية.
+cl.connectors.extras.field,حقل شركة النقل
+cl.connectors.keys.title,مفاتيح الموصل
+cl.connectors.keys.help,تستخدم شركة النقل مفتاحًا لإرسال دفعاتها. يمكن فقط للمشرف العام أو UPU Account Manager إصدار المفاتيح.
+cl.connectors.keys.invalid,تحقق من الاسم وتاريخ الانتهاء (يجب أن يكون في المستقبل).
+cl.connectors.keys.empty,لا توجد مفاتيح لهذا الموصل.
+cl.connectors.keys.name,الاسم
+cl.connectors.keys.prefix,البادئة
+cl.connectors.keys.expires,تنتهي في
+cl.connectors.keys.expires_optional,تاريخ الانتهاء (اختياري)
+cl.connectors.keys.last_used,آخر استخدام
+cl.connectors.keys.never,أبدًا
+cl.connectors.keys.inactive,معطّل
+cl.connectors.keys.deactivate_confirm,هل تريد تعطيل هذا المفتاح؟ لن تتمكن شركة النقل من استخدامه بعد الآن.
+cl.connectors.keys.new,مفتاح جديد
+cl.connectors.keys.issue,إصدار المفتاح
+cl.connectors.dry_run.title,اختبار دفعة (تجربة)
+cl.connectors.dry_run.help,حمّل ملف دفعة بتنسيق JSON. يُفحص كما لو كان حقيقيًا ولكن لا يُحفظ شيء.
+cl.connectors.dry_run.choose,اختر ملف JSON
+cl.connectors.dry_run.running,جارٍ الفحص...
+cl.connectors.dry_run.bad_json,الملف ليس JSON صالحًا.
+cl.connectors.dry_run.replayed,سبق اختبار هذه الدفعة: النتيجة المعروضة هي المحفوظة في ذلك الوقت.
+cl.connectors.dry_run.validated,ستُقبل الدفعة. النتيجة لكل طبقة:
+cl.connectors.dry_run.rejected,ستُرفض الدفعة.
+cl.connectors.dry_run.bad_method,طريقة الاختيار ليست المتوقعة ({expected}).
+cl.connectors.dry_run.stratum,الطبقة
+cl.connectors.dry_run.rows,القراءات
+cl.connectors.dry_run.candidates,المرشحون
+cl.connectors.dry_run.valid,الصالحة
+cl.connectors.dry_run.rejected_by_reason,المرفوضة حسب السبب
+cl.connectors.dry_run.rows_rejected,القراءات المرفوضة
+cl.reason.already_sampled,مأخوذة كعينة مسبقًا
+cl.reason.bad_timestamp,تاريخ أو وقت غير صحيح
+cl.reason.bad_value,قيمة غير صحيحة
+cl.reason.end_out_of_period,النهاية خارج الفترة
+cl.reason.missing_field,حقل مفقود
+cl.reason.no_end,لا توجد قراءة نهاية
+cl.reason.no_start,لا توجد قراءة بداية
+cl.reason.product_mismatch,منتج مختلف
+cl.reason.same_reading,البداية والنهاية هما القراءة نفسها
+cl.reason.start_after_end,البداية بعد النهاية
+cl.reason.unknown_product,منتج غير معروف
+cl.reason.unknown_reading_point,نقطة قراءة غير معروفة
+cl.plans.new,خطة جديدة
+cl.plans.edit,تعديل الخطة
+cl.plans.name,الاسم
+cl.plans.product,المنتج
+cl.plans.carrier,الناقل
+cl.plans.connector,الموصل
+cl.plans.no_connector,لا يوجد موصل بعد
+cl.plans.connector_hint,موصلات الناقل نفسه فقط. لا يمكن تفعيل الخطة بدون موصل.
+cl.plans.select,اختر...
+cl.plans.start,تاريخ البدء
+cl.plans.end,تاريخ الانتهاء
+cl.plans.period,الفترة
+cl.plans.total,إجمالي العينات
+cl.plans.total_hint,إذا غيّرت الإجمالي أو التواريخ، أعد توليد الحصص وحفظها.
+cl.plans.status,الحالة
+cl.plans.status.draft,مسودة
+cl.plans.status.active,نشط
+cl.plans.status.closed,مغلق
+cl.plans.empty,لا توجد خطط بعد.
+cl.plans.samples,{count} عينة
+cl.plans.feed_diagnosis,تشخيص الموصل (الاحتفاظ ببيانات إضافية للتحليل)
+cl.plans.locked_hint,لم تعد الخطة مسودة: لا يمكن تغيير الناقل أو المنتج أو الموصل أو تاريخ البدء.
+cl.plans.error.no_account,اختر حسابًا أولاً.
+cl.plans.error.bad_period,لا يمكن أن يكون تاريخ الانتهاء قبل تاريخ البدء.
+cl.plans.error.bad_total,يجب أن يكون الإجمالي عددًا صحيحًا لا يقل عن 1.
+cl.plans.error.missing_field,املأ الاسم والناقل والمنتج والتواريخ.
+cl.plans.generate,توليد الحصص
+cl.plans.no_routes,لا يملك الناقل نقاط قراءة نشطة بمدينة بداية ومدينة نهاية: لا توجد مسارات.
+cl.plans.preview_title,معاينة (لم تُحفظ بعد)
+cl.plans.save_quotas,حفظ الحصص
+cl.plans.saving_quotas,جارٍ حفظ {count} حصة...
+cl.plans.discard,تجاهل
+cl.plans.quotas_saved,تم حفظ {count} حصة.
+cl.plans.quotas_title,الحصص
+cl.plans.no_quotas,"لا تحتوي هذه الخطة على حصص بعد. استخدم ""توليد الحصص""."
+cl.plans.missing_points_title,نقاط قراءة مفقودة
+cl.plans.missing_points_help,سجّل نقطة نشطة للناقل في هذه المدن قبل تفعيل الخطة.
+cl.plans.missing.origin,لا توجد نقطة بداية
+cl.plans.missing.destination,لا توجد نقطة نهاية
+cl.plans.missing_standards_title,{count} مسار بدون معيار تسليم
+cl.plans.missing_standards_help,تُؤخذ عينات من هذه المسارات، لكن بدون معيار لا يمكن حساب الوصول في الموعد. لا يمنع ذلك التفعيل.
+cl.plans.no_standard,يُحتسب دون الالتزام بالموعد
+cl.plans.more,و{count} أخرى (مُعلّمة بـ ⚠ في الجدول)
+cl.plans.activate,تفعيل الخطة
+cl.plans.activate_confirm,تفعيل الخطة {name}؟ بعد ذلك لا يمكن تغيير الناقل أو المنتج أو الموصل أو تاريخ البدء أو الحصص.
+cl.plans.activate_blocked,لا يمكن تفعيل الخطة ما دامت هناك نقاط قراءة مفقودة.
+cl.plans.matrix.filter,تصفية حسب المسار...
+cl.plans.matrix.by_week,حسب الأسبوع
+cl.plans.matrix.by_month,حسب الشهر
+cl.plans.matrix.summary,{routes} مسار، {total} عينة
+cl.plans.matrix.legend,كل خلية: المخطط (+المُرحّل).
+cl.plans.matrix.legend_obtained,كل خلية: المخطط (+المُرحّل) ✓المُحصّل.
+cl.plans.matrix.expand_hint,افتح مدينة منشأ لرؤية مساراتها؛ فوق {cells} خلية تبقى مدينة واحدة فقط مفتوحة.
+cl.plans.matrix.no_match,لا يوجد مسار يطابق عامل التصفية.
+cl.plans.matrix.route,المسار
+cl.plans.matrix.total,الإجمالي
+cl.plans.matrix.routes,{count} مسار
+cl.plans.error.quotas_mismatch,الحصص لا تتطابق مع تواريخ الخطة: أعد توليدها.
+cl.plans.regenerate_notice,تغيّر الإجمالي أو التواريخ: أعد توليد الحصص وحفظها.
+cl.samples.plan,الخطة
+cl.samples.week,الأسبوع
+cl.samples.all,الكل
+cl.samples.origin,المصدر
+cl.samples.destination,الوجهة
+cl.samples.misrouted_only,احتمال سوء التوجيه فقط
+cl.samples.item,الشحنة
+cl.samples.route,المسار
+cl.samples.start,البداية
+cl.samples.end,النهاية
+cl.samples.transit,العبور
+cl.samples.transit_value,{days} أيام ({hours} ساعة)
+cl.samples.on_time,في الوقت
+cl.samples.yes,نعم
+cl.samples.no,لا
+cl.samples.misrouted,احتمال سوء التوجيه
+cl.samples.empty,لا توجد عينات لهذه المرشحات.
+cl.samples.total,{count} عينة
+cl.samples.prev,السابق
+cl.samples.next,التالي
+cl.samples.page,الصفحة {page} من {pages}
+cl.samples.scans,القراءات
+cl.samples.close,إغلاق
+cl.samples.no_scans,لا توجد قراءات لهذه العينة.
+cl.samples.role.start,قراءة البداية
+cl.samples.role.end,قراءة النهاية
+cl.samples.role.intermediate,قراءة وسيطة
+cl.monitor.plan,الخطة
+cl.monitor.all_plans,جميع الخطط
+cl.monitor.demands,الطلبات إلى الناقل (بما في ذلك طلبات الاختبار)
+cl.monitor.demand.open,مفتوحة
+cl.monitor.demand.fulfilled,مكتملة
+cl.monitor.demand.partial,جزئية
+cl.monitor.demand.failed,فاشلة
+cl.monitor.batches,الدفعات المستلمة
+cl.monitor.batches_empty,لا توجد دفعات بعد.
+cl.monitor.col.date,تاريخ الاستلام
+cl.monitor.col.status,الحالة
+cl.monitor.col.shipments,الشحنات
+cl.monitor.col.rejected,المرفوضة
+cl.monitor.col.selected,المختارة
+cl.monitor.batch.received,مستلمة
+cl.monitor.batch.validated,تم التحقق
+cl.monitor.batch.sampled,تم أخذ العينات
+cl.monitor.batch.rejected,مرفوضة
+cl.monitor.batch.undone,تم التراجع
+cl.monitor.batch.expired,منتهية
+cl.monitor.undo,تراجع
+cl.monitor.undo_title,هل تريد التراجع عن هذه الدفعة؟
+cl.monitor.undo_effect,ستتم إزالة العينات المختارة من هذه الدفعة من تقارير E2E وسيُعاد حساب الحصص المتأثرة.
+cl.monitor.undo_confirm,نعم، تراجع عن الدفعة
+cl.monitor.undo_cancel,إلغاء
+cl.monitor.undo_done,تم التراجع عن الدفعة. حصص عادت إلى الانتظار: {pending}؛ حصص مرحّلة (تحتاج مراجعة): {carried}؛ حصص بقيت مفتوحة بطلب آخر: {kept}.
+cl.monitor.alerts,التنبيهات
+cl.monitor.alerts_empty,لا توجد تنبيهات.
+cl.monitor.alert_filter_open,المفتوحة فقط
+cl.monitor.alert_filter_all,الكل
+cl.monitor.alert.open,مفتوح
+cl.monitor.alert.acknowledged,تمت المشاهدة
+cl.monitor.alert.dismissed,مُهمل
+cl.monitor.acknowledge,تحديد كمشاهد
+cl.monitor.dismiss,إهمال
+cl.monitor.severity.low,منخفضة
+cl.monitor.severity.medium,متوسطة
+cl.monitor.severity.high,عالية
+cl.monitor.total,الإجمالي: {count}
+cl.alert.insufficient_candidates,مرشحون غير كافين
+cl.alert.empty_stratum,شريحة فارغة
+cl.alert.population_drop,انخفاض في عدد المجتمع
+cl.alert.population_incoherent,عدد مجتمع غير متسق
+cl.alert.suspicious_distribution,توزيع مشبوه
+cl.alert.late_batch,دفعة متأخرة
+cl.alert.unknown_product,منتج غير معروف
+cl.alert.unknown_reading_point,نقطة قراءة غير معروفة
+cl.alert.possible_misrouting,شحنة قد تكون موجهة خطأً
+cl.alert.missing_standard,معيار التسليم مفقود
+cl.alert.rejected_ratio,عدد كبير من القراءات المرفوضة
+cl.alert.quota_unfilled,حصة غير مكتملة
+cl.alert.feed_silent,لم يستجب الناقل
+cl.alert.missing_points,نقاط البداية أو النهاية مفقودة
+cl.alert.invalid_timezone,المنطقة الزمنية للحساب غير صالحة
+cl.alert.emit_failed,تعذر إرسال الطلب
+cl.alert.selection_method,طريقة اختيار مختلفة
+cl.alert.reader_without_city,قارئ بلا مدينة
+cl.alert.undo_after_carry,تم التراجع عن دفعة بعد ترحيل الحصة
+cl.alert.route,المسار: {origin} -> {destination}
+cl.alert.detail.insufficient_candidates,{valid} مرشحًا صالحًا مقابل {required} عينات مطلوبة.
+cl.alert.detail.quota_unfilled,ينقص {missing} عينة من أصل {planned} مخطط لها.
+cl.alert.detail.rejected_ratio,تم رفض {rejected} قراءة من أصل {candidates} ({percent}%).
+cl.alert.detail.population_incoherent,أبلغ الناقل عن عدد مجتمع {population} لكنه أرسل {candidates} مرشحًا.
+cl.alert.detail.suspicious_distribution,تم تسليم جميع العينات ({samples}) في الموعد المحدد.
+cl.alert.detail.missing_points,نقاط البداية: {start}؛ نقاط النهاية: {end}.
+cl.alert.detail.items,الشحنات: {items}
+cl.alert.detail.products,المنتجات المستلمة: {values}
+cl.alert.detail.points,نقاط القراءة: {points}
+cl.alert.detail.feed_silent,لم يتم الرد على طلب {date}.
+cl.alert.detail.selection_method,الطريقة المتوقعة: {expected}.
+hc.delivery_standards.cl_first_mile,المرحلة الأولى للناقل
+hc.delivery_standards.cl_last_mile,المرحلة الأخيرة للناقل
+hc.delivery_standards.cl_equivalence_tip,يُضاف فقط إلى عينات الناقل
+hc.delivery_standard_form.cl_equivalence_invalid,وقت المرحلة الأولى/الأخيرة غير صالح (أدخل رقما >= 0)
+hc.delivery_standard_form.cl_first_mile_time,وقت معادلة المرحلة الأولى
+hc.delivery_standard_form.cl_last_mile_time,وقت معادلة المرحلة الأخيرة
+help_center.doc.carrier_link.title,Carrier Link
+help_center.doc.carrier_link.desc,"ما هو Carrier Link، وبأي ترتيب يُعدّ، وماذا تفعل كل شاشة، ومعنى كل تنبيه."
+cl.help_link,مساعدة

@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ayuda: Carrier Link</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  :root {
+    --white: #ffffff; --g50: #f9fafb; --g100: #f3f4f6; --g200: #e5e7eb; --g300: #d1d5db;
+    --g400: #9ca3af; --g500: #6b7280; --g600: #4b5563; --g700: #374151; --g900: #111827;
+    --b50: #eff6ff; --b100: #dbeafe; --b600: #2563eb; --b700: #1d4ed8;
+    --r100: #fee2e2; --r700: #b91c1c; --gr100: #dcfce7; --gr700: #15803d;
+    --y100: #fef9c3; --y800: #854d0e; --p100: #f3e8ff; --p700: #7e22ce;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+      'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased; background: var(--g50); color: var(--g700); line-height: 1.6; font-size: 15px;
+  }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* Sidebar, same look as the ONE menu */
+  .side {
+    width: 272px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--g200);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column;
+  }
+  .brand { padding: 24px 24px 16px; }
+  .brand h1 { font-size: 24px; line-height: 32px; font-weight: 700; color: var(--g900); }
+  .brand p { font-size: 14px; color: var(--g500); margin-top: 4px; }
+  .brand .doc { margin-top: 16px; font-size: 12px; font-weight: 600; color: var(--b700); background: var(--b50);
+    display: inline-block; padding: 2px 10px; border-radius: 999px; }
+  .nav { padding: 8px 12px 24px; flex: 1; }
+  .nav h3 { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--g400);
+    padding: 16px 12px 6px; }
+  .nav a {
+    display: block; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--g600);
+    text-decoration: none; transition: background .15s, color .15s;
+  }
+  .nav a:hover { background: var(--g100); }
+  .nav a.active { background: var(--b50); color: var(--b700); }
+  .side-foot { padding: 16px 24px; border-top: 1px solid var(--g200); font-size: 12px; color: var(--g500); }
+
+  /* Content */
+  .main { flex: 1; min-width: 0; padding: 40px 32px 80px; }
+  .page { max-width: 880px; margin: 0 auto; }
+  .page > header { margin-bottom: 32px; }
+  .page > header h2 { font-size: 30px; line-height: 38px; font-weight: 700; color: var(--g900); }
+  .page > header p { margin-top: 8px; font-size: 17px; color: var(--g600); max-width: 640px; }
+  section { margin-top: 48px; }
+  section > h2 { font-size: 22px; font-weight: 700; color: var(--g900); padding-bottom: 8px; margin-bottom: 16px;
+    border-bottom: 1px solid var(--g200); }
+  h3 { font-size: 17px; font-weight: 600; color: var(--g900); margin: 28px 0 8px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0 8px 22px; }
+  li { margin: 4px 0; }
+  strong { color: var(--g900); font-weight: 600; }
+  code, kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px;
+    background: var(--g100); border: 1px solid var(--g200); border-radius: 6px; padding: 1px 6px; color: var(--g900); }
+  .card { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0; }
+  .grid .card { margin: 0; }
+  .card h4 { font-size: 15px; font-weight: 600; color: var(--g900); margin-bottom: 4px; }
+  .card p { margin: 4px 0; font-size: 14px; color: var(--g600); }
+
+  .badge { display: inline-block; font-size: 12px; font-weight: 500; padding: 1px 10px; border-radius: 999px; white-space: nowrap; }
+  .b-red { background: var(--r100); color: var(--r700); }
+  .b-blue { background: var(--b100); color: var(--b700); }
+  .b-green { background: var(--gr100); color: var(--gr700); }
+  .b-yellow { background: var(--y100); color: var(--y800); }
+  .b-gray { background: var(--g100); color: var(--g600); }
+  .b-purple { background: var(--p100); color: var(--p700); }
+  .btn { display: inline-block; font-size: 13px; font-weight: 500; padding: 2px 10px; border-radius: 8px;
+    background: var(--white); border: 1px solid var(--g300); color: var(--g700); white-space: nowrap; }
+  .btn.primary { background: var(--b600); border-color: var(--b600); color: #fff; }
+
+  .callout { border-radius: 12px; padding: 14px 18px; margin: 16px 0; font-size: 14px; border: 1px solid; }
+  .callout.info { background: var(--b50); border-color: var(--b100); color: #1e3a8a; }
+  .callout.ok { background: #f0fdf4; border-color: var(--gr100); color: #14532d; }
+  .callout.warn { background: #fffbeb; border-color: var(--y100); color: var(--y800); }
+  .callout strong { color: inherit; }
+
+  .table-wrap { overflow-x: auto; margin: 16px 0; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--g500); background: var(--g50); padding: 10px 14px; border-bottom: 1px solid var(--g200); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--g100); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 500; color: var(--g900); }
+
+  /* Steps */
+  ol.steps { list-style: none; margin: 12px 0; counter-reset: s; }
+  ol.steps > li { counter-increment: s; position: relative; padding: 4px 0 12px 44px; margin: 0; }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--b100); color: var(--b700); font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Telegram chat mock-ups */
+  .chat { background: #e9eef5; border: 1px solid var(--g200); border-radius: 16px; padding: 16px; margin: 16px 0; max-width: 460px; }
+  .chat .who { text-align: center; font-size: 12px; color: var(--g500); margin-bottom: 8px; font-weight: 500; }
+  .msg { max-width: 85%; padding: 8px 12px; border-radius: 14px; margin: 6px 0; font-size: 14px; line-height: 1.45; box-shadow: 0 1px 1px rgba(0,0,0,.06); }
+  .msg.bot { background: var(--white); border-top-left-radius: 4px; margin-right: auto; color: var(--g900); }
+  .msg.me { background: #dbeafe; border-top-right-radius: 4px; margin-left: auto; color: var(--g900); }
+  .kb { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; max-width: 85%; }
+  .kb span { flex: 1 1 auto; text-align: center; background: rgba(37,99,235,.12); color: var(--b700); font-size: 13px; font-weight: 500;
+    padding: 6px 10px; border-radius: 10px; }
+  .kb.col span { flex-basis: 100%; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+  .two .chat { margin: 8px 0; }
+  .cap { font-size: 13px; color: var(--g500); margin-top: -6px; max-width: 460px; }
+
+  /* Flow */
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; margin: 16px 0; }
+  .flow .node { flex: 1 1 150px; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 12px 14px; font-size: 13px; position: relative; }
+  .flow .node b { display: block; color: var(--g900); font-size: 14px; margin-bottom: 2px; }
+  .flow .node .tag { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--b700); }
+  .flow .arrow { align-self: center; color: var(--g400); font-size: 18px; }
+
+  details { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; margin: 8px 0; }
+  summary { cursor: pointer; padding: 14px 18px; font-weight: 600; color: var(--g900); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; color: var(--g400); font-size: 20px; line-height: 1; }
+  details[open] summary::after { content: '\2212'; }
+  details > div { padding: 0 18px 14px; color: var(--g600); font-size: 14px; }
+
+  /* ONEMS screen drawings */
+  .app { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; overflow: hidden; margin: 16px 0 6px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .app-bar { display: flex; gap: 6px; align-items: center; background: var(--g100); border-bottom: 1px solid var(--g200); padding: 8px 12px; font-size: 12px; color: var(--g500); }
+  .app-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--g300); display: inline-block; }
+  .app-bar span { margin-left: 8px; }
+  .app-body { padding: 20px; font-size: 13px; color: var(--g700); overflow-x: auto; }
+  .app-body.cols { display: grid; grid-template-columns: 210px 1fr; padding: 0; }
+  .app-body.cols > .sb { border-right: 1px solid var(--g200); padding: 14px 10px; background: #fff; }
+  .app-body.cols > .ct { padding: 20px; }
+  .sb .t { font-size: 20px; font-weight: 700; color: var(--g900); padding: 0 8px; }
+  .sb .s { font-size: 11px; color: var(--g500); padding: 0 8px 8px; }
+  .sb h5 { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--g400); padding: 10px 8px 4px; }
+  .mi { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; font-size: 13px; color: var(--g700); }
+  .mi.on { background: var(--b50); color: var(--b600); }
+  .mi .ic { width: 14px; height: 14px; border-radius: 4px; background: var(--g300); flex-shrink: 0; }
+  .mi.on .ic { background: var(--b600); }
+  .mi .badge { margin-left: auto; font-size: 11px; padding: 0 7px; }
+  .m-h { font-size: 18px; font-weight: 700; color: var(--g900); margin-bottom: 12px; }
+  .m-h3 { font-size: 15px; font-weight: 700; color: var(--g900); margin: 0 0 6px; }
+  .m-sel { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 24px 3px 8px; font-size: 12px; background: #fff; color: var(--g700); margin-right: 8px; position: relative; }
+  .m-sel::after { content: '\25BE'; position: absolute; right: 8px; color: var(--g400); }
+  .m-card { border: 1px solid var(--g200); border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.05); margin: 10px 0; }
+  .app table { font-size: 12px; }
+  .app th { padding: 8px 12px; font-size: 11px; }
+  .app td { padding: 8px 12px; }
+  .app td:first-child { font-weight: 400; color: inherit; }
+  .app .num { text-align: right; }
+  .m-link { color: var(--b600); }
+  .m-box { border: 1px solid var(--g200); border-radius: 6px; padding: 14px; margin: 10px 0; }
+  .m-note { background: var(--g50); border-radius: 6px; padding: 10px 12px; margin: 8px 0; font-size: 12px; }
+  .m-muted { color: var(--g500); font-size: 12px; }
+  .m-pbtn, .m-sbtn { display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 12px; margin: 2px 6px 2px 0; }
+  .m-pbtn { background: var(--b600); color: #fff; }
+  .m-sbtn { background: var(--g200); color: var(--g700); }
+  .m-ta { border: 1px solid var(--g300); border-radius: 4px; padding: 8px; font-size: 12px; color: var(--g400); background: #fff; margin: 6px 0 10px; }
+  .m-in { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 8px; font-size: 12px; background: #fff; min-width: 90px; }
+  .m-bub { max-width: 80%; padding: 6px 10px; border-radius: 10px; margin: 5px 0; font-size: 12px; }
+  .m-bub small { display: block; color: var(--g500); font-size: 10px; margin-top: 2px; }
+  .m-bub.l { background: var(--g100); margin-right: auto; }
+  .m-bub.r { background: var(--b100); margin-left: auto; }
+  .pin { display: inline-flex; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; align-items: center; justify-content: center; margin-left: 6px; vertical-align: middle; flex-shrink: 0; }
+  .legend { counter-reset: l; list-style: none; margin: 10px 0 20px; }
+  .legend li { counter-increment: l; position: relative; padding: 2px 0 6px 34px; font-size: 14px; }
+  .legend li::before { content: counter(l); position: absolute; left: 0; top: 1px; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .heat td { text-align: center; }
+  .heat .ok { background: #f0fdf4; } .heat .hi { background: var(--y100); } .heat .sat { background: var(--r100); }
+  .heat .off { background: repeating-linear-gradient(45deg, var(--g100), var(--g100) 4px, #fff 4px, #fff 8px); color: var(--g400); }
+  .heat .now { outline: 2px solid var(--b600); outline-offset: -2px; }
+
+  /* Right-to-left (Arabic) */
+  [dir=rtl] .side { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] .app-body.cols > .sb { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] th, [dir=rtl] td, [dir=rtl] .nav a { text-align: right; }
+  [dir=rtl] ul, [dir=rtl] ol { margin: 8px 22px 8px 0; }
+  [dir=rtl] ol.steps > li { padding: 4px 44px 12px 0; }
+  [dir=rtl] ol.steps > li::before { left: auto; right: 0; }
+  [dir=rtl] .legend li { padding: 2px 34px 6px 0; }
+  [dir=rtl] .legend li::before { left: auto; right: 0; }
+  [dir=rtl] .msg.bot { border-top-left-radius: 14px; border-top-right-radius: 4px; margin-right: 0; margin-left: auto; }
+  [dir=rtl] .msg.me { border-top-right-radius: 14px; border-top-left-radius: 4px; margin-left: 0; margin-right: auto; }
+  [dir=rtl] .m-bub.l { margin-right: 0; margin-left: auto; }
+  [dir=rtl] .m-bub.r { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .pin { margin-left: 0; margin-right: 6px; }
+  [dir=rtl] .m-sel { padding: 3px 8px 3px 24px; margin-right: 0; margin-left: 8px; }
+  [dir=rtl] .m-sel::after { right: auto; left: 8px; }
+  [dir=rtl] .m-pbtn, [dir=rtl] .m-sbtn { margin: 2px 0 2px 6px; }
+  [dir=rtl] .mi .badge { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .app-bar span { margin-left: 0; margin-right: 8px; }
+  [dir=rtl] .flow .arrow { transform: scaleX(-1); }
+  [dir=rtl] .app td:first-child { font-weight: 400; }
+  .mobile-top { display: none; }
+  @media (max-width: 900px) {
+    .app-body.cols { grid-template-columns: 1fr; }
+    .app-body.cols > .sb { border-right: 0; border-bottom: 1px solid var(--g200); }
+    .layout { display: block; }
+    .side { display: none; }
+    .mobile-top { display: block; position: sticky; top: 0; z-index: 5; background: var(--white); border-bottom: 1px solid var(--g200); padding: 10px 16px; }
+    .mobile-top b { font-size: 18px; color: var(--g900); }
+    .mobile-top span { font-size: 13px; color: var(--g500); margin-left: 6px; }
+    .mobile-top select { width: 100%; margin-top: 8px; padding: 8px; border: 1px solid var(--g300); border-radius: 8px; font-size: 14px; background: #fff; color: var(--g700); }
+    .main { padding: 24px 16px 64px; }
+    .page > header h2 { font-size: 24px; line-height: 32px; }
+  }
+  @media print { .side, .mobile-top { display: none; } .main { padding: 0; } body { background: #fff; } section { break-inside: avoid-page; } }
+</style>
+</head>
+<body>
+<div class="mobile-top">
+  <b>ONE</b><span>for Regulators &middot; Ayuda</span>
+  <select id="jump" aria-label="Ir a la sección"></select>
+</div>
+<div class="layout">
+  <aside class="side">
+    <div class="brand">
+      <h1>ONE</h1>
+      <p>for Regulators</p>
+      <span class="doc">Ayuda &middot; Carrier Link</span>
+    </div>
+    <nav class="nav" id="nav">
+      <h3>Primeros pasos</h3>
+      <a href="#overview">Qué es Carrier Link</a>
+      <a href="#order">El orden de trabajo</a>
+      <h3>Las pantallas</h3>
+      <a href="#reading-points">Puntos de lectura</a>
+      <a href="#connectors">Conectores</a>
+      <a href="#plans">Planes de muestreo</a>
+      <a href="#samples">Muestras</a>
+      <a href="#monitor">Monitor de capturas</a>
+      <h3>Referencia</h3>
+      <a href="#equivalence">El tiempo de equivalencia</a>
+      <a href="#alerts">Qué significa cada aviso</a>
+      <a href="#faq">Preguntas</a>
+    </nav>
+    <div class="side-foot">Actualizado el 20 de noviembre de 2026</div>
+  </aside>
+
+  <main class="main">
+  <div class="page">
+    <header>
+      <h2>Carrier Link: muestras a partir de los registros del carrier</h2>
+      <p>Qué es, en qué orden se configura y qué hace cada pantalla de la sección Carrier Link de ONEMS.</p>
+    </header>
+
+    <section id="overview">
+    <h2>Qué es Carrier Link</h2>
+<p>Hasta ahora ONEMS mide con envíos de prueba que mueven los panelistas (E2E) y con lecturas RFID en centros postales (diagnóstico). <strong>Carrier Link</strong> añade una tercera fuente: ONEMS toma <strong>al azar</strong> envíos reales ya cerrados de los registros del propio carrier (su lectura de salida y su lectura de llegada) y los usa como muestras.</p>
+<div class="grid">
+  <div class="card"><h4>Muestras al azar</h4><p>El carrier propone muchos envíos y ONEMS hace el sorteo final. El sorteo se puede reproducir ante un auditor.</p></div>
+  <div class="card"><h4>Registros ya cerrados</h4><p>Solo se usan envíos con lectura de inicio y de llegada, porque así se sabe qué ruta (ciudad a ciudad) han hecho.</p></div>
+  <div class="card"><h4>Mismos informes</h4><p>No hay informes nuevos: las muestras aparecen en los informes E2E y de diagnóstico de siempre, marcadas con el origen «carrier».</p></div>
+</div>
+<p>En lugar de un panelista de origen y otro de destino, cada muestra tiene un <strong>punto de lectura de inicio</strong> y uno de <strong>fin</strong>. El tiempo E2E va de la primera lectura en el inicio a la última en el fin.</p>
+<div class="callout info"><strong>Escala.</strong> Un plan puede llegar a unas <span dir="ltr">15.000</span> muestras al año por producto. Por eso las cuotas se reparten por ruta (ciudad a ciudad) y semana, sin que usted tenga que elegir los envíos uno a uno.</div>
+<div class="callout warn"><strong>Qué no se ve.</strong> Solo entran envíos que han llegado. Los que nunca llegan o se quedan en otra ciudad no aparecen como muestra, y no hay seguimiento de las salidas. Tampoco hay rutas dentro de una misma ciudad. El estándar de entrega solo afecta al análisis de los informes, nunca a la captura ni al plan.</div>
+    </section>
+
+    <section id="order">
+    <h2>El orden de trabajo</h2>
+<ol class="steps">
+  <li><strong>Puntos de lectura.</strong> En <strong>Puntos de lectura</strong>, dé de alta los lugares del carrier donde se lee cada envío y diga en qué ciudad empiezan o terminan las rutas. Cada ciudad necesita al menos un punto de inicio y uno de fin.</li>
+  <li><strong>Conector.</strong> En <strong>Conectores</strong>, cree el conector del carrier: sus equivalencias de campos y de producto, el calendario de peticiones y la clave. Pruébelo con un lote de ensayo.</li>
+  <li><strong>Estándar de entrega.</strong> En <strong>Estándares de Entrega</strong>, compruebe que cada ruta tiene su estándar y, si quiere comparar con los panelistas, el tiempo de equivalencia (véase <a href="#equivalence">El tiempo de equivalencia</a>).</li>
+  <li><strong>Plan de muestreo.</strong> En <strong>Planes de muestreo</strong>, cree el plan, genere y guarde las cuotas y pulse <span class="btn primary">Activar plan</span>.</li>
+  <li><strong>Activar el conector.</strong> Cuando todo esté listo, pase el conector de Pruebas a Activo. Hasta entonces solo admite ensayos y no se crea ninguna muestra.</li>
+  <li><strong>Seguimiento.</strong> En <strong>Monitor de capturas</strong> vea las peticiones, los lotes y los avisos, y en <strong>Muestras</strong> revise las muestras que van entrando.</li>
+</ol>
+<div class="callout ok"><strong>Y después:</strong> ONEMS pide los envíos al carrier en los días y a la hora del calendario del conector, hace el sorteo y mete las muestras en los informes E2E. Usted solo atiende los avisos.</div>
+    </section>
+
+    <section id="reading-points">
+    <h2>Puntos de lectura</h2>
+<p>Pantalla <strong>Puntos de lectura</strong>. Un punto de lectura es un lugar (y, si se quiere, un modo: admisión, salida, entrega...) donde el carrier lee los envíos. Cada punto está en un centro postal y, por tanto, en una ciudad.</p>
+<ol class="steps">
+  <li>Elija el carrier y pulse <span class="btn primary">Añadir punto de lectura</span>.</li>
+  <li>Escriba el <strong>lugar</strong> (el código que usa el carrier) y, si procede, el <strong>modo</strong>. Si deja el modo vacío, el punto acepta cualquier modo.</li>
+  <li>Elija el <strong>centro postal</strong>. La ciudad sale del centro.</li>
+  <li>Elija el <strong>papel en la ruta</strong>: Inicio, Fin, Inicio y fin, o Intermedio.</li>
+</ol>
+<div class="callout warn">Un centro postal sin ciudad solo puede ser punto <strong>Intermedio</strong>. Para que una ciudad pueda ser origen o destino de rutas, su centro debe tener ciudad.</div>
+<p>El bloque <strong>Lugares sin punto de lectura</strong> lista los lugares de los que han llegado lecturas en los últimos 90 días sin poder asignarlas. Pulse <span class="btn">Dar de alta</span> para convertirlos en puntos.</p>
+    </section>
+
+    <section id="connectors">
+    <h2>Conectores</h2>
+<p>Pantalla <strong>Conectores</strong>. El conector es el canal por el que el carrier entrega sus datos a ONEMS. Hay uno o varios por carrier.</p>
+<h3>Qué se configura</h3>
+<ul>
+  <li><strong>Calendario:</strong> los días de la semana y la hora a los que ONEMS puede pedir datos, para no molestar a la base de datos del carrier. Si deja la zona horaria vacía se usa la de la cuenta.</li>
+  <li><strong>Equivalencias de campos:</strong> qué campo del carrier contiene cada dato (identificador del envío, producto, fecha y hora de lectura, lugar y modo). Mientras falte alguno, ONEMS no puede leer los datos.</li>
+  <li><strong>Equivalencias de producto:</strong> a qué producto de ONEMS corresponde cada valor de producto del carrier.</li>
+  <li><strong>Campos extra permitidos:</strong> otros campos del carrier que se guardan con cada lectura. Cualquier otro campo se descarta al entrar, para no guardar datos personales.</li>
+</ul>
+<h3>Estados del conector</h3>
+<div class="table-wrap"><table>
+<tr><th>Estado</th><th>Qué pasa</th></tr>
+<tr><td><span class="badge b-yellow">Pruebas</span></td><td>Solo admite lotes de ensayo: se comprueban como si fueran reales, pero no se guarda nada y no se crea ninguna muestra.</td></tr>
+<tr><td><span class="badge b-green">Activo</span></td><td>Recibe lotes reales y crea muestras. Al activarlo se cierran las peticiones que se hubieran abierto en pruebas.</td></tr>
+<tr><td><span class="badge b-gray">Pausado</span></td><td>No recibe lotes ni se envían peticiones hasta que se reanude.</td></tr>
+</table></div>
+<h3>La clave del carrier</h3>
+<p>El carrier usa una clave para enviar sus lotes. <strong>Solo un superadmin o el UPU Account Manager pueden crear claves.</strong> Pulse <span class="btn">Nueva clave</span>, póngale un nombre y, si quiere, una fecha de caducidad.</p>
+<div class="callout warn"><strong>La clave se muestra una sola vez.</strong> Cópiela y entréguela al carrier por un canal seguro: después ONEMS solo guarda un prefijo para reconocerla. Si se pierde, cree otra y desactive la anterior.</div>
+<h3>Probar un lote</h3>
+<p>En <strong>Probar lote (ensayo)</strong> suba un fichero de lote del carrier. ONEMS indica si lo aceptaría y, si no, por qué. No se guarda nada.</p>
+    </section>
+
+    <section id="plans">
+    <h2>Planes de muestreo</h2>
+<p>Pantalla <strong>Planes de muestreo</strong>. Un plan dice cuántas muestras se quieren, de qué carrier y producto, en qué fechas y entre qué ciudades.</p>
+<ol class="steps">
+  <li>Pulse <span class="btn primary">Nuevo plan</span> y rellene nombre, carrier, producto, conector, fechas y total de muestras. Marque la casilla de diagnóstico solo si quiere además guardar datos para el análisis de diagnóstico.</li>
+  <li>Pulse <span class="btn">Generar cuotas</span>. ONEMS reparte el total entre las rutas (ciudad a ciudad) y las semanas, y muestra una vista previa sin guardar.</li>
+  <li>Revise la vista previa y pulse <span class="btn">Guardar cuotas</span>. Si cambia el total o las fechas, vuelva a generar y guardar.</li>
+  <li>Si el aviso <strong>Faltan puntos de lectura</strong> lista ciudades, dé de alta sus puntos de inicio y de fin en <strong>Puntos de lectura</strong>. Mientras falte alguno, el plan no se puede activar.</li>
+  <li>Pulse <span class="btn primary">Activar plan</span> y confirme.</li>
+</ol>
+<div class="callout warn">Una ruta sin estándar de entrega se muestrea igual, pero sus muestras entran sin «a tiempo» hasta que se cree el estándar. Es solo un aviso: no impide activar el plan.</div>
+<div class="callout info">Tras activar, ya no se pueden cambiar el carrier, el producto, el conector, la fecha de inicio ni las cuotas. Las muestras obtenidas no se tocan.</div>
+<h3>La tabla de cuotas</h3>
+<p>Cada celda muestra lo <strong>previsto</strong>, lo <strong>arrastrado</strong> de semanas anteriores entre paréntesis y, con el plan en marcha, lo <strong>obtenido</strong>. Puede verla por semana o por mes y filtrar por ruta.</p>
+<h3>Si una cuota no se cubre</h3>
+<p>Si el carrier no tiene suficientes envíos, ONEMS vuelve a pedir lo que falta (hasta 3 veces en la misma semana). Lo que siga faltando se reparte entre las semanas que quedan del mes y, si no caben, entre las de los meses siguientes. Lo que falte al terminar el plan queda sin cubrir y genera un aviso.</p>
+<div class="callout ok"><strong>Y después:</strong> con el plan activo y el conector en Activo, el sistema pide los envíos solo, semana a semana. No hay que hacer nada más.</div>
+    </section>
+
+    <section id="samples">
+    <h2>Muestras</h2>
+<p>Pantalla <strong>Muestras</strong>. Lista las muestras obtenidas, una por envío.</p>
+<ul>
+  <li><strong>Filtros:</strong> plan, semana, ciudad de origen y de destino, y «Solo posible mal encaminado».</li>
+  <li><strong>Columnas:</strong> identificador del envío, ruta, lectura de inicio y de fin, tránsito (en días y horas) y si llegó a tiempo.</li>
+  <li><strong>Lecturas:</strong> al abrir una muestra se ven todas sus lecturas, marcadas como de inicio, de fin o intermedias.</li>
+</ul>
+<p>La marca <span class="badge b-yellow">Posible mal encaminado</span> aparece cuando un envío tiene lecturas en más de un punto o en una ciudad distinta de la pedida. La muestra cuenta igual para la cuota de la ruta, pero conviene revisarla.</p>
+<p>Esta pantalla es de consulta: las muestras no se editan.</p>
+    </section>
+
+    <section id="monitor">
+    <h2>Monitor de capturas</h2>
+<p>Pantalla <strong>Monitor de capturas</strong>. Aquí se sigue lo que pasa con la captura de datos.</p>
+<ul>
+  <li><strong>Peticiones al carrier:</strong> abiertas, cumplidas, parciales o fallidas (incluidas las de prueba).</li>
+  <li><strong>Lotes recibidos:</strong> cada lote con su estado (Recibido, Validado, Muestreado, Rechazado, Deshecho o Caducado), el número de envíos, los rechazados y los elegidos.</li>
+  <li><strong>Avisos:</strong> con su gravedad (baja, media o alta). Puede filtrar solo los abiertos y marcarlos con <span class="btn">Marcar como visto</span> o <span class="btn">Descartar</span>. Qué significa cada uno está en <a href="#alerts">Qué significa cada aviso</a>.</li>
+</ul>
+<h3>Deshacer un lote</h3>
+<p>Si un lote es erróneo, pulse <span class="btn">Deshacer</span> en su fila y confirme. Las muestras elegidas en ese lote se quitan de los informes E2E y las cuotas afectadas se recalculan. ONEMS indica cuántas cuotas han vuelto a pendiente y cuáles, por haberse arrastrado ya, hay que revisar.</p>
+    </section>
+
+    <section id="equivalence">
+    <h2>El tiempo de equivalencia</h2>
+<p>La lectura del carrier no incluye el último tramo hasta el destinatario ni los retrasos de declaración que sí lleva la medida con panelistas. Para que las dos medidas sean comparables, el estándar de entrega admite un <strong>tiempo de equivalencia</strong>.</p>
+<ol class="steps">
+  <li>Abra la pantalla <strong>Estándares de Entrega</strong>.</li>
+  <li>En la ruta que quiera, rellene <strong>Tiempo equiv. primer tramo</strong> y <strong>Tiempo equiv. último tramo</strong>, en la misma unidad que el estándar. Por defecto valen 0.</li>
+</ol>
+<div class="callout info"><strong>Solo para muestras del carrier.</strong> Este tiempo se suma únicamente a las muestras del carrier; las de panelistas no cambian. ONEMS guarda por separado el tiempo medido y el tiempo añadido, y los informes (incluido «a tiempo») usan el total.</div>
+<p>Ejemplo: si el carrier mide 2 días y el último tramo se ha fijado en 1 día, el informe cuenta 3 días.</p>
+    </section>
+
+    <section id="alerts">
+    <h2>Qué significa cada aviso</h2>
+<p>Los avisos aparecen en <strong>Monitor de capturas</strong>. Estos son los tipos y qué hacer con cada uno.</p>
+<div class="table-wrap"><table>
+<tr><th>Aviso</th><th>Qué significa</th><th>Qué hacer</th></tr>
+<tr><td>Candidatos insuficientes</td><td>El carrier envió menos envíos válidos de los que hacían falta para una ruta y una semana.</td><td>ONEMS suele volver a pedir los que faltan. Si se repite, hable con el carrier.</td></tr>
+<tr><td>Estrato vacío</td><td>El carrier no devolvió ningún envío para una ruta.</td><td>Compruebe que los puntos de inicio y de fin de esas ciudades son correctos y que el carrier tiene tráfico en esa ruta.</td></tr>
+<tr><td>Caída de población</td><td>Los envíos disponibles en una ruta han caído por debajo del 30 % de lo habitual (mediana de las últimas 6 semanas).</td><td>Pregunte al carrier si hubo un corte en sus datos o un cambio real de tráfico.</td></tr>
+<tr><td>Población incoherente</td><td>El carrier indica menos envíos disponibles que los que ha enviado como candidatos.</td><td>Es un error de su extracción de datos: pídale que la revise.</td></tr>
+<tr><td>Distribución sospechosa</td><td>Todas las muestras de un lote (20 o más) llegaron en plazo. Es raro y puede indicar que el carrier no elige al azar.</td><td>Pida al carrier que explique cómo selecciona los envíos y revise los lotes siguientes.</td></tr>
+<tr><td>Lote tardío</td><td>El lote llegó después del plazo previsto.</td><td>Si se repite, revise con el carrier el calendario del conector.</td></tr>
+<tr><td>Producto desconocido</td><td>El carrier envió un producto que ONEMS no tiene en sus equivalencias.</td><td>Añada la equivalencia en <strong>Conectores</strong>, bloque Equivalencias de producto.</td></tr>
+<tr><td>Punto de lectura desconocido</td><td>Llegaron lecturas de un lugar que no está dado de alta como punto de lectura.</td><td>Dé de alta el lugar en <strong>Puntos de lectura</strong> (bloque Lugares sin punto de lectura). Esas lecturas se aprovechan al darlo de alta.</td></tr>
+<tr><td>Posible envío mal encaminado</td><td>Un envío tiene lecturas en más de un punto, o en una ciudad distinta de la pedida.</td><td>Revíselo en <strong>Muestras</strong>. Cuenta igual para la cuota de la ruta.</td></tr>
+<tr><td>Falta el estándar de entrega</td><td>Una ruta no tiene estándar de entrega, así que no se puede saber si sus muestras llegan en plazo.</td><td>Cree el estándar de esa ruta en <strong>Estándares de Entrega</strong>. Las muestras se recalculan solas.</td></tr>
+<tr><td>Muchas lecturas rechazadas</td><td>Más del 20 % de las lecturas de un lote se han rechazado.</td><td>Revise las equivalencias y los puntos de lectura; un lote de prueba en <strong>Conectores</strong> muestra los motivos.</td></tr>
+<tr><td>Cuota sin cubrir</td><td>Al terminar el plan, una cuota no se ha cubierto del todo.</td><td>Revise los avisos anteriores de esa ruta; si hace falta, amplíe el plan.</td></tr>
+<tr><td>El carrier no respondió</td><td>El conector está activo, pero el carrier no respondió a una petición vencida.</td><td>Compruebe con el carrier que su sistema funciona y revise el calendario y el estado del conector.</td></tr>
+<tr><td>Faltan puntos de inicio o fin</td><td>Faltan puntos de inicio o de fin en alguna ciudad.</td><td>Dé de alta los puntos que faltan en <strong>Puntos de lectura</strong>.</td></tr>
+<tr><td>Zona horaria de la cuenta no válida</td><td>La zona horaria de la cuenta no es válida y ONEMS no sabe a qué hora pedir los datos.</td><td>Corríjala en la cuenta o indique una zona propia en el calendario del conector.</td></tr>
+<tr><td>No se pudo enviar la petición</td><td>ONEMS no pudo enviar la petición al carrier.</td><td>Mire el último error del conector en <strong>Conectores</strong> y revise su configuración.</td></tr>
+<tr><td>Método de selección distinto</td><td>El carrier usó un método de selección distinto del acordado.</td><td>Pídale que use el método acordado y compruébelo con un lote de prueba.</td></tr>
+<tr><td>Lector sin ciudad</td><td>Un punto de lectura está en un centro postal que no tiene ciudad.</td><td>Asigne una ciudad al centro postal.</td></tr>
+<tr><td>Lote deshecho tras arrastrar la cuota</td><td>Se deshizo un lote cuando su cuota ya se había repartido entre otras semanas.</td><td>Revise las cuotas del plan: aparecen como arrastradas (a revisar).</td></tr>
+</table></div>
+    </section>
+
+    <section id="faq">
+    <h2>Preguntas</h2>
+<details><summary>¿Cuántas muestras puede tener un plan?</summary><div>Un plan puede llegar a unas <span dir="ltr">15.000</span> muestras al año por producto.</div></details>
+<details><summary>¿Puede el carrier elegir qué envíos manda?</summary><div>No. El carrier propone muchos candidatos y ONEMS hace el sorteo final. La semilla del sorteo se fija antes de recibir los candidatos, así que nadie puede elegirla después de verlos.</div></details>
+<details><summary>¿Se guardan datos personales?</summary><div>No. Solo se guardan los campos de la lista de campos extra permitidos; el resto se descarta al entrar.</div></details>
+<details><summary>¿Quién puede crear claves de conector?</summary><div>Solo un superadmin o el UPU Account Manager. La clave se muestra una única vez al crearla.</div></details>
+<details><summary>He activado el plan y no entran muestras. ¿Por qué?</summary><div>Compruebe que el conector está en Activo (en Pruebas solo admite ensayos) y que el día y la hora del calendario ya han pasado. Después mire <strong>Monitor de capturas</strong>.</div></details>
+<details><summary>¿Cómo distingo estas muestras en los informes?</summary><div>Llevan el origen «carrier», distinto del de las muestras de panelistas, y se pueden separar.</div></details>
+<details><summary>¿Quién ve cada pantalla?</summary><div>El Account Manager (y el UPU Account Manager) edita planes, puntos, conectores y monitor, y ve las muestras. El Allocation Plan Manager edita planes y ve el resto salvo conectores. El DO Coordinator edita puntos de lectura y ve el resto salvo conectores. Panelist Manager y Materials Supplier no tienen acceso. Una pantalla en solo lectura muestra la etiqueta de solo lectura.</div></details>
+    </section>
+
+  </div>
+  </main>
+</div>
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('#nav a'));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+
+  // Mobile section picker
+  var jump = document.getElementById('jump');
+  links.forEach(function (a) {
+    var o = document.createElement('option');
+    o.value = a.getAttribute('href'); o.textContent = a.textContent; jump.appendChild(o);
+  });
+  jump.addEventListener('change', function () { location.hash = jump.value; });
+
+  // Highlight the current section in the side menu
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id); });
+          jump.value = '#' + e.target.id;
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>
