@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useLocale } from '@/contexts/LocaleContext'
 import { usePermissions } from '@/contexts/PermissionsContext'
 import { ACCESS_OPTIONS } from '@/lib/access'
-import { HELP_DOCS, HELP_LANGS, canSeeHelpDoc, helpDocUrl, helpLang } from '@/lib/helpDocs'
+import { visibleHelpDocs, HELP_LANGS, canSeeHelpDoc, helpDocUrl, helpLang } from '@/lib/helpDocs'
 
 export function HelpCenter() {
   const { t, locale } = useLocale()
@@ -17,7 +17,7 @@ export function HelpCenter() {
     canManageAccess,
     hasAnyEdit: ACCESS_OPTIONS.some(o => canEdit(o.key)),
   }
-  const docs = HELP_DOCS.filter(d => canSeeHelpDoc(d, who))
+  const docs = visibleHelpDocs().filter(d => canSeeHelpDoc(d, who))
   const current = docs.find(d => d.id === params.get('doc')) ?? docs[0]
   const [lang, setLang] = useState<string>(helpLang(locale))
   const [copied, setCopied] = useState(false)

@@ -13,7 +13,7 @@ describe('access', () => {
     const src = readFileSync(resolve(__dirname, '../../App.tsx'), 'utf8')
     const paths = [...src.matchAll(/path=\s*"([^"]+)"/g)].map(m => m[1]).filter(p => p !== '/*' && p !== '/')
     expect(paths.length).toBeGreaterThan(30)
-    const missing = paths.filter(p => !(p in ROUTE_OPTION))
+    const missing = paths.filter(p => !(p in ROUTE_OPTION) && p !== '/carrier-link/*') // comodín = redirección en producción
     expect(missing).toEqual([])
   })
 
@@ -48,11 +48,11 @@ describe('access', () => {
   })
 
   it('landingPath: quien solo ve cl_plans aterriza en una pantalla de Carrier Link', () => {
-    expect(landingPath(o => o === 'cl_plans')).toBe('/carrier-link/allocation-generator')
+    expect(landingPath(o => o === 'cl_plans', true)).toBe('/carrier-link/allocation-generator')
   })
 
   it('landingPath: quien solo ve cl_samples aterriza en /carrier-link/samples', () => {
-    expect(landingPath(o => o === 'cl_samples')).toBe('/carrier-link/samples')
+    expect(landingPath(o => o === 'cl_samples', true)).toBe('/carrier-link/samples')
   })
 
   it('firstAllowedPath: solo reporting -> territory-equity', () => {
@@ -146,5 +146,14 @@ describe('access', () => {
     expect(permissionsStatus('u|a2', 'u|a1', 'u|a1')).toBe('loading')
     // derechos ya cargados ganan a un fallo posterior de recarga
     expect(permissionsStatus('u|a1', 'u|a1', 'u|a1')).toBe('ready')
+  })
+})
+
+describe('Carrier Link deshabilitado (producción)', () => {
+  it('quien solo tiene cl_* no aterriza nunca en /carrier-link: pantalla sin acceso', () => {
+    expect(landingPath(o => o.startsWith('cl_'), false)).toBe(NO_ACCESS_PATH)
+  })
+  it('con otras opciones aterriza en la primera no cl_*', () => {
+    expect(landingPath(o => o === 'cl_plans' || o === 'dashboard', false)).toBe('/dashboard')
   })
 })

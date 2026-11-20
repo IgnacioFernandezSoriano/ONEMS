@@ -65,6 +65,9 @@ import { ClReadingPoints } from './pages/carrier-link/ClReadingPoints'
 import { ClConnectors } from './pages/carrier-link/ClConnectors'
 import { ClMonitor } from './pages/carrier-link/ClMonitor'
 import { ClComingSoon } from './pages/carrier-link/ClComingSoon'
+import { isCarrierLinkEnabled } from './lib/featureFlags'
+
+const carrierLinkOn = isCarrierLinkEnabled()
 
 
 function App() {
@@ -130,7 +133,11 @@ function App() {
                       }
                     />
                     
-                    {/* Carrier Link */}
+                    {/* Carrier Link (solo DEV; en producción todas las rutas redirigen) */}
+                    {!carrierLinkOn && (
+                      <Route path="/carrier-link/*" element={<Navigate to="/" replace />} />
+                    )}
+                    {carrierLinkOn && (<>
                     <Route
                       path="/carrier-link/plans"
                       element={<Navigate to="/carrier-link/allocation-generator" replace />}
@@ -191,6 +198,7 @@ function App() {
                         </ProtectedRoute>
                       }
                     />
+                    </>)}
 
                     {/* Delivery Standards */}
                     <Route

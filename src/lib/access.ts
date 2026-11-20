@@ -1,6 +1,8 @@
 // Catálogo de opciones de menú y mapeo ruta -> opción para roles y derechos por cuenta.
 // Las 33 claves coinciden con public.access_option (migración 20261119100000_account_access.sql).
 
+import { isCarrierLinkEnabled } from './featureFlags'
+
 export type AccessOption =
   | 'dashboard' | 'topology' | 'carriers' | 'panelists' | 'e2e_sla'
   | 'allocation_generator' | 'load_balancing' | 'allocation_plans'
@@ -154,8 +156,13 @@ export const OPTION_ROUTE: Partial<Record<AccessOption, string>> = {
 }
 
 /** Primera ruta permitida siguiendo el orden del menú; null si no hay ninguna. */
-export function firstAllowedPath(levels: Map<AccessOption, AccessLevel>): string | null {
-  const first = ACCESS_OPTIONS.find(o => levels.has(o.key) && OPTION_ROUTE[o.key])
+export function firstAllowedPath(
+  levels: Map<AccessOption, AccessLevel>,
+  carrierLink: boolean = isCarrierLinkEnabled(),
+): string | null {
+  const first = ACCESS_OPTIONS.find(
+    o => levels.has(o.key) && OPTION_ROUTE[o.key] && (carrierLink || o.group !== 'carrier_link'),
+  )
   return first ? OPTION_ROUTE[first.key] ?? null : null
 }
 
@@ -182,10 +189,10 @@ export function canAccess(access: RouteAccess, isSuperadmin: boolean, canView: (
 }
 
 /** Primera ruta permitida (orden del menú) según canView, o NO_ACCESS_PATH si no hay ninguna. */
-export function landingPath(canView: (o: AccessOption) => boolean): string {
+export function landingPath(canView: (o: AccessOption) => boolean, carrierLink: boolean = isCarrierLinkEnabled()): string {
   const levels = new Map<AccessOption, AccessLevel>()
   for (const o of ACCESS_OPTIONS) if (canView(o.key)) levels.set(o.key, 'view')
-  return firstAllowedPath(levels) ?? NO_ACCESS_PATH
+  return firstAllowedPath(levels, carrierLink) ?? NO_ACCESS_PATH
 }
 
 /** Destino al denegar `currentPath`: la primera permitida, nunca la propia ruta (evita bucles). */

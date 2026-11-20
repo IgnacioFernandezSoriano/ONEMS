@@ -47,6 +47,10 @@ import { useDeferredSamples } from '../../hooks/useDeferredSamples'
 import { usePermissions } from '../../contexts/PermissionsContext'
 import { canAccess, routeAccess, type RouteAccess } from '../../lib/access'
 import { visibleEntries } from '../../lib/menuHeadings'
+import { isCarrierLinkEnabled } from '@/lib/featureFlags'
+
+// Carrier Link solo en DEV: fuera de DEV sus enlaces (y con ellos sus subencabezados) no se muestran.
+const carrierLinkOn = isCarrierLinkEnabled()
 
 interface MenuItem {
   path: string
@@ -500,6 +504,7 @@ export function Sidebar() {
 
   const hasAccess = (item: MenuItem): boolean => {
     if (item.heading) return false
+    if (!carrierLinkOn && item.path.startsWith('/carrier-link')) return false
     if (item.children) return item.children.some(hasAccess)
     // Mientras cargan los derechos no se enseña nada que dependa de ellos (evita parpadeo de opciones).
     if (permissionsLoading && item.option !== 'open') return false
