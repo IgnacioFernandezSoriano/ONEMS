@@ -220,6 +220,8 @@ export function ClPlans() {
       hasSavedQuotas: (detail?.quotas.length ?? 0) > 0,
     })
     if (followUp.clearPreview) {
+      beginGenerate() // una generación en curso usa el total/fechas viejos: queda descartada
+      setGenerating(false)
       setPreview(null)
       setConfirmActivate(false)
       setMessage(followUp.regenerateNotice ? { kind: 'info', key: 'cl.plans.regenerate_notice' } : null)
