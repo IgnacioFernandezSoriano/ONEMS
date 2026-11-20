@@ -56,8 +56,22 @@ describe('access', () => {
     expect(src).not.toMatch(/ClPlans|ClComingSoon/)
   })
 
-  it('landingPath: quien solo ve cl_plans aterriza en el Generador de Asignaciones', () => {
-    expect(landingPath(o => o === 'cl_plans', true)).toBe('/allocation-plan-generator')
+  it('landingPath: con cl_plans y el Generador aterriza en el Generador de Asignaciones', () => {
+    expect(landingPath(o => o === 'cl_plans' || o === 'allocation_generator', true)).toBe('/allocation-plan-generator')
+  })
+
+  it('landingPath: cl_plans sin el Generador no aterriza en una pantalla que le negaría la entrada', () => {
+    // El Generador exige allocation_generator: con solo cl_plans + cl_samples se pasa a la siguiente permitida.
+    expect(landingPath(o => o === 'cl_plans' || o === 'cl_samples', true)).toBe('/carrier-link/samples')
+    expect(landingPath(o => o === 'cl_plans', true)).toBe(NO_ACCESS_PATH)
+  })
+
+  it('deniedRedirect: negado en la entrada de cl_plans pasa a la siguiente permitida, no a "sin acceso"', () => {
+    const v = (o: AccessOption) => o === 'cl_plans' || o === 'cl_samples'
+    expect(deniedRedirect('/allocation-plan-generator', v, true)).toBe('/carrier-link/samples')
+    // Con varias permitidas, nunca la propia ruta: la siguiente.
+    const w = (o: AccessOption) => o === 'cl_samples' || o === 'cl_monitor'
+    expect(deniedRedirect('/carrier-link/samples', w, true)).toBe('/carrier-link/monitor')
   })
 
   it('landingPath: quien solo ve cl_samples aterriza en /carrier-link/samples', () => {

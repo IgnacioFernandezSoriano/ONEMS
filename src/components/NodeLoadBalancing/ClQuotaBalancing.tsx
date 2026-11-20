@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Loader2, Lock } from 'lucide-react'
 import { useTranslation } from '@/hooks/useTranslation'
 import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge'
@@ -32,6 +32,8 @@ interface Props {
   fenceUntil: string
   onChangeFence: (v: string) => void
   canEdit: boolean
+  /** Avisa a la página mientras se aplica un balanceo (para bloquear el cambio de plan). */
+  onApplyingChange?: (applying: boolean) => void
 }
 
 const LEVEL_CELL: Record<LoadLevel, string> = {
@@ -71,11 +73,17 @@ export function ClQuotaBalancing({
   fenceUntil,
   onChangeFence,
   canEdit,
+  onApplyingChange,
 }: Props) {
   const { t } = useTranslation()
   const { quotas, loading, error, reload, apply } = useClBalancing(plan.id, loadAllQuotas)
   const [proposal, setProposal] = useState<BalanceProposal | null>(null)
   const [applying, setApplying] = useState(false)
+  useEffect(() => {
+    onApplyingChange?.(applying)
+  }, [applying, onApplyingChange])
+  // Si el componente se desmonta a mitad (p. ej. "Actualizar"), la página no se queda bloqueada.
+  useEffect(() => () => onApplyingChange?.(false), [onApplyingChange])
   const [notice, setNotice] = useState<{ type: 'ok' | 'error' | 'info'; text: string } | null>(null)
 
   const today = localDateKey(new Date())

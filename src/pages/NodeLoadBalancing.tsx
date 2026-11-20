@@ -49,6 +49,8 @@ export default function NodeLoadBalancing() {
   useEffect(() => setClPlanId(null), [effectiveAccountId]);
   // "Actualizar" con un plan de Carrier Link: se releen los planes y, al remontar el balanceo, sus cuotas.
   const [clReload, setClReload] = useState(0);
+  // Mientras se aplica un balanceo de Carrier Link no se puede cambiar de plan.
+  const [clApplying, setClApplying] = useState(false);
   const clPlan = clPlans.find((p) => p.id === clPlanId) ?? null;
   const { user, profile } = useAuth();
   const currentDate = new Date();
@@ -521,7 +523,7 @@ export default function NodeLoadBalancing() {
             id="lb-plan"
             value={clPlan ? clPlanOptionValue(clPlan.id) : ''}
             onChange={(e) => setClPlanId(parseClPlanOption(e.target.value))}
-            disabled={applying}
+            disabled={applying || clApplying}
             className="block w-full md:w-auto md:min-w-[24rem] border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm disabled:opacity-50"
           >
             <option value="">{t('cl.balancing.panelists_option')}</option>
@@ -549,6 +551,7 @@ export default function NodeLoadBalancing() {
           fenceUntil={fenceUntil}
           onChangeFence={setFenceUntil}
           canEdit={canEdit('cl_plans')}
+          onApplyingChange={setClApplying}
         />
       ) : (
       <>
