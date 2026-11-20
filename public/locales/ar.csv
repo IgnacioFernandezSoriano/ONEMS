@@ -5720,7 +5720,7 @@ cl.help_link,مساعدة
 menu.capture_panelists,المشاركون
 cl.coming_soon,قيد الإعداد.
 cl.capture_method.label,طريقة الالتقاط
-cl.capture_method.help,المشاركون: مولّد التخصيص E2E. Carrier Link: عمليات مسح الناقل (مولّد ووصلات ونقاط قراءة Carrier Link). كلاهما: متاح في الاثنين.
+cl.capture_method.help,طرق الالتقاط التي يقبلها الناقل في مولد التخصيص: المشاركون، أو Carrier Link (عمليات مسح الناقل؛ ويفعّل أيضًا وصلاته ونقاط قراءته)، أو كلاهما.
 cl.capture_method.panelists,المشاركون
 cl.capture_method.carrier_link,Carrier Link
 cl.capture_method.both,كلاهما

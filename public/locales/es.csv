@@ -5728,7 +5728,7 @@ cl.help_link,Ayuda
 menu.capture_panelists,Panelistas
 cl.coming_soon,En preparación.
 cl.capture_method.label,Forma de captura
-cl.capture_method.help,"Panelistas: generador de asignación E2E. Carrier Link: escaneos del carrier (generador, conectores y puntos de lectura de Carrier Link). Ambos: disponible en los dos."
+cl.capture_method.help,"Qué capturas admite el carrier en el Generador de Asignaciones: Panelistas, Carrier Link (escaneos del carrier; también habilita sus conectores y puntos de lectura) o Ambos."
 cl.capture_method.panelists,Panelistas
 cl.capture_method.carrier_link,Carrier Link
 cl.capture_method.both,Ambos

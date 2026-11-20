@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { captureMethodOf, carriersForCapture } from '../carrierCapture'
+import { captureMethodOf, carriersForCapture, captureOptionsFor, carrierWritePayload } from '../carrierCapture'
 
 type C = { id: string; capture_method?: string | null }
 const ids = (l: C[]) => l.map((c) => c.id)
@@ -35,5 +35,29 @@ describe('carriersForCapture', () => {
     const k: C[] = [{ id: 'a', capture_method: 'panelists' }, { id: 'b', capture_method: 'panelists' }]
     expect(ids(carriersForCapture(k, 'panelists'))).toEqual(['a', 'b'])
     expect(carriersForCapture(k, 'carrier_link')).toEqual([])
+  })
+})
+
+describe('captureOptionsFor', () => {
+  it('both -> las dos capturas', () => {
+    expect(captureOptionsFor({ capture_method: 'both' })).toEqual(['panelists', 'carrier_link'])
+  })
+  it('un solo valor -> solo esa captura (sin valor = panelists)', () => {
+    expect(captureOptionsFor({ capture_method: 'carrier_link' })).toEqual(['carrier_link'])
+    expect(captureOptionsFor({ capture_method: 'panelists' })).toEqual(['panelists'])
+    expect(captureOptionsFor({})).toEqual(['panelists'])
+  })
+})
+
+describe('carrierWritePayload', () => {
+  const data = { code: 'C', name: 'N', status: 'active', capture_method: 'both' as const }
+  it('con Carrier Link envía capture_method', () => {
+    expect(carrierWritePayload(data, true)).toEqual(data)
+  })
+  it('sin Carrier Link no envía capture_method (producción como siempre)', () => {
+    const out = carrierWritePayload(data, false)
+    expect(out).toEqual({ code: 'C', name: 'N', status: 'active' })
+    expect('capture_method' in out).toBe(false)
+    expect(data.capture_method).toBe('both')
   })
 })

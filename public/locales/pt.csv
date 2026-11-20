@@ -5728,7 +5728,7 @@ cl.help_link,Ajuda
 menu.capture_panelists,Painelistas
 cl.coming_soon,Em preparação.
 cl.capture_method.label,Forma de captura
-cl.capture_method.help,"Painelistas: gerador de alocação E2E. Carrier Link: leituras da transportadora (gerador, conectores e pontos de leitura do Carrier Link). Ambos: disponível nos dois."
+cl.capture_method.help,"Que capturas a transportadora aceita no Gerador de alocação: Painelistas, Carrier Link (leituras da transportadora; também ativa os seus conectores e pontos de leitura) ou Ambos."
 cl.capture_method.panelists,Painelistas
 cl.capture_method.carrier_link,Carrier Link
 cl.capture_method.both,Ambos

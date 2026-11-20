@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Carrier, Product, ProductMaterial } from '@/lib/types'
-import type { CaptureMethod } from '@/lib/carrierCapture'
+import { carrierWritePayload, type CaptureMethod } from '@/lib/carrierCapture'
+import { isCarrierLinkEnabled } from '@/lib/featureFlags'
 import { useEffectiveAccountId } from './useEffectiveAccountId'
 import { useLatestRequest } from '@/lib/latestRequest'
+
+// Sin Carrier Link (producción) nunca se envía capture_method: funciona aunque la columna no exista.
+const carrierLinkOn = isCarrierLinkEnabled()
 
 export function useCarriers() {
   const effectiveAccountId = useEffectiveAccountId()
@@ -64,14 +68,14 @@ export function useCarriers() {
 
   // Carrier operations
   const createCarrier = async (data: { code: string; name: string; type?: string; status?: string; capture_method?: CaptureMethod }) => {
-    const carrierData = { ...data, account_id: effectiveAccountId }
+    const carrierData = { ...carrierWritePayload(data, carrierLinkOn), account_id: effectiveAccountId }
     const { data: newCarrier, error } = await supabase.from('carriers').insert(carrierData).select().single()
     if (error) throw error
     setCarriers([...carriers, newCarrier])
   }
 
   const updateCarrier = async (id: string, data: Partial<Carrier>) => {
-    const { data: updated, error } = await supabase.from('carriers').update(data).eq('id', id).select().single()
+    const { data: updated, error } = await supabase.from('carriers').update(carrierWritePayload(data, carrierLinkOn)).eq('id', id).select().single()
     if (error) throw error
     setCarriers(carriers.map(c => c.id === id ? updated : c))
   }

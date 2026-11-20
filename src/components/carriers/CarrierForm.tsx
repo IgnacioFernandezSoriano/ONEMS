@@ -1,8 +1,13 @@
 import { useState } from 'react'
 import type { Carrier } from '@/lib/types'
-import { CAPTURE_METHODS, CAPTURE_METHOD_LABEL_KEY, captureMethodOf, type CaptureMethod } from '@/lib/carrierCapture'
+import { CAPTURE_METHODS, CAPTURE_METHOD_LABEL_KEY, captureMethodOf, carrierWritePayload, type CaptureMethod } from '@/lib/carrierCapture'
+import { isCarrierLinkEnabled } from '@/lib/featureFlags'
 
 import { useTranslation } from '@/hooks/useTranslation';
+
+// Forma de captura solo con Carrier Link habilitado (DEV); fuera, el formulario es el de siempre.
+const carrierLinkOn = isCarrierLinkEnabled()
+
 interface CarrierFormProps {
   carrier?: Carrier
   onSubmit: (data: any) => Promise<void>
@@ -24,7 +29,7 @@ export function CarrierForm({ carrier, onSubmit, onCancel }: CarrierFormProps) {
     e.preventDefault()
     setLoading(true)
     try {
-      await onSubmit(formData)
+      await onSubmit(carrierWritePayload(formData, carrierLinkOn))
     } finally {
       setLoading(false)
     }
@@ -81,7 +86,7 @@ export function CarrierForm({ carrier, onSubmit, onCancel }: CarrierFormProps) {
         </select>
       </div>
 
-      <div>
+      {carrierLinkOn && <div>
         <label className="block text-sm font-medium mb-1">{t('cl.capture_method.label')} *</label>
         <select
           required
@@ -94,7 +99,7 @@ export function CarrierForm({ carrier, onSubmit, onCancel }: CarrierFormProps) {
           ))}
         </select>
         <p className="text-xs text-gray-500 mt-1">{t('cl.capture_method.help')}</p>
-      </div>
+      </div>}
 
       <div className="flex gap-2 justify-end">
         <button

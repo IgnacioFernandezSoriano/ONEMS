@@ -5720,7 +5720,7 @@ cl.help_link,Aide
 menu.capture_panelists,Panélistes
 cl.coming_soon,En préparation.
 cl.capture_method.label,Mode de capture
-cl.capture_method.help,"Panélistes : générateur d’allocation E2E. Carrier Link : scans du transporteur (générateur, connecteurs et points de lecture Carrier Link). Les deux : disponible dans les deux."
+cl.capture_method.help,"Captures acceptées par le transporteur dans le Générateur d’allocations : Panélistes, Carrier Link (scans du transporteur ; active aussi ses connecteurs et points de lecture) ou Les deux."
 cl.capture_method.panelists,Panélistes
 cl.capture_method.carrier_link,Carrier Link
 cl.capture_method.both,Les deux

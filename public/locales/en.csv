@@ -5728,7 +5728,7 @@ cl.help_link,Help
 menu.capture_panelists,Panelists
 cl.coming_soon,In preparation.
 cl.capture_method.label,Capture method
-cl.capture_method.help,"Panelists: E2E allocation generator. Carrier Link: carrier scans (Carrier Link generator, connectors and reading points). Both: available in both."
+cl.capture_method.help,"Which captures the carrier accepts in the Allocation Generator: Panelists, Carrier Link (carrier scans; also enables its connectors and reading points) or Both."
 cl.capture_method.panelists,Panelists
 cl.capture_method.carrier_link,Carrier Link
 cl.capture_method.both,Both

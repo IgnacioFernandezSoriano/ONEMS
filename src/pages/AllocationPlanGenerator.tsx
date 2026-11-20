@@ -3,6 +3,8 @@ import { useAllocationPlans } from '@/hooks/useAllocationPlans'
 import { useAppliedAllocationPlans } from '@/hooks/useAppliedAllocationPlans'
 import { AllocationPlanGeneratorForm } from '@/components/allocation-plans/AllocationPlanGeneratorForm'
 import { carriersForCapture } from '@/lib/carrierCapture'
+import { isCarrierLinkEnabled } from '@/lib/featureFlags'
+
 import { CSVHandler } from '@/components/allocation-plans/CSVHandler'
 import { PageHeader } from '@/components/common/PageHeader'
 import { Button } from '@/components/common/Button'
@@ -12,6 +14,9 @@ import { useAuth } from '@/contexts/AuthContext'
 import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge'
 import { usePermissions } from '@/contexts/PermissionsContext'
 import { useTranslation } from '@/hooks/useTranslation'
+
+// Sin Carrier Link (producción) el generador no depende de capture_method: ofrece todos los carriers, como siempre.
+const carrierLinkOn = isCarrierLinkEnabled()
 
 export function AllocationPlanGenerator() {
   const { t } = useTranslation()
@@ -261,7 +266,7 @@ export function AllocationPlanGenerator() {
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-lg font-medium mb-4">{t('allocation_generator.automatic_generator')}</h2>
             <AllocationPlanGeneratorForm
-              carriers={carriersForCapture(carriers, 'panelists')}
+              carriers={carrierLinkOn ? carriersForCapture(carriers, 'panelists') : carriers}
               products={products}
               cities={cities}
               nodes={nodes}
