@@ -68,12 +68,13 @@ export function unknownPlaces(
 /** Quita de la lista los lugares que ya tienen un punto activo (modo NULL del punto = cualquier modo). */
 export function excludeRegistered(
   unknown: UnknownPlace[],
-  points: { carrier_place_ref: string; carrier_mode_ref: string | null }[],
+  points: { carrier_place_ref: string; carrier_mode_ref: string | null; is_active?: boolean }[],
 ): UnknownPlace[] {
   return unknown.filter(
     (u) =>
       !points.some(
         (p) =>
+          p.is_active !== false &&
           p.carrier_place_ref.trim() === u.place_ref.trim() &&
           (p.carrier_mode_ref === null || p.carrier_mode_ref.trim() === (u.mode_ref ?? '').trim()),
       ),
