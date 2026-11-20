@@ -5636,7 +5636,7 @@ cl.samples.role.end,قراءة النهاية
 cl.samples.role.intermediate,قراءة وسيطة
 cl.monitor.plan,الخطة
 cl.monitor.all_plans,جميع الخطط
-cl.monitor.demands,الطلبات إلى الناقل
+cl.monitor.demands,الطلبات إلى الناقل (بما في ذلك طلبات الاختبار)
 cl.monitor.demand.open,مفتوحة
 cl.monitor.demand.fulfilled,مكتملة
 cl.monitor.demand.partial,جزئية

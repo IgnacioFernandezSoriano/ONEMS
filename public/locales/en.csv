@@ -5644,7 +5644,7 @@ cl.samples.role.end,End scan
 cl.samples.role.intermediate,Intermediate scan
 cl.monitor.plan,Plan
 cl.monitor.all_plans,All plans
-cl.monitor.demands,Requests to the carrier
+cl.monitor.demands,Requests to the carrier (including test requests)
 cl.monitor.demand.open,Open
 cl.monitor.demand.fulfilled,Fulfilled
 cl.monitor.demand.partial,Partial

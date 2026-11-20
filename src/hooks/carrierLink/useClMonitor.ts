@@ -96,7 +96,8 @@ export function useClMonitor(accountId: string | null, planId: string | null, op
         count: 'exact',
       })
       .eq('account_id', accountId)
-    if (planId) aq = aq.eq('plan_id', planId)
+    // Con plan elegido tambien se ven los avisos de cuenta (plan_id nulo).
+    if (planId) aq = aq.or(`plan_id.eq.${planId},plan_id.is.null`)
     if (alertFilter === 'open') aq = aq.eq('status', 'open')
     const aFrom = alertPage * MONITOR_PAGE_SIZE
 
@@ -106,23 +107,16 @@ export function useClMonitor(accountId: string | null, planId: string | null, op
       aq.order('created_at', { ascending: false }).order('id').range(aFrom, aFrom + MONITOR_PAGE_SIZE - 1),
     ])
 
-    // Elegidos por lote: solo de los lotes de esta pagina.
+    // Elegidos por lote: un recuento (head) por lote de esta pagina, en paralelo; incluye todas las muestras del lote
+    // (tambien las de un lote deshecho). Nunca se traen filas: cl_sampling_runs puede pasar del tope de 1.000 de PostgREST.
     const batchRows = (bRes.data ?? []) as any[]
-    const selectedByBatch = new Map<string, number>()
-    let runsError: ClMonitorError | null = null
-    if (batchRows.length > 0) {
-      const runs = await supabase
-        .from('cl_sampling_runs')
-        .select('batch_id, samples_selected')
-        .in(
-          'batch_id',
-          batchRows.map((b) => b.id),
-        )
-        .limit(5000)
-      runsError = runs.error
-      for (const r of (runs.data ?? []) as any[])
-        selectedByBatch.set(r.batch_id, (selectedByBatch.get(r.batch_id) ?? 0) + (r.samples_selected ?? 0))
-    }
+    const selCounts = await Promise.all(
+      batchRows.map((b) =>
+        supabase.from('cl_samples').select('id', { count: 'exact', head: true }).eq('account_id', accountId).eq('batch_id', b.id),
+      ),
+    )
+    const selectedByBatch = new Map<string, number>(batchRows.map((b, i) => [b.id as string, selCounts[i].count ?? 0]))
+    const runsError: ClMonitorError | null = selCounts.map((r) => r.error).find(Boolean) ?? null
     if (isStale()) return
 
     // 416 / PGRST103 = pagina fuera de rango: no es un error para el usuario.

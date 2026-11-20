@@ -5644,7 +5644,7 @@ cl.samples.role.end,Leitura de fim
 cl.samples.role.intermediate,Leitura intermédia
 cl.monitor.plan,Plano
 cl.monitor.all_plans,Todos os planos
-cl.monitor.demands,Pedidos ao transportador
+cl.monitor.demands,Pedidos ao transportador (incluindo os de teste)
 cl.monitor.demand.open,Abertos
 cl.monitor.demand.fulfilled,Cumpridos
 cl.monitor.demand.partial,Parciais
