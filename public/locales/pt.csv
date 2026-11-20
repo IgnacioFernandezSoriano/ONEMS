@@ -5395,3 +5395,38 @@ onedb.source_panelist,Painelista
 onedb.source_carrier,Transportadora
 onedb.measured_time,Medido
 onedb.equivalence_added,Equivalência adicionada
+cl.error.cl_bad_payload,Os dados enviados não são válidos.
+cl.error.cl_batch_already_undone,Este lote já foi desfeito.
+cl.error.cl_batch_not_found,O lote não foi encontrado.
+cl.error.cl_batch_not_undoable,Este lote já não pode ser desfeito.
+cl.error.cl_batch_not_validated,O lote ainda não foi validado.
+cl.error.cl_demand_not_open,"A procura não está aberta, por isso não pode ser alterada."
+cl.error.cl_duplicate_quota,Já existe uma quota com os mesmos valores neste plano.
+cl.error.cl_feed_carrier_mismatch,O conector pertence a uma transportadora diferente da do plano.
+cl.error.cl_feed_paused,O conector está em pausa. Reative-o para continuar.
+cl.error.cl_mapping_incomplete,O mapeamento de campos está incompleto. Complete-o antes de continuar.
+cl.error.cl_missing_points,Faltam pontos de início ou de fim em algumas cidades do plano.
+cl.error.cl_no_feed,O plano não tem nenhum conector atribuído.
+cl.error.cl_no_quotas,O plano ainda não tem quotas. Adicione pelo menos uma.
+cl.error.cl_plan_closed,O plano está fechado e não pode ser alterado.
+cl.error.cl_plan_locked_field,Este campo já não pode ser alterado porque o plano já começou.
+cl.error.cl_plan_not_draft,Só os planos em rascunho podem ser alterados assim.
+cl.error.cl_quota_locked,Esta quota já não pode ser alterada porque já tem amostras.
+cl.error.cl_too_many_rows,O ficheiro tem demasiadas linhas. Divida-o em ficheiros mais pequenos.
+cl.error.cl_unknown_stratum,Algumas linhas referem-se a uma cidade ou rota que não está no plano.
+cl.error.cl_forbidden,Não tem permissão para fazer isto no Carrier Link.
+cl.error.cl_demand_testing_dry_run_only,Esta procura está em modo de teste e só permite uma simulação.
+cl.error.forbidden,Não tem permissão para fazer isto.
+cl.error.generic,Algo correu mal. Tente novamente.
+cl.select_account.title,Selecione uma conta
+cl.select_account.body,Escolha uma conta na barra superior para trabalhar com o Carrier Link.
+cl.plans.title,Planos de amostragem
+cl.plans.help,Defina que rotas e volumes são amostrados a partir das leituras da transportadora.
+cl.samples.title,Amostras
+cl.samples.help,Reveja as amostras geradas a partir das leituras da transportadora.
+cl.reading_points.title,Pontos de leitura
+cl.reading_points.help,Gira os pontos da transportadora onde as leituras são captadas.
+cl.connectors.title,Conectores
+cl.connectors.help,Configure como os dados de leitura da transportadora chegam ao ONEMS.
+cl.monitor.title,Monitor de captura
+cl.monitor.help,Acompanhe o estado da captura de dados das transportadoras.

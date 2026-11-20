@@ -55,7 +55,7 @@ interface MenuItem {
   /** Opción de la matriz de la cuenta (ROUTE_OPTION); los grupos con hijos no llevan: se ven si algún hijo se ve. */
   option?: RouteAccess
   children?: MenuItem[]
-  module?: 'e2e' | 'diagnosis'
+  module?: 'e2e' | 'diagnosis' | 'carrier_link'
   external?: boolean
 }
 
@@ -89,18 +89,28 @@ export function Sidebar() {
   const [isHovered, setIsHovered] = useState(false)
   const [accounts, setAccounts] = useState<Array<{ id: string; name: string }>>([])
   const [accountName, setAccountName] = useState<string>('')
-  const [moduleFilter, setModuleFilter] = useState<'all' | 'e2e' | 'diagnosis'>('e2e')
+  const [moduleFilter, setModuleFilter] = useState<'all' | 'e2e' | 'diagnosis' | 'carrier_link'>('e2e')
 
   // Handle module filter change with auto-expand
-  const handleModuleFilterChange = (filter: 'all' | 'e2e' | 'diagnosis') => {
+  const handleModuleFilterChange = (filter: 'all' | 'e2e' | 'diagnosis' | 'carrier_link') => {
     setModuleFilter(filter)
     if (filter === 'diagnosis') {
       setExpandedSections(['/rfid/setup'])
     } else if (filter === 'e2e') {
       setExpandedSections(['/e2e/setup'])
+    } else if (filter === 'carrier_link') {
+      setExpandedSections(['/carrier-link'])
     }
   }
   
+  // Al entrar en una pantalla de Carrier Link (p. ej. aterrizaje), se muestra su pestaña
+  useEffect(() => {
+    if (location.pathname.startsWith('/carrier-link')) {
+      setModuleFilter('carrier_link')
+      setExpandedSections(prev => (prev.includes('/carrier-link') ? prev : [...prev, '/carrier-link']))
+    }
+  }, [location.pathname])
+
   // Auto-expand on hover when collapsed
   const isExpanded = isCollapsed ? isHovered : true
 
@@ -355,6 +365,23 @@ export function Sidebar() {
       ],
     },
     {
+      label: 'CARRIER_LINK',
+      items: [
+        {
+          path: '/carrier-link',
+          label: t('menu.carrier_link'),
+          icon: Truck,
+          children: [
+            { path: '/carrier-link/plans', label: t('menu.cl_plans'), icon: Target, option: 'cl_plans' },
+            { path: '/carrier-link/samples', label: t('menu.cl_samples'), icon: Package, option: 'cl_samples' },
+            { path: '/carrier-link/reading-points', label: t('menu.cl_reading_points'), icon: MapPin, option: 'cl_reading_points' },
+            { path: '/carrier-link/connectors', label: t('menu.cl_connectors'), icon: Network, option: 'cl_connectors' },
+            { path: '/carrier-link/monitor', label: t('menu.cl_monitor'), icon: Activity, option: 'cl_monitor' },
+          ],
+        },
+      ],
+    },
+    {
       label: t('incidents.menu_group'),
       items: [
         {
@@ -484,6 +511,9 @@ export function Sidebar() {
     return canAccess(item.option ?? routeAccess(item.path), isSuperadmin, canView)
   }
 
+  // La pestaña Carrier Link solo se ve si el usuario ve alguna opción cl_*
+  const showCarrierLinkTab = menuGroups.some(g => g.label === 'CARRIER_LINK' && g.items.some(hasAccess))
+
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(path + '/')
   }
@@ -548,6 +578,18 @@ export function Sidebar() {
             >
               {t('menu.diagnosis')}
             </button>
+            {showCarrierLinkTab && (
+              <button
+                onClick={() => handleModuleFilterChange('carrier_link')}
+                className={`flex-1 px-2 py-1 text-xs font-medium rounded-md transition-colors ${
+                  moduleFilter === 'carrier_link'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {t('menu.carrier_link')}
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -560,8 +602,9 @@ export function Sidebar() {
 
           // Apply module filter: E2E hides the DIAGNOSIS group and vice versa
           if (moduleFilter !== 'all') {
-            if (moduleFilter === 'e2e' && group.label === 'DIAGNOSIS') return null
-            if (moduleFilter === 'diagnosis' && group.label === 'E2E') return null
+            if (moduleFilter === 'e2e' && (group.label === 'DIAGNOSIS' || group.label === 'CARRIER_LINK')) return null
+            if (moduleFilter === 'diagnosis' && (group.label === 'E2E' || group.label === 'CARRIER_LINK')) return null
+            if (moduleFilter === 'carrier_link' && (group.label === 'E2E' || group.label === 'DIAGNOSIS')) return null
           }
 
           return (
@@ -571,7 +614,11 @@ export function Sidebar() {
                 <h3 className={`text-xs font-semibold text-gray-400 uppercase tracking-wider transition-opacity ${
                   isExpanded ? 'opacity-100' : 'opacity-0'
                 }`}>
-                  {group.label === 'DIAGNOSIS' ? t('menu.diagnosis') : group.label}
+                  {group.label === 'DIAGNOSIS'
+                    ? t('menu.diagnosis')
+                    : group.label === 'CARRIER_LINK'
+                      ? t('menu.carrier_link')
+                      : group.label}
                 </h3>
               </div>
 

@@ -5387,3 +5387,38 @@ onedb.source_panelist,Panéliste
 onedb.source_carrier,Transporteur
 onedb.measured_time,Mesuré
 onedb.equivalence_added,Équivalence ajoutée
+cl.error.cl_bad_payload,Les données envoyées ne sont pas valides.
+cl.error.cl_batch_already_undone,Ce lot a déjà été annulé.
+cl.error.cl_batch_not_found,Le lot est introuvable.
+cl.error.cl_batch_not_undoable,Ce lot ne peut plus être annulé.
+cl.error.cl_batch_not_validated,Le lot n'a pas encore été validé.
+cl.error.cl_demand_not_open,La demande n'est pas ouverte et ne peut donc pas être modifiée.
+cl.error.cl_duplicate_quota,Un quota avec les mêmes valeurs existe déjà dans ce plan.
+cl.error.cl_feed_carrier_mismatch,Le connecteur appartient à un autre transporteur que celui du plan.
+cl.error.cl_feed_paused,Le connecteur est en pause. Réactivez-le pour continuer.
+cl.error.cl_mapping_incomplete,La correspondance des champs est incomplète. Complétez-la avant de continuer.
+cl.error.cl_missing_points,Il manque des points de départ ou d'arrivée pour certaines villes du plan.
+cl.error.cl_no_feed,Aucun connecteur n'est associé au plan.
+cl.error.cl_no_quotas,Le plan n'a pas encore de quotas. Ajoutez-en au moins un.
+cl.error.cl_plan_closed,Le plan est clos et ne peut pas être modifié.
+cl.error.cl_plan_locked_field,Ce champ ne peut plus être modifié car le plan a déjà commencé.
+cl.error.cl_plan_not_draft,Seuls les plans en brouillon peuvent être modifiés ainsi.
+cl.error.cl_quota_locked,Ce quota ne peut plus être modifié car il a déjà des échantillons.
+cl.error.cl_too_many_rows,Le fichier contient trop de lignes. Divisez-le en fichiers plus petits.
+cl.error.cl_unknown_stratum,Certaines lignes font référence à une ville ou un trajet absent du plan.
+cl.error.cl_forbidden,Vous n'avez pas l'autorisation de faire cela dans Carrier Link.
+cl.error.cl_demand_testing_dry_run_only,Cette demande est en mode test et n'autorise qu'une simulation.
+cl.error.forbidden,Vous n'avez pas l'autorisation de faire cela.
+cl.error.generic,Une erreur s'est produite. Veuillez réessayer.
+cl.select_account.title,Sélectionnez un compte
+cl.select_account.body,Choisissez un compte dans la barre supérieure pour utiliser Carrier Link.
+cl.plans.title,Plans d'échantillonnage
+cl.plans.help,Définissez quels trajets et volumes sont échantillonnés à partir des scans du transporteur.
+cl.samples.title,Échantillons
+cl.samples.help,Consultez les échantillons générés à partir des scans du transporteur.
+cl.reading_points.title,Points de lecture
+cl.reading_points.help,Gérez les points du transporteur où les scans sont capturés.
+cl.connectors.title,Connecteurs
+cl.connectors.help,Configurez la manière dont les données de scan du transporteur parviennent à ONEMS.
+cl.monitor.title,Suivi de capture
+cl.monitor.help,Suivez l'état de la capture des données des transporteurs.

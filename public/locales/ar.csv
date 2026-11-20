@@ -5387,3 +5387,38 @@ onedb.source_panelist,مشارك
 onedb.source_carrier,ناقل
 onedb.measured_time,المقاس
 onedb.equivalence_added,الزمن المكافئ المضاف
+cl.error.cl_bad_payload,البيانات المرسلة غير صالحة.
+cl.error.cl_batch_already_undone,تم التراجع عن هذه الدفعة مسبقًا.
+cl.error.cl_batch_not_found,لم يتم العثور على الدفعة.
+cl.error.cl_batch_not_undoable,لا يمكن التراجع عن هذه الدفعة بعد الآن.
+cl.error.cl_batch_not_validated,لم يتم التحقق من الدفعة بعد.
+cl.error.cl_demand_not_open,الطلب غير مفتوح، لذا لا يمكن تعديله.
+cl.error.cl_duplicate_quota,توجد حصة بالقيم نفسها في هذه الخطة.
+cl.error.cl_feed_carrier_mismatch,الموصل تابع لناقل مختلف عن ناقل الخطة.
+cl.error.cl_feed_paused,الموصل متوقف مؤقتًا. أعد تشغيله للمتابعة.
+cl.error.cl_mapping_incomplete,ربط الحقول غير مكتمل. أكمله قبل المتابعة.
+cl.error.cl_missing_points,تنقص نقاط البداية أو النهاية في بعض مدن الخطة.
+cl.error.cl_no_feed,لا يوجد موصل مرتبط بالخطة.
+cl.error.cl_no_quotas,لا تحتوي الخطة على حصص بعد. أضف حصة واحدة على الأقل.
+cl.error.cl_plan_closed,الخطة مغلقة ولا يمكن تعديلها.
+cl.error.cl_plan_locked_field,لم يعد بالإمكان تغيير هذا الحقل لأن الخطة بدأت بالفعل.
+cl.error.cl_plan_not_draft,لا يمكن تعديل بهذه الطريقة إلا الخطط في حالة المسودة.
+cl.error.cl_quota_locked,لم يعد بالإمكان تغيير هذه الحصة لأنها تحتوي على عينات بالفعل.
+cl.error.cl_too_many_rows,يحتوي الملف على عدد كبير جدًا من الصفوف. قسّمه إلى ملفات أصغر.
+cl.error.cl_unknown_stratum,تشير بعض الصفوف إلى مدينة أو مسار غير موجود في الخطة.
+cl.error.cl_forbidden,ليس لديك إذن للقيام بذلك في Carrier Link.
+cl.error.cl_demand_testing_dry_run_only,هذا الطلب في وضع الاختبار ويسمح بتشغيل تجريبي فقط.
+cl.error.forbidden,ليس لديك إذن للقيام بذلك.
+cl.error.generic,حدث خطأ ما. حاول مرة أخرى.
+cl.select_account.title,اختر حسابًا
+cl.select_account.body,اختر حسابًا من الشريط العلوي للعمل مع Carrier Link.
+cl.plans.title,خطط أخذ العينات
+cl.plans.help,حدد المسارات والأحجام التي يتم أخذ عينات منها من عمليات مسح الناقل.
+cl.samples.title,العينات
+cl.samples.help,راجع العينات الناتجة عن عمليات مسح الناقل.
+cl.reading_points.title,نقاط القراءة
+cl.reading_points.help,أدر نقاط الناقل التي يتم فيها التقاط عمليات المسح.
+cl.connectors.title,الموصلات
+cl.connectors.help,اضبط كيفية وصول بيانات مسح الناقل إلى ONEMS.
+cl.monitor.title,مراقب الالتقاط
+cl.monitor.help,تابع حالة التقاط البيانات من الناقلين.

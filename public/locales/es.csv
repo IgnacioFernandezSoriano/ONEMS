@@ -5395,3 +5395,38 @@ onedb.source_panelist,Panelista
 onedb.source_carrier,Carrier
 onedb.measured_time,Medido
 onedb.equivalence_added,Equivalencia añadida
+cl.error.cl_bad_payload,Los datos enviados no son válidos.
+cl.error.cl_batch_already_undone,Este lote ya se ha deshecho.
+cl.error.cl_batch_not_found,No se ha encontrado el lote.
+cl.error.cl_batch_not_undoable,Este lote ya no se puede deshacer.
+cl.error.cl_batch_not_validated,El lote todavía no se ha validado.
+cl.error.cl_demand_not_open,"La demanda no está abierta, por lo que no se puede modificar."
+cl.error.cl_duplicate_quota,Ya existe una cuota con los mismos valores en este plan.
+cl.error.cl_feed_carrier_mismatch,El conector pertenece a un carrier distinto del del plan.
+cl.error.cl_feed_paused,El conector está en pausa. Reactívalo para continuar.
+cl.error.cl_mapping_incomplete,El mapeo de campos está incompleto. Complétalo antes de continuar.
+cl.error.cl_missing_points,Faltan puntos de inicio o de fin en algunas ciudades del plan.
+cl.error.cl_no_feed,El plan no tiene ningún conector asignado.
+cl.error.cl_no_quotas,El plan todavía no tiene cuotas. Añade al menos una.
+cl.error.cl_plan_closed,El plan está cerrado y no se puede modificar.
+cl.error.cl_plan_locked_field,Este campo ya no se puede cambiar porque el plan ya ha empezado.
+cl.error.cl_plan_not_draft,Solo los planes en borrador se pueden modificar así.
+cl.error.cl_quota_locked,Esta cuota ya no se puede cambiar porque ya tiene muestras.
+cl.error.cl_too_many_rows,El archivo tiene demasiadas filas. Divídelo en archivos más pequeños.
+cl.error.cl_unknown_stratum,Algunas filas hacen referencia a una ciudad o ruta que no está en el plan.
+cl.error.cl_forbidden,No tienes permiso para hacer esto en Carrier Link.
+cl.error.cl_demand_testing_dry_run_only,Esta demanda está en modo de pruebas y solo permite una simulación.
+cl.error.forbidden,No tienes permiso para hacer esto.
+cl.error.generic,Algo ha fallado. Inténtalo de nuevo.
+cl.select_account.title,Selecciona una cuenta
+cl.select_account.body,Elige una cuenta en la barra superior para trabajar con Carrier Link.
+cl.plans.title,Planes de muestreo
+cl.plans.help,Define qué rutas y volúmenes se muestrean a partir de los escaneos del carrier.
+cl.samples.title,Muestras
+cl.samples.help,Revisa las muestras generadas a partir de los escaneos del carrier.
+cl.reading_points.title,Puntos de lectura
+cl.reading_points.help,Gestiona los puntos del carrier donde se capturan los escaneos.
+cl.connectors.title,Conectores
+cl.connectors.help,Configura cómo llegan a ONEMS los datos de escaneo del carrier.
+cl.monitor.title,Monitor de captura
+cl.monitor.help,Sigue el estado de la captura de datos de los carriers.

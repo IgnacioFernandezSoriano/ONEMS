@@ -5395,3 +5395,38 @@ onedb.source_panelist,Panelist
 onedb.source_carrier,Carrier
 onedb.measured_time,Measured
 onedb.equivalence_added,Equivalence added
+cl.error.cl_bad_payload,The data sent is not valid.
+cl.error.cl_batch_already_undone,This batch has already been undone.
+cl.error.cl_batch_not_found,The batch was not found.
+cl.error.cl_batch_not_undoable,This batch can no longer be undone.
+cl.error.cl_batch_not_validated,The batch has not been validated yet.
+cl.error.cl_demand_not_open,"The demand is not open, so it cannot be changed."
+cl.error.cl_duplicate_quota,There is already a quota with the same values in this plan.
+cl.error.cl_feed_carrier_mismatch,The connector belongs to a different carrier than the plan.
+cl.error.cl_feed_paused,The connector is paused. Resume it to continue.
+cl.error.cl_mapping_incomplete,The field mapping is incomplete. Complete it before continuing.
+cl.error.cl_missing_points,Some cities in the plan are missing start or end points.
+cl.error.cl_no_feed,The plan has no connector assigned.
+cl.error.cl_no_quotas,The plan has no quotas yet. Add at least one.
+cl.error.cl_plan_closed,The plan is closed and cannot be changed.
+cl.error.cl_plan_locked_field,This field can no longer be changed because the plan has already started.
+cl.error.cl_plan_not_draft,Only plans in draft status can be changed this way.
+cl.error.cl_quota_locked,This quota can no longer be changed because it already has samples.
+cl.error.cl_too_many_rows,The file has too many rows. Split it into smaller files.
+cl.error.cl_unknown_stratum,Some rows refer to a city or route that is not in the plan.
+cl.error.cl_forbidden,You do not have permission to do this in Carrier Link.
+cl.error.cl_demand_testing_dry_run_only,This demand is in testing mode and only allows a trial run.
+cl.error.forbidden,You do not have permission to do this.
+cl.error.generic,Something went wrong. Please try again.
+cl.select_account.title,Select an account
+cl.select_account.body,Choose an account in the top bar to work with Carrier Link.
+cl.plans.title,Sampling plans
+cl.plans.help,Define which routes and volumes are sampled from carrier scans.
+cl.samples.title,Samples
+cl.samples.help,Review the samples generated from carrier scans.
+cl.reading_points.title,Reading points
+cl.reading_points.help,Manage the carrier points where scans are captured.
+cl.connectors.title,Connectors
+cl.connectors.help,Configure how carrier scan data reaches ONEMS.
+cl.monitor.title,Capture monitor
+cl.monitor.help,Follow the status of data capture from carriers.
