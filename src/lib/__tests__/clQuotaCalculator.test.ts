@@ -60,6 +60,21 @@ describe('generateClQuotas', () => {
     expect(sum(q)).toBe(40)
     expect(Math.abs(a - 2 * b)).toBeLessThanOrEqual(1)
   })
+  it('rotates leftovers so every route gets samples over the plan', () => {
+    const q = generateClQuotas({ totalSamples: 5, startDate: '2026-11-02', endDate: '2026-11-29', routes: routes3 })
+    expect(sum(q)).toBe(5)
+    for (const r of routes3) {
+      expect(q.some(x => x.origin_city_id === r.origin_city_id && x.destination_city_id === r.destination_city_id)).toBe(true)
+    }
+  })
+  it('negative weight gets 0 and the sum stays exact', () => {
+    const q = generateClQuotas({
+      totalSamples: 10, startDate: '2026-11-02', endDate: '2026-11-08',
+      routes: [{ ...routes3[0], weight: -1 }, routes3[1], routes3[2]],
+    })
+    expect(sum(q)).toBe(10)
+    expect(q.some(x => x.destination_city_id === 'B' && x.origin_city_id === 'A')).toBe(false)
+  })
   it('no routes -> []', () => {
     expect(generateClQuotas({ totalSamples: 10, startDate: '2026-11-02', endDate: '2026-11-15', routes: [] })).toEqual([])
   })

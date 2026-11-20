@@ -46,8 +46,9 @@ function parseLocalDate(s: string): Date {
   return new Date(y, m - 1, d)
 }
 
-/** Split `total` by weights using largest remainders; ties go to the earlier index. */
-function splitByWeight(total: number, weights: number[]): number[] {
+/** Split `total` by weights using largest remainders; ties go to the route nearest after `start` (cyclic). */
+function splitByWeight(total: number, weights: number[], start = 0): number[] {
+  const n = weights.length
   const sum = weights.reduce((a, b) => a + b, 0)
   if (sum <= 0 || total <= 0) return weights.map(() => 0)
   const exact = weights.map(w => (total * w) / sum)
@@ -55,7 +56,7 @@ function splitByWeight(total: number, weights: number[]): number[] {
   let remaining = total - counts.reduce((a, b) => a + b, 0)
   const order = exact
     .map((e, i) => ({ i, frac: e - counts[i] }))
-    .sort((a, b) => b.frac - a.frac || a.i - b.i)
+    .sort((a, b) => b.frac - a.frac || ((a.i - start + n) % n) - ((b.i - start + n) % n))
   for (let k = 0; remaining > 0 && order.length > 0; k = (k + 1) % order.length, remaining--) {
     counts[order[k].i]++
   }
@@ -80,11 +81,14 @@ export function generateClQuotas(p: {
   if (weeks.length === 0) return []
 
   const perWeek = distributeSamplesAcrossWeeks(p.totalSamples, weeks, false, undefined, () => 0.5)
-  const weights = p.routes.map(r => r.weight ?? 1)
+  const weights = p.routes.map(r => {
+    const w = r.weight ?? 1
+    return Number.isNaN(w) ? 0 : Math.max(0, w)
+  })
   const quotas: ClQuota[] = []
   weeks.forEach((week, wi) => {
     const { iso_year, iso_week } = isoWeekOf(week.days[0])
-    const perRoute = splitByWeight(perWeek[wi], weights)
+    const perRoute = splitByWeight(perWeek[wi], weights, wi % weights.length)
     p.routes.forEach((r, ri) => {
       if (perRoute[ri] > 0) {
         quotas.push({
