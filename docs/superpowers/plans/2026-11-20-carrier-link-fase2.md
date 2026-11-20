@@ -24,7 +24,8 @@
 
 ## Escala (dato del responsable, 20/11)
 
-Planes de **~15.000 muestras al año** por cuenta. Referencia de dimensionado: 30 ciudades con puntos de inicio y fin → hasta 870 rutas × 52 semanas ≈ 45.000 celdas de cuota (la mayoría con 0 o 1 muestra), ~290 muestras por semana, ~1.450 candidatos por petición con sobremuestreo 5. Consecuencias obligatorias:
+Planes de **~15.000 muestras al año POR PRODUCTO** (un plan = carrier + producto; una cuenta tendrá varios planes a la vez, uno por producto; dimensionar para 5 productos ≈ 75.000 muestras/año por cuenta). Referencia de dimensionado: 30 ciudades con puntos de inicio y fin → hasta 870 rutas × 52 semanas ≈ 45.000 celdas de cuota (la mayoría con 0 o 1 muestra), ~290 muestras por semana, ~1.450 candidatos por petición con sobremuestreo 5. Consecuencias obligatorias:
+- Las pantallas Muestras y Monitor filtran por plan (= producto) y por defecto muestran el plan activo más reciente; las listas de planes muestran el producto.
 - Ninguna lista de la web carga "todo" de una vez: Muestras y lecturas paginan en el servidor (`.range()`, filtros en la consulta; recordar el límite de 1.000 filas de PostgREST); el Monitor pagina lotes y avisos.
 - La tabla de cuotas no pinta 45.000 celdas: se agrupa por ciudad de origen (filas plegadas con totales), las semanas se pueden agrupar por mes, hay filtro por ruta, y solo se despliega lo que el usuario abre.
 - `cl_plan_set_quotas` recibe solo las cuotas con muestras > 0 (la calculadora ya las omite).
@@ -240,7 +241,7 @@ Planes de **~15.000 muestras al año** por cuenta. Referencia de dimensionado: 3
 **Files:**
 - Create: `supabase/tests/adhoc/cl_volume/` (`run.sh`, generador de lote) — solo base local
 
-- [ ] **Step 1:** En el Postgres local, con un fixture de 30 ciudades y 870 rutas: plan de 15.000 muestras, una semana de petición (~290 muestras, ~1.450 candidatos, ~4.500 lecturas en uno o dos lotes ≤ 5.000 filas), llamar a `cl_ingest_batch`, `cl_sample_stratum` por estrato y `cl_finish_batch` como lo hace `carrier-link-ingest`.
+- [ ] **Step 1:** En el Postgres local, con un fixture de 30 ciudades y 870 rutas y **5 planes activos a la vez** (5 productos del mismo carrier, mismo conector y misma hora de calendario): medir `cl_emit_due_demands` emitiendo las 5 peticiones juntas; después, para cada plan de 15.000 muestras, una semana de petición (~290 muestras, ~1.450 candidatos, ~4.500 lecturas en uno o dos lotes ≤ 5.000 filas), llamar a `cl_ingest_batch`, `cl_sample_stratum` por estrato y `cl_finish_batch` como lo hace `carrier-link-ingest`.
 - [ ] **Step 2:** Medir y anotar en el informe: tiempo de entrada, tiempo total del sorteo de todos los estratos, tamaño del `payload` de la petición. Umbral: todo el lote por debajo de 120 s (límite de la Edge Function); si no, proponer en el informe el cambio (p. ej. sortear en una sola llamada) sin implementarlo.
 - [ ] **Step 3: Commit** `test(carrier-link): prueba de volumen local`.
 
