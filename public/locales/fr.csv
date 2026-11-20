@@ -5451,3 +5451,100 @@ cl.reading_points.error.no_account,Sélectionnez d'abord un compte.
 cl.reading_points.error.missing_place,Indiquez le code du lieu.
 cl.reading_points.error.missing_carrier,Sélectionnez un transporteur.
 cl.reading_points.error.missing_center,Sélectionnez un centre postal.
+cl.connectors.carrier,Transporteur
+cl.connectors.connector,Connecteur
+cl.connectors.add,Nouveau connecteur
+cl.connectors.edit,Modifier le connecteur
+cl.connectors.empty,Ce transporteur n'a pas encore de connecteur.
+cl.connectors.name,Nom
+cl.connectors.extraction_model,Modèle d'extraction
+cl.connectors.emit_days,Jours de demande
+cl.connectors.emit_hour,Heure
+cl.connectors.emit_timezone,Fuseau horaire
+cl.connectors.account_timezone,(fuseau du compte)
+cl.connectors.calendar_hint,Les demandes au transporteur sont envoyées ces jours-là à cette heure. Laissez le fuseau vide pour utiliser celui du compte (p. ex. Europe/Madrid).
+cl.connectors.calendar,Calendrier
+cl.connectors.last_batch,Dernier lot
+cl.connectors.last_error,Dernière erreur
+cl.connectors.testing_hint,"En mode test, le connecteur n'accepte que des essais ; aucun échantillon n'est créé."
+cl.connectors.mapping_incomplete,Les équivalences de champs sont incomplètes : les données du transporteur ne peuvent pas encore être lues.
+cl.connectors.status.testing,Test
+cl.connectors.status.active,Actif
+cl.connectors.status.paused,En pause
+cl.connectors.set_status.testing,Revenir en test
+cl.connectors.set_status.active,Activer
+cl.connectors.set_status.paused,Mettre en pause
+cl.connectors.status_confirm.testing,Le connecteur n'acceptera de nouveau que des essais.
+cl.connectors.status_confirm.active,Le connecteur recevra des lots réels et créera des échantillons. Les demandes ouvertes en mode test seront fermées.
+cl.connectors.status_confirm.paused,Le connecteur cessera de recevoir des lots et aucune demande ne sera envoyée jusqu'à sa reprise.
+cl.connectors.delete_title,Supprimer le connecteur
+cl.connectors.delete_confirm,Supprimer le connecteur {name} ?
+cl.connectors.error.name_required,Saisissez un nom pour le connecteur.
+cl.connectors.error.no_days,Choisissez au moins un jour.
+cl.connectors.error.bad_day,Les jours ne sont pas valides.
+cl.connectors.error.bad_hour,L'heure doit être comprise entre 00:00 et 23:00.
+cl.connectors.error.duplicate,Cette valeur existe déjà pour ce transporteur.
+cl.connectors.error.in_use,Impossible de le supprimer car il est utilisé (clés ou plans). Mettez-le plutôt en pause.
+cl.connectors.error.invalid_value,Une valeur n'est pas valide (vérifiez le fuseau horaire).
+cl.connectors.fields.title,Équivalences de champs
+cl.connectors.fields.help,Quel champ du transporteur contient chaque donnée. Commun à tous les connecteurs de ce transporteur.
+cl.connectors.fields.missing,Champs obligatoires manquants : {fields}
+cl.connectors.fields.standard,Champ ONEMS
+cl.connectors.fields.carrier_field,Champ du transporteur
+cl.connectors.fields.format,Format
+cl.connectors.fields.timezone,Fuseau horaire
+cl.connectors.field.item_id,Identifiant de l'envoi
+cl.connectors.field.product,Produit
+cl.connectors.field.scan_at,Date et heure de lecture
+cl.connectors.field.place_ref,Lieu
+cl.connectors.field.mode_ref,Mode
+cl.connectors.values.title,Équivalences de produit
+cl.connectors.values.help,Traduisez les valeurs de produit du transporteur en produits ONEMS.
+cl.connectors.values.empty,Aucune équivalence de produit pour l'instant.
+cl.connectors.values.carrier_value,Valeur du transporteur
+cl.connectors.values.product,Produit ONEMS
+cl.connectors.values.select_product,Choisissez un produit
+cl.connectors.extras.title,Champs supplémentaires autorisés
+cl.connectors.extras.help,Autres champs du transporteur conservés avec chaque lecture. Tout autre champ est ignoré.
+cl.connectors.extras.empty,Aucun champ supplémentaire.
+cl.connectors.extras.field,Champ du transporteur
+cl.connectors.keys.title,Clés du connecteur
+cl.connectors.keys.help,Le transporteur utilise une clé pour envoyer ses lots. Seul un superadmin ou le UPU Account Manager peut émettre des clés.
+cl.connectors.keys.invalid,Vérifiez le nom et la date d'expiration (elle doit être future).
+cl.connectors.keys.empty,Ce connecteur n'a pas de clés.
+cl.connectors.keys.name,Nom
+cl.connectors.keys.prefix,Préfixe
+cl.connectors.keys.expires,Expire
+cl.connectors.keys.expires_optional,Expire (facultatif)
+cl.connectors.keys.last_used,Dernière utilisation
+cl.connectors.keys.never,Jamais
+cl.connectors.keys.inactive,Désactivée
+cl.connectors.keys.deactivate_confirm,Désactiver cette clé ? Le transporteur ne pourra plus l'utiliser.
+cl.connectors.keys.new,Nouvelle clé
+cl.connectors.keys.issue,Émettre la clé
+cl.connectors.dry_run.title,Tester un lot (essai)
+cl.connectors.dry_run.help,Téléversez un fichier de lot au format JSON. Il est vérifié comme s'il était réel mais rien n'est enregistré.
+cl.connectors.dry_run.choose,Choisir un fichier JSON
+cl.connectors.dry_run.running,Vérification...
+cl.connectors.dry_run.bad_json,Le fichier n'est pas un JSON valide.
+cl.connectors.dry_run.validated,Le lot serait accepté. Résultat par strate :
+cl.connectors.dry_run.rejected,Le lot serait rejeté.
+cl.connectors.dry_run.bad_method,La méthode de sélection n'est pas celle attendue ({expected}).
+cl.connectors.dry_run.stratum,Strate
+cl.connectors.dry_run.rows,Lectures
+cl.connectors.dry_run.candidates,Candidats
+cl.connectors.dry_run.valid,Valides
+cl.connectors.dry_run.rejected_by_reason,Rejetés par motif
+cl.connectors.dry_run.rows_rejected,Lectures rejetées
+cl.reason.already_sampled,Déjà échantillonné
+cl.reason.bad_timestamp,Date ou heure incorrecte
+cl.reason.bad_value,Valeur incorrecte
+cl.reason.end_out_of_period,Fin hors période
+cl.reason.missing_field,Champ manquant
+cl.reason.no_end,Pas de lecture de fin
+cl.reason.no_start,Pas de lecture de début
+cl.reason.product_mismatch,Produit différent
+cl.reason.same_reading,Début et fin sont la même lecture
+cl.reason.start_after_end,Début après la fin
+cl.reason.unknown_product,Produit inconnu
+cl.reason.unknown_reading_point,Point de lecture inconnu

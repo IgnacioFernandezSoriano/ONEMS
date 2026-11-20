@@ -5451,3 +5451,100 @@ cl.reading_points.error.no_account,اختر حسابا أولا.
 cl.reading_points.error.missing_place,أدخل رمز المكان.
 cl.reading_points.error.missing_carrier,اختر ناقلا.
 cl.reading_points.error.missing_center,اختر مركزا بريديا.
+cl.connectors.carrier,شركة النقل
+cl.connectors.connector,الموصل
+cl.connectors.add,موصل جديد
+cl.connectors.edit,تعديل الموصل
+cl.connectors.empty,لا يوجد موصل لشركة النقل هذه بعد.
+cl.connectors.name,الاسم
+cl.connectors.extraction_model,نموذج الاستخراج
+cl.connectors.emit_days,أيام الطلب
+cl.connectors.emit_hour,الساعة
+cl.connectors.emit_timezone,المنطقة الزمنية
+cl.connectors.account_timezone,(منطقة الحساب الزمنية)
+cl.connectors.calendar_hint,تُرسل الطلبات إلى شركة النقل في هذه الأيام وفي هذه الساعة. اترك المنطقة الزمنية فارغة لاستخدام منطقة الحساب (مثل Europe/Madrid).
+cl.connectors.calendar,الجدول
+cl.connectors.last_batch,آخر دفعة
+cl.connectors.last_error,آخر خطأ
+cl.connectors.testing_hint,في وضع الاختبار يقبل الموصل التجارب فقط؛ ولا تُنشأ عينات.
+cl.connectors.mapping_incomplete,مطابقات الحقول غير مكتملة: لا يمكن قراءة بيانات شركة النقل بعد.
+cl.connectors.status.testing,اختبار
+cl.connectors.status.active,نشط
+cl.connectors.status.paused,متوقف مؤقتًا
+cl.connectors.set_status.testing,العودة إلى الاختبار
+cl.connectors.set_status.active,تفعيل
+cl.connectors.set_status.paused,إيقاف مؤقت
+cl.connectors.status_confirm.testing,سيقبل الموصل التجارب فقط من جديد.
+cl.connectors.status_confirm.active,سيستقبل الموصل دفعات حقيقية وينشئ عينات. ستُغلق الطلبات المفتوحة في وضع الاختبار.
+cl.connectors.status_confirm.paused,سيتوقف الموصل عن استقبال الدفعات ولن تُرسل طلبات حتى يُستأنف.
+cl.connectors.delete_title,حذف الموصل
+cl.connectors.delete_confirm,هل تريد حذف الموصل {name}؟
+cl.connectors.error.name_required,أدخل اسمًا للموصل.
+cl.connectors.error.no_days,اختر يومًا واحدًا على الأقل.
+cl.connectors.error.bad_day,الأيام غير صالحة.
+cl.connectors.error.bad_hour,يجب أن تكون الساعة بين 00:00 و23:00.
+cl.connectors.error.duplicate,هذه القيمة موجودة بالفعل لشركة النقل هذه.
+cl.connectors.error.in_use,لا يمكن حذفه لأنه قيد الاستخدام (مفاتيح أو خطط). أوقفه مؤقتًا بدلًا من ذلك.
+cl.connectors.error.invalid_value,إحدى القيم غير صالحة (تحقق من المنطقة الزمنية).
+cl.connectors.fields.title,مطابقة الحقول
+cl.connectors.fields.help,أي حقل لدى شركة النقل يحتوي كل معلومة. مشترك بين جميع موصلات شركة النقل هذه.
+cl.connectors.fields.missing,حقول إلزامية مفقودة: {fields}
+cl.connectors.fields.standard,حقل ONEMS
+cl.connectors.fields.carrier_field,حقل شركة النقل
+cl.connectors.fields.format,التنسيق
+cl.connectors.fields.timezone,المنطقة الزمنية
+cl.connectors.field.item_id,معرّف الإرسالية
+cl.connectors.field.product,المنتج
+cl.connectors.field.scan_at,تاريخ ووقت القراءة
+cl.connectors.field.place_ref,المكان
+cl.connectors.field.mode_ref,الوضع
+cl.connectors.values.title,مطابقة المنتجات
+cl.connectors.values.help,حوّل قيم منتجات شركة النقل إلى منتجات ONEMS.
+cl.connectors.values.empty,لا توجد مطابقات للمنتجات بعد.
+cl.connectors.values.carrier_value,قيمة شركة النقل
+cl.connectors.values.product,منتج ONEMS
+cl.connectors.values.select_product,اختر منتجًا
+cl.connectors.extras.title,الحقول الإضافية المسموح بها
+cl.connectors.extras.help,حقول أخرى لدى شركة النقل تُحفظ مع كل قراءة. يُتجاهل أي حقل آخر.
+cl.connectors.extras.empty,لا توجد حقول إضافية.
+cl.connectors.extras.field,حقل شركة النقل
+cl.connectors.keys.title,مفاتيح الموصل
+cl.connectors.keys.help,تستخدم شركة النقل مفتاحًا لإرسال دفعاتها. يمكن فقط للمشرف العام أو UPU Account Manager إصدار المفاتيح.
+cl.connectors.keys.invalid,تحقق من الاسم وتاريخ الانتهاء (يجب أن يكون في المستقبل).
+cl.connectors.keys.empty,لا توجد مفاتيح لهذا الموصل.
+cl.connectors.keys.name,الاسم
+cl.connectors.keys.prefix,البادئة
+cl.connectors.keys.expires,تنتهي في
+cl.connectors.keys.expires_optional,تاريخ الانتهاء (اختياري)
+cl.connectors.keys.last_used,آخر استخدام
+cl.connectors.keys.never,أبدًا
+cl.connectors.keys.inactive,معطّل
+cl.connectors.keys.deactivate_confirm,هل تريد تعطيل هذا المفتاح؟ لن تتمكن شركة النقل من استخدامه بعد الآن.
+cl.connectors.keys.new,مفتاح جديد
+cl.connectors.keys.issue,إصدار المفتاح
+cl.connectors.dry_run.title,اختبار دفعة (تجربة)
+cl.connectors.dry_run.help,حمّل ملف دفعة بتنسيق JSON. يُفحص كما لو كان حقيقيًا ولكن لا يُحفظ شيء.
+cl.connectors.dry_run.choose,اختر ملف JSON
+cl.connectors.dry_run.running,جارٍ الفحص...
+cl.connectors.dry_run.bad_json,الملف ليس JSON صالحًا.
+cl.connectors.dry_run.validated,ستُقبل الدفعة. النتيجة لكل طبقة:
+cl.connectors.dry_run.rejected,ستُرفض الدفعة.
+cl.connectors.dry_run.bad_method,طريقة الاختيار ليست المتوقعة ({expected}).
+cl.connectors.dry_run.stratum,الطبقة
+cl.connectors.dry_run.rows,القراءات
+cl.connectors.dry_run.candidates,المرشحون
+cl.connectors.dry_run.valid,الصالحة
+cl.connectors.dry_run.rejected_by_reason,المرفوضة حسب السبب
+cl.connectors.dry_run.rows_rejected,القراءات المرفوضة
+cl.reason.already_sampled,مأخوذة كعينة مسبقًا
+cl.reason.bad_timestamp,تاريخ أو وقت غير صحيح
+cl.reason.bad_value,قيمة غير صحيحة
+cl.reason.end_out_of_period,النهاية خارج الفترة
+cl.reason.missing_field,حقل مفقود
+cl.reason.no_end,لا توجد قراءة نهاية
+cl.reason.no_start,لا توجد قراءة بداية
+cl.reason.product_mismatch,منتج مختلف
+cl.reason.same_reading,البداية والنهاية هما القراءة نفسها
+cl.reason.start_after_end,البداية بعد النهاية
+cl.reason.unknown_product,منتج غير معروف
+cl.reason.unknown_reading_point,نقطة قراءة غير معروفة

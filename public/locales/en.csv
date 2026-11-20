@@ -5459,3 +5459,100 @@ cl.reading_points.error.no_account,Select an account first.
 cl.reading_points.error.missing_place,Enter the place code.
 cl.reading_points.error.missing_carrier,Select a carrier.
 cl.reading_points.error.missing_center,Select a postal center.
+cl.connectors.carrier,Carrier
+cl.connectors.connector,Connector
+cl.connectors.add,New connector
+cl.connectors.edit,Edit connector
+cl.connectors.empty,This carrier has no connector yet.
+cl.connectors.name,Name
+cl.connectors.extraction_model,Extraction model
+cl.connectors.emit_days,Request days
+cl.connectors.emit_hour,Hour
+cl.connectors.emit_timezone,Time zone
+cl.connectors.account_timezone,(account time zone)
+cl.connectors.calendar_hint,Requests to the carrier are sent on these days and at this hour. Leave the time zone empty to use the account one (e.g. Europe/Madrid).
+cl.connectors.calendar,Calendar
+cl.connectors.last_batch,Last batch
+cl.connectors.last_error,Last error
+cl.connectors.testing_hint,In testing mode the connector only accepts trial runs; no samples are created.
+cl.connectors.mapping_incomplete,The field equivalences are incomplete: the carrier data cannot be read yet.
+cl.connectors.status.testing,Testing
+cl.connectors.status.active,Active
+cl.connectors.status.paused,Paused
+cl.connectors.set_status.testing,Back to testing
+cl.connectors.set_status.active,Activate
+cl.connectors.set_status.paused,Pause
+cl.connectors.status_confirm.testing,The connector will only accept trial runs again.
+cl.connectors.status_confirm.active,The connector will receive real batches and create samples. Open requests in testing mode will be closed.
+cl.connectors.status_confirm.paused,The connector will stop receiving batches and no requests will be sent until it is resumed.
+cl.connectors.delete_title,Delete connector
+cl.connectors.delete_confirm,Delete the connector {name}?
+cl.connectors.error.name_required,Enter a name for the connector.
+cl.connectors.error.no_days,Choose at least one day.
+cl.connectors.error.bad_day,The days are not valid.
+cl.connectors.error.bad_hour,The hour must be between 00:00 and 23:00.
+cl.connectors.error.duplicate,That value already exists for this carrier.
+cl.connectors.error.in_use,It cannot be deleted because it is in use (keys or plans). Pause it instead.
+cl.connectors.error.invalid_value,Some value is not valid (check the time zone).
+cl.connectors.fields.title,Field equivalences
+cl.connectors.fields.help,Which carrier field holds each piece of data. Shared by all connectors of this carrier.
+cl.connectors.fields.missing,Required fields missing: {fields}
+cl.connectors.fields.standard,ONEMS field
+cl.connectors.fields.carrier_field,Carrier field
+cl.connectors.fields.format,Format
+cl.connectors.fields.timezone,Time zone
+cl.connectors.field.item_id,Item identifier
+cl.connectors.field.product,Product
+cl.connectors.field.scan_at,Scan date and time
+cl.connectors.field.place_ref,Place
+cl.connectors.field.mode_ref,Mode
+cl.connectors.values.title,Product equivalences
+cl.connectors.values.help,Translate the carrier product values into ONEMS products.
+cl.connectors.values.empty,No product equivalences yet.
+cl.connectors.values.carrier_value,Carrier value
+cl.connectors.values.product,ONEMS product
+cl.connectors.values.select_product,Select a product
+cl.connectors.extras.title,Allowed extra fields
+cl.connectors.extras.help,Other carrier fields that are kept with each scan. Any other field is ignored.
+cl.connectors.extras.empty,No extra fields.
+cl.connectors.extras.field,Carrier field
+cl.connectors.keys.title,Connector keys
+cl.connectors.keys.help,The carrier uses a key to send its batches. Only a superadmin or the UPU Account Manager can issue keys.
+cl.connectors.keys.invalid,Check the name and the expiry date (it must be in the future).
+cl.connectors.keys.empty,This connector has no keys.
+cl.connectors.keys.name,Name
+cl.connectors.keys.prefix,Prefix
+cl.connectors.keys.expires,Expires
+cl.connectors.keys.expires_optional,Expires (optional)
+cl.connectors.keys.last_used,Last used
+cl.connectors.keys.never,Never
+cl.connectors.keys.inactive,Deactivated
+cl.connectors.keys.deactivate_confirm,Deactivate this key? The carrier will no longer be able to use it.
+cl.connectors.keys.new,New key
+cl.connectors.keys.issue,Issue key
+cl.connectors.dry_run.title,Test a batch (trial run)
+cl.connectors.dry_run.help,Upload a batch file in JSON format. It is checked as if it were real but nothing is saved.
+cl.connectors.dry_run.choose,Choose JSON file
+cl.connectors.dry_run.running,Checking...
+cl.connectors.dry_run.bad_json,The file is not valid JSON.
+cl.connectors.dry_run.validated,The batch would be accepted. Result per stratum:
+cl.connectors.dry_run.rejected,The batch would be rejected.
+cl.connectors.dry_run.bad_method,The selection method is not the expected one ({expected}).
+cl.connectors.dry_run.stratum,Stratum
+cl.connectors.dry_run.rows,Scans
+cl.connectors.dry_run.candidates,Candidates
+cl.connectors.dry_run.valid,Valid
+cl.connectors.dry_run.rejected_by_reason,Rejected by reason
+cl.connectors.dry_run.rows_rejected,Scans rejected
+cl.reason.already_sampled,Already sampled
+cl.reason.bad_timestamp,Wrong date or time
+cl.reason.bad_value,Wrong value
+cl.reason.end_out_of_period,End outside the period
+cl.reason.missing_field,Missing field
+cl.reason.no_end,No end scan
+cl.reason.no_start,No start scan
+cl.reason.product_mismatch,Different product
+cl.reason.same_reading,Start and end are the same scan
+cl.reason.start_after_end,Start after end
+cl.reason.unknown_product,Unknown product
+cl.reason.unknown_reading_point,Unknown reading point
