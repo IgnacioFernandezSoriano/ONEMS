@@ -5423,8 +5423,6 @@ cl.error.forbidden,No tienes permiso para hacer esto.
 cl.error.generic,Algo ha fallado. Inténtalo de nuevo.
 cl.select_account.title,Selecciona una cuenta
 cl.select_account.body,Elige una cuenta en la barra superior para trabajar con Carrier Link.
-cl.plans.title,Planes de muestreo
-cl.plans.help,Define qué rutas y volúmenes se muestrean a partir de los escaneos del carrier.
 cl.samples.title,Muestras
 cl.samples.help,Revisa las muestras generadas a partir de los escaneos del carrier.
 cl.reading_points.title,Puntos de lectura
@@ -5561,41 +5559,22 @@ cl.reason.same_reading,Inicio y fin son la misma lectura
 cl.reason.start_after_end,Inicio posterior al fin
 cl.reason.unknown_product,Producto desconocido
 cl.reason.unknown_reading_point,Punto de lectura desconocido
-cl.plans.new,Nuevo plan
-cl.plans.edit,Editar plan
-cl.plans.name,Nombre
-cl.plans.product,Producto
-cl.plans.carrier,Carrier
 cl.plans.connector,Conector
 cl.plans.no_connector,Sin conector todavía
 cl.plans.connector_hint,Solo conectores del mismo carrier. Sin conector el plan no se puede activar.
 cl.plans.select,Selecciona...
-cl.plans.start,Fecha de inicio
-cl.plans.end,Fecha de fin
-cl.plans.period,Periodo
-cl.plans.total,Total de muestras
-cl.plans.total_hint,"Si cambias el total o las fechas, vuelve a generar y guardar las cuotas."
 cl.plans.status,Estado
 cl.plans.status.draft,Borrador
 cl.plans.status.active,Activo
 cl.plans.status.closed,Cerrado
-cl.plans.empty,Todavía no hay planes.
-cl.plans.samples,{count} muestras
-cl.plans.feed_diagnosis,Diagnóstico del conector (guardar datos extra para análisis)
-cl.plans.locked_hint,"El plan ya no es un borrador: no se pueden cambiar el carrier, el producto, el conector ni la fecha de inicio."
 cl.plans.error.no_account,Elige primero una cuenta.
 cl.plans.error.bad_period,La fecha de fin no puede ser anterior a la de inicio.
 cl.plans.error.bad_total,El total debe ser un número entero mayor o igual que 1.
 cl.plans.error.missing_field,"Rellena el nombre, el carrier, el producto y las fechas."
-cl.plans.generate,Generar cuotas
 cl.plans.no_routes,El carrier no tiene puntos de lectura activos con ciudad de inicio y de fin: no hay rutas.
 cl.plans.preview_title,Vista previa (sin guardar)
-cl.plans.save_quotas,Guardar cuotas
 cl.plans.saving_quotas,Guardando {count} cuotas...
 cl.plans.discard,Descartar
-cl.plans.quotas_saved,{count} cuotas guardadas.
-cl.plans.quotas_title,Cuotas
-cl.plans.no_quotas,"Este plan todavía no tiene cuotas. Usa ""Generar cuotas""."
 cl.plans.missing_points_title,Faltan puntos de lectura
 cl.plans.missing_points_help,Da de alta un punto activo del carrier en estas ciudades antes de activar el plan.
 cl.plans.missing.origin,sin punto de inicio
@@ -5603,8 +5582,6 @@ cl.plans.missing.destination,sin punto de fin
 cl.plans.missing_standards_title,{count} rutas sin estándar de entrega
 cl.plans.missing_standards_help,"Estas rutas se muestrean, pero sin estándar no se puede calcular si llegan en plazo. No impide activar el plan."
 cl.plans.no_standard,entra sin en plazo
-cl.plans.more,y {count} más (marcadas con ⚠ en la tabla)
-cl.plans.activate,Activar plan
 cl.plans.activate_confirm,"¿Activar el plan {name}? Después no se podrán cambiar el carrier, el producto, el conector, la fecha de inicio ni las cuotas."
 cl.plans.activate_blocked,No se puede activar mientras falten puntos de lectura.
 cl.plans.matrix.filter,Filtrar por ruta...
@@ -5619,7 +5596,6 @@ cl.plans.matrix.route,Ruta
 cl.plans.matrix.total,Total
 cl.plans.matrix.routes,{count} rutas
 cl.plans.error.quotas_mismatch,Las cuotas no coinciden con las fechas del plan: vuelve a generarlas.
-cl.plans.regenerate_notice,Han cambiado el total o las fechas: vuelve a generar y guardar las cuotas.
 cl.samples.plan,Plan
 cl.samples.week,Semana
 cl.samples.all,Todas

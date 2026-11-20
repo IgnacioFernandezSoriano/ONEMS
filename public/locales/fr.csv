@@ -5415,8 +5415,6 @@ cl.error.forbidden,Vous n'avez pas l'autorisation de faire cela.
 cl.error.generic,Une erreur s'est produite. Veuillez réessayer.
 cl.select_account.title,Sélectionnez un compte
 cl.select_account.body,Choisissez un compte dans la barre supérieure pour utiliser Carrier Link.
-cl.plans.title,Plans d'échantillonnage
-cl.plans.help,Définissez quels trajets et volumes sont échantillonnés à partir des scans du transporteur.
 cl.samples.title,Échantillons
 cl.samples.help,Consultez les échantillons générés à partir des scans du transporteur.
 cl.reading_points.title,Points de lecture
@@ -5553,41 +5551,22 @@ cl.reason.same_reading,Début et fin sont la même lecture
 cl.reason.start_after_end,Début après la fin
 cl.reason.unknown_product,Produit inconnu
 cl.reason.unknown_reading_point,Point de lecture inconnu
-cl.plans.new,Nouveau plan
-cl.plans.edit,Modifier le plan
-cl.plans.name,Nom
-cl.plans.product,Produit
-cl.plans.carrier,Transporteur
 cl.plans.connector,Connecteur
 cl.plans.no_connector,Pas encore de connecteur
 cl.plans.connector_hint,"Uniquement les connecteurs du même transporteur. Sans connecteur, le plan ne peut pas être activé."
 cl.plans.select,Sélectionner...
-cl.plans.start,Date de début
-cl.plans.end,Date de fin
-cl.plans.period,Période
-cl.plans.total,Total d'échantillons
-cl.plans.total_hint,"Si vous modifiez le total ou les dates, générez et enregistrez à nouveau les quotas."
 cl.plans.status,Statut
 cl.plans.status.draft,Brouillon
 cl.plans.status.active,Actif
 cl.plans.status.closed,Clôturé
-cl.plans.empty,Il n'y a pas encore de plan.
-cl.plans.samples,{count} échantillons
-cl.plans.feed_diagnosis,Diagnostic du connecteur (conserver des données supplémentaires pour analyse)
-cl.plans.locked_hint,"Le plan n'est plus un brouillon : le transporteur, le produit, le connecteur et la date de début ne peuvent plus être modifiés."
 cl.plans.error.no_account,Choisissez d'abord un compte.
 cl.plans.error.bad_period,La date de fin ne peut pas être antérieure à la date de début.
 cl.plans.error.bad_total,Le total doit être un nombre entier d'au moins 1.
 cl.plans.error.missing_field,"Renseignez le nom, le transporteur, le produit et les dates."
-cl.plans.generate,Générer les quotas
 cl.plans.no_routes,Le transporteur n'a pas de points de lecture actifs avec une ville de départ et une ville d'arrivée : il n'y a pas de trajets.
 cl.plans.preview_title,Aperçu (pas encore enregistré)
-cl.plans.save_quotas,Enregistrer les quotas
 cl.plans.saving_quotas,Enregistrement de {count} quotas...
 cl.plans.discard,Annuler
-cl.plans.quotas_saved,{count} quotas enregistrés.
-cl.plans.quotas_title,Quotas
-cl.plans.no_quotas,Ce plan n'a pas encore de quotas. Utilisez « Générer les quotas ».
 cl.plans.missing_points_title,Points de lecture manquants
 cl.plans.missing_points_help,Enregistrez un point actif du transporteur dans ces villes avant d'activer le plan.
 cl.plans.missing.origin,pas de point de départ
@@ -5595,8 +5574,6 @@ cl.plans.missing.destination,pas de point d'arrivée
 cl.plans.missing_standards_title,{count} trajets sans norme de livraison
 cl.plans.missing_standards_help,"Ces trajets sont échantillonnés, mais sans norme on ne peut pas calculer s'ils arrivent dans les délais. Cela n'empêche pas l'activation."
 cl.plans.no_standard,compté sans délai
-cl.plans.more,et {count} de plus (marqués ⚠ dans le tableau)
-cl.plans.activate,Activer le plan
 cl.plans.activate_confirm,"Activer le plan {name} ? Ensuite, le transporteur, le produit, le connecteur, la date de début et les quotas ne pourront plus être modifiés."
 cl.plans.activate_blocked,Le plan ne peut pas être activé tant qu'il manque des points de lecture.
 cl.plans.matrix.filter,Filtrer par trajet...
@@ -5611,7 +5588,6 @@ cl.plans.matrix.route,Trajet
 cl.plans.matrix.total,Total
 cl.plans.matrix.routes,{count} trajets
 cl.plans.error.quotas_mismatch,Les quotas ne correspondent pas aux dates du plan : générez-les à nouveau.
-cl.plans.regenerate_notice,Le total ou les dates ont changé : générez et enregistrez à nouveau les quotas.
 cl.samples.plan,Plan
 cl.samples.week,Semaine
 cl.samples.all,Toutes

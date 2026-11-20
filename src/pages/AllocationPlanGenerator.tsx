@@ -29,6 +29,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge'
 import { usePermissions } from '@/contexts/PermissionsContext'
 import { useTranslation } from '@/hooks/useTranslation'
+import { ClHelpLink } from '@/components/carrier-link/ClHelpLink'
 
 // Sin Carrier Link (producción) el generador no depende de capture_method: ofrece todos los carriers, como siempre.
 const carrierLinkOn = isCarrierLinkEnabled()
@@ -268,6 +269,7 @@ export function AllocationPlanGenerator() {
       <div className="flex items-center gap-3">
         <h1 className="text-3xl font-bold text-gray-900">{t('allocation_generator.title')}</h1>
         {readOnly && <ReadOnlyBadge />}
+        {clOn && capture === 'carrier_link' && <ClHelpLink section="generator" />}
         <span className="group relative">
           <svg
             className="w-5 h-5 text-gray-400 cursor-help"

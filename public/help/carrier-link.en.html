@@ -231,7 +231,9 @@
       <h3>The screens</h3>
       <a href="#reading-points">Reading points</a>
       <a href="#connectors">Connectors</a>
-      <a href="#plans">Sampling plans</a>
+      <a href="#generator">Allocation Generator</a>
+      <a href="#balancing">Load Balancing</a>
+      <a href="#records">Allocation Plans</a>
       <a href="#samples">Samples</a>
       <a href="#monitor">Capture monitor</a>
       <h3>Reference</h3>
@@ -246,7 +248,7 @@
   <div class="page">
     <header>
       <h2>Carrier Link: samples from the carrier’s own records</h2>
-      <p>What it is, the order to set it up in, and what each screen in the Carrier Link section of ONEMS does.</p>
+      <p>What it is, the order to set it up in, and how the usual E2E screens and the two Carrier Link screens are used with Carrier Link.</p>
     </header>
 
     <section id="overview">
@@ -260,17 +262,19 @@
 <p>Instead of an origin panelist and a destination panelist, each sample has a <strong>start reading point</strong> and an <strong>end reading point</strong>. The E2E time runs from the first reading at the start to the last at the end.</p>
 <div class="callout info"><strong>Scale.</strong> A plan can reach about <span dir="ltr">15,000</span> samples a year per product. That is why quotas are spread by route (city to city) and week, without you having to choose shipments one by one.</div>
 <div class="callout warn"><strong>What you do not see.</strong> Only shipments that have arrived are included. Those that never arrive or stay in another city do not appear as samples, and departures are not followed up. There are no routes within a single city either. The delivery standard only affects the analysis in the reports, never the capture or the plan.</div>
+<div class="callout info"><strong>There is no separate section.</strong> Carrier Link is not a separate module: everything lives inside E2E. The only thing that changes is the <strong>capture method</strong> of the data (panelists or carrier), which is chosen <strong>per carrier</strong> in <strong>Carriers &amp; Products</strong>: <em>Panelists</em>, <em>Carrier Link</em> or <em>Both</em>. The same carrier can use both systems at once. Carriers that use panelists only work exactly as before.</div>
     </section>
 
     <section id="order">
     <h2>The order of work</h2>
 <ol class="steps">
-  <li><strong>Reading points.</strong> In <strong>Reading points</strong>, register the carrier places where each shipment is read and say in which city routes start or end. Each city needs at least one start point and one end point.</li>
-  <li><strong>Connector.</strong> In <strong>Connectors</strong>, create the carrier’s connector: its field and product equivalences, the request calendar and the key. Test it with a trial batch.</li>
-  <li><strong>Delivery standard.</strong> In <strong>Delivery Standards</strong>, check that every route has its standard and, if you want to compare with panelists, the equivalence time (see <a href="#equivalence">The equivalence time</a>).</li>
-  <li><strong>Sampling plan.</strong> In <strong>Sampling plans</strong>, create the plan, generate and save the quotas and press <span class="btn primary">Activate plan</span>.</li>
+  <li><strong>Capture method.</strong> In <strong>Carriers &amp; Products</strong>, choose each carrier’s <strong>Capture method</strong>: Panelists, Carrier Link or Both. Reading points and connectors are only offered for carriers set to Carrier Link or Both.</li>
+  <li><strong>Reading points.</strong> In <strong>Reading points</strong> (menu E2E ▸ Setup ▸ Carrier Link), register the carrier places where each shipment is read and say in which city routes start or end. Each city needs at least one start point and one end point.</li>
+  <li><strong>Connector.</strong> In <strong>Connectors</strong> (same submenu), create the carrier’s connector: its field and product equivalences, the request calendar and the key. Test it with a trial batch.</li>
+  <li><strong>Delivery standard.</strong> In <strong>E2E: SLA</strong>, check that every route has its standard and, if you want to compare with panelists, the equivalence time (see <a href="#equivalence">The equivalence time</a>).</li>
+  <li><strong>Generate and apply the plan.</strong> In <strong>Allocation Generator</strong>, choose the carrier with the Carrier Link capture method, generate the preview, save the plan and press <span class="btn primary">Apply</span>.</li>
   <li><strong>Activate the connector.</strong> When everything is ready, move the connector from Testing to Active. Until then it only accepts trial runs and no sample is created.</li>
-  <li><strong>Monitoring.</strong> In <strong>Capture monitor</strong> follow the requests, batches and alerts, and in <strong>Samples</strong> review the samples as they come in.</li>
+  <li><strong>Monitoring.</strong> To spread the load better use <strong>Load Balancing</strong>; to see the quotas, <strong>Allocation Plans</strong>; in <strong>Capture monitor</strong> follow the requests, batches and alerts, and in <strong>Samples</strong> review the samples as they come in (menu Database ▸ Carrier Link).</li>
 </ol>
 <div class="callout ok"><strong>And then:</strong> ONEMS asks the carrier for shipments on the days and at the time set in the connector calendar, makes the draw and puts the samples into the E2E reports. You only need to deal with the alerts.</div>
     </section>
@@ -312,23 +316,50 @@
 <p>In <strong>Test a batch (trial run)</strong> upload a batch file from the carrier. ONEMS tells you whether it would accept it and, if not, why. Nothing is saved.</p>
     </section>
 
-    <section id="plans">
-    <h2>Sampling plans</h2>
-<p>Screen <strong>Sampling plans</strong>. A plan says how many samples are wanted, for which carrier and product, on which dates and between which cities.</p>
+    <section id="generator">
+    <h2>Allocation Generator</h2>
+<p>Screen <strong>Allocation Generator</strong> (menu E2E ▸ Allocation). It is <strong>the same screen</strong> used with panelists: only the <strong>Capture method</strong> field changes. A plan says how many samples are wanted, for which carrier and product, on which dates and between which cities.</p>
 <ol class="steps">
-  <li>Press <span class="btn primary">New plan</span> and fill in the name, carrier, product, connector, dates and total number of samples. Tick the diagnosis box only if you also want to keep data for the diagnosis analysis.</li>
-  <li>Press <span class="btn">Generate quotas</span>. ONEMS spreads the total across routes (city to city) and weeks, and shows a preview that is not saved.</li>
-  <li>Review the preview and press <span class="btn">Save quotas</span>. If you change the total or the dates, generate and save again.</li>
-  <li>If the <strong>Reading points missing</strong> notice lists cities, register their start and end points in <strong>Reading points</strong>. While any is missing, the plan cannot be activated.</li>
-  <li>Press <span class="btn primary">Activate plan</span> and confirm.</li>
+  <li>Choose the carrier. Its capture method (the one set in <strong>Carriers &amp; Products</strong>) decides the options. If it is <em>Both</em>, you choose between Panelists and Carrier Link in <strong>Capture method</strong>.</li>
+  <li>With Carrier Link, also choose the <strong>connector</strong>. It is required: without it the plan cannot be applied. There are no panelists: the cities come from the carrier’s active reading points.</li>
+  <li>Fill in the name, product, dates and total number of samples, and choose the distribution just as with panelists: the same A/B/C matrix, seasonality and working days. You can also import the quotas from a CSV file, with the columns origin city, destination city, week and samples.</li>
+  <li>Press <span class="btn">Generate preview</span>. ONEMS spreads the total across routes (city to city) and weeks, and shows the result without saving it. If it could not place all the samples, it tells you.</li>
+  <li>Review the preview and press <span class="btn">Save plan (draft)</span>. The plan appears in <strong>Generated Plans</strong>, with a <strong>Capture</strong> column showing whether it is a panelist plan or a Carrier Link plan. A draft can be deleted.</li>
+  <li>To start it, press <span class="btn primary">Apply</span>. With Carrier Link, <strong>applying means ONEMS starts asking the carrier for the shipments</strong>. The plan moves to <strong>Applied Plans</strong>.</li>
 </ol>
-<div class="callout warn">A route without a delivery standard is still sampled, but its samples enter without “on time” until the standard is created. It is only a notice: it does not stop the plan from being activated.</div>
-<div class="callout info">After activation, the carrier, product, connector, start date and quotas can no longer be changed. Samples already obtained are not touched.</div>
-<h3>The quota table</h3>
-<p>Each cell shows what is <strong>planned</strong>, what has been <strong>carried over</strong> from earlier weeks in brackets and, once the plan is running, what has been <strong>obtained</strong>. You can see it by week or by month and filter by route.</p>
+<div class="callout warn">If any city is missing start or end reading points, ONEMS tells you and does not let you apply the plan until you register them in <strong>Reading points</strong>. A route without a delivery standard is still sampled, but its samples enter without “on time” until the standard is created: it is only a notice.</div>
+<div class="callout info">After applying, the carrier, product, connector, start date and quotas can no longer be changed (except with Load Balancing). Samples already obtained are not touched.</div>
+<div class="callout ok"><strong>And then:</strong> with the plan applied and the connector Active, the system asks for shipments by itself, week by week. There is nothing else to do.</div>
+    </section>
+
+    <section id="balancing">
+    <h2>Load Balancing</h2>
+<p>Screen <strong>Load Balancing</strong> (menu E2E ▸ Allocation). It is also <strong>the same screen</strong> as with panelists: when you choose a Carrier Link plan, the screen knows its type and adapts.</p>
+<ul>
+  <li><strong>What it moves:</strong> samples from one week to another, <strong>within each route</strong>, so that there are no overloaded weeks next to almost empty ones. It does not change the plan’s total or its routes.</li>
+  <li><strong>No maximum per panelist:</strong> with Carrier Link there are no panelists. The rows are the origin cities and the load is the samples planned per week.</li>
+  <li><strong>Freeze date (fence):</strong> from today up to that date, inclusive, nothing is moved. If you leave it empty, the freeze starts today.</li>
+  <li><strong>Draft and active:</strong> in a draft plan any week can be moved; in an active plan only pending quotas of weeks that start after the freeze date.</li>
+</ul>
+<ol class="steps">
+  <li>Choose the Carrier Link plan in the plan selector.</li>
+  <li>Press <span class="btn">Balance all origin cities</span>, or <span class="btn">Balance</span> on one city.</li>
+  <li>Review the <strong>Balancing preview</strong>: how many samples change week. Nothing is saved yet.</li>
+  <li>Press <span class="btn primary">Apply balancing</span>.</li>
+</ol>
+<div class="callout info">If the distribution is already as even as it can be with what can be moved, ONEMS says there is nothing to move.</div>
+    </section>
+
+    <section id="records">
+    <h2>Allocation Plans</h2>
+<p>Screen <strong>Allocation Plans</strong> (menu E2E ▸ Allocation). When you choose a Carrier Link plan in the selector, the plan’s <strong>records</strong> are its <strong>quotas: one per route (city to city) and week</strong>. This view is for consultation; quotas are changed with the Allocation Generator and Load Balancing.</p>
+<ul>
+  <li><strong>Table:</strong> one row per quota, with what is <strong>planned</strong>, what is <strong>carried over</strong> from earlier weeks, what has been <strong>obtained</strong>, the requests made to the carrier and its status: Pending, Open, Fulfilled, Carried over or Unfilled. It can be filtered.</li>
+  <li><strong>Matrix:</strong> routes in rows and weeks (or months) in columns. Each cell shows what is planned, what is carried over in brackets and, once the plan is running, what has been obtained. The matrix shows all the plan’s quotas: it does not apply the table filters.</li>
+  <li><strong>View samples:</strong> on each quota, a link takes you to the samples obtained for that route and week.</li>
+</ul>
 <h3>If a quota is not filled</h3>
 <p>If the carrier does not have enough shipments, ONEMS asks again for what is missing (up to 3 times in the same week). Whatever is still missing is spread over the remaining weeks of the month and, if it does not fit, over the following months. What is still missing when the plan ends stays unfilled and raises an alert.</p>
-<div class="callout ok"><strong>And then:</strong> with the plan active and the connector Active, the system asks for shipments by itself, week by week. There is nothing else to do.</div>
     </section>
 
     <section id="samples">
@@ -359,7 +390,7 @@
     <h2>The equivalence time</h2>
 <p>The carrier’s reading does not include the last stretch to the addressee nor the reporting delays that the panelist measurement does include. To make the two measurements comparable, the delivery standard admits an <strong>equivalence time</strong>.</p>
 <ol class="steps">
-  <li>Open the delivery standards screen (<strong>Delivery Standards</strong>).</li>
+  <li>Open the delivery standards screen (<strong>E2E: SLA</strong>).</li>
   <li>On the route you want, fill in <strong>First-leg equivalence time</strong> and <strong>Last-leg equivalence time</strong>, in the same unit as the standard. They default to 0.</li>
 </ol>
 <div class="callout info"><strong>Only for carrier samples.</strong> This time is added only to carrier samples; panelist samples do not change. ONEMS keeps the measured time and the added time separately, and the reports (including “on time”) use the total.</div>
@@ -380,7 +411,7 @@
 <tr><td>Unknown product</td><td>The carrier sent a product that ONEMS has no equivalence for.</td><td>Add the equivalence in <strong>Connectors</strong>, in the Product equivalences block.</td></tr>
 <tr><td>Unknown reading point</td><td>Readings arrived from a place that is not registered as a reading point.</td><td>Register the place in <strong>Reading points</strong> (Places without a reading point block). Those readings are used once the place is registered.</td></tr>
 <tr><td>Possible misrouted shipment</td><td>A shipment has readings at more than one point, or in a city other than the one requested.</td><td>Review it in <strong>Samples</strong>. It still counts towards the route quota.</td></tr>
-<tr><td>Missing delivery standard</td><td>A route has no delivery standard, so it is not possible to tell whether its samples arrive on time.</td><td>Create the standard for that route in <strong>Delivery Standards</strong>. The samples are recalculated automatically.</td></tr>
+<tr><td>Missing delivery standard</td><td>A route has no delivery standard, so it is not possible to tell whether its samples arrive on time.</td><td>Create the standard for that route in <strong>E2E: SLA</strong>. The samples are recalculated automatically.</td></tr>
 <tr><td>Many readings rejected</td><td>More than 20% of the readings in a batch were rejected.</td><td>Check the equivalences and the reading points; a trial batch in <strong>Connectors</strong> shows the reasons.</td></tr>
 <tr><td>Quota not filled</td><td>When the plan ended, a quota had not been completely filled.</td><td>Review the earlier alerts for that route; extend the plan if needed.</td></tr>
 <tr><td>Carrier did not answer</td><td>The connector is active, but the carrier did not answer a request that was due.</td><td>Check with the carrier that its system is running, and review the calendar and the status of the connector.</td></tr>
@@ -399,8 +430,9 @@
 <details><summary>Can the carrier choose which shipments it sends?</summary><div>No. The carrier proposes many candidates and ONEMS makes the final draw. The seed of the draw is fixed before the candidates are received, so nobody can pick it after seeing them.</div></details>
 <details><summary>Is personal data stored?</summary><div>No. Only the fields on the allowed extra fields list are kept; everything else is discarded on entry.</div></details>
 <details><summary>Who can create connector keys?</summary><div>Only a superadmin or the UPU Account Manager. The key is shown just once, when it is created.</div></details>
-<details><summary>I activated the plan and no samples are coming in. Why?</summary><div>Check that the connector is Active (in Testing it only accepts trial runs) and that the day and time in the calendar have already passed. Then look at <strong>Capture monitor</strong>.</div></details>
+<details><summary>I applied the plan and no samples are coming in. Why?</summary><div>Check that the connector is Active (in Testing it only accepts trial runs) and that the day and time in the calendar have already passed. Then look at <strong>Capture monitor</strong>.</div></details>
 <details><summary>How do I tell these samples apart in the reports?</summary><div>They carry the origin “carrier”, different from panelist samples, and can be separated.</div></details>
+<details><summary>Do I have to use Carrier Link with every carrier?</summary><div>No. The capture method is chosen per carrier in <strong>Carriers &amp; Products</strong>: Panelists, Carrier Link or Both. Carriers that use panelists only keep working as before, and the E2E screens show nothing about Carrier Link for them.</div></details>
 <details><summary>Who sees each screen?</summary><div>The Account Manager (and the UPU Account Manager) edits plans, points, connectors and the monitor, and sees the samples. The Allocation Plan Manager edits plans and sees the rest except connectors. The DO Coordinator edits reading points and sees the rest except connectors. Panelist Manager and Materials Supplier have no access. A read-only screen shows the read-only label.</div></details>
     </section>
 

@@ -29,18 +29,23 @@ describe('ayuda de Carrier Link', () => {
     expect(doc?.titleKey).toBe('help_center.doc.carrier_link.title')
     expect(doc?.descKey).toBe('help_center.doc.carrier_link.desc')
   })
-  it('existen los ficheros en los 5 idiomas con las 5 anclas de las pantallas', () => {
+  it('existen los ficheros en los 5 idiomas con las anclas de las pantallas', () => {
     for (const lang of HELP_LANGS) {
       const file = resolve(__dirname, '../../../public/help', `carrier-link.${lang}.html`)
       expect(existsSync(file)).toBe(true)
       const html = readFileSync(file, 'utf-8')
-      for (const id of ['plans', 'samples', 'reading-points', 'connectors', 'monitor']) {
+      for (const id of ['generator', 'balancing', 'records', 'samples', 'reading-points', 'connectors', 'monitor']) {
         expect(html).toContain(`<section id="${id}">`)
+        expect(html).toContain(`href="#${id}"`)
       }
+      expect(html).not.toContain('<section id="plans">')
     }
   })
   it('los enlaces de las pantallas apuntan a la sección correcta', () => {
     expect(helpDocUrl('carrier-link', 'es', 'reading-points')).toBe('/help/carrier-link.es.html#reading-points')
+    expect(helpDocUrl('carrier-link', 'en', 'generator')).toBe('/help/carrier-link.en.html#generator')
+    expect(helpDocUrl('carrier-link', 'fr', 'balancing')).toBe('/help/carrier-link.fr.html#balancing')
+    expect(helpDocUrl('carrier-link', 'ar', 'records')).toBe('/help/carrier-link.ar.html#records')
   })
 })
 

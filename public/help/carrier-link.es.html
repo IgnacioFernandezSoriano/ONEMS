@@ -231,7 +231,9 @@
       <h3>Las pantallas</h3>
       <a href="#reading-points">Puntos de lectura</a>
       <a href="#connectors">Conectores</a>
-      <a href="#plans">Planes de muestreo</a>
+      <a href="#generator">Generador de Asignaciones</a>
+      <a href="#balancing">Balanceo de Carga</a>
+      <a href="#records">Planes de Asignación</a>
       <a href="#samples">Muestras</a>
       <a href="#monitor">Monitor de capturas</a>
       <h3>Referencia</h3>
@@ -246,7 +248,7 @@
   <div class="page">
     <header>
       <h2>Carrier Link: muestras a partir de los registros del carrier</h2>
-      <p>Qué es, en qué orden se configura y qué hace cada pantalla de la sección Carrier Link de ONEMS.</p>
+      <p>Qué es, en qué orden se configura y cómo se usan, con Carrier Link, las pantallas de siempre de E2E y las dos propias de Carrier Link.</p>
     </header>
 
     <section id="overview">
@@ -260,17 +262,19 @@
 <p>En lugar de un panelista de origen y otro de destino, cada muestra tiene un <strong>punto de lectura de inicio</strong> y uno de <strong>fin</strong>. El tiempo E2E va de la primera lectura en el inicio a la última en el fin.</p>
 <div class="callout info"><strong>Escala.</strong> Un plan puede llegar a unas <span dir="ltr">15.000</span> muestras al año por producto. Por eso las cuotas se reparten por ruta (ciudad a ciudad) y semana, sin que usted tenga que elegir los envíos uno a uno.</div>
 <div class="callout warn"><strong>Qué no se ve.</strong> Solo entran envíos que han llegado. Los que nunca llegan o se quedan en otra ciudad no aparecen como muestra, y no hay seguimiento de las salidas. Tampoco hay rutas dentro de una misma ciudad. El estándar de entrega solo afecta al análisis de los informes, nunca a la captura ni al plan.</div>
+<div class="callout info"><strong>No hay una sección aparte.</strong> Carrier Link no es un módulo separado: todo vive dentro de E2E. Lo único que cambia es la <strong>forma de captura</strong> del dato (panelistas o carrier), que se elige <strong>por operador</strong> en <strong>Operadores y Productos</strong>: <em>Panelistas</em>, <em>Carrier Link</em> o <em>Ambos</em>. Un mismo operador puede usar los dos sistemas a la vez. Los operadores que usan solo panelistas funcionan exactamente como siempre.</div>
     </section>
 
     <section id="order">
     <h2>El orden de trabajo</h2>
 <ol class="steps">
-  <li><strong>Puntos de lectura.</strong> En <strong>Puntos de lectura</strong>, dé de alta los lugares del carrier donde se lee cada envío y diga en qué ciudad empiezan o terminan las rutas. Cada ciudad necesita al menos un punto de inicio y uno de fin.</li>
-  <li><strong>Conector.</strong> En <strong>Conectores</strong>, cree el conector del carrier: sus equivalencias de campos y de producto, el calendario de peticiones y la clave. Pruébelo con un lote de ensayo.</li>
-  <li><strong>Estándar de entrega.</strong> En <strong>Estándares de Entrega</strong>, compruebe que cada ruta tiene su estándar y, si quiere comparar con los panelistas, el tiempo de equivalencia (véase <a href="#equivalence">El tiempo de equivalencia</a>).</li>
-  <li><strong>Plan de muestreo.</strong> En <strong>Planes de muestreo</strong>, cree el plan, genere y guarde las cuotas y pulse <span class="btn primary">Activar plan</span>.</li>
+  <li><strong>Forma de captura.</strong> En <strong>Operadores y Productos</strong>, elija para cada operador su <strong>Forma de captura</strong>: Panelistas, Carrier Link o Ambos. Los puntos de lectura y los conectores solo se ofrecen para operadores con Carrier Link o Ambos.</li>
+  <li><strong>Puntos de lectura.</strong> En <strong>Puntos de lectura</strong> (menú E2E ▸ Configuración ▸ Carrier Link), dé de alta los lugares del carrier donde se lee cada envío y diga en qué ciudad empiezan o terminan las rutas. Cada ciudad necesita al menos un punto de inicio y uno de fin.</li>
+  <li><strong>Conector.</strong> En <strong>Conectores</strong> (mismo submenú), cree el conector del carrier: sus equivalencias de campos y de producto, el calendario de peticiones y la clave. Pruébelo con un lote de ensayo.</li>
+  <li><strong>Estándar de entrega.</strong> En <strong>E2E: SLA</strong>, compruebe que cada ruta tiene su estándar y, si quiere comparar con los panelistas, el tiempo de equivalencia (véase <a href="#equivalence">El tiempo de equivalencia</a>).</li>
+  <li><strong>Generar y aplicar el plan.</strong> En <strong>Generador de Asignaciones</strong>, elija el operador con la forma de captura Carrier Link, genere la vista previa, guarde el plan y pulse <span class="btn primary">Aplicar</span>.</li>
   <li><strong>Activar el conector.</strong> Cuando todo esté listo, pase el conector de Pruebas a Activo. Hasta entonces solo admite ensayos y no se crea ninguna muestra.</li>
-  <li><strong>Seguimiento.</strong> En <strong>Monitor de capturas</strong> vea las peticiones, los lotes y los avisos, y en <strong>Muestras</strong> revise las muestras que van entrando.</li>
+  <li><strong>Seguimiento.</strong> Si quiere repartir mejor la carga, use <strong>Balanceo de Carga</strong>; para ver las cuotas, <strong>Planes de Asignación</strong>; en <strong>Monitor de capturas</strong> vea las peticiones, los lotes y los avisos, y en <strong>Muestras</strong> revise las muestras que van entrando (menú Base de Datos ▸ Carrier Link).</li>
 </ol>
 <div class="callout ok"><strong>Y después:</strong> ONEMS pide los envíos al carrier en los días y a la hora del calendario del conector, hace el sorteo y mete las muestras en los informes E2E. Usted solo atiende los avisos.</div>
     </section>
@@ -312,23 +316,50 @@
 <p>En <strong>Probar lote (ensayo)</strong> suba un fichero de lote del carrier. ONEMS indica si lo aceptaría y, si no, por qué. No se guarda nada.</p>
     </section>
 
-    <section id="plans">
-    <h2>Planes de muestreo</h2>
-<p>Pantalla <strong>Planes de muestreo</strong>. Un plan dice cuántas muestras se quieren, de qué carrier y producto, en qué fechas y entre qué ciudades.</p>
+    <section id="generator">
+    <h2>Generador de Asignaciones</h2>
+<p>Pantalla <strong>Generador de Asignaciones</strong> (menú E2E ▸ Asignación). Es <strong>la misma pantalla</strong> que se usa con panelistas: solo cambia el campo <strong>Forma de captura</strong>. Un plan dice cuántas muestras se quieren, de qué carrier y producto, en qué fechas y entre qué ciudades.</p>
 <ol class="steps">
-  <li>Pulse <span class="btn primary">Nuevo plan</span> y rellene nombre, carrier, producto, conector, fechas y total de muestras. Marque la casilla de diagnóstico solo si quiere además guardar datos para el análisis de diagnóstico.</li>
-  <li>Pulse <span class="btn">Generar cuotas</span>. ONEMS reparte el total entre las rutas (ciudad a ciudad) y las semanas, y muestra una vista previa sin guardar.</li>
-  <li>Revise la vista previa y pulse <span class="btn">Guardar cuotas</span>. Si cambia el total o las fechas, vuelva a generar y guardar.</li>
-  <li>Si el aviso <strong>Faltan puntos de lectura</strong> lista ciudades, dé de alta sus puntos de inicio y de fin en <strong>Puntos de lectura</strong>. Mientras falte alguno, el plan no se puede activar.</li>
-  <li>Pulse <span class="btn primary">Activar plan</span> y confirme.</li>
+  <li>Elija el operador. Su forma de captura (la que se fijó en <strong>Operadores y Productos</strong>) decide las opciones. Si es <em>Ambos</em>, elija usted entre Panelistas y Carrier Link en <strong>Forma de captura</strong>.</li>
+  <li>Con Carrier Link, elija también el <strong>conector</strong>. Es obligatorio: sin él el plan no se puede aplicar. No hay panelistas: las ciudades salen de los puntos de lectura activos del operador.</li>
+  <li>Rellene nombre, producto, fechas y total de muestras, y elija el reparto igual que con panelistas: la misma matriz A/B/C, la estacionalidad y los días laborables. También puede importar las cuotas con un fichero CSV, con las columnas ciudad de origen, ciudad de destino, semana y muestras.</li>
+  <li>Pulse <span class="btn">Generar vista previa</span>. ONEMS reparte el total entre las rutas (ciudad a ciudad) y las semanas, y muestra el resultado sin guardar. Si no ha podido repartir todas las muestras, se lo dice.</li>
+  <li>Revise la vista previa y pulse <span class="btn">Guardar plan (borrador)</span>. El plan aparece en <strong>Planes generados</strong>, con una columna <strong>Captura</strong> que indica si es de panelistas o de Carrier Link. Un borrador se puede eliminar.</li>
+  <li>Para ponerlo en marcha, pulse <span class="btn primary">Aplicar</span>. Con Carrier Link, <strong>aplicar significa que ONEMS empieza a pedir los envíos al carrier</strong>. El plan pasa a <strong>Planes aplicados</strong>.</li>
 </ol>
-<div class="callout warn">Una ruta sin estándar de entrega se muestrea igual, pero sus muestras entran sin «a tiempo» hasta que se cree el estándar. Es solo un aviso: no impide activar el plan.</div>
-<div class="callout info">Tras activar, ya no se pueden cambiar el carrier, el producto, el conector, la fecha de inicio ni las cuotas. Las muestras obtenidas no se tocan.</div>
-<h3>La tabla de cuotas</h3>
-<p>Cada celda muestra lo <strong>previsto</strong>, lo <strong>arrastrado</strong> de semanas anteriores entre paréntesis y, con el plan en marcha, lo <strong>obtenido</strong>. Puede verla por semana o por mes y filtrar por ruta.</p>
+<div class="callout warn">Si a alguna ciudad le faltan puntos de lectura de inicio o de fin, ONEMS lo avisa y no deja aplicar el plan hasta que los dé de alta en <strong>Puntos de lectura</strong>. Una ruta sin estándar de entrega se muestrea igual, pero sus muestras entran sin «a tiempo» hasta que se cree el estándar: es solo un aviso.</div>
+<div class="callout info">Tras aplicar, ya no se pueden cambiar el carrier, el producto, el conector, la fecha de inicio ni las cuotas (salvo con el Balanceo de Carga). Las muestras obtenidas no se tocan.</div>
+<div class="callout ok"><strong>Y después:</strong> con el plan aplicado y el conector en Activo, el sistema pide los envíos solo, semana a semana. No hay que hacer nada más.</div>
+    </section>
+
+    <section id="balancing">
+    <h2>Balanceo de Carga</h2>
+<p>Pantalla <strong>Balanceo de Carga</strong> (menú E2E ▸ Asignación). Es también <strong>la misma pantalla</strong> que con panelistas: al elegir un plan de Carrier Link, la pantalla sabe de qué tipo es y se adapta.</p>
+<ul>
+  <li><strong>Qué mueve:</strong> muestras de una semana a otra, <strong>dentro de cada ruta</strong>, para que no haya semanas saturadas y otras casi vacías. No cambia el total del plan ni las rutas.</li>
+  <li><strong>Sin máximo por panelista:</strong> con Carrier Link no hay panelistas. Las filas son las ciudades de origen y la carga son las muestras previstas por semana.</li>
+  <li><strong>Fecha de bloqueo (fence):</strong> desde hoy hasta esa fecha, incluida, no se mueve nada. Si la deja vacía, el bloqueo empieza hoy.</li>
+  <li><strong>Borrador y activo:</strong> en un plan borrador se puede mover cualquier semana; en un plan activo solo las cuotas pendientes de semanas que empiezan después de la fecha de bloqueo.</li>
+</ul>
+<ol class="steps">
+  <li>Elija el plan de Carrier Link en el selector de planes.</li>
+  <li>Pulse <span class="btn">Balancear todas las ciudades de origen</span>, o <span class="btn">Balancear</span> en una ciudad concreta.</li>
+  <li>Revise la <strong>Vista previa del balanceo</strong>: cuántas muestras cambian de semana. No se guarda nada todavía.</li>
+  <li>Pulse <span class="btn primary">Aplicar balanceo</span>.</li>
+</ol>
+<div class="callout info">Si el reparto ya es el más equilibrado posible con lo que se puede mover, ONEMS indica que no hay nada que mover.</div>
+    </section>
+
+    <section id="records">
+    <h2>Planes de Asignación</h2>
+<p>Pantalla <strong>Planes de Asignación</strong> (menú E2E ▸ Asignación). Al elegir un plan de Carrier Link en el selector, los <strong>registros</strong> del plan son sus <strong>cuotas: una por ruta (ciudad a ciudad) y semana</strong>. Esta vista es de consulta; las cuotas se cambian con el Generador de Asignaciones y el Balanceo de Carga.</p>
+<ul>
+  <li><strong>Tabla:</strong> una fila por cuota, con lo <strong>previsto</strong>, lo <strong>arrastrado</strong> de semanas anteriores, lo <strong>obtenido</strong>, las peticiones hechas al carrier y su estado: Pendiente, Abierta, Cumplida, Arrastrada o Sin cubrir. Se puede filtrar.</li>
+  <li><strong>Matriz:</strong> las rutas en filas y las semanas (o los meses) en columnas. Cada celda muestra lo previsto, lo arrastrado entre paréntesis y, con el plan en marcha, lo obtenido. La matriz enseña todas las cuotas del plan: no aplica los filtros de la tabla.</li>
+  <li><strong>Ver muestras:</strong> en cada cuota, un enlace lleva a las muestras obtenidas de esa ruta y semana.</li>
+</ul>
 <h3>Si una cuota no se cubre</h3>
 <p>Si el carrier no tiene suficientes envíos, ONEMS vuelve a pedir lo que falta (hasta 3 veces en la misma semana). Lo que siga faltando se reparte entre las semanas que quedan del mes y, si no caben, entre las de los meses siguientes. Lo que falte al terminar el plan queda sin cubrir y genera un aviso.</p>
-<div class="callout ok"><strong>Y después:</strong> con el plan activo y el conector en Activo, el sistema pide los envíos solo, semana a semana. No hay que hacer nada más.</div>
     </section>
 
     <section id="samples">
@@ -359,7 +390,7 @@
     <h2>El tiempo de equivalencia</h2>
 <p>La lectura del carrier no incluye el último tramo hasta el destinatario ni los retrasos de declaración que sí lleva la medida con panelistas. Para que las dos medidas sean comparables, el estándar de entrega admite un <strong>tiempo de equivalencia</strong>.</p>
 <ol class="steps">
-  <li>Abra la pantalla <strong>Estándares de Entrega</strong>.</li>
+  <li>Abra la pantalla <strong>E2E: SLA</strong>.</li>
   <li>En la ruta que quiera, rellene <strong>Tiempo equiv. primer tramo</strong> y <strong>Tiempo equiv. último tramo</strong>, en la misma unidad que el estándar. Por defecto valen 0.</li>
 </ol>
 <div class="callout info"><strong>Solo para muestras del carrier.</strong> Este tiempo se suma únicamente a las muestras del carrier; las de panelistas no cambian. ONEMS guarda por separado el tiempo medido y el tiempo añadido, y los informes (incluido «a tiempo») usan el total.</div>
@@ -380,7 +411,7 @@
 <tr><td>Producto desconocido</td><td>El carrier envió un producto que ONEMS no tiene en sus equivalencias.</td><td>Añada la equivalencia en <strong>Conectores</strong>, bloque Equivalencias de producto.</td></tr>
 <tr><td>Punto de lectura desconocido</td><td>Llegaron lecturas de un lugar que no está dado de alta como punto de lectura.</td><td>Dé de alta el lugar en <strong>Puntos de lectura</strong> (bloque Lugares sin punto de lectura). Esas lecturas se aprovechan al darlo de alta.</td></tr>
 <tr><td>Posible envío mal encaminado</td><td>Un envío tiene lecturas en más de un punto, o en una ciudad distinta de la pedida.</td><td>Revíselo en <strong>Muestras</strong>. Cuenta igual para la cuota de la ruta.</td></tr>
-<tr><td>Falta el estándar de entrega</td><td>Una ruta no tiene estándar de entrega, así que no se puede saber si sus muestras llegan en plazo.</td><td>Cree el estándar de esa ruta en <strong>Estándares de Entrega</strong>. Las muestras se recalculan solas.</td></tr>
+<tr><td>Falta el estándar de entrega</td><td>Una ruta no tiene estándar de entrega, así que no se puede saber si sus muestras llegan en plazo.</td><td>Cree el estándar de esa ruta en <strong>E2E: SLA</strong>. Las muestras se recalculan solas.</td></tr>
 <tr><td>Muchas lecturas rechazadas</td><td>Más del 20 % de las lecturas de un lote se han rechazado.</td><td>Revise las equivalencias y los puntos de lectura; un lote de prueba en <strong>Conectores</strong> muestra los motivos.</td></tr>
 <tr><td>Cuota sin cubrir</td><td>Al terminar el plan, una cuota no se ha cubierto del todo.</td><td>Revise los avisos anteriores de esa ruta; si hace falta, amplíe el plan.</td></tr>
 <tr><td>El carrier no respondió</td><td>El conector está activo, pero el carrier no respondió a una petición vencida.</td><td>Compruebe con el carrier que su sistema funciona y revise el calendario y el estado del conector.</td></tr>
@@ -399,8 +430,9 @@
 <details><summary>¿Puede el carrier elegir qué envíos manda?</summary><div>No. El carrier propone muchos candidatos y ONEMS hace el sorteo final. La semilla del sorteo se fija antes de recibir los candidatos, así que nadie puede elegirla después de verlos.</div></details>
 <details><summary>¿Se guardan datos personales?</summary><div>No. Solo se guardan los campos de la lista de campos extra permitidos; el resto se descarta al entrar.</div></details>
 <details><summary>¿Quién puede crear claves de conector?</summary><div>Solo un superadmin o el UPU Account Manager. La clave se muestra una única vez al crearla.</div></details>
-<details><summary>He activado el plan y no entran muestras. ¿Por qué?</summary><div>Compruebe que el conector está en Activo (en Pruebas solo admite ensayos) y que el día y la hora del calendario ya han pasado. Después mire <strong>Monitor de capturas</strong>.</div></details>
+<details><summary>He aplicado el plan y no entran muestras. ¿Por qué?</summary><div>Compruebe que el conector está en Activo (en Pruebas solo admite ensayos) y que el día y la hora del calendario ya han pasado. Después mire <strong>Monitor de capturas</strong>.</div></details>
 <details><summary>¿Cómo distingo estas muestras en los informes?</summary><div>Llevan el origen «carrier», distinto del de las muestras de panelistas, y se pueden separar.</div></details>
+<details><summary>¿Tengo que usar Carrier Link con todos los operadores?</summary><div>No. La forma de captura se elige por operador en <strong>Operadores y Productos</strong>: Panelistas, Carrier Link o Ambos. Los operadores que usan solo panelistas siguen funcionando como siempre, y las pantallas de E2E no muestran nada de Carrier Link para ellos.</div></details>
 <details><summary>¿Quién ve cada pantalla?</summary><div>El Account Manager (y el UPU Account Manager) edita planes, puntos, conectores y monitor, y ve las muestras. El Allocation Plan Manager edita planes y ve el resto salvo conectores. El DO Coordinator edita puntos de lectura y ve el resto salvo conectores. Panelist Manager y Materials Supplier no tienen acceso. Una pantalla en solo lectura muestra la etiqueta de solo lectura.</div></details>
     </section>
 

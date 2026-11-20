@@ -15,6 +15,7 @@ import { cityIdsToApply, isCityFailed } from '../lib/balanceViews';
 import { isUsablePeriod } from '../lib/dateRange';
 
 import { useTranslation } from '@/hooks/useTranslation';
+import { ClHelpLink } from '@/components/carrier-link/ClHelpLink';
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId';
 import { isCarrierLinkEnabled } from '@/lib/featureFlags';
 import { carrierLinkPlansVisible, clPlanOptionLabel, clPlanOptionValue, parseClPlanOption } from '@/lib/carrierLink/planRecords';
@@ -467,6 +468,7 @@ export default function NodeLoadBalancing() {
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold text-gray-900">{t("node_load_balancing.title")}</h1>
             {readOnly && <ReadOnlyBadge />}
+            {clOn && clPlan && <ClHelpLink section="balancing" />}
             <span className="group relative">
               <svg
                 className="w-5 h-5 text-gray-400 cursor-help"

@@ -11,6 +11,7 @@ import { SortableHeader } from '@/components/common/SortableHeader'
 import { SmartTooltip } from '@/components/common/SmartTooltip'
 
 import { useTranslation } from '@/hooks/useTranslation';
+import { ClHelpLink } from '@/components/carrier-link/ClHelpLink';
 import { useAccount } from '@/contexts/AccountContext'
 import { formatInTz } from '@/lib/accountTime'
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
@@ -644,6 +645,7 @@ export function AllocationPlans() {
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold text-gray-900">{t("allocation_plans.title")}</h1>
             {readOnly && <ReadOnlyBadge />}
+            {clOn && clPlan && <ClHelpLink section="records" />}
             <SmartTooltip content="Allocation Plans Management - Purpose: View and manage generated allocation plans with detailed shipment assignments between origin and destination nodes. Key Features: Track scheduled shipments, monitor panelist assignments, identify availability issues, and perform bulk operations on multiple records. Usage: Filter plans by criteria, review assignments, update nodes or dates in bulk, cancel or reprocess shipments, and export data for analysis.">
               <svg
                 className="w-5 h-5 text-gray-400 hover:text-gray-600 cursor-help"

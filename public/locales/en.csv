@@ -5423,8 +5423,6 @@ cl.error.forbidden,You do not have permission to do this.
 cl.error.generic,Something went wrong. Please try again.
 cl.select_account.title,Select an account
 cl.select_account.body,Choose an account in the top bar to work with Carrier Link.
-cl.plans.title,Sampling plans
-cl.plans.help,Define which routes and volumes are sampled from carrier scans.
 cl.samples.title,Samples
 cl.samples.help,Review the samples generated from carrier scans.
 cl.reading_points.title,Reading points
@@ -5561,41 +5559,22 @@ cl.reason.same_reading,Start and end are the same scan
 cl.reason.start_after_end,Start after end
 cl.reason.unknown_product,Unknown product
 cl.reason.unknown_reading_point,Unknown reading point
-cl.plans.new,New plan
-cl.plans.edit,Edit plan
-cl.plans.name,Name
-cl.plans.product,Product
-cl.plans.carrier,Carrier
 cl.plans.connector,Connector
 cl.plans.no_connector,No connector yet
 cl.plans.connector_hint,Only connectors of the same carrier. The plan cannot be activated without one.
 cl.plans.select,Select...
-cl.plans.start,Start date
-cl.plans.end,End date
-cl.plans.period,Period
-cl.plans.total,Total samples
-cl.plans.total_hint,"If you change the total or the dates, generate and save the quotas again."
 cl.plans.status,Status
 cl.plans.status.draft,Draft
 cl.plans.status.active,Active
 cl.plans.status.closed,Closed
-cl.plans.empty,There are no plans yet.
-cl.plans.samples,{count} samples
-cl.plans.feed_diagnosis,Connector diagnosis (keep extra data for analysis)
-cl.plans.locked_hint,"The plan is no longer a draft: carrier, product, connector and start date cannot be changed."
 cl.plans.error.no_account,Select an account first.
 cl.plans.error.bad_period,The end date cannot be before the start date.
 cl.plans.error.bad_total,The total must be a whole number of at least 1.
 cl.plans.error.missing_field,"Fill in the name, carrier, product and dates."
-cl.plans.generate,Generate quotas
 cl.plans.no_routes,The carrier has no active reading points with a start and an end city: there are no routes.
 cl.plans.preview_title,Preview (not saved yet)
-cl.plans.save_quotas,Save quotas
 cl.plans.saving_quotas,Saving {count} quotas...
 cl.plans.discard,Discard
-cl.plans.quotas_saved,{count} quotas saved.
-cl.plans.quotas_title,Quotas
-cl.plans.no_quotas,"This plan has no quotas yet. Use ""Generate quotas""."
 cl.plans.missing_points_title,Reading points missing
 cl.plans.missing_points_help,Register an active point of the carrier in these cities before activating the plan.
 cl.plans.missing.origin,no start point
@@ -5603,8 +5582,6 @@ cl.plans.missing.destination,no end point
 cl.plans.missing_standards_title,{count} routes without a delivery standard
 cl.plans.missing_standards_help,"These routes are sampled, but without a standard the on-time result cannot be calculated. It does not block activation."
 cl.plans.no_standard,counted without on-time
-cl.plans.more,and {count} more (marked with ⚠ in the table)
-cl.plans.activate,Activate plan
 cl.plans.activate_confirm,"Activate the plan {name}? Afterwards the carrier, product, connector, start date and quotas can no longer be changed."
 cl.plans.activate_blocked,The plan cannot be activated while reading points are missing.
 cl.plans.matrix.filter,Filter by route...
@@ -5619,7 +5596,6 @@ cl.plans.matrix.route,Route
 cl.plans.matrix.total,Total
 cl.plans.matrix.routes,{count} routes
 cl.plans.error.quotas_mismatch,The quotas do not match the plan dates: generate them again.
-cl.plans.regenerate_notice,The total or the dates have changed: generate and save the quotas again.
 cl.samples.plan,Plan
 cl.samples.week,Week
 cl.samples.all,All
