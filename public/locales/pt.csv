@@ -5454,7 +5454,7 @@ cl.reading_points.unknown_help,Nos últimos 90 dias chegaram leituras destes loc
 cl.reading_points.readings,Leituras
 cl.reading_points.register,Registar
 cl.reading_points.delete_title,Eliminar ponto de leitura
-cl.reading_points.delete_confirm,Eliminar o ponto de leitura
+cl.reading_points.delete_confirm,Eliminar o ponto de leitura {name}?
 cl.reading_points.error.no_account,Selecione primeiro uma conta.
 cl.reading_points.error.missing_place,Indique o código do local.
 cl.reading_points.error.missing_carrier,Selecione uma transportadora.

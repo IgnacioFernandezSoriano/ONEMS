@@ -4,6 +4,7 @@ import { useLatestRequest } from '@/lib/latestRequest'
 import {
   buildReadingPointRow,
   unknownPlaces,
+  excludeRegistered,
   readerTypeForRole,
   type E2eRole,
   type ReadingPointForm,
@@ -47,11 +48,13 @@ const SCAN_LIMIT = 5000
 export function useClCarriersAndCenters(accountId: string | null) {
   const [carriers, setCarriers] = useState<ClCarrierOption[]>([])
   const [centers, setCenters] = useState<ClCenterOption[]>([])
+  const [error, setError] = useState<{ message?: string; code?: string } | null>(null)
 
   useEffect(() => {
     if (!accountId) {
       setCarriers([])
       setCenters([])
+      setError(null)
       return
     }
     let cancelled = false
@@ -66,6 +69,7 @@ export function useClCarriersAndCenters(accountId: string | null) {
           .order('name'),
       ])
       if (cancelled) return
+      setError(c.error ?? p.error ?? null)
       setCarriers((c.data ?? []) as ClCarrierOption[])
       setCenters(
         ((p.data ?? []) as any[]).map((r) => ({
@@ -81,7 +85,7 @@ export function useClCarriersAndCenters(accountId: string | null) {
     }
   }, [accountId])
 
-  return { carriers, centers }
+  return { carriers, centers, error }
 }
 
 export function useClReadingPoints(accountId: string | null, carrierId: string | null) {
@@ -118,6 +122,7 @@ export function useClReadingPoints(accountId: string | null, carrierId: string |
         .eq('account_id', accountId)
         .is('reader_id', null)
         .gte('scan_at', since)
+        .order('scan_at', { ascending: false })
         .limit(SCAN_LIMIT),
     ])
     if (isStale()) return
@@ -144,7 +149,11 @@ export function useClReadingPoints(accountId: string | null, carrierId: string |
       )
     }
     // Sin permiso cl_monitor la consulta falla: lista vacía, sin error visible.
-    setUnknown(scans.error ? [] : unknownPlaces((scans.data ?? []) as any[]))
+    const registered = ((pts.data ?? []) as any[]).map((r) => ({
+      carrier_place_ref: r.carrier_place_ref as string,
+      carrier_mode_ref: (r.carrier_mode_ref ?? null) as string | null,
+    }))
+    setUnknown(scans.error ? [] : excludeRegistered(unknownPlaces((scans.data ?? []) as any[]), registered))
     setLoading(false)
   }, [accountId, carrierId, beginLoad])
 
@@ -153,7 +162,6 @@ export function useClReadingPoints(accountId: string | null, carrierId: string |
   }, [refetch])
 
   const fail = (err: { message?: string; code?: string }): ClWriteResult => {
-    setError(err)
     return { success: false, error: err.message ?? '' }
   }
 

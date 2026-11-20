@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildReadingPointRow, unknownPlaces } from '../carrierLink/readingPoints'
+import { buildReadingPointRow, unknownPlaces, excludeRegistered } from '../carrierLink/readingPoints'
 
 const base = {
   carrier_id: 'c1',
@@ -45,5 +45,17 @@ describe('unknownPlaces', () => {
       ({ place_ref: 'X', mode_ref: 'M', reject_reason, reader_id })
     const out = unknownPlaces([s(null), s(null, 'unknown_reading_point'), s('r1'), s(null)])
     expect(out).toEqual([{ place_ref: 'X', mode_ref: 'M', readings: 3 }])
+  })
+})
+
+describe('excludeRegistered', () => {
+  const u = (place_ref: string, mode_ref: string | null) => ({ place_ref, mode_ref, readings: 1 })
+  it('quita lugares con punto activo; modo NULL del punto cubre cualquier modo', () => {
+    const pts = [
+      { carrier_place_ref: 'A', carrier_mode_ref: null },
+      { carrier_place_ref: 'B', carrier_mode_ref: 'M1' },
+    ]
+    const out = excludeRegistered([u(' A ', 'X'), u('B', 'M1'), u('B', 'M2'), u('C', null)], pts)
+    expect(out).toEqual([u('B', 'M2'), u('C', null)])
   })
 })

@@ -5446,7 +5446,7 @@ cl.reading_points.unknown_help,وصلت خلال آخر 90 يوما عمليات
 cl.reading_points.readings,القراءات
 cl.reading_points.register,تسجيل
 cl.reading_points.delete_title,حذف نقطة القراءة
-cl.reading_points.delete_confirm,حذف نقطة القراءة
+cl.reading_points.delete_confirm,هل تريد حذف نقطة القراءة {name}؟
 cl.reading_points.error.no_account,اختر حسابا أولا.
 cl.reading_points.error.missing_place,أدخل رمز المكان.
 cl.reading_points.error.missing_carrier,اختر ناقلا.

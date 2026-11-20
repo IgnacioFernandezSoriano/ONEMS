@@ -22,7 +22,7 @@ export function ClReadingPoints() {
   const accountId = useEffectiveAccountId()
   const readOnly = !canEdit('cl_reading_points')
 
-  const { carriers, centers } = useClCarriersAndCenters(accountId)
+  const { carriers, centers, error: lookupError } = useClCarriersAndCenters(accountId)
   const [carrierId, setCarrierId] = useState('')
   const { points, unknown, loading, error, create, update, remove } = useClReadingPoints(accountId, carrierId || null)
 
@@ -132,7 +132,8 @@ export function ClReadingPoints() {
             )}
           </div>
 
-          {carriers.length === 0 && <p className="text-sm text-gray-500">{t('cl.reading_points.no_carriers')}</p>}
+          {lookupError && <p className="text-sm text-red-600">{t(clErrorKey(lookupError))}</p>}
+          {!lookupError && carriers.length === 0 && <p className="text-sm text-gray-500">{t('cl.reading_points.no_carriers')}</p>}
           {error && <p className="text-sm text-red-600">{t(clErrorKey(error))}</p>}
 
           {carrierId && (
@@ -316,7 +317,7 @@ export function ClReadingPoints() {
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 space-y-4">
             <h2 className="text-lg font-semibold">{t('cl.reading_points.delete_title')}</h2>
             <p className="text-sm text-gray-700">
-              {t('cl.reading_points.delete_confirm')} <strong>{deleting.carrier_place_ref}</strong>
+              {t('cl.reading_points.delete_confirm', { name: deleting.carrier_place_ref })}
             </p>
             {formError && <p className="text-sm text-red-600">{t(formError)}</p>}
             <div className="flex justify-end gap-2">

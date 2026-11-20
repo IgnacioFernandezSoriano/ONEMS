@@ -5446,7 +5446,7 @@ cl.reading_points.unknown_help,Des scans des 90 derniers jours proviennent de ce
 cl.reading_points.readings,Lectures
 cl.reading_points.register,Enregistrer
 cl.reading_points.delete_title,Supprimer le point de lecture
-cl.reading_points.delete_confirm,Supprimer le point de lecture
+cl.reading_points.delete_confirm,Supprimer le point de lecture {name} ?
 cl.reading_points.error.no_account,Sélectionnez d'abord un compte.
 cl.reading_points.error.missing_place,Indiquez le code du lieu.
 cl.reading_points.error.missing_carrier,Sélectionnez un transporteur.

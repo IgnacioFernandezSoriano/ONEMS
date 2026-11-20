@@ -5454,7 +5454,7 @@ cl.reading_points.unknown_help,Scans from the last 90 days arrived from these pl
 cl.reading_points.readings,Readings
 cl.reading_points.register,Register
 cl.reading_points.delete_title,Delete reading point
-cl.reading_points.delete_confirm,Delete the reading point
+cl.reading_points.delete_confirm,Delete the reading point {name}?
 cl.reading_points.error.no_account,Select an account first.
 cl.reading_points.error.missing_place,Enter the place code.
 cl.reading_points.error.missing_carrier,Select a carrier.
