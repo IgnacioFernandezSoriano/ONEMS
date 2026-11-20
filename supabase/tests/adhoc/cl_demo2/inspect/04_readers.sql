@@ -1,0 +1,1 @@
+SELECT r.id, r.reader_id, r.name, r.type, r.postal_center_id, r.capture_source, r.e2e_role, r.is_active, r.deleted_at FROM public.readers r WHERE r.account_id = 'f4d823d2-93e6-4755-9a89-9da87e7fa86e' ORDER BY r.reader_id;

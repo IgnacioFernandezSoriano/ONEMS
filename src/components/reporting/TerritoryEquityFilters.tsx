@@ -4,6 +4,8 @@ import { SmartTooltip } from '@/components/common/SmartTooltip';
 import { QuickMonthSelector } from '@/components/common/QuickMonthSelector';
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId';
 import { supabase } from '@/lib/supabase';
+import { applySourceFilter } from '@/lib/e2eCalculations';
+import { SourceFilter } from './SourceFilter';
 import type { TerritoryEquityFilters as Filters } from '@/types/reporting';
 
 import { useTranslation } from '@/hooks/useTranslation';
@@ -39,19 +41,25 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
         setLoading(true);
 
         // Get unique carriers
-        const { data: carrierData } = await supabase
+        const { data: carrierData } = await applySourceFilter(
+          supabase
           .from('one_db')
           .select('carrier_name')
           .eq('account_id', accountId)
-          .not('carrier_name', 'is', null);
+          .not('carrier_name', 'is', null),
+          filters.source ?? ''
+        );
         if (cancelled) return;
 
         // Get unique products
-        const { data: productData } = await supabase
+        const { data: productData } = await applySourceFilter(
+          supabase
           .from('one_db')
           .select('product_name')
           .eq('account_id', accountId)
-          .not('product_name', 'is', null);
+          .not('product_name', 'is', null),
+          filters.source ?? ''
+        );
         if (cancelled) return;
 
         // Get regions
@@ -62,19 +70,25 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
         if (cancelled) return;
 
         // Get unique origin cities
-        const { data: originCityData } = await supabase
+        const { data: originCityData } = await applySourceFilter(
+          supabase
           .from('one_db')
           .select('origin_city_name')
           .eq('account_id', accountId)
-          .not('origin_city_name', 'is', null);
+          .not('origin_city_name', 'is', null),
+          filters.source ?? ''
+        );
         if (cancelled) return;
 
         // Get unique destination cities
-        const { data: destCityData } = await supabase
+        const { data: destCityData } = await applySourceFilter(
+          supabase
           .from('one_db')
           .select('destination_city_name')
           .eq('account_id', accountId)
-          .not('destination_city_name', 'is', null);
+          .not('destination_city_name', 'is', null),
+          filters.source ?? ''
+        );
         if (cancelled) return;
 
         const uniqueCarriers = [...new Set(carrierData?.map(d => d.carrier_name) || [])];
@@ -98,7 +112,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
 
     loadFilterOptions();
     return () => { cancelled = true; };
-  }, [accountId]);
+  }, [accountId, filters.source]);
 
   // Filter products by selected carrier
   useEffect(() => {
@@ -112,12 +126,15 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
       }
 
       try {
-        const { data } = await supabase
+        const { data } = await applySourceFilter(
+          supabase
           .from('one_db')
           .select('product_name')
           .eq('account_id', accountId)
           .eq('carrier_name', filters.carrier)
-          .not('product_name', 'is', null);
+          .not('product_name', 'is', null),
+          filters.source ?? ''
+        );
         if (cancelled) return;
 
         const uniqueProducts = [...new Set(data?.map(d => d.product_name) || [])];
@@ -141,7 +158,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
 
     filterProductsByCarrier();
     return () => { cancelled = true; };
-  }, [filters.carrier, products, accountId]);
+  }, [filters.carrier, filters.source, products, accountId]);
 
   const handleChange = useCallback((field: keyof Filters, value: string | string[] | undefined) => {
     onChange({
@@ -164,6 +181,7 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
         region: '',
         direction: undefined,
         equityStatus: [],
+        source: '',
       });
     }
   };
@@ -386,6 +404,12 @@ export function TerritoryEquityFilters({ filters, onChange, onReset }: Territory
           }}
         />
       </div>
+
+      <SourceFilter
+        accountId={accountId ?? undefined}
+        value={filters.source ?? ''}
+        onChange={(value) => handleChange('source', value)}
+      />
       </>
       )}
     </div>

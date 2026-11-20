@@ -3,6 +3,8 @@ import { Calendar, Filter, RotateCcw, MapPin } from 'lucide-react';
 import { SmartTooltip } from '@/components/common/SmartTooltip';
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId';
 import { supabase } from '@/lib/supabase';
+import { applySourceFilter } from '@/lib/e2eCalculations';
+import { SourceFilter } from './SourceFilter';
 
 import { useTranslation } from '@/hooks/useTranslation';
 interface ReportFiltersProps {
@@ -14,6 +16,7 @@ interface ReportFiltersProps {
     originCity: string;
     destinationCity: string;
     complianceStatus?: string;
+    source?: '' | 'panelist' | 'carrier';
   };
   onChange: (filters: any) => void;
   onReset?: () => void;
@@ -41,35 +44,47 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
         setLoading(true);
 
         // Get unique carriers from one_db for this account
-        const { data: carrierData } = await supabase
+        const { data: carrierData } = await applySourceFilter(
+          supabase
           .from('one_db')
           .select('carrier_name')
           .eq('account_id', accountId)
-          .not('carrier_name', 'is', null);
+          .not('carrier_name', 'is', null),
+          filters.source ?? ''
+        );
         if (cancelled) return;
 
         // Get unique products from one_db for this account
-        const { data: productData } = await supabase
+        const { data: productData } = await applySourceFilter(
+          supabase
           .from('one_db')
           .select('product_name')
           .eq('account_id', accountId)
-          .not('product_name', 'is', null);
+          .not('product_name', 'is', null),
+          filters.source ?? ''
+        );
         if (cancelled) return;
 
         // Get unique origin cities
-        const { data: originData } = await supabase
+        const { data: originData } = await applySourceFilter(
+          supabase
           .from('one_db')
           .select('origin_city_name')
           .eq('account_id', accountId)
-          .not('origin_city_name', 'is', null);
+          .not('origin_city_name', 'is', null),
+          filters.source ?? ''
+        );
         if (cancelled) return;
 
         // Get unique destination cities
-        const { data: destinationData } = await supabase
+        const { data: destinationData } = await applySourceFilter(
+          supabase
           .from('one_db')
           .select('destination_city_name')
           .eq('account_id', accountId)
-          .not('destination_city_name', 'is', null);
+          .not('destination_city_name', 'is', null),
+          filters.source ?? ''
+        );
         if (cancelled) return;
 
         // Extract unique values
@@ -92,7 +107,7 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
 
     loadFilterOptions();
     return () => { cancelled = true; };
-  }, [accountId]);
+  }, [accountId, filters.source]);
 
   const handleChange = (field: string, value: string) => {
     onChange({
@@ -111,7 +126,8 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
         carrier: '',
         product: '',
         originCity: '',
-        destinationCity: ''
+        destinationCity: '',
+        source: ''
       });
     }
   };
@@ -310,6 +326,12 @@ export function ReportFilters({ filters, onChange, onReset }: ReportFiltersProps
           </div>
         </div>
       </div>
+
+      <SourceFilter
+        accountId={accountId ?? undefined}
+        value={filters.source ?? ''}
+        onChange={(value) => handleChange('source', value)}
+      />
 
       {/* Filter Guidance */}
       <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">

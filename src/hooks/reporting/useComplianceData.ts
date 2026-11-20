@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { applySourceFilter } from '@/lib/e2eCalculations';
 import { supabase } from '@/lib/supabase';
 import { useAccount } from '@/contexts/AccountContext';
 import { startOfDayInTz, endOfDayInTz } from '@/lib/dateUtils';
@@ -15,6 +16,7 @@ interface Filters {
   carrier?: string;
   product?: string;
   complianceStatus?: string;
+  source?: string;
 }
 
 export interface RouteData {
@@ -113,6 +115,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
             .select('*')
             .eq('account_id', activeAccountId)
             .range(start, start + pageSize - 1)
+          query = applySourceFilter(query, filters?.source ?? '')
 
           // Use same date filtering as ONE DB (no time adjustment)
           if (filters?.startDate && filters.startDate !== '') {
@@ -480,7 +483,7 @@ export function useComplianceData(accountId: string | undefined, filters?: Filte
 
     fetchData();
     return () => { cancelled = true; };
-  }, [activeAccountId, filters?.startDate, filters?.endDate, filters?.originCity, filters?.destinationCity, filters?.carrier, filters?.product, filters?.complianceStatus, accountTimezone]);
+  }, [activeAccountId, filters?.startDate, filters?.endDate, filters?.originCity, filters?.destinationCity, filters?.carrier, filters?.product, filters?.complianceStatus, filters?.source, accountTimezone]);
 
   return { data, loading, error, globalWarningThreshold, globalCriticalThreshold };
 }

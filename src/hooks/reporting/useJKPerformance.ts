@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { applySourceFilter } from '@/lib/e2eCalculations';
 import { supabase } from '@/lib/supabase';
 import { useAccount } from '@/contexts/AccountContext';
 import { startOfDayInTz, endOfDayInTz } from '@/lib/dateUtils';
@@ -157,6 +158,7 @@ interface Filters {
   carrier?: string;
   product?: string;
   region?: string;
+  source?: string;
 }
 
 export function useJKPerformance(accountId: string | undefined, filters?: Filters) {
@@ -210,6 +212,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
             .select('*')
             .eq('account_id', activeAccountId)
             .range(start, start + pageSize - 1)
+          query = applySourceFilter(query, filters?.source ?? '')
 
           // Use same date filtering as ONE DB (no time adjustment)
           if (filters?.startDate && filters.startDate !== '') query = query.gte('sent_at', startOfDayInTz(filters.startDate.slice(0, 10), accountTimezone))
@@ -1196,6 +1199,7 @@ export function useJKPerformance(accountId: string | undefined, filters?: Filter
     filters?.carrier,
     filters?.product,
     filters?.region,
+    filters?.source,
     accountTimezone,
   ]);
 

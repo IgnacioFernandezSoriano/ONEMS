@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { applySourceFilter } from '@/lib/e2eCalculations';
 import { supabase } from '@/lib/supabase';
 import { useAccount } from '@/contexts/AccountContext';
 import { startOfDayInTz, endOfDayInTz } from '@/lib/dateUtils';
@@ -29,6 +30,7 @@ interface Filters {
   destinationCity?: string;
   carrier?: string;
   product?: string;
+  source?: string;
 }
 
 export function useCarrierProductOverview(accountId: string | undefined, filters: Filters) {
@@ -135,6 +137,7 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
             `)
             .eq('account_id', activeAccountId)
             .range(start, start + pageSize - 1)
+          query = applySourceFilter(query, filters.source ?? '')
 
           // Use same date filtering as ONE DB (no time adjustment)
           if (filters.dateFrom && filters.dateFrom !== '') {
@@ -329,7 +332,7 @@ export function useCarrierProductOverview(accountId: string | undefined, filters
 
     fetchData();
     return () => { cancelled = true; };
-  }, [activeAccountId, filters.dateFrom, filters.dateTo, filters.routeType, filters.originCity, filters.destinationCity, filters.carrier, filters.product, accountTimezone]);
+  }, [activeAccountId, filters.dateFrom, filters.dateTo, filters.routeType, filters.originCity, filters.destinationCity, filters.carrier, filters.product, filters.source, accountTimezone]);
 
   return { data, loading, error, globalWarningThreshold, globalCriticalThreshold };
 }

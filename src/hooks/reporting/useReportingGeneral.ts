@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { applySourceFilter } from '@/lib/e2eCalculations';
 import { supabase } from '@/lib/supabase';
 import type { GeneralPerformanceData } from '@/types/reporting';
 import { useAccount } from '@/contexts/AccountContext';
@@ -13,6 +14,7 @@ interface Filters {
   product?: string;
   dateFrom?: string;
   dateTo?: string;
+  source?: string;
 }
 
 export function useReportingGeneral(accountId: string | undefined, filters?: Filters) {
@@ -49,6 +51,7 @@ export function useReportingGeneral(accountId: string | undefined, filters?: Fil
             .select('*')
             .eq('account_id', activeAccountId)
             .range(start, start + pageSize - 1)
+          query = applySourceFilter(query, filters?.source ?? '')
 
           if (filters?.originCity) {
             query = query.eq('origin_city_name', filters.originCity)
@@ -139,7 +142,7 @@ export function useReportingGeneral(accountId: string | undefined, filters?: Fil
 
     fetchData();
     return () => { cancelled = true; };
-  }, [activeAccountId, filters?.originCity, filters?.destinationCity, filters?.carrier, filters?.product, filters?.dateFrom, filters?.dateTo, accountTimezone]);
+  }, [activeAccountId, filters?.originCity, filters?.destinationCity, filters?.carrier, filters?.product, filters?.dateFrom, filters?.dateTo, filters?.source, accountTimezone]);
 
   return { data, loading, error };
 }

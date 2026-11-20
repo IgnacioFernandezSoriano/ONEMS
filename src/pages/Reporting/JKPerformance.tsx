@@ -50,7 +50,7 @@ export default function JKPerformance() {
     destinationCity: filters.destinationCity,
     carrier: filters.carrier,
     product: filters.product,
-
+    source: filters.source,
   });
 
   // Apply problematic routes filter globally

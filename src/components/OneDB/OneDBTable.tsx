@@ -50,6 +50,13 @@ export const OneDBTable: React.FC<OneDBTableProps> = ({
   const formatDate = (dateString: string) => formatInTz(dateString, tz);
   const unitLabel = unitSuffix(unit);
 
+  // Los datos de carrier guardan el tiempo en horas o en dias segun el estandar de la fila
+  const formatMeasure = (hours: number | null | undefined, days: number | null | undefined) => {
+    if (hours !== null && hours !== undefined) return formatDuration(Number(hours), 'hours');
+    if (days !== null && days !== undefined) return `${Number(days).toFixed(2)} d`;
+    return 'N/A';
+  };
+
   const OnTimeDeliveryBadge = ({ value }: { value: boolean | null }) => {
     if (value === null) {
       return (
@@ -107,6 +114,9 @@ export const OneDBTable: React.FC<OneDBTableProps> = ({
                 </div>
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {t('onedb.source')}
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div className="flex items-center gap-1">
                   {t('onedb.carrier')}
                   <SmartTooltip content="Postal carrier that handled the shipment (e.g., DHL, FedEx, UPS)." />
@@ -159,7 +169,7 @@ export const OneDBTable: React.FC<OneDBTableProps> = ({
           <tbody className="divide-y divide-gray-200">
             {records.length === 0 ? (
               <tr>
-                <td colSpan={11} className="px-4 py-8 text-center text-gray-500">
+                <td colSpan={12} className="px-4 py-8 text-center text-gray-500">
                   {t('onedb.no_records_to_display')}
                 </td>
               </tr>
@@ -183,6 +193,9 @@ export const OneDBTable: React.FC<OneDBTableProps> = ({
                     {record.tag_id}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-700">{record.plan_name}</td>
+                  <td className="px-4 py-3 text-sm text-gray-700">
+                    {record.source === 'carrier' ? t('onedb.source_carrier') : t('onedb.source_panelist')}
+                  </td>
                   <td className="px-4 py-3 text-sm text-gray-700">{record.carrier_name}</td>
                   <td className="px-4 py-3 text-sm text-gray-700">{record.product_name}</td>
                   <td className="px-4 py-3 text-sm text-gray-700">
@@ -204,6 +217,16 @@ export const OneDBTable: React.FC<OneDBTableProps> = ({
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-700">
                     {formatDuration(record.business_transit_hours, unit)}
+                    {record.source === 'carrier' && (
+                      <div className="mt-1 text-xs text-gray-500">
+                        <div>
+                          {t('onedb.measured_time')}: {formatMeasure(record.measured_business_hours, record.measured_business_days)}
+                        </div>
+                        <div>
+                          {t('onedb.equivalence_added')}: {formatMeasure(record.equivalence_hours, record.equivalence_days)}
+                        </div>
+                      </div>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <OnTimeDeliveryBadge value={record.on_time_delivery} />

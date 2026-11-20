@@ -53,9 +53,9 @@ DECLARE n int; b boolean;
   NR constant text := '95000000-0000-0000-0000-000000000095';
   MU constant text := '94000000-0000-0000-0000-000000000094';
 BEGIN
-  -- Plantilla: 28 opciones; 7 columnas (6 roles + no_role).
+  -- Plantilla: 33 opciones (28 + 5 cl_ de Carrier Link); 7 columnas (6 roles + no_role).
   SELECT count(*) INTO n FROM public.access_option;
-  PERFORM pg_temp.fail_if(n <> 28, 'opciones: ' || n);
+  PERFORM pg_temp.fail_if(n <> 33, 'opciones: ' || n);
   SELECT count(DISTINCT role) INTO n FROM public.access_template;
   PERFORM pg_temp.fail_if(n <> 7, 'roles plantilla: ' || n);
   SELECT count(*) INTO n FROM public.access_template WHERE role = 'no_role';
@@ -96,7 +96,7 @@ BEGIN
   PERFORM pg_temp.as_user(SA, 'authenticated');
   PERFORM pg_temp.fail_if(NOT public.has_access(A2, 'users', 'edit'), 'super users edit');
   SELECT count(*) INTO n FROM public.my_access(A2) WHERE level = 'edit';
-  PERFORM pg_temp.fail_if(n <> 28, 'super my_access: ' || n);
+  PERFORM pg_temp.fail_if(n <> 33, 'super my_access: ' || n);
   PERFORM pg_temp.fail_if(NOT public.can_manage_account_access(A2), 'super gestiona');
 
   -- AM de A1: cambia su matriz y queda log; sobre A2 rechazado.

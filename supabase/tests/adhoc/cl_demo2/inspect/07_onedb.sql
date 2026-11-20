@@ -1,0 +1,1 @@
+SELECT carrier_name, product_name, origin_city_name, destination_city_name, plan_name, count(*), min(sent_at)::date, max(received_at)::date FROM public.one_db WHERE account_id = 'f4d823d2-93e6-4755-9a89-9da87e7fa86e' GROUP BY 1,2,3,4,5 ORDER BY 1,2,3,4,5;
