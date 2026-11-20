@@ -373,3 +373,33 @@ GRANT EXECUTE ON FUNCTION public.cl_plan_quota_totals(uuid, uuid, uuid, integer,
 -- ================================================================ 3. indice para orden y totales
 CREATE INDEX IF NOT EXISTS cl_plan_quotas_plan_week_route_idx
   ON public.cl_plan_quotas (plan_id, iso_year, iso_week, origin_city_id, destination_city_id, id);
+
+-- ================================================================ 4. cl_feed_options
+-- Lista de conectores (id, carrier, nombre, estado) para elegir uno al generar un plan. El Allocation Plan Manager
+-- tiene Edit en cl_plans pero ningun acceso a cl_connectors, y cl_feeds solo se lee con cl_connectors: sin esta
+-- funcion no podria generar planes de Carrier Link (el conector es obligatorio). Nunca devuelve config, secret_ref
+-- ni claves. Permitido: superadmin, o la cuenta del usuario con View en cl_plans o cl_connectors. Lo demas (otra
+-- cuenta, sin derecho, cuenta inexistente): el mismo 42501 CL_FORBIDDEN.
+CREATE OR REPLACE FUNCTION public.cl_feed_options(p_account_id uuid, p_carrier_id uuid DEFAULT NULL)
+ RETURNS TABLE (id uuid, carrier_id uuid, name text, status text)
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path = public, extensions
+AS $$
+BEGIN
+  IF NOT public.is_superadmin()
+     AND (p_account_id IS NULL
+          OR p_account_id IS DISTINCT FROM public.current_user_account_id()
+          OR NOT public.has_any_access(p_account_id, 'view', 'cl_plans', 'cl_connectors')) THEN
+    RAISE EXCEPTION 'CL_FORBIDDEN' USING ERRCODE = '42501';
+  END IF;
+  RETURN QUERY
+  SELECT f.id, f.carrier_id, f.name, f.status
+    FROM public.cl_feeds f
+   WHERE f.account_id = p_account_id
+     AND (p_carrier_id IS NULL OR f.carrier_id = p_carrier_id)
+   ORDER BY f.name, f.id
+   LIMIT 500;
+END $$;
+REVOKE ALL ON FUNCTION public.cl_feed_options(uuid, uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.cl_feed_options(uuid, uuid) TO authenticated;
