@@ -5405,6 +5405,7 @@ cl.error.cl_plan_locked_field,لم يعد بالإمكان تغيير هذا ا�
 cl.error.cl_plan_not_draft,لا يمكن تعديل بهذه الطريقة إلا الخطط في حالة المسودة.
 cl.error.cl_quota_locked,لم يعد بالإمكان تغيير هذه الحصة لأنها تحتوي على عينات بالفعل.
 cl.error.cl_quota_not_found,لم تعد هذه الحصة موجودة. أعد تحميل الصفحة.
+cl.error.cl_rebalance_total_changed,يغيّر الاقتراح إجمالي عدد العينات في الخطة. أعد تحميل الصفحة وحاول مرة أخرى.
 cl.error.cl_stratum_already_delivered,تم بالفعل تسليم طبقة من هذه الدفعة لهذا الطلب.
 cl.error.cl_too_many_rows,يحتوي الملف على عدد كبير جدًا من الصفوف. قسّمه إلى ملفات أصغر.
 cl.error.cl_unknown_stratum,تشير بعض الصفوف إلى مدينة أو مسار غير موجود في الخطة.

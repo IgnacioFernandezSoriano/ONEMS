@@ -5413,6 +5413,7 @@ cl.error.cl_plan_locked_field,Este campo ya no se puede cambiar porque el plan y
 cl.error.cl_plan_not_draft,Solo los planes en borrador se pueden modificar así.
 cl.error.cl_quota_locked,Esta cuota ya no se puede cambiar porque ya tiene muestras.
 cl.error.cl_quota_not_found,La cuota ya no existe. Recarga la página.
+cl.error.cl_rebalance_total_changed,La propuesta cambia el total de muestras del plan. Recarga la página y vuelve a intentarlo.
 cl.error.cl_stratum_already_delivered,Un estrato de este lote ya se entregó para esta demanda.
 cl.error.cl_too_many_rows,El archivo tiene demasiadas filas. Divídelo en archivos más pequeños.
 cl.error.cl_unknown_stratum,Algunas filas hacen referencia a una ciudad o ruta que no está en el plan.

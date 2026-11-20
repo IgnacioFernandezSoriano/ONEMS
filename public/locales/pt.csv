@@ -5413,6 +5413,7 @@ cl.error.cl_plan_locked_field,Este campo já não pode ser alterado porque o pla
 cl.error.cl_plan_not_draft,Só os planos em rascunho podem ser alterados assim.
 cl.error.cl_quota_locked,Esta quota já não pode ser alterada porque já tem amostras.
 cl.error.cl_quota_not_found,A quota já não existe. Recarregue a página.
+cl.error.cl_rebalance_total_changed,A proposta altera o total de amostras do plano. Recarregue a página e tente novamente.
 cl.error.cl_stratum_already_delivered,Um estrato deste lote já foi entregue para esta procura.
 cl.error.cl_too_many_rows,O ficheiro tem demasiadas linhas. Divida-o em ficheiros mais pequenos.
 cl.error.cl_unknown_stratum,Algumas linhas referem-se a uma cidade ou rota que não está no plano.
