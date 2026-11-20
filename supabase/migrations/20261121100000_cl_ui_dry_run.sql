@@ -4,7 +4,8 @@
 -- 1. cl_dry_run_batch: ensayo de un lote desde la web. cl_ingest_batch solo la ejecuta service_role (API del conector);
 --    este envoltorio deja a un usuario con Edit en cl_connectors (o al superadmin) ensayar un lote de un feed de SU
 --    cuenta. Siempre en modo ensayo: no escribe nada. Feed ajeno, inexistente o sin derecho: el mismo 42501
---    (sin oraculo de existencia).
+--    (sin oraculo de existencia). El resultado siempre lleva dry_run = true; si el batch_id ya estaba cargado se
+--    devuelve su resumen guardado con replayed = true. Lote de mas de 5 MB: CL_BAD_PAYLOAD.
 -- 2. cl_plan_set_quotas por conjuntos: la version anterior (20261120110800) recorria el array y buscaba duplicados con
 --    v_key = ANY(v_keys) (O(n^2): ~7-12 s para 15.000 cuotas, por encima del statement_timeout de 8 s de
 --    authenticated). Misma firma, permisos, autorizacion, reglas, codigos y mensajes de error; valida todo antes de
@@ -14,7 +15,8 @@
 -- 3. Lo que quedaba lento al guardar 15.000 cuotas (medido en local, 15.660 cuotas: 2,9 s el primer guardado y 5,7 s
 --    el reemplazo con solo el punto 2):
 --    a) El trigger generico cl_same_account de cl_plan_quotas (to_jsonb(NEW) + 3 EXECUTE dinamicos por fila). En
---       cl_plan_quotas se cambia por una funcion propia con SQL estatico: mismas tres comprobaciones, mismo momento
+--       cl_plan_quotas se cambia por una funcion propia con SQL estatico: misma guarda de cuenta (42501) y mismas
+--       tres comprobaciones, mismo momento
 --       (BEFORE INSERT OR UPDATE, por fila), mismo nombre de trigger, mismo mensaje y SQLSTATE. Las demas tablas
 --       siguen con el generico.
 --    b) Las claves ajenas cl_samples.quota_id y cl_alerts.quota_id no tenian indice: borrar N cuotas pending hacia
@@ -28,7 +30,9 @@ CREATE OR REPLACE FUNCTION public.cl_dry_run_batch(p_feed_id uuid, p_payload jso
  SET search_path = public, extensions
 AS $$
 DECLARE
+  c_max_bytes constant integer := 5 * 1024 * 1024;   -- mismo tope que la Edge Function del conector
   v_account uuid;
+  v_res jsonb;
 BEGIN
   SELECT f.account_id INTO v_account FROM public.cl_feeds f WHERE f.id = p_feed_id;
   IF v_account IS NULL
@@ -37,7 +41,16 @@ BEGIN
                  AND public.has_any_access(v_account, 'edit', 'cl_connectors'))) THEN
     RAISE EXCEPTION 'CL_FORBIDDEN' USING ERRCODE = '42501';
   END IF;
-  RETURN public.cl_ingest_batch(p_feed_id, p_payload, true);
+  IF pg_column_size(p_payload) > c_max_bytes THEN
+    RAISE EXCEPTION 'CL_BAD_PAYLOAD: the batch is larger than 5 MB' USING ERRCODE = '22023';
+  END IF;
+  v_res := public.cl_ingest_batch(p_feed_id, p_payload, true);
+  -- Un batch_id ya cargado devuelve el resumen guardado (real): se marca para que la web lo distinga.
+  IF COALESCE(jsonb_typeof(v_res) = 'object' AND v_res->'dry_run' = 'true'::jsonb, false) IS NOT TRUE THEN
+    v_res := CASE WHEN jsonb_typeof(v_res) = 'object' THEN v_res ELSE jsonb_build_object('summary', v_res) END
+             || jsonb_build_object('dry_run', true, 'replayed', true);
+  END IF;
+  RETURN v_res;
 END $$;
 REVOKE ALL ON FUNCTION public.cl_dry_run_batch(uuid, jsonb) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.cl_dry_run_batch(uuid, jsonb) TO authenticated;
@@ -164,8 +177,11 @@ REVOKE ALL ON FUNCTION public.cl_plan_set_quotas(uuid, jsonb) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.cl_plan_set_quotas(uuid, jsonb) TO authenticated, service_role;
 
 -- ================================================================ 3a. cl_same_account de cl_plan_quotas con SQL estatico
--- Equivale a cl_check_same_account('plan_id','cl_plans','origin_city_id','cities','destination_city_id','cities').
--- Las tres columnas son NOT NULL, asi que siempre se comprueban las tres.
+-- Equivale a cl_check_same_account('plan_id','cl_plans','origin_city_id','cities','destination_city_id','cities')
+-- (version de 20261120110250_cl_tables_hardening.sql), incluida su guarda de cuenta: un usuario que escribe en una
+-- cuenta que no es la suya recibe 42501 antes de cualquier consulta (sin oraculo de existencia entre cuentas).
+-- Misma condicion de la guarda, con las comprobaciones baratas primero (rol de la sesion y auth.uid()) para que los
+-- caminos de backend no paguen consultas por fila. Las tres columnas son NOT NULL, asi que siempre se comprueban las tres.
 CREATE OR REPLACE FUNCTION public.cl_plan_quotas_check_same_account()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -173,6 +189,13 @@ CREATE OR REPLACE FUNCTION public.cl_plan_quotas_check_same_account()
  SET search_path = public, extensions
 AS $$
 BEGIN
+  IF NOT (current_setting('role') IN ('none', 'service_role', 'postgres', 'supabase_admin')
+          OR auth.uid() IS NULL
+          OR public.is_superadmin()
+          OR NEW.account_id = public.current_user_account_id()) THEN
+    RAISE EXCEPTION 'Operacion no permitida' USING ERRCODE = '42501';
+  END IF;
+
   IF NOT EXISTS (SELECT 1 FROM public.cl_plans t WHERE t.id = NEW.plan_id AND t.account_id = NEW.account_id) THEN
     RAISE EXCEPTION '% % debe pertenecer a la misma cuenta (%)', TG_TABLE_NAME, 'plan_id', 'cl_plans'
       USING ERRCODE = 'check_violation';

@@ -112,6 +112,7 @@ BEGIN
   PERFORM pg_temp.ok((r->>'dry_run')::boolean IS TRUE, 'dry_run = true: ' || r::text);
   PERFORM pg_temp.ok(r->'strata' = e->'strata', 'mismo strata que cl_ingest_batch(...,true): ' || r::text);
   PERFORM pg_temp.ok((r->'strata'->0->>'rows')::int = 4, 'resumen calculado (4 filas)');
+  PERFORM pg_temp.ok(NOT (r ? 'replayed'), 'ensayo normal sin replayed');
 END $$;
 RESET ROLE;
 DO $$
@@ -170,6 +171,33 @@ BEGIN
   PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_batches)::text = current_setting('t.n_batches'), 'superadmin: sin lotes nuevos');
   PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_batch_scans)::text = current_setting('t.n_scans'), 'superadmin: sin lecturas nuevas');
 END $$;
+
+-- 7. Lote de más de 5 MB: CL_BAD_PAYLOAD (mismo tope que la Edge Function).
+SET ROLE authenticated;
+SELECT pg_temp.as_user('93000000-0000-0000-0000-000000000093', 'authenticated');
+DO $$
+DECLARE v_big jsonb; m text;
+BEGIN
+  v_big := pg_temp.payload() || jsonb_build_object('pad', (SELECT string_agg(md5(i::text), '') FROM generate_series(1, 200000) i));
+  PERFORM pg_temp.ok(pg_column_size(v_big) > 5 * 1024 * 1024, 'fixture: payload > 5 MB');
+  m := pg_temp.raises(format('SELECT public.cl_dry_run_batch(%L, %L::jsonb)', 'f0000000-0000-0000-0000-0000000000a1', v_big));
+  PERFORM pg_temp.ok(m LIKE '22023:CL_BAD_PAYLOAD%', 'lote > 5 MB: ' || coalesce(left(m, 200), 'null'));
+END $$;
+RESET ROLE;
+
+-- 8. batch_id ya cargado de verdad: cl_ingest_batch devuelve el resumen guardado; el ensayo lo marca dry_run + replayed.
+SELECT set_config('t.real', public.cl_ingest_batch('f0000000-0000-0000-0000-0000000000a1', pg_temp.payload())::text, true);
+SET ROLE authenticated;
+SELECT pg_temp.as_user('93000000-0000-0000-0000-000000000093', 'authenticated');
+DO $$
+DECLARE r jsonb; v_real jsonb := current_setting('t.real')::jsonb;
+BEGIN
+  PERFORM pg_temp.ok(v_real->>'batch' IS NOT NULL AND NOT (v_real ? 'dry_run'), 'fixture: carga real');
+  r := public.cl_dry_run_batch('f0000000-0000-0000-0000-0000000000a1', pg_temp.payload());
+  PERFORM pg_temp.ok(r->'dry_run' = 'true'::jsonb AND r->'replayed' = 'true'::jsonb, 'repetido: dry_run y replayed: ' || r::text);
+  PERFORM pg_temp.ok(r - 'dry_run' - 'replayed' = v_real, 'repetido: resumen guardado intacto');
+END $$;
+RESET ROLE;
 
 \echo cl_ui_dry_run: OK
 ROLLBACK;
