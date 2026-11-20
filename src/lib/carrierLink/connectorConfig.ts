@@ -88,6 +88,13 @@ const counts = (v: unknown): DryRunReasonCount[] =>
         .sort((a, b) => b.count - a.count || a.reason.localeCompare(b.reason))
     : []
 
+/** Resultado del ensayo: aceptado solo si la base dice 'validated'; cualquier otra cosa no se da por buena. */
+export function dryRunOutcome(s: DryRunSummary): 'accepted' | 'rejected' | 'unknown' {
+  if (s.status === 'validated') return 'accepted'
+  if (s.status === 'rejected') return 'rejected'
+  return 'unknown'
+}
+
 /** Lee el jsonb que devuelve cl_dry_run_batch (mismo resumen que cl_ingest_batch) sin fiarse de su forma. */
 export function parseDryRunResult(data: unknown): DryRunSummary {
   const o = data && typeof data === 'object' && !Array.isArray(data) ? (data as Record<string, unknown>) : {}

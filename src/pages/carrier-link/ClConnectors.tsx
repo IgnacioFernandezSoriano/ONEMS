@@ -20,6 +20,7 @@ import {
   canManageCarrierKeys,
   connectorErrorKey,
   parseDryRunResult,
+  dryRunOutcome,
   type ConnectorStatus,
   type StandardField,
   type DryRunSummary,
@@ -778,7 +779,8 @@ function KeysSection(props: { t: T; feedId: string; cl: Cl; canKeys: boolean }) 
         </div>
       )}
 
-      {keys.length === 0 && <p className="text-sm text-gray-500">{t('cl.connectors.keys.empty')}</p>}
+      {canKeys && cl.keysError && <p className="text-sm text-red-600">{t(clErrorKey(cl.keysError))}</p>}
+      {keys.length === 0 && !(canKeys && cl.keysError) && <p className="text-sm text-gray-500">{t('cl.connectors.keys.empty')}</p>}
       {keys.length > 0 && (
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
@@ -894,7 +896,9 @@ function DryRunSection(props: { t: T; feedId: string; cl: Cl }) {
     }
     setBusy(true)
     try {
-      setResult(parseDryRunResult(await cl.dryRun(feedId, payload)))
+      const summary = parseDryRunResult(await cl.dryRun(feedId, payload))
+      if (dryRunOutcome(summary) === 'unknown') setErr('cl.error.generic')
+      else setResult(summary)
     } catch (e) {
       setErr(clErrorKey(e as { message?: string; code?: string }))
     } finally {
@@ -927,12 +931,12 @@ function DryRunSection(props: { t: T; feedId: string; cl: Cl }) {
       {result && (
         <div className="space-y-2">
           <p className="text-sm font-medium">
-            {result.status === 'rejected' ? t('cl.connectors.dry_run.rejected') : t('cl.connectors.dry_run.validated')}
+            {dryRunOutcome(result) === 'accepted' ? t('cl.connectors.dry_run.validated') : t('cl.connectors.dry_run.rejected')}
           </p>
           {result.reason === 'selection_method' && (
             <p className="text-sm text-red-600">{t('cl.connectors.dry_run.bad_method', { expected: result.expected ?? '' })}</p>
           )}
-          {result.strata.length > 0 && result.reason === null && (
+          {dryRunOutcome(result) === 'accepted' && result.strata.length > 0 && (
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
                 <thead className="bg-gray-50 text-gray-600">

@@ -6,6 +6,7 @@ import {
   canManageCarrierKeys,
   connectorErrorKey,
   parseDryRunResult,
+  dryRunOutcome,
 } from '../carrierLink/connectorConfig'
 
 const full = [
@@ -148,5 +149,14 @@ describe('parseDryRunResult', () => {
   })
   it('respuesta sin forma esperada → sin estratos', () => {
     expect(parseDryRunResult(null)).toEqual({ status: null, reason: null, expected: null, strata: [] })
+  })
+})
+
+describe('dryRunOutcome', () => {
+  it('validated → accepted, rejected → rejected, resto → unknown', () => {
+    expect(dryRunOutcome(parseDryRunResult({ status: 'validated', strata: [] }))).toBe('accepted')
+    expect(dryRunOutcome(parseDryRunResult({ status: 'rejected', reason: 'selection_method' }))).toBe('rejected')
+    expect(dryRunOutcome(parseDryRunResult({ status: 'pending' }))).toBe('unknown')
+    expect(dryRunOutcome(parseDryRunResult(null))).toBe('unknown')
   })
 })

@@ -86,6 +86,7 @@ export function useClConnectors(accountId: string | null) {
   const [extraFields, setExtraFields] = useState<ClExtraField[]>([])
   const [allKeys, setAllKeys] = useState<ClFeedKey[]>([])
   const [products, setProducts] = useState<ClProductOption[]>([])
+  const [keysError, setKeysError] = useState<ClDbError | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<ClDbError | null>(null)
 
@@ -99,6 +100,7 @@ export function useClConnectors(accountId: string | null) {
       setAllKeys([])
       setProducts([])
       setError(null)
+      setKeysError(null)
       setLoading(false)
       return
     }
@@ -134,6 +136,7 @@ export function useClConnectors(accountId: string | null) {
         .from('products')
         .select('id, carrier_id, code, description')
         .eq('account_id', accountId)
+        .eq('status', 'active')
         .order('code')
         .limit(LIST_LIMIT),
     ])
@@ -143,8 +146,9 @@ export function useClConnectors(accountId: string | null) {
     setFieldMappings((fm.data ?? []) as ClFieldMapping[])
     setValueMappings((vm.data ?? []) as ClValueMapping[])
     setExtraFields((ef.data ?? []) as ClExtraField[])
-    // Sin derecho a ver claves la consulta puede fallar: lista vacía, sin bloquear la pantalla.
+    // El error de claves se expone aparte: la pantalla solo lo muestra a quien puede gestionarlas.
     setAllKeys(k.error ? [] : ((k.data ?? []) as ClFeedKey[]))
+    setKeysError(k.error ?? null)
     setProducts((p.data ?? []) as ClProductOption[])
     setLoading(false)
   }, [accountId, beginLoad])
@@ -299,6 +303,7 @@ export function useClConnectors(accountId: string | null) {
     refetch,
     mappings,
     keys,
+    keysError,
     saveFeed,
     removeFeed,
     setStatus,
