@@ -5778,3 +5778,35 @@ cl.records.status.open,Open
 cl.records.status.fulfilled,Fulfilled
 cl.records.status.carried,Carried over
 cl.records.status.unfilled,Unfilled
+cl.records.filter_total,Total (all quotas with these filters)
+cl.records.plan_total,Total (whole plan)
+cl.balancing.plan_label,Plan
+cl.balancing.panelists_option,Panelists (by period)
+cl.balancing.no_max_note,Carrier Link plan: the nodes are the origin cities and the load is the planned samples per week. There is no per-panelist maximum: the reference is the expected average of each origin city according to the working days of each week.
+cl.balancing.draft_note,Draft plan: samples can be moved in any week.
+cl.balancing.fence_note,Active plan: only pending quotas of weeks starting after the fence date are moved.
+cl.balancing.deviation_hint,A week is High or Saturated when it exceeds the expected average by this percentage (x1.5 for Saturated).
+cl.balancing.fence_hint,From today up to this date (included) nothing is moved. Empty: from today.
+cl.balancing.loading,Loading the plan quotas...
+cl.balancing.empty,The plan has no quotas.
+cl.balancing.kpi_saturated,Saturated origin cities
+cl.balancing.kpi_high,Origin cities with high load
+cl.balancing.kpi_total,Planned samples
+cl.balancing.carried_in,+{count} carried over
+cl.balancing.preview_title,Balancing preview
+cl.balancing.preview_summary,"{moved} samples change week in {origins} origin cities ({changes} quotas: {created} new, {zeroed} to zero). The plan total and the totals of each city and each route do not change."
+cl.balancing.before_after,"{moved} moved, standard deviation {before} to {after}"
+cl.balancing.preview_matrix_note,The table below shows the proposed distribution. Nothing is saved until you apply it.
+cl.balancing.confirm,Apply balancing
+cl.balancing.applying,Applying...
+cl.balancing.applied,"Balancing applied: {changed} quotas changed, {created} new, {deleted} deleted."
+cl.balancing.nothing_to_do,Nothing to move: the distribution is already as balanced as possible with what can be moved.
+cl.balancing.matrix_title,Load by origin city and week
+cl.balancing.legend,Planned samples per week (+carried over). Green: normal; orange: high; red: saturated; grey: cannot be moved.
+cl.balancing.balance_all,Balance all origin cities
+cl.balancing.balance_origin,Balance
+cl.balancing.origin,Origin city
+cl.balancing.routes,Routes
+cl.balancing.total,Total
+cl.balancing.stddev,Std. dev.
+cl.balancing.cell_title,Expected: {expected}; cannot be moved: {locked}

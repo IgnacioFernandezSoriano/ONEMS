@@ -69,6 +69,8 @@ export function AllocationPlans() {
   })
   const cl = useClPlans(clOn ? effectiveAccountId : null)
   const [clPlanId, setClPlanId] = useState<string | null>(null)
+  // Otra cuenta: el plan de Carrier Link elegido era de la anterior.
+  useEffect(() => setClPlanId(null), [effectiveAccountId])
   const clPlan = clOn ? (cl.plans.find((p) => p.id === clPlanId) ?? null) : null
 
   // Respuestas fuera de orden (p. ej. el superadmin cambia de cuenta rápido): solo cuenta la última petición
@@ -665,6 +667,7 @@ export function AllocationPlans() {
       <div className="space-y-6">
         {header}
         <ClPlanRecords
+          key={clPlan.id}
           plan={clPlan}
           panelistPlans={plans}
           clPlans={cl.plans}

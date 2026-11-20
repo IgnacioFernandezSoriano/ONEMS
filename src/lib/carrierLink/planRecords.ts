@@ -115,6 +115,42 @@ export function quotaTotals(rows: QuotaRecord[]): { planned: number; carried_in:
   )
 }
 
+/** Totales de todas las cuotas que cumplen los filtros (cl_plan_quota_totals). */
+export interface QuotaFilterTotals {
+  quotas: number
+  planned: number
+  carried_in: number
+  obtained: number
+  demands: number
+}
+
+/** Parámetros de cl_plan_quota_totals con los mismos filtros que la tabla (vacíos o no válidos = sin filtro). */
+export function quotaTotalsParams(planId: string, f: QuotaFilters): Record<string, string | number | null> {
+  const wk = f.week ? parseWeekKey(f.week) : null
+  return {
+    p_plan_id: planId,
+    p_origin: f.origin || null,
+    p_destination: f.destination || null,
+    p_iso_year: wk ? wk.iso_year : null,
+    p_iso_week: wk ? wk.iso_week : null,
+    p_status: (QUOTA_STATUSES as readonly string[]).includes(f.status) ? f.status : null,
+  }
+}
+
+/** Fila devuelta por cl_plan_quota_totals (bigint puede llegar como texto). Sin fila: null. */
+export function toQuotaFilterTotals(data: unknown): QuotaFilterTotals | null {
+  const row = (Array.isArray(data) ? data[0] : data) as Record<string, unknown> | null | undefined
+  if (!row) return null
+  const n = (v: unknown) => Number(v ?? 0) || 0
+  return {
+    quotas: n(row.quotas),
+    planned: n(row.planned),
+    carried_in: n(row.carried),
+    obtained: n(row.obtained),
+    demands: n(row.demands),
+  }
+}
+
 export const SAMPLES_PATH = '/carrier-link/samples'
 
 /** Enlace a Muestras filtrado por el plan y, si se da, la semana y la ruta de una cuota. */

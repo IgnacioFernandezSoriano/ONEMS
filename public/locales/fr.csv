@@ -5770,3 +5770,35 @@ cl.records.status.open,Ouvert
 cl.records.status.fulfilled,Atteint
 cl.records.status.carried,Reporté
 cl.records.status.unfilled,Non couvert
+cl.records.filter_total,Total (tous les quotas avec ces filtres)
+cl.records.plan_total,Total (tout le plan)
+cl.balancing.plan_label,Plan
+cl.balancing.panelists_option,Panélistes (par période)
+cl.balancing.no_max_note,Plan Carrier Link : les nœuds sont les villes d'origine et la charge est le nombre d'échantillons prévus par semaine. Il n'y a pas de maximum par panéliste : la référence est la moyenne attendue de chaque ville d'origine selon les jours ouvrables de chaque semaine.
+cl.balancing.draft_note,Plan en brouillon : les échantillons de n'importe quelle semaine peuvent être déplacés.
+cl.balancing.fence_note,Plan actif : seuls les quotas en attente des semaines commençant après la date de fence sont déplacés.
+cl.balancing.deviation_hint,"Une semaine est Élevée ou Saturée si elle dépasse la moyenne attendue de ce pourcentage (x1,5 pour Saturée)."
+cl.balancing.fence_hint,D'aujourd'hui jusqu'à cette date (incluse) rien n'est déplacé. Vide : à partir d'aujourd'hui.
+cl.balancing.loading,Chargement des quotas du plan...
+cl.balancing.empty,Le plan n'a pas de quotas.
+cl.balancing.kpi_saturated,Villes d'origine saturées
+cl.balancing.kpi_high,Villes d'origine à charge élevée
+cl.balancing.kpi_total,Échantillons prévus
+cl.balancing.carried_in,+{count} reportés
+cl.balancing.preview_title,Aperçu de l'équilibrage
+cl.balancing.preview_summary,"{moved} échantillons changent de semaine dans {origins} villes d'origine ({changes} quotas : {created} nouveaux, {zeroed} à zéro). Le total du plan et ceux de chaque ville et de chaque route ne changent pas."
+cl.balancing.before_after,"{moved} déplacés, écart type de {before} à {after}"
+cl.balancing.preview_matrix_note,Le tableau ci-dessous montre la répartition proposée. Rien n'est enregistré tant que vous ne l'appliquez pas.
+cl.balancing.confirm,Appliquer l'équilibrage
+cl.balancing.applying,Application...
+cl.balancing.applied,"Équilibrage appliqué : {changed} quotas modifiés, {created} nouveaux, {deleted} supprimés."
+cl.balancing.nothing_to_do,Rien à déplacer : la répartition est déjà aussi équilibrée que possible avec ce qui peut être déplacé.
+cl.balancing.matrix_title,Charge par ville d'origine et semaine
+cl.balancing.legend,Échantillons prévus par semaine (+reportés). Vert : normal ; orange : élevée ; rouge : saturée ; gris : non déplaçable.
+cl.balancing.balance_all,Équilibrer toutes les villes d'origine
+cl.balancing.balance_origin,Équilibrer
+cl.balancing.origin,Ville d'origine
+cl.balancing.routes,Routes
+cl.balancing.total,Total
+cl.balancing.stddev,Écart type
+cl.balancing.cell_title,Attendu : {expected} ; non déplaçable : {locked}

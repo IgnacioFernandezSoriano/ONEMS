@@ -5778,3 +5778,35 @@ cl.records.status.open,Aberta
 cl.records.status.fulfilled,Cumprida
 cl.records.status.carried,Transitada
 cl.records.status.unfilled,Por cobrir
+cl.records.filter_total,Total (todas as quotas com estes filtros)
+cl.records.plan_total,Total (todo o plano)
+cl.balancing.plan_label,Plano
+cl.balancing.panelists_option,Panelistas (por período)
+cl.balancing.no_max_note,Plano Carrier Link: os nós são as cidades de origem e a carga são as amostras previstas por semana. Não há máximo por panelista: a referência é a média esperada de cada cidade de origem segundo os dias úteis de cada semana.
+cl.balancing.draft_note,Plano em rascunho: é possível mover amostras de qualquer semana.
+cl.balancing.fence_note,Plano ativo: só se movem quotas pendentes de semanas que começam depois do fence.
+cl.balancing.deviation_hint,"Uma semana está Alta ou Saturada se ultrapassar a média esperada nesta percentagem (x1,5 para Saturada)."
+cl.balancing.fence_hint,De hoje até esta data (incluída) nada é movido. Vazio: a partir de hoje.
+cl.balancing.loading,A carregar as quotas do plano...
+cl.balancing.empty,O plano não tem quotas.
+cl.balancing.kpi_saturated,Cidades de origem saturadas
+cl.balancing.kpi_high,Cidades de origem com carga alta
+cl.balancing.kpi_total,Amostras previstas
+cl.balancing.carried_in,+{count} transitadas
+cl.balancing.preview_title,Pré-visualização do balanceamento
+cl.balancing.preview_summary,"{moved} amostras mudam de semana em {origins} cidades de origem ({changes} quotas: {created} novas, {zeroed} a zero). O total do plano e os de cada cidade e cada rota não mudam."
+cl.balancing.before_after,"{moved} movidas, desvio padrão de {before} para {after}"
+cl.balancing.preview_matrix_note,A tabela abaixo mostra a distribuição proposta. Nada é guardado até a aplicar.
+cl.balancing.confirm,Aplicar balanceamento
+cl.balancing.applying,A aplicar...
+cl.balancing.applied,"Balanceamento aplicado: {changed} quotas alteradas, {created} novas, {deleted} eliminadas."
+cl.balancing.nothing_to_do,Nada a mover: a distribuição já é a mais equilibrada possível com o que se pode mover.
+cl.balancing.matrix_title,Carga por cidade de origem e semana
+cl.balancing.legend,Amostras previstas por semana (+transitadas). Verde: normal; laranja: alta; vermelho: saturada; cinzento: não se pode mover.
+cl.balancing.balance_all,Balancear todas as cidades de origem
+cl.balancing.balance_origin,Balancear
+cl.balancing.origin,Cidade de origem
+cl.balancing.routes,Rotas
+cl.balancing.total,Total
+cl.balancing.stddev,Desvio padrão
+cl.balancing.cell_title,Esperado: {expected}; não movível: {locked}

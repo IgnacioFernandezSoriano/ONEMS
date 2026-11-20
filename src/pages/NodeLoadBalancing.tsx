@@ -15,10 +15,40 @@ import { cityIdsToApply, isCityFailed } from '../lib/balanceViews';
 import { isUsablePeriod } from '../lib/dateRange';
 
 import { useTranslation } from '@/hooks/useTranslation';
+import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId';
+import { isCarrierLinkEnabled } from '@/lib/featureFlags';
+import { carrierLinkPlansVisible, clPlanOptionLabel, clPlanOptionValue, parseClPlanOption } from '@/lib/carrierLink/planRecords';
+import { balancingPlanOptions } from '@/lib/carrierLink/quotaBalancing';
+import { useClPlans } from '@/hooks/carrierLink/useClPlans';
+import { useClCaptureCarriers } from '@/hooks/carrierLink/useClPlanRecords';
+import { ClQuotaBalancing } from '../components/NodeLoadBalancing/ClQuotaBalancing';
+
+// Sin Carrier Link (producción) la página es la de siempre: no se consulta nada de Carrier Link.
+const carrierLinkOn = isCarrierLinkEnabled();
+
 export default function NodeLoadBalancing() {
   const { t } = useTranslation();
-  const { canEdit } = usePermissions();
+  const { canEdit, canView } = usePermissions();
   const readOnly = !canEdit('load_balancing');
+
+  // ---- Carrier Link: solo en DEV, con View en cl_plans y algún carrier de Carrier Link. El plan elegido dice si se
+  // balancean panelistas (lo de siempre, por periodo) o las cuotas de un plan de Carrier Link.
+  const effectiveAccountId = useEffectiveAccountId();
+  const clCandidate = carrierLinkOn && canView('cl_plans') && !!effectiveAccountId;
+  const clCarriers = useClCaptureCarriers(clCandidate ? effectiveAccountId : null);
+  const clOn = carrierLinkPlansVisible({
+    flagOn: carrierLinkOn,
+    canViewPlans: canView('cl_plans'),
+    accountId: effectiveAccountId,
+    carriers: clCarriers,
+  });
+  const cl = useClPlans(clOn ? effectiveAccountId : null);
+  const clPlans = balancingPlanOptions(clOn, cl.plans);
+  const [clPlanId, setClPlanId] = useState<string | null>(null);
+  useEffect(() => setClPlanId(null), [effectiveAccountId]);
+  // "Actualizar" con un plan de Carrier Link: se releen los planes y, al remontar el balanceo, sus cuotas.
+  const [clReload, setClReload] = useState(0);
+  const clPlan = clPlans.find((p) => p.id === clPlanId) ?? null;
   const { user, profile } = useAuth();
   const currentDate = new Date();
   const [startDate, setStartDate] = useState('');
@@ -386,7 +416,7 @@ export default function NodeLoadBalancing() {
 
   // Pantalla de carga completa solo la primera vez (aun no hay nada que mostrar). En las recargas por cambio de
   // fechas se mantiene la pagina (y el foco en el campo de fecha) y solo se atenua el contenido.
-  if (loading && loadData.length === 0 && citySummaries.length === 0) {
+  if (!clPlan && loading && loadData.length === 0 && citySummaries.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex items-center gap-3 text-gray-600">
@@ -399,12 +429,12 @@ export default function NodeLoadBalancing() {
 
   return (
     <div className="space-y-6">
-      {error && (
+      {!clPlan && error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-700">{t('lb2.error_loading', { error })}</p>
         </div>
       )}
-      {(loading || datesPending) && (
+      {!clPlan && (loading || datesPending) && (
         <div className="flex items-center gap-2 text-sm text-gray-500" role="status">
           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-500"></div>
           <span>{t("common.loading_data")}</span>
@@ -466,13 +496,60 @@ export default function NodeLoadBalancing() {
           <p className="text-gray-600 mt-1">{t("node_load_balancing.subtitle")}</p>
         </div>
         <button
-          onClick={refetch}
+          onClick={
+            clPlan
+              ? () => {
+                  void cl.refetch();
+                  setClReload((n) => n + 1);
+                }
+              : refetch
+          }
           className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
         >
           {t('common.refresh')}
         </button>
       </div>
 
+      {clPlans.length > 0 && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <label htmlFor="lb-plan" className="block text-sm font-medium text-gray-700 mb-1">
+            {t('cl.balancing.plan_label')}
+          </label>
+          <select
+            id="lb-plan"
+            value={clPlan ? clPlanOptionValue(clPlan.id) : ''}
+            onChange={(e) => setClPlanId(parseClPlanOption(e.target.value))}
+            disabled={applying}
+            className="block w-full md:w-auto md:min-w-[24rem] border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm disabled:opacity-50"
+          >
+            <option value="">{t('cl.balancing.panelists_option')}</option>
+            <optgroup label={`${t('cl.generator.capture_column')}: ${t('cl.capture_method.carrier_link')}`}>
+              {clPlans.map((p) => (
+                <option key={p.id} value={clPlanOptionValue(p.id)}>
+                  {clPlanOptionLabel(p, t)}
+                </option>
+              ))}
+            </optgroup>
+          </select>
+        </div>
+      )}
+
+      {clPlan ? (
+        <ClQuotaBalancing
+          key={`${clPlan.id}:${clReload}`}
+          plan={clPlan}
+          cityName={cl.cityName}
+          workingDows={cl.workingDows}
+          nonWorkingDays={cl.nonWorkingDays}
+          loadAllQuotas={cl.quotas}
+          deviationPercent={deviationPercent}
+          onChangeDeviation={setDeviationPercent}
+          fenceUntil={fenceUntil}
+          onChangeFence={setFenceUntil}
+          canEdit={canEdit('cl_plans')}
+        />
+      ) : (
+      <>
       <BalancePoliciesPanel
         workingDows={workingDows}
         onToggleDay={handleToggleDay}
@@ -759,8 +836,8 @@ export default function NodeLoadBalancing() {
           ))}
         </div>
       )}
-
-
+      </>
+      )}
 
       {/* Balance Preview Modal */}
       <BalancePreviewModal

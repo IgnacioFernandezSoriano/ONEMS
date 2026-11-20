@@ -11,6 +11,8 @@ import {
   quotaPageRange,
   toQuotaRecord,
   quotaTotals,
+  quotaTotalsParams,
+  toQuotaFilterTotals,
   samplesLink,
   samplesParams,
   clPlanOptionLabel,
@@ -171,6 +173,43 @@ describe('enlace a Muestras (parámetros de URL)', () => {
   it('sin parámetros (o semana no válida): Muestras como siempre', () => {
     expect(samplesParams(new URLSearchParams(''))).toEqual({ plan: null, week: null, origin: '', destination: '' })
     expect(samplesParams(new URLSearchParams('week=bad')).week).toBeNull()
+  })
+})
+
+describe('totales de todo el filtro (cl_plan_quota_totals)', () => {
+  it('mismos filtros que la tabla; vacíos o no válidos = sin filtro', () => {
+    expect(quotaTotalsParams('p1', EMPTY_QUOTA_FILTERS)).toEqual({
+      p_plan_id: 'p1',
+      p_origin: null,
+      p_destination: null,
+      p_iso_year: null,
+      p_iso_week: null,
+      p_status: null,
+    })
+    expect(quotaTotalsParams('p1', { origin: 'o', destination: 'd', week: '2027-W05', status: 'open' })).toEqual({
+      p_plan_id: 'p1',
+      p_origin: 'o',
+      p_destination: 'd',
+      p_iso_year: 2027,
+      p_iso_week: 5,
+      p_status: 'open',
+    })
+    expect(quotaTotalsParams('p1', { ...EMPTY_QUOTA_FILTERS, week: 'bad', status: 'x' })).toMatchObject({
+      p_iso_year: null,
+      p_iso_week: null,
+      p_status: null,
+    })
+  })
+  it('lee la fila (bigint como texto o número); sin fila, null', () => {
+    expect(toQuotaFilterTotals([{ quotas: '3', planned: '40', carried: 2, obtained: '7', demands: 1 }])).toEqual({
+      quotas: 3,
+      planned: 40,
+      carried_in: 2,
+      obtained: 7,
+      demands: 1,
+    })
+    expect(toQuotaFilterTotals([])).toBeNull()
+    expect(toQuotaFilterTotals(null)).toBeNull()
   })
 })
 

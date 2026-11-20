@@ -5778,3 +5778,35 @@ cl.records.status.open,Abierta
 cl.records.status.fulfilled,Cumplida
 cl.records.status.carried,Arrastrada
 cl.records.status.unfilled,Sin cubrir
+cl.records.filter_total,Total (todas las cuotas con estos filtros)
+cl.records.plan_total,Total (todo el plan)
+cl.balancing.plan_label,Plan
+cl.balancing.panelists_option,Panelistas (por periodo)
+cl.balancing.no_max_note,Plan de Carrier Link: los nodos son las ciudades de origen y la carga son las muestras previstas por semana. No hay máximo por panelista: la referencia es la media esperada de cada ciudad de origen según los días laborables de cada semana.
+cl.balancing.draft_note,Plan en borrador: se pueden mover muestras de cualquier semana.
+cl.balancing.fence_note,Plan activo: solo se mueven cuotas pendientes de semanas que empiezan después del fence.
+cl.balancing.deviation_hint,"Una semana está Alta o Saturada si supera la media esperada en este porcentaje (x1,5 para Saturada)."
+cl.balancing.fence_hint,Desde hoy hasta esta fecha (incluida) no se mueve nada. Vacío: desde hoy.
+cl.balancing.loading,Cargando las cuotas del plan...
+cl.balancing.empty,El plan no tiene cuotas.
+cl.balancing.kpi_saturated,Ciudades de origen saturadas
+cl.balancing.kpi_high,Ciudades de origen con carga alta
+cl.balancing.kpi_total,Muestras previstas
+cl.balancing.carried_in,+{count} arrastradas
+cl.balancing.preview_title,Vista previa del balanceo
+cl.balancing.preview_summary,"{moved} muestras cambian de semana en {origins} ciudades de origen ({changes} cuotas: {created} nuevas, {zeroed} a cero). No cambian el total del plan ni el de cada ciudad y cada ruta."
+cl.balancing.before_after,"{moved} movidas, desv. típica de {before} a {after}"
+cl.balancing.preview_matrix_note,La tabla de abajo muestra el reparto propuesto. No se guarda nada hasta que lo apliques.
+cl.balancing.confirm,Aplicar balanceo
+cl.balancing.applying,Aplicando...
+cl.balancing.applied,"Balanceo aplicado: {changed} cuotas cambiadas, {created} nuevas, {deleted} borradas."
+cl.balancing.nothing_to_do,No hay nada que mover: el reparto ya es el más equilibrado posible con lo que se puede mover.
+cl.balancing.matrix_title,Carga por ciudad de origen y semana
+cl.balancing.legend,Muestras previstas por semana (+arrastradas). Verde: normal; naranja: alta; rojo: saturada; gris: no se puede mover.
+cl.balancing.balance_all,Balancear todas las ciudades de origen
+cl.balancing.balance_origin,Balancear
+cl.balancing.origin,Ciudad de origen
+cl.balancing.routes,Rutas
+cl.balancing.total,Total
+cl.balancing.stddev,Desv. típica
+cl.balancing.cell_title,Esperado: {expected}; no movible: {locked}

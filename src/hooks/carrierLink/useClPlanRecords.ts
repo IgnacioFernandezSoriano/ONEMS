@@ -7,7 +7,10 @@ import {
   toQuotaRecord,
   QUOTA_COLUMNS,
   QUOTA_ORDER,
+  quotaTotalsParams,
+  toQuotaFilterTotals,
   type QuotaFilters,
+  type QuotaFilterTotals,
   type QuotaRecord,
 } from '@/lib/carrierLink/planRecords'
 
@@ -23,11 +26,15 @@ interface QuotaQuery extends PromiseLike<{ data: unknown[] | null; count: number
  * Forma de captura de los carriers de la cuenta, para decidir si Planes de Asignación muestra Carrier Link.
  * Con accountId null no consulta nada (producción, sin permiso o sin cuenta): la página es la de siempre.
  */
+type CaptureCarrier = { id: string; capture_method: string | null }
+/** Siempre el mismo array vacío: sin cuenta no hay ni consulta ni re-render (producción, la página de siempre). */
+const NO_CARRIERS: CaptureCarrier[] = []
+
 export function useClCaptureCarriers(accountId: string | null) {
-  const [carriers, setCarriers] = useState<{ id: string; capture_method: string | null }[]>([])
+  const [carriers, setCarriers] = useState<CaptureCarrier[]>(NO_CARRIERS)
   useEffect(() => {
     if (!accountId) {
-      setCarriers([])
+      setCarriers(NO_CARRIERS)
       return
     }
     let cancelled = false
@@ -39,7 +46,7 @@ export function useClCaptureCarriers(accountId: string | null) {
       .limit(50)
       .then(({ data, error }) => {
         if (cancelled) return
-        setCarriers(error ? [] : ((data ?? []) as { id: string; capture_method: string | null }[]))
+        setCarriers(error ? NO_CARRIERS : ((data ?? []) as CaptureCarrier[]))
       })
     return () => {
       cancelled = true
@@ -86,4 +93,30 @@ export function useClPlanQuotas(planId: string | null, filters: QuotaFilters, pa
   }, [planId, origin, destination, week, status, page, pageSize, beginLoad])
 
   return { rows, total, loading, error }
+}
+
+/**
+ * Totales de TODAS las cuotas del plan que cumplen los filtros (cl_plan_quota_totals, en el servidor): la tabla solo
+ * trae una página. planId null = sin plan elegido, no consulta.
+ */
+export function useClPlanQuotaTotals(planId: string | null, filters: QuotaFilters) {
+  const beginLoad = useLatestRequest()
+  const [totals, setTotals] = useState<QuotaFilterTotals | null>(null)
+  const { origin, destination, week, status } = filters
+
+  useEffect(() => {
+    const isStale = beginLoad()
+    // Mientras llegan los de estos filtros no se muestran los anteriores.
+    setTotals(null)
+    if (!planId) return
+    supabase
+      .rpc('cl_plan_quota_totals', quotaTotalsParams(planId, { origin, destination, week, status }))
+      .then(({ data, error }) => {
+        if (isStale()) return
+        // Sin totales (error): la pantalla se queda con los de la página.
+        setTotals(error ? null : toQuotaFilterTotals(data))
+      })
+  }, [planId, origin, destination, week, status, beginLoad])
+
+  return totals
 }

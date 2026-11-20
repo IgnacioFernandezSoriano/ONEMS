@@ -5770,3 +5770,35 @@ cl.records.status.open,مفتوحة
 cl.records.status.fulfilled,مكتملة
 cl.records.status.carried,مُرحَّلة
 cl.records.status.unfilled,غير مكتملة
+cl.records.filter_total,الإجمالي (كل الحصص بهذه المرشحات)
+cl.records.plan_total,الإجمالي (الخطة كاملة)
+cl.balancing.plan_label,الخطة
+cl.balancing.panelists_option,المشاركون (حسب الفترة)
+cl.balancing.no_max_note,خطة Carrier Link: العُقد هي مدن المنشأ والحمل هو العينات المخططة في كل أسبوع. لا يوجد حد أقصى لكل مشارك: المرجع هو المتوسط المتوقع لكل مدينة منشأ حسب أيام العمل في كل أسبوع.
+cl.balancing.draft_note,خطة مسودة: يمكن نقل العينات في أي أسبوع.
+cl.balancing.fence_note,خطة نشطة: تُنقل فقط الحصص المعلقة للأسابيع التي تبدأ بعد تاريخ الحد.
+cl.balancing.deviation_hint,يكون الأسبوع مرتفعًا أو مشبعًا إذا تجاوز المتوسط المتوقع بهذه النسبة (x1.5 للمشبع).
+cl.balancing.fence_hint,من اليوم حتى هذا التاريخ (ضمنًا) لا يُنقل شيء. فارغ: من اليوم.
+cl.balancing.loading,جارٍ تحميل حصص الخطة...
+cl.balancing.empty,لا تحتوي الخطة على حصص.
+cl.balancing.kpi_saturated,مدن المنشأ المشبعة
+cl.balancing.kpi_high,مدن المنشأ ذات الحمل المرتفع
+cl.balancing.kpi_total,العينات المخططة
+cl.balancing.carried_in,+{count} مُرحّلة
+cl.balancing.preview_title,معاينة الموازنة
+cl.balancing.preview_summary,تنتقل {moved} عينة إلى أسبوع آخر في {origins} مدينة منشأ ({changes} حصة: {created} جديدة، {zeroed} إلى صفر). لا يتغير إجمالي الخطة ولا إجمالي كل مدينة وكل مسار.
+cl.balancing.before_after,{moved} منقولة، الانحراف المعياري من {before} إلى {after}
+cl.balancing.preview_matrix_note,يعرض الجدول أدناه التوزيع المقترح. لا يُحفظ شيء حتى تطبقه.
+cl.balancing.confirm,تطبيق الموازنة
+cl.balancing.applying,جارٍ التطبيق...
+cl.balancing.applied,تم تطبيق الموازنة: {changed} حصة معدلة، {created} جديدة، {deleted} محذوفة.
+cl.balancing.nothing_to_do,لا يوجد ما يُنقل: التوزيع متوازن قدر الإمكان بما يمكن نقله.
+cl.balancing.matrix_title,الحمل حسب مدينة المنشأ والأسبوع
+cl.balancing.legend,العينات المخططة لكل أسبوع (+المُرحّلة). الأخضر: عادي؛ البرتقالي: مرتفع؛ الأحمر: مشبع؛ الرمادي: لا يمكن نقله.
+cl.balancing.balance_all,موازنة كل مدن المنشأ
+cl.balancing.balance_origin,موازنة
+cl.balancing.origin,مدينة المنشأ
+cl.balancing.routes,المسارات
+cl.balancing.total,الإجمالي
+cl.balancing.stddev,الانحراف المعياري
+cl.balancing.cell_title,المتوقع: {expected}؛ غير قابل للنقل: {locked}

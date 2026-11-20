@@ -17,7 +17,7 @@ import {
   QUOTA_STATUSES,
   type QuotaFilters,
 } from '@/lib/carrierLink/planRecords'
-import { useClPlanQuotas } from '@/hooks/carrierLink/useClPlanRecords'
+import { useClPlanQuotas, useClPlanQuotaTotals } from '@/hooks/carrierLink/useClPlanRecords'
 import type { ClPlan } from '@/hooks/carrierLink/useClPlans'
 
 interface Props {
@@ -49,6 +49,7 @@ const STATUS_STYLE: Record<string, string> = {
 /**
  * Registros de un plan de Carrier Link en Planes de Asignación: cuotas ruta × semana, de solo lectura
  * (las cambian el Generador de Asignaciones y el Balanceo de Carga). Tabla paginada en el servidor o matriz agrupada.
+ * Se monta con key={plan.id}: otro plan empieza desde cero (filtros, página y matriz) sin una consulta de más.
  */
 export function ClPlanRecords({
   plan,
@@ -72,15 +73,10 @@ export function ClPlanRecords({
   const weeks = useMemo(() => planWeekKeys(plan.start_date, plan.end_date), [plan.start_date, plan.end_date])
   const totalPages = Math.max(1, Math.ceil(total / pageSize))
   const totals = quotaTotals(rows)
-
-  // Otro plan: filtros, página y matriz desde cero.
-  useEffect(() => {
-    setFilters(EMPTY_QUOTA_FILTERS)
-    setPage(1)
-    setView('table')
-    setMatrixQuotas(null)
-    setMatrixError(null)
-  }, [plan.id])
+  // Totales de todas las cuotas con estos filtros (no solo la página), calculados en el servidor.
+  const filterTotals = useClPlanQuotaTotals(plan.id, filters)
+  // Con una sola página los de la página ya son los de todo el filtro (también si la RPC falla).
+  const wholeTotals = filterTotals ?? (totalPages <= 1 ? totals : null)
 
   // Si el total se reduce y la página queda fuera de rango, se vuelve a la última.
   useEffect(() => {
@@ -285,15 +281,28 @@ export function ClPlanRecords({
                   ))}
                 </tbody>
                 <tfoot className="bg-gray-50 font-medium">
+                  {totalPages > 1 && (
+                    <tr className="text-gray-500">
+                      <td className="px-4 py-2" colSpan={2}>
+                        {t('cl.records.page_total')}
+                      </td>
+                      <td className="px-4 py-2 text-end">{totals.planned}</td>
+                      <td className="px-4 py-2 text-end">{totals.carried_in}</td>
+                      <td className="px-4 py-2 text-end">{totals.obtained}</td>
+                      <td />
+                      <td className="px-4 py-2 text-end">{totals.demands}</td>
+                      {canViewSamples && <td />}
+                    </tr>
+                  )}
                   <tr>
                     <td className="px-4 py-2" colSpan={2}>
-                      {t('cl.records.page_total')}
+                      {hasFilters ? t('cl.records.filter_total') : t('cl.records.plan_total')}
                     </td>
-                    <td className="px-4 py-2 text-end">{totals.planned}</td>
-                    <td className="px-4 py-2 text-end">{totals.carried_in}</td>
-                    <td className="px-4 py-2 text-end">{totals.obtained}</td>
+                    <td className="px-4 py-2 text-end">{wholeTotals ? wholeTotals.planned : '…'}</td>
+                    <td className="px-4 py-2 text-end">{wholeTotals ? wholeTotals.carried_in : '…'}</td>
+                    <td className="px-4 py-2 text-end">{wholeTotals ? wholeTotals.obtained : '…'}</td>
                     <td />
-                    <td className="px-4 py-2 text-end">{totals.demands}</td>
+                    <td className="px-4 py-2 text-end">{wholeTotals ? wholeTotals.demands : '…'}</td>
                     {canViewSamples && <td />}
                   </tr>
                 </tfoot>
