@@ -5411,7 +5411,7 @@ cl.error.cl_no_quotas,The plan has no quotas yet. Add at least one.
 cl.error.cl_plan_closed,The plan is closed and cannot be changed.
 cl.error.cl_plan_locked_field,This field can no longer be changed because the plan has already started.
 cl.error.cl_plan_not_draft,Only plans in draft status can be changed this way.
-cl.error.cl_quota_locked,This quota can no longer be changed because it already has samples.
+cl.error.cl_quota_locked,"This quota can no longer be changed: it already has samples or requests, or its week is inside the frozen period (already requested or about to be)."
 cl.error.cl_quota_not_found,The quota no longer exists. Reload the page.
 cl.error.cl_rebalance_total_changed,The proposal changes the total number of samples in the plan. Reload the page and try again.
 cl.error.cl_stratum_already_delivered,A stratum of this batch was already delivered for this demand.

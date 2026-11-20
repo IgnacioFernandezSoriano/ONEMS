@@ -5403,7 +5403,7 @@ cl.error.cl_no_quotas,Le plan n'a pas encore de quotas. Ajoutez-en au moins un.
 cl.error.cl_plan_closed,Le plan est clos et ne peut pas être modifié.
 cl.error.cl_plan_locked_field,Ce champ ne peut plus être modifié car le plan a déjà commencé.
 cl.error.cl_plan_not_draft,Seuls les plans en brouillon peuvent être modifiés ainsi.
-cl.error.cl_quota_locked,Ce quota ne peut plus être modifié car il a déjà des échantillons.
+cl.error.cl_quota_locked,"Ce quota ne peut plus être modifié : il a déjà des échantillons ou des demandes, ou sa semaine est dans la période gelée (déjà demandée ou sur le point de l'être)."
 cl.error.cl_quota_not_found,Le quota n'existe plus. Rechargez la page.
 cl.error.cl_rebalance_total_changed,La proposition modifie le nombre total d'échantillons du plan. Rechargez la page et réessayez.
 cl.error.cl_stratum_already_delivered,Une strate de ce lot a déjà été livrée pour cette demande.

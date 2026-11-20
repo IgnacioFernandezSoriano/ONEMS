@@ -5411,7 +5411,7 @@ cl.error.cl_no_quotas,O plano ainda não tem quotas. Adicione pelo menos uma.
 cl.error.cl_plan_closed,O plano está fechado e não pode ser alterado.
 cl.error.cl_plan_locked_field,Este campo já não pode ser alterado porque o plano já começou.
 cl.error.cl_plan_not_draft,Só os planos em rascunho podem ser alterados assim.
-cl.error.cl_quota_locked,Esta quota já não pode ser alterada porque já tem amostras.
+cl.error.cl_quota_locked,"Esta quota já não pode ser alterada: já tem amostras ou pedidos, ou a sua semana está dentro do período congelado (já pedida ou prestes a ser pedida)."
 cl.error.cl_quota_not_found,A quota já não existe. Recarregue a página.
 cl.error.cl_rebalance_total_changed,A proposta altera o total de amostras do plano. Recarregue a página e tente novamente.
 cl.error.cl_stratum_already_delivered,Um estrato deste lote já foi entregue para esta procura.

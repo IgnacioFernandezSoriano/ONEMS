@@ -7,7 +7,8 @@
 --      si cambia, CL_REBALANCE_TOTAL_CHANGED y no se escribe nada).
 --    - Fence: de hoy al dia del fence (incluidos) no se toca nada; se reparte desde el dia siguiente y nunca en el
 --      pasado. Sin fence explicito, el de la pantalla E2E: el domingo de la semana actual. Un fence anterior a hoy
---      equivale a "sin fence" (se puede tocar desde hoy). "Hoy" es el de la zona del plan (conector o cuenta).
+--      equivale a "sin fence" (se puede tocar desde hoy). "Hoy" es el de la zona de la CUENTA (como E2E; zona no
+--      valida o vacia: UTC), no la del conector.
 --      Una cuota es movible si period_start > fence efectivo.
 --    - Solo se mueve lo pendiente (E2E: allocation_plan_details.status = 'pending'; aqui cl_plan_quotas.status =
 --      'pending'). Plan en borrador: cualquier semana (aun no hay nada en curso) salvo cuotas no pendientes. Plan
@@ -17,10 +18,12 @@
 --    - Cuota nueva (ruta/semana sin fila): se crea con period_start/period_end como cl_plan_set_quotas. Cuota que
 --      queda a 0: se borra si esta pendiente y sin nada colgado (arrastre, obtenidas, demandas, muestras, alertas);
 --      si tiene algo colgado se deja a 0.
---    - Todo se valida antes de escribir; dos balanceos del mismo plan se serializan (bloqueo consultivo + filas).
+--    - Todo se valida antes de escribir; dos balanceos del mismo plan, o un balanceo y cl_plan_set_quotas, se
+--      serializan (bloqueo consultivo por plan + filas; orden de bloqueo explicado en el cuerpo).
 --    Devuelve {changed, created, deleted, fence}.
 -- 2. cl_plan_quota_totals: totales (cuotas, planificadas, arrastradas, obtenidas, demandas) de un plan con filtros
 --    opcionales, para la pantalla de Planes de Asignacion (sin traer las 15.000 filas al navegador).
+-- 1b. cl_plan_set_quotas: mismo cuerpo que 20261121100000 + el mismo bloqueo consultivo por plan.
 -- 3. Indice (plan_id, iso_year, iso_week, origin_city_id, destination_city_id, id): orden de la pantalla y totales.
 
 -- ================================================================ 1. cl_plan_rebalance_quotas
@@ -32,7 +35,6 @@ CREATE OR REPLACE FUNCTION public.cl_plan_rebalance_quotas(p_plan_id uuid, p_cha
 AS $$
 DECLARE
   v_plan public.cl_plans;
-  v_status text;
   v_today date;
   v_fence date;          -- ultimo dia congelado (NULL en borrador)
   v_delta bigint;
@@ -46,10 +48,7 @@ BEGIN
     RAISE EXCEPTION 'CL_FORBIDDEN' USING ERRCODE = '42501';
   END;
 
-  -- Dos balanceos del mismo plan se serializan; el estado del plan se relee bloqueado (no cambia hasta el final).
-  PERFORM pg_advisory_xact_lock(hashtext('cl_plan_rebalance_quotas:' || p_plan_id::text));
-  SELECT p.status INTO v_status FROM public.cl_plans p WHERE p.id = p_plan_id FOR SHARE;
-  IF v_status = 'closed' THEN
+  IF v_plan.status = 'closed' THEN
     RAISE EXCEPTION 'CL_PLAN_CLOSED: plan is closed' USING ERRCODE = '22023';
   END IF;
 
@@ -63,11 +62,12 @@ BEGIN
     RAISE EXCEPTION 'Invalid change: samples is required and must be an integer' USING ERRCODE = '22023';
   END IF;
 
-  -- Fence efectivo (solo plan activo). Mismo criterio que rpc_balance_city_v2 + pantalla E2E.
-  IF v_status = 'active' THEN
-    v_today := (now() AT TIME ZONE public.cl_effective_tz(v_plan.account_id, v_plan.feed_id))::date;
-    v_fence := GREATEST(COALESCE(p_fence, v_today + (7 - extract(isodow FROM v_today)::integer)), v_today - 1);
-  END IF;
+  -- Orden de bloqueo (el del motor, cl_emit_due_demands / cl_settle_quota: cuotas pending por id y despues el plan):
+  -- 1) bloqueo consultivo del plan (dos balanceos, o un balanceo y cl_plan_set_quotas, se serializan);
+  -- 2) cuotas PENDIENTES afectadas, en orden de id (las no pendientes no se bloquean: no se van a tocar y bloquearlas
+  --    antes que las pending invertiria el orden de cl_settle_quota);
+  -- 3) la fila del plan FOR SHARE, entera: fechas, cuenta y estado ya no cambian hasta el final de la transaccion.
+  PERFORM pg_advisory_xact_lock(hashtext('cl_plan_quotas_write:' || p_plan_id::text));
 
   IF to_regclass('pg_temp.cl_rb') IS NOT NULL THEN DROP TABLE pg_temp.cl_rb; END IF;   -- sin NOTICE (D5 de cl_wave2)
   CREATE TEMP TABLE cl_rb (
@@ -90,6 +90,29 @@ BEGIN
   END IF;
   IF EXISTS (SELECT 1 FROM pg_temp.cl_rb WHERE s < 0) THEN
     RAISE EXCEPTION 'Invalid change: samples must be 0 or more' USING ERRCODE = '22023';
+  END IF;
+
+  PERFORM 1 FROM public.cl_plan_quotas q
+    JOIN pg_temp.cl_rb t ON q.plan_id = p_plan_id AND q.origin_city_id = t.o AND q.destination_city_id = t.d
+                        AND q.iso_year = t.y AND q.iso_week = t.w
+   WHERE q.status = 'pending'
+   ORDER BY q.id
+     FOR UPDATE OF q;
+
+  SELECT * INTO v_plan FROM public.cl_plans p WHERE p.id = p_plan_id FOR SHARE;
+  IF v_plan.status = 'closed' THEN
+    RAISE EXCEPTION 'CL_PLAN_CLOSED: plan is closed' USING ERRCODE = '22023';
+  END IF;
+
+  -- Fence efectivo (solo plan activo). Mismo criterio que rpc_balance_city_v2 + pantalla E2E: "hoy" en la zona de la
+  -- CUENTA (valida; si no, UTC), por defecto el domingo de la semana actual, nunca antes de hoy.
+  IF v_plan.status = 'active' THEN
+    SELECT (now() AT TIME ZONE CASE WHEN public.cl_is_valid_timezone(a.timezone) THEN COALESCE(a.timezone, 'UTC')
+                                    ELSE 'UTC' END)::date
+      INTO v_today
+      FROM public.accounts a WHERE a.id = v_plan.account_id;
+    v_today := COALESCE(v_today, (now() AT TIME ZONE 'UTC')::date);
+    v_fence := GREATEST(COALESCE(p_fence, v_today + (7 - extract(isodow FROM v_today)::integer)), v_today - 1);
   END IF;
 
   BEGIN
@@ -126,12 +149,7 @@ BEGIN
     RAISE EXCEPTION 'CL_DUPLICATE_QUOTA: route % -> % week %-W% appears twice', v_o, v_d, v_y, v_w USING ERRCODE = '22023';
   END IF;
 
-  -- Cuotas existentes afectadas: se bloquean (su estado no cambia hasta el final) y se leen.
-  PERFORM 1 FROM public.cl_plan_quotas q
-    JOIN pg_temp.cl_rb t ON q.plan_id = p_plan_id AND q.origin_city_id = t.o AND q.destination_city_id = t.d
-                        AND q.iso_year = t.y AND q.iso_week = t.w
-   ORDER BY q.id
-     FOR UPDATE OF q;
+  -- Cuotas existentes afectadas (las pending ya estan bloqueadas).
   UPDATE pg_temp.cl_rb t
      SET q_id = q.id, q_status = q.status, q_old = q.samples_planned, ps = q.period_start,
          q_free = q.samples_carried_in = 0 AND q.samples_obtained = 0 AND q.demands_count = 0
@@ -197,6 +215,131 @@ BEGIN
 END $$;
 REVOKE ALL ON FUNCTION public.cl_plan_rebalance_quotas(uuid, jsonb, date) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.cl_plan_rebalance_quotas(uuid, jsonb, date) TO authenticated, service_role;
+
+-- ================================================================ 1b. cl_plan_set_quotas con el bloqueo por plan
+-- Cuerpo identico al de 20261121100000_cl_ui_dry_run.sql (misma firma, permisos, reglas y mensajes); solo anade, tras
+-- la autorizacion, el mismo bloqueo consultivo por plan que cl_plan_rebalance_quotas.
+CREATE OR REPLACE FUNCTION public.cl_plan_set_quotas(p_plan_id uuid, p_quotas jsonb)
+ RETURNS integer
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path = public, extensions
+AS $$
+DECLARE
+  v_plan public.cl_plans;
+  v_n integer := 0;
+  v_o uuid; v_d uuid; v_y integer; v_w integer;
+  -- todas las entradas (en orden), tras convertir tipos
+  a_o uuid[]; a_d uuid[]; a_y integer[]; a_w integer[]; a_s integer[];
+  -- solo las entradas con samples > 0 (en orden), con el lunes de su semana ISO
+  k_o uuid[]; k_d uuid[]; k_y integer[]; k_w integer[]; k_s integer[]; k_ps date[];
+BEGIN
+  v_plan := public.cl_plan_authorize(p_plan_id, 'edit');
+  -- 20261121100400: mismo bloqueo consultivo por plan que cl_plan_rebalance_quotas (se serializan entre si).
+  PERFORM pg_advisory_xact_lock(hashtext('cl_plan_quotas_write:' || p_plan_id::text));
+  IF v_plan.status = 'closed' THEN
+    RAISE EXCEPTION 'CL_PLAN_CLOSED: plan is closed' USING ERRCODE = '22023';
+  END IF;
+  IF v_plan.status <> 'draft' THEN
+    RAISE EXCEPTION 'CL_PLAN_NOT_DRAFT: quotas can only be set on a draft plan' USING ERRCODE = '22023';
+  END IF;
+  IF p_quotas IS NULL OR jsonb_typeof(p_quotas) <> 'array' THEN
+    RAISE EXCEPTION 'p_quotas must be a JSON array' USING ERRCODE = '22023';
+  END IF;
+
+  -- Validar todo antes de borrar nada.
+  -- Forma de cada elemento.
+  IF EXISTS (SELECT 1 FROM jsonb_array_elements(p_quotas) e WHERE jsonb_typeof(e) <> 'object') THEN
+    RAISE EXCEPTION 'Invalid quota: each element must be an object' USING ERRCODE = '22023';
+  END IF;
+  IF EXISTS (SELECT 1 FROM jsonb_array_elements(p_quotas) e WHERE jsonb_typeof(e->'samples') IS DISTINCT FROM 'number') THEN
+    RAISE EXCEPTION 'Invalid quota: samples is required and must be an integer' USING ERRCODE = '22023';
+  END IF;
+
+  -- Tipos (los campos se leen como texto, igual que q->>'campo').
+  BEGIN
+    SELECT array_agg(r.origin_city_id::uuid ORDER BY r.i), array_agg(r.destination_city_id::uuid ORDER BY r.i),
+           array_agg(r.iso_year::integer ORDER BY r.i), array_agg(r.iso_week::integer ORDER BY r.i),
+           array_agg(r.samples::integer ORDER BY r.i)
+      INTO a_o, a_d, a_y, a_w, a_s
+      FROM ROWS FROM (jsonb_to_recordset(p_quotas)
+             AS (origin_city_id text, destination_city_id text, iso_year text, iso_week text, samples text))
+           WITH ORDINALITY AS r(origin_city_id, destination_city_id, iso_year, iso_week, samples, i);
+  EXCEPTION WHEN invalid_text_representation OR numeric_value_out_of_range THEN
+    RAISE EXCEPTION 'Invalid quota entry: %', SQLERRM USING ERRCODE = '22023';
+  END;
+  IF EXISTS (SELECT 1 FROM unnest(a_o, a_d, a_y, a_w) t(o, d, y, w)
+              WHERE o IS NULL OR d IS NULL OR y IS NULL OR w IS NULL) THEN
+    RAISE EXCEPTION 'Invalid quota: origin, destination, iso_year and iso_week are required' USING ERRCODE = '22023';
+  END IF;
+
+  -- Entradas que cuentan (samples > 0) y lunes de su semana ISO.
+  BEGIN
+    SELECT array_agg(t.o ORDER BY t.i), array_agg(t.d ORDER BY t.i), array_agg(t.y ORDER BY t.i),
+           array_agg(t.w ORDER BY t.i), array_agg(t.s ORDER BY t.i),
+           array_agg(to_date(t.y::text || '-' || lpad(t.w::text, 2, '0'), 'IYYY-IW') ORDER BY t.i)
+      INTO k_o, k_d, k_y, k_w, k_s, k_ps
+      FROM unnest(a_o, a_d, a_y, a_w, a_s) WITH ORDINALITY t(o, d, y, w, s, i)
+     WHERE t.s > 0;
+  EXCEPTION WHEN invalid_text_representation OR numeric_value_out_of_range
+            OR invalid_datetime_format OR datetime_field_overflow THEN
+    RAISE EXCEPTION 'Invalid quota entry: %', SQLERRM USING ERRCODE = '22023';
+  END;
+
+  SELECT t.y, t.w INTO v_y, v_w
+    FROM unnest(k_y, k_w, k_ps) WITH ORDINALITY t(y, w, ps, i)
+   WHERE extract(isoyear FROM t.ps)::integer <> t.y OR extract(week FROM t.ps)::integer <> t.w
+   ORDER BY t.i LIMIT 1;
+  IF FOUND THEN
+    RAISE EXCEPTION 'Invalid ISO week %-W%', v_y, v_w USING ERRCODE = '22023';
+  END IF;
+
+  IF EXISTS (SELECT 1
+               FROM (SELECT o FROM unnest(k_o) o UNION SELECT d FROM unnest(k_d) d) c(id)
+              WHERE NOT EXISTS (SELECT 1 FROM public.cities ci
+                                 WHERE ci.id = c.id AND ci.account_id = v_plan.account_id)) THEN
+    RAISE EXCEPTION 'City does not belong to the plan account' USING ERRCODE = '22023';
+  END IF;
+
+  SELECT t.y, t.w INTO v_y, v_w
+    FROM unnest(k_y, k_w, k_ps) WITH ORDINALITY t(y, w, ps, i)
+   WHERE t.ps + 6 < v_plan.start_date OR t.ps > v_plan.end_date
+   ORDER BY t.i LIMIT 1;
+  IF FOUND THEN
+    RAISE EXCEPTION 'Week %-W% is outside the plan dates', v_y, v_w USING ERRCODE = '22023';
+  END IF;
+
+  SELECT t.o, t.d, t.y, t.w INTO v_o, v_d, v_y, v_w
+    FROM unnest(k_o, k_d, k_y, k_w) WITH ORDINALITY t(o, d, y, w, i)
+   GROUP BY t.o, t.d, t.y, t.w
+  HAVING count(*) > 1
+   ORDER BY min(t.i) LIMIT 1;
+  IF FOUND THEN
+    RAISE EXCEPTION 'CL_DUPLICATE_QUOTA: route % -> % week %-W% appears twice', v_o, v_d, v_y, v_w USING ERRCODE = '22023';
+  END IF;
+
+  SELECT t.o, t.d, t.y, t.w INTO v_o, v_d, v_y, v_w
+    FROM unnest(k_o, k_d, k_y, k_w) WITH ORDINALITY t(o, d, y, w, i)
+    JOIN public.cl_plan_quotas x
+      ON x.plan_id = p_plan_id AND x.origin_city_id = t.o AND x.destination_city_id = t.d
+     AND x.iso_year = t.y AND x.iso_week = t.w AND x.status <> 'pending'
+   ORDER BY t.i LIMIT 1;
+  IF FOUND THEN
+    RAISE EXCEPTION 'CL_QUOTA_LOCKED: route % -> % week %-W% already has a non-pending quota', v_o, v_d, v_y, v_w USING ERRCODE = '22023';
+  END IF;
+
+  DELETE FROM public.cl_plan_quotas WHERE plan_id = p_plan_id AND status = 'pending';
+
+  INSERT INTO public.cl_plan_quotas
+    (account_id, plan_id, origin_city_id, destination_city_id, iso_year, iso_week, period_start, period_end, samples_planned)
+  SELECT v_plan.account_id, p_plan_id, t.o, t.d, t.y, t.w, t.ps, t.ps + 6, t.s
+    FROM unnest(k_o, k_d, k_y, k_w, k_s, k_ps) WITH ORDINALITY t(o, d, y, w, s, ps, i)
+   ORDER BY t.i;
+  GET DIAGNOSTICS v_n = ROW_COUNT;
+  RETURN v_n;
+END $$;
+REVOKE ALL ON FUNCTION public.cl_plan_set_quotas(uuid, jsonb) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.cl_plan_set_quotas(uuid, jsonb) TO authenticated, service_role;
 
 -- ================================================================ 2. cl_plan_quota_totals
 CREATE OR REPLACE FUNCTION public.cl_plan_quota_totals(p_plan_id uuid, p_origin uuid DEFAULT NULL,

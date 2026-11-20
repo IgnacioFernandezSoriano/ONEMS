@@ -76,7 +76,8 @@ CREATE TEMP TABLE t_dates AS
 SELECT d.today,
        (d.today - (extract(isodow FROM d.today)::int - 1))::date AS mon,               -- lunes de esta semana
        (d.today + (7 - extract(isodow FROM d.today)::int))::date AS sun                -- domingo de esta semana
-  FROM (SELECT (now() AT TIME ZONE public.cl_effective_tz('a0000000-0000-0000-0000-000000000001', NULL))::date AS today) d;
+  FROM (SELECT (now() AT TIME ZONE a.timezone)::date AS today FROM public.accounts a
+         WHERE a.id = 'a0000000-0000-0000-0000-000000000001') d;   -- zona de la cuenta (como E2E)
 GRANT SELECT ON t_dates TO authenticated;
 
 INSERT INTO public.cl_plans (id, account_id, plan_name, carrier_id, product_id, total_samples, start_date, end_date, status)
@@ -372,6 +373,35 @@ BEGIN
   PERFORM pg_temp.ok((r.quotas, r.planned, r.obtained, r.demands) = (1::bigint, 2::bigint, 2::bigint, 1::bigint), 'todos los filtros: ' || r::text);
 END $$;
 RESET ROLE;
+
+-- ===================================================================== 4b. "hoy" en la zona de la CUENTA (como E2E), no la del conector
+-- A2: cuenta en Australia/Sydney (UTC+10/+11), conector en Etc/GMT+12 (UTC-12): sus fechas difieren 23 de cada 24 horas.
+-- Con un fence en el pasado, el fence efectivo es hoy-1, asi que el resultado revela que "hoy" se uso.
+SELECT pg_temp.as_user(NULL, NULL);
+UPDATE public.accounts SET timezone = 'Australia/Sydney' WHERE id = 'a0000000-0000-0000-0000-000000000002';
+INSERT INTO public.cl_feeds (id, account_id, carrier_id, name, status, emit_timezone) VALUES
+  ('f0000000-0000-0000-0000-0000000000f2','a0000000-0000-0000-0000-000000000002','ca000000-0000-0000-0000-000000000002','Feed A2','active','Etc/GMT+12');
+INSERT INTO public.cl_plans (id, account_id, plan_name, carrier_id, product_id, total_samples, start_date, end_date, status, feed_id)
+SELECT '90000000-0000-0000-0000-0000000000f3', 'a0000000-0000-0000-0000-000000000002', 'G2', 'ca000000-0000-0000-0000-000000000002',
+       'cb000000-0000-0000-0000-000000000002', 10, t.mon - 14, t.mon + 62, 'active', 'f0000000-0000-0000-0000-0000000000f2'
+  FROM t_dates t;
+DO $$
+DECLARE r jsonb; v_acc date; v_feed date;
+BEGIN
+  v_acc := (now() AT TIME ZONE 'Australia/Sydney')::date;
+  v_feed := (now() AT TIME ZONE 'Etc/GMT+12')::date;
+  r := public.cl_plan_rebalance_quotas('90000000-0000-0000-0000-0000000000f3', '[]'::jsonb, DATE '2000-01-01');
+  PERFORM pg_temp.ok((r ->> 'fence')::date = v_acc - 1, 'fence pasado = hoy de la CUENTA - 1: ' || r::text || ' (cuenta ' || v_acc || ', conector ' || v_feed || ')');
+  PERFORM pg_temp.ok(v_acc = v_feed OR (r ->> 'fence')::date <> v_feed - 1, 'no usa la zona del conector');
+  r := public.cl_plan_rebalance_quotas('90000000-0000-0000-0000-0000000000f3', '[]'::jsonb);
+  PERFORM pg_temp.ok((r ->> 'fence')::date = v_acc + (7 - extract(isodow FROM v_acc)::int), 'fence por defecto = domingo de la semana de la cuenta: ' || r::text);
+  PERFORM set_config('t.tz', 'account ' || v_acc || ' vs feed ' || v_feed, true);
+  -- Ambas funciones de escritura de cuotas comparten el bloqueo consultivo por plan.
+  PERFORM pg_temp.ok((SELECT prosrc LIKE '%pg_advisory_xact_lock(hashtext(''cl_plan_quotas_write:''%' FROM pg_proc WHERE oid = 'public.cl_plan_set_quotas(uuid,jsonb)'::regprocedure)
+                 AND (SELECT prosrc LIKE '%pg_advisory_xact_lock(hashtext(''cl_plan_quotas_write:''%' FROM pg_proc WHERE oid = 'public.cl_plan_rebalance_quotas(uuid,jsonb,date)'::regprocedure),
+                     'mismo bloqueo consultivo por plan en set_quotas y rebalance');
+END $$;
+SELECT 'cl_balancing timezone: ' || current_setting('t.tz') AS tz;
 
 -- ===================================================================== 5. escala: 15.660 cuotas (30 ciudades, 18 semanas)
 INSERT INTO public.cities (account_id, region_id, name, code)
