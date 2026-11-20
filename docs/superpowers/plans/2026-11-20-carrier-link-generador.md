@@ -51,3 +51,13 @@ Copy of src/pages/AllocationPlans.tsx layout/filters for quotas (plan, origin, d
 Copy of src/pages/NodeLoadBalancing.tsx + useNodeLoadBalancing (read its algorithm/UX: expected average, acceptable deviation, fence, compensation) applied to quotas: nodes = origin cities (and per-week view), no capacity limit; proposals saved through cl_plan_rebalance_quotas.
 ## Task 7: Help + cleanup
 Help page carrier-link.* updated to the new structure/names (5 languages); remove dead code (old ClPlans pieces, generateClQuotas if unused).
+
+---
+# v3 menus (20/11, owner): "los menús deben ser con la misma lógica"
+Carrier Link tab = same groups as E2E:
+- **Setup**: Topología del país (same cities, NO nodes — panelist nodes hidden in this tab), Carriers y Productos, E2E: SLA (all shared pages/data with E2E), Puntos de lectura, Conectores.
+- **Asignación**: Generador de Asignaciones, Balanceo de Carga, Planes de Asignación (copies, see v2).
+- **Base de datos**: the SAME E2E database page (one_db) opened pre-filtered to origin "carrier"; Muestras; Monitor de capturas. (Data is ONE store: one_db.source panelist|carrier; reports read both.)
+- **Reporting** (proposed to owner): same report pages as E2E (they already have the origin filter).
+- **Incidencias**: only in the E2E tab (pending owner answer: also remove from Diagnosis?).
+Task 2 (menu) implements this; shared pages must be reachable from both tabs without duplicating code (same route or a carrier-link route rendering the same page with a "carrier" context prop: topology hides nodes, E2E DB pre-filters source=carrier). Permissions: shared pages keep their existing options (country_topology, carriers, e2e_sla, e2e_db…).
