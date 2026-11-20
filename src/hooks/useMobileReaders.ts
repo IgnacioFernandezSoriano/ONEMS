@@ -42,19 +42,21 @@ export function useMobileReaders(accountId: string | undefined) {
       if (isStale()) return;
       if (summaryError) throw summaryError;
 
-      setReaders(summaryData || []);
-
-      // Also fetch full reader details
+      // Also fetch full reader details (RFID readers only: carrier reading points are not RFID readers)
       const { data: readersData, error: readersError } = await supabase
         .from('readers')
         .select('*')
         .eq('account_id', accountId)
         .eq('is_active', true)
+        .eq('capture_source', 'rfid')
         .order('name');
 
       if (isStale()) return;
       if (readersError) throw readersError;
 
+      // The summary RPC does not know capture_source: keep only the RFID readers listed above.
+      const rfidIds = new Set((readersData || []).map((r: Reader) => r.id));
+      setReaders(((summaryData || []) as MobileReaderSummary[]).filter((s) => rfidIds.has(s.reader_id)));
       setAllReaders(readersData || []);
       setError(null);
     } catch (err: any) {

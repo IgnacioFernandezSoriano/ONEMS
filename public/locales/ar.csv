@@ -5371,3 +5371,19 @@ roles_access.role.allocation_plan_manager,Allocation Plan Manager
 common.read_only,للاطلاع فقط
 roles_access.rights_load_error,تعذّر تحميل صلاحيات الوصول الخاصة بك. تحقّق من اتصالك وحاول مرة أخرى.
 roles_access.rights_retry,إعادة المحاولة
+menu.carrier_link,Carrier Link
+menu.cl_plans,خطط أخذ العينات
+menu.cl_samples,العينات
+menu.cl_reading_points,نقاط القراءة
+menu.cl_connectors,الموصّلات
+menu.cl_monitor,مراقب الالتقاط
+reporting.data_source,مصدر البيانات
+reporting.source_all,الكل
+reporting.source_panelists,المشاركون
+reporting.source_carrier,الناقل
+reporting.source_method_note,عينات الناقل تقيس الزمن من مسح إلى مسح مضافاً إليه زمن مكافئ، أما عينات المشاركين فتقيس الزمن من الإيداع إلى الاستلام.
+onedb.source,المصدر
+onedb.source_panelist,مشارك
+onedb.source_carrier,ناقل
+onedb.measured_time,المقاس
+onedb.equivalence_added,الزمن المكافئ المضاف

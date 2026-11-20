@@ -87,8 +87,7 @@ serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
-    const { startDate, endDate, limit, offset } = parsed
-    // parsed.source is validated but not applied yet (one_db.source does not exist)
+    const { startDate, endDate, limit, offset, source } = parsed
 
     // Log API usage
     const requestStartTime = Date.now()
@@ -103,6 +102,11 @@ serve(async (req) => {
       .lt('sent_at', nextDay(endDate))
       .order('sent_at', { ascending: false })
       .range(offset, offset + limit - 1)
+
+    // Origen del dato ('panelist' | 'carrier'); sin parametro devuelve todos. Cada fila lleva su `source`.
+    if (source) {
+      query = query.eq('source', source)
+    }
 
     const { data, error, count } = await query
 

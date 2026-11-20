@@ -27,6 +27,14 @@ export interface OneDBRecord {
   on_time_delivery: boolean | null;
   created_at: string;
   source_data_snapshot: any;
+  /** Origen del dato: 'panelist' (por defecto) | 'carrier' */
+  source?: 'panelist' | 'carrier';
+  measured_total_hours?: number | null;
+  measured_total_days?: number | null;
+  measured_business_hours?: number | null;
+  measured_business_days?: number | null;
+  equivalence_hours?: number | null;
+  equivalence_days?: number | null;
 }
 
 export interface OneDBFilters {

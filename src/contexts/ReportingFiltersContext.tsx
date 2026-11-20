@@ -9,6 +9,8 @@ export interface ReportingFilters {
   originCity: string;
   destinationCity: string;
   complianceStatus?: string;
+  /** Origen del dato: '' = todos, 'panelist' | 'carrier' */
+  source: '' | 'panelist' | 'carrier';
 }
 
 interface ReportingFiltersContextType {
@@ -26,7 +28,8 @@ const defaultFilters: ReportingFilters = {
   routeType: '',
   originCity: '',
   destinationCity: '',
-  complianceStatus: ''
+  complianceStatus: '',
+  source: ''
 };
 
 const ReportingFiltersContext = createContext<ReportingFiltersContextType | undefined>(undefined);

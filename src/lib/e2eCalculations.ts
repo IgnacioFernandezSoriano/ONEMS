@@ -13,6 +13,14 @@
 
 import { supabase } from './supabase';
 
+/**
+ * Filtra una consulta de one_db por origen del dato ('panelist' | 'carrier').
+ * Cadena vacia = todos los origenes (no anade filtro).
+ */
+export function applySourceFilter<T>(query: T, source: string): T {
+  return source ? ((query as unknown as { eq: (column: string, value: string) => T }).eq('source', source)) : query;
+}
+
 // ============================================================================
 // TYPES
 // ============================================================================

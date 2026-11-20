@@ -1,0 +1,1 @@
+SELECT c.id, c.code, c.name, (SELECT json_agg(json_build_object('id',p.id,'code',p.code,'desc',p.description,'std_h',p.standard_delivery_hours)) FROM public.products p WHERE p.carrier_id = c.id) AS products FROM public.carriers c WHERE c.account_id = 'f4d823d2-93e6-4755-9a89-9da87e7fa86e' ORDER BY c.code;

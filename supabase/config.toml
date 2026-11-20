@@ -415,3 +415,6 @@ enabled = true
 
 [functions.onedb-api]
 verify_jwt = false
+
+[functions.carrier-link-ingest]
+verify_jwt = false

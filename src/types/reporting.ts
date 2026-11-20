@@ -321,4 +321,6 @@ export interface TerritoryEquityFilters {
   region?: string;
   direction?: 'inbound' | 'outbound' | 'both';
   equityStatus?: string[];
+  /** Origen del dato: '' = todos */
+  source?: '' | 'panelist' | 'carrier';
 }

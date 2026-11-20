@@ -19,6 +19,7 @@ describe('accessAdmin', () => {
   it('seis roles y todos los grupos del catálogo tienen título', () => {
     expect(ACCOUNT_ROLES).toHaveLength(6)
     for (const o of ACCESS_OPTIONS) expect(GROUP_LABEL_KEYS[o.group]).toBeDefined()
+    expect(GROUP_LABEL_KEYS.carrier_link).toBeDefined()
   })
 
   it('buildLevelMap ignora niveles desconocidos', () => {

@@ -21,6 +21,7 @@ export const GROUP_LABEL_KEYS: Record<string, string[]> = {
   e2e_materials: ['menu.e2e', 'menu.materials'],
   e2e_reporting: ['menu.e2e', 'menu.reporting'],
   e2e_database: ['menu.e2e', 'menu.database'],
+  carrier_link: ['menu.carrier_link'],
   rfid_setup: ['menu.diagnosis', 'menu.setup'],
   rfid_reporting: ['menu.diagnosis', 'menu.reporting'],
   rfid_database: ['menu.diagnosis', 'menu.database'],

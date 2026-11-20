@@ -5379,3 +5379,19 @@ roles_access.role.allocation_plan_manager,Allocation Plan Manager
 common.read_only,View only
 roles_access.rights_load_error,Your access rights could not be loaded. Check your connection and try again.
 roles_access.rights_retry,Retry
+menu.carrier_link,Carrier Link
+menu.cl_plans,Sampling plans
+menu.cl_samples,Samples
+menu.cl_reading_points,Reading points
+menu.cl_connectors,Connectors
+menu.cl_monitor,Capture monitor
+reporting.data_source,Data source
+reporting.source_all,All
+reporting.source_panelists,Panelists
+reporting.source_carrier,Carrier
+reporting.source_method_note,Carrier samples measure scan-to-scan time plus an equivalence time; panelist samples measure deposit-to-receipt time.
+onedb.source,Source
+onedb.source_panelist,Panelist
+onedb.source_carrier,Carrier
+onedb.measured_time,Measured
+onedb.equivalence_added,Equivalence added

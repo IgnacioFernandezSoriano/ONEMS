@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { applySourceFilter } from '@/lib/e2eCalculations';
 import { supabase } from '@/lib/supabase';
 // Removed dateUtils import - using same filtering as ONE DB
 import { calculateJKActualFromDays } from '@/lib/jkCalculations';
@@ -177,8 +178,9 @@ export function useTerritoryEquityData(
             on_time_delivery
           `)
           .eq('account_id', activeAccountId);
+        shipmentsQuery = applySourceFilter(shipmentsQuery, filters?.source ?? '');
 
-        // Use same date filtering as ONE DB (no time adjustment)
+        // Use same filtering as ONE DB (no time adjustment)
         if (filters?.startDate) {
           shipmentsQuery = shipmentsQuery.gte('sent_at', filters.startDate);
         }
@@ -416,6 +418,7 @@ export function useTerritoryEquityData(
     filters?.destinationCity,
     filters?.carrier,
     filters?.product,
+    filters?.source,
   ]);
 
   return {
