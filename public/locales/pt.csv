@@ -5615,3 +5615,30 @@ cl.plans.matrix.total,Total
 cl.plans.matrix.routes,{count} rotas
 cl.plans.error.quotas_mismatch,As quotas não coincidem com as datas do plano: gere-as novamente.
 cl.plans.regenerate_notice,O total ou as datas mudaram: gere e guarde as quotas novamente.
+cl.samples.plan,Plano
+cl.samples.week,Semana
+cl.samples.all,Todas
+cl.samples.origin,Origem
+cl.samples.destination,Destino
+cl.samples.misrouted_only,Apenas possível encaminhamento errado
+cl.samples.item,Envio
+cl.samples.route,Rota
+cl.samples.start,Início
+cl.samples.end,Fim
+cl.samples.transit,Trânsito
+cl.samples.transit_value,{days} dias ({hours} h)
+cl.samples.on_time,No prazo
+cl.samples.yes,Sim
+cl.samples.no,Não
+cl.samples.misrouted,Possível encaminhamento errado
+cl.samples.empty,Não há amostras para estes filtros.
+cl.samples.total,{count} amostras
+cl.samples.prev,Anterior
+cl.samples.next,Seguinte
+cl.samples.page,Página {page} de {pages}
+cl.samples.scans,Leituras
+cl.samples.close,Fechar
+cl.samples.no_scans,Esta amostra não tem leituras.
+cl.samples.role.start,Leitura de início
+cl.samples.role.end,Leitura de fim
+cl.samples.role.intermediate,Leitura intermédia

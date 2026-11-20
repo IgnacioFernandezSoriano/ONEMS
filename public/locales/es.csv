@@ -5615,3 +5615,30 @@ cl.plans.matrix.total,Total
 cl.plans.matrix.routes,{count} rutas
 cl.plans.error.quotas_mismatch,Las cuotas no coinciden con las fechas del plan: vuelve a generarlas.
 cl.plans.regenerate_notice,Han cambiado el total o las fechas: vuelve a generar y guardar las cuotas.
+cl.samples.plan,Plan
+cl.samples.week,Semana
+cl.samples.all,Todas
+cl.samples.origin,Origen
+cl.samples.destination,Destino
+cl.samples.misrouted_only,Solo posible mal encaminado
+cl.samples.item,Envío
+cl.samples.route,Ruta
+cl.samples.start,Inicio
+cl.samples.end,Fin
+cl.samples.transit,Tránsito
+cl.samples.transit_value,{days} días ({hours} h)
+cl.samples.on_time,A tiempo
+cl.samples.yes,Sí
+cl.samples.no,No
+cl.samples.misrouted,Posible mal encaminado
+cl.samples.empty,No hay muestras con estos filtros.
+cl.samples.total,{count} muestras
+cl.samples.prev,Anterior
+cl.samples.next,Siguiente
+cl.samples.page,Página {page} de {pages}
+cl.samples.scans,Lecturas
+cl.samples.close,Cerrar
+cl.samples.no_scans,Esta muestra no tiene lecturas.
+cl.samples.role.start,Lectura de inicio
+cl.samples.role.end,Lectura de fin
+cl.samples.role.intermediate,Lectura intermedia

@@ -5607,3 +5607,30 @@ cl.plans.matrix.total,الإجمالي
 cl.plans.matrix.routes,{count} مسار
 cl.plans.error.quotas_mismatch,الحصص لا تتطابق مع تواريخ الخطة: أعد توليدها.
 cl.plans.regenerate_notice,تغيّر الإجمالي أو التواريخ: أعد توليد الحصص وحفظها.
+cl.samples.plan,الخطة
+cl.samples.week,الأسبوع
+cl.samples.all,الكل
+cl.samples.origin,المصدر
+cl.samples.destination,الوجهة
+cl.samples.misrouted_only,احتمال سوء التوجيه فقط
+cl.samples.item,الشحنة
+cl.samples.route,المسار
+cl.samples.start,البداية
+cl.samples.end,النهاية
+cl.samples.transit,العبور
+cl.samples.transit_value,{days} أيام ({hours} ساعة)
+cl.samples.on_time,في الوقت
+cl.samples.yes,نعم
+cl.samples.no,لا
+cl.samples.misrouted,احتمال سوء التوجيه
+cl.samples.empty,لا توجد عينات لهذه المرشحات.
+cl.samples.total,{count} عينة
+cl.samples.prev,السابق
+cl.samples.next,التالي
+cl.samples.page,الصفحة {page} من {pages}
+cl.samples.scans,القراءات
+cl.samples.close,إغلاق
+cl.samples.no_scans,لا توجد قراءات لهذه العينة.
+cl.samples.role.start,قراءة البداية
+cl.samples.role.end,قراءة النهاية
+cl.samples.role.intermediate,قراءة وسيطة

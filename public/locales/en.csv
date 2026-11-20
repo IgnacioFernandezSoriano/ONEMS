@@ -5615,3 +5615,30 @@ cl.plans.matrix.total,Total
 cl.plans.matrix.routes,{count} routes
 cl.plans.error.quotas_mismatch,The quotas do not match the plan dates: generate them again.
 cl.plans.regenerate_notice,The total or the dates have changed: generate and save the quotas again.
+cl.samples.plan,Plan
+cl.samples.week,Week
+cl.samples.all,All
+cl.samples.origin,Origin
+cl.samples.destination,Destination
+cl.samples.misrouted_only,Only possible misrouting
+cl.samples.item,Item
+cl.samples.route,Route
+cl.samples.start,Start
+cl.samples.end,End
+cl.samples.transit,Transit
+cl.samples.transit_value,{days} days ({hours} h)
+cl.samples.on_time,On time
+cl.samples.yes,Yes
+cl.samples.no,No
+cl.samples.misrouted,Possible misrouting
+cl.samples.empty,There are no samples for these filters.
+cl.samples.total,{count} samples
+cl.samples.prev,Previous
+cl.samples.next,Next
+cl.samples.page,Page {page} of {pages}
+cl.samples.scans,Scans
+cl.samples.close,Close
+cl.samples.no_scans,This sample has no scans.
+cl.samples.role.start,Start scan
+cl.samples.role.end,End scan
+cl.samples.role.intermediate,Intermediate scan

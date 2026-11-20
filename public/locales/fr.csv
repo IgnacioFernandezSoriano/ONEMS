@@ -5607,3 +5607,30 @@ cl.plans.matrix.total,Total
 cl.plans.matrix.routes,{count} trajets
 cl.plans.error.quotas_mismatch,Les quotas ne correspondent pas aux dates du plan : générez-les à nouveau.
 cl.plans.regenerate_notice,Le total ou les dates ont changé : générez et enregistrez à nouveau les quotas.
+cl.samples.plan,Plan
+cl.samples.week,Semaine
+cl.samples.all,Toutes
+cl.samples.origin,Origine
+cl.samples.destination,Destination
+cl.samples.misrouted_only,Seulement mauvais acheminement possible
+cl.samples.item,Envoi
+cl.samples.route,Route
+cl.samples.start,Début
+cl.samples.end,Fin
+cl.samples.transit,Transit
+cl.samples.transit_value,{days} jours ({hours} h)
+cl.samples.on_time,À l'heure
+cl.samples.yes,Oui
+cl.samples.no,Non
+cl.samples.misrouted,Mauvais acheminement possible
+cl.samples.empty,Aucun échantillon pour ces filtres.
+cl.samples.total,{count} échantillons
+cl.samples.prev,Précédent
+cl.samples.next,Suivant
+cl.samples.page,Page {page} sur {pages}
+cl.samples.scans,Lectures
+cl.samples.close,Fermer
+cl.samples.no_scans,Cet échantillon n'a pas de lectures.
+cl.samples.role.start,Lecture de début
+cl.samples.role.end,Lecture de fin
+cl.samples.role.intermediate,Lecture intermédiaire
