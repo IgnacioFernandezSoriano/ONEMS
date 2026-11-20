@@ -5759,3 +5759,21 @@ cl.generator.csv.bad_samples,"Fila {row}: muestras no válidas «{value}» (núm
 cl.generator.csv.no_points,Fila {row}: la ruta {origin} → {destination} no tiene puntos de lectura activos del carrier.
 cl.generator.connector_required,Elige el conector: un plan de Carrier Link no se puede aplicar sin él y los planes guardados no se editan.
 cl.generator.needs_connector,Este plan no tiene conector y no se puede aplicar. Elimínalo y vuelve a generarlo eligiendo un conector.
+cl.records.heading,Registros del plan: cuotas ruta × semana ({count})
+cl.records.read_only_note,"Es un plan de Carrier Link: sus registros son cuotas por ruta y semana, de solo lectura aquí. Cambian con el Generador de Asignaciones y el Balanceo de Carga."
+cl.records.view_table,Tabla
+cl.records.view_matrix,Matriz
+cl.records.planned,Previsto
+cl.records.carried_in,Arrastrado
+cl.records.obtained,Obtenido
+cl.records.demands,Peticiones
+cl.records.view_samples,Ver muestras
+cl.records.page_total,Total (esta página)
+cl.records.empty,No hay registros con estos filtros.
+cl.records.matrix_loading,Cargando todas las cuotas del plan...
+cl.records.matrix_scope,La matriz muestra todas las cuotas del plan (no se aplican los filtros de la tabla).
+cl.records.status.pending,Pendiente
+cl.records.status.open,Abierta
+cl.records.status.fulfilled,Cumplida
+cl.records.status.carried,Arrastrada
+cl.records.status.unfilled,Sin cubrir

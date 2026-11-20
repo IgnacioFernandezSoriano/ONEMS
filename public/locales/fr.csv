@@ -5751,3 +5751,21 @@ cl.generator.csv.bad_samples,"Ligne {row} : échantillons non valides « {value}
 cl.generator.csv.no_points,Ligne {row} : la route {origin} → {destination} n’a pas de points de lecture actifs du transporteur.
 cl.generator.connector_required,Choisissez le connecteur : un plan Carrier Link ne peut pas être appliqué sans lui et les plans enregistrés ne se modifient pas.
 cl.generator.needs_connector,Ce plan n’a pas de connecteur et ne peut pas être appliqué. Supprimez-le et générez-le à nouveau en choisissant un connecteur.
+cl.records.heading,Enregistrements du plan : quotas trajet × semaine ({count})
+cl.records.read_only_note,"Il s'agit d'un plan Carrier Link : ses enregistrements sont des quotas par trajet et par semaine, en lecture seule ici. Ils changent avec le Générateur d'allocations et l'Équilibrage de charge."
+cl.records.view_table,Tableau
+cl.records.view_matrix,Matrice
+cl.records.planned,Prévu
+cl.records.carried_in,Reporté
+cl.records.obtained,Obtenu
+cl.records.demands,Demandes
+cl.records.view_samples,Voir les échantillons
+cl.records.page_total,Total (cette page)
+cl.records.empty,Aucun enregistrement ne correspond à ces filtres.
+cl.records.matrix_loading,Chargement de tous les quotas du plan...
+cl.records.matrix_scope,La matrice affiche tous les quotas du plan (les filtres du tableau ne s'appliquent pas).
+cl.records.status.pending,En attente
+cl.records.status.open,Ouvert
+cl.records.status.fulfilled,Atteint
+cl.records.status.carried,Reporté
+cl.records.status.unfilled,Non couvert

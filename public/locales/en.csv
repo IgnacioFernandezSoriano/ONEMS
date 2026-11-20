@@ -5759,3 +5759,21 @@ cl.generator.csv.bad_samples,"Row {row}: invalid samples ""{value}"" (whole numb
 cl.generator.csv.no_points,Row {row}: the route {origin} → {destination} has no active reading points of the carrier.
 cl.generator.connector_required,"Choose the connector: a Carrier Link plan cannot be applied without one, and saved plans cannot be edited."
 cl.generator.needs_connector,"This plan has no connector, so it cannot be applied. Delete it and generate it again choosing a connector."
+cl.records.heading,Plan records: route × week quotas ({count})
+cl.records.read_only_note,"This is a Carrier Link plan: its records are quotas per route and week, read-only here. They change with the Allocation Generator and Load Balancing."
+cl.records.view_table,Table
+cl.records.view_matrix,Matrix
+cl.records.planned,Planned
+cl.records.carried_in,Carried in
+cl.records.obtained,Obtained
+cl.records.demands,Requests
+cl.records.view_samples,View samples
+cl.records.page_total,Total (this page)
+cl.records.empty,No records match these filters.
+cl.records.matrix_loading,Loading all the plan quotas...
+cl.records.matrix_scope,The matrix shows every quota of the plan (the table filters do not apply).
+cl.records.status.pending,Pending
+cl.records.status.open,Open
+cl.records.status.fulfilled,Fulfilled
+cl.records.status.carried,Carried over
+cl.records.status.unfilled,Unfilled

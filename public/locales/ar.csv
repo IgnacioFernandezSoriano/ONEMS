@@ -5751,3 +5751,21 @@ cl.generator.csv.bad_samples,الصف {row}: عدد عينات غير صالح �
 cl.generator.csv.no_points,الصف {row}: المسار {origin} → {destination} ليس له نقاط قراءة نشطة لشركة النقل.
 cl.generator.connector_required,اختر الموصل: لا يمكن تطبيق خطة Carrier Link بدونه، ولا يمكن تعديل الخطط المحفوظة.
 cl.generator.needs_connector,لا يحتوي هذا المخطط على موصل ولا يمكن تطبيقه. احذفه وأنشئه من جديد مع اختيار موصل.
+cl.records.heading,سجلات الخطة: حصص المسار × الأسبوع ({count})
+cl.records.read_only_note,هذه خطة Carrier Link: سجلاتها حصص لكل مسار وأسبوع، للقراءة فقط هنا. تتغير من خلال مولد التخصيص وموازنة الحمل.
+cl.records.view_table,جدول
+cl.records.view_matrix,مصفوفة
+cl.records.planned,المخطط
+cl.records.carried_in,المُرحَّل
+cl.records.obtained,المُحصَّل
+cl.records.demands,الطلبات
+cl.records.view_samples,عرض العينات
+cl.records.page_total,الإجمالي (هذه الصفحة)
+cl.records.empty,لا توجد سجلات تطابق هذه المرشحات.
+cl.records.matrix_loading,جارٍ تحميل جميع حصص الخطة...
+cl.records.matrix_scope,تعرض المصفوفة جميع حصص الخطة (لا تُطبَّق مرشحات الجدول).
+cl.records.status.pending,قيد الانتظار
+cl.records.status.open,مفتوحة
+cl.records.status.fulfilled,مكتملة
+cl.records.status.carried,مُرحَّلة
+cl.records.status.unfilled,غير مكتملة

@@ -5759,3 +5759,21 @@ cl.generator.csv.bad_samples,"Linha {row}: amostras inválidas «{value}» (núm
 cl.generator.csv.no_points,Linha {row}: a rota {origin} → {destination} não tem pontos de leitura ativos do transportador.
 cl.generator.connector_required,Escolha o conector: um plano do Carrier Link não pode ser aplicado sem ele e os planos guardados não se editam.
 cl.generator.needs_connector,Este plano não tem conector e não pode ser aplicado. Elimine-o e volte a gerá-lo escolhendo um conector.
+cl.records.heading,Registos do plano: quotas rota × semana ({count})
+cl.records.read_only_note,"É um plano Carrier Link: os seus registos são quotas por rota e semana, só de leitura aqui. Mudam com o Gerador de Alocações e o Balanceamento de Carga."
+cl.records.view_table,Tabela
+cl.records.view_matrix,Matriz
+cl.records.planned,Previsto
+cl.records.carried_in,Transitado
+cl.records.obtained,Obtido
+cl.records.demands,Pedidos
+cl.records.view_samples,Ver amostras
+cl.records.page_total,Total (esta página)
+cl.records.empty,Não há registos com estes filtros.
+cl.records.matrix_loading,A carregar todas as quotas do plano...
+cl.records.matrix_scope,A matriz mostra todas as quotas do plano (os filtros da tabela não se aplicam).
+cl.records.status.pending,Pendente
+cl.records.status.open,Aberta
+cl.records.status.fulfilled,Cumprida
+cl.records.status.carried,Transitada
+cl.records.status.unfilled,Por cobrir

@@ -3,6 +3,7 @@ import { Filter, RotateCcw } from 'lucide-react';
 import { SmartTooltip } from '../common/SmartTooltip';
 
 import { useTranslation } from '@/hooks/useTranslation';
+import { clPlanOptionLabel, clPlanOptionValue, parseClPlanOption } from '@/lib/carrierLink/planRecords';
 interface Props {
   filters: {
     planId: string
@@ -34,6 +35,9 @@ interface Props {
   }
   onFilterChange: (key: string, value: string) => void
   onClearFilters: () => void
+  /** Solo con Carrier Link (DEV, permiso y carrier de Carrier Link): sus planes también se listan en el selector. */
+  clPlans?: { id: string; plan_name: string; status: string }[]
+  onSelectClPlan?: (planId: string) => void
 }
 
 export function AllocationPlanFilters({
@@ -47,6 +51,8 @@ export function AllocationPlanFilters({
   availabilityCounts,
   onFilterChange,
   onClearFilters,
+  clPlans,
+  onSelectClPlan,
 }: Props) {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -115,7 +121,11 @@ export function AllocationPlanFilters({
               </label>
               <select
                 value={filters.planId}
-                onChange={(e) => onFilterChange('planId', e.target.value)}
+                onChange={(e) => {
+                  const clPlanId = parseClPlanOption(e.target.value);
+                  if (clPlanId && onSelectClPlan) onSelectClPlan(clPlanId);
+                  else onFilterChange('planId', e.target.value);
+                }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">{t('allocation_plans.all_plans')}</option>
@@ -124,6 +134,15 @@ export function AllocationPlanFilters({
                     {plan.plan_name}
                   </option>
                 ))}
+                {clPlans && clPlans.length > 0 && (
+                  <optgroup label={`${t('cl.generator.capture_column')}: ${t('cl.capture_method.carrier_link')}`}>
+                    {clPlans.map((plan) => (
+                      <option key={plan.id} value={clPlanOptionValue(plan.id)}>
+                        {clPlanOptionLabel(plan, t)}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
               </select>
             </div>
 

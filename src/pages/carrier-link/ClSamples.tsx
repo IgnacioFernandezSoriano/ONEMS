@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Loader2, AlertTriangle, X } from 'lucide-react'
 import { useTranslation } from '@/hooks/useTranslation'
 import { ClHelpLink } from '@/components/carrier-link/ClHelpLink'
@@ -11,6 +12,7 @@ import { clErrorKey } from '@/lib/carrierLink/clErrors'
 import { useClPlans } from '@/hooks/carrierLink/useClPlans'
 import { useClSamples, CL_ALL_PLANS, type ClSampleScan } from '@/hooks/carrierLink/useClSamples'
 import { SAMPLES_PAGE_SIZE, clampPage, planWeekKeys, transitLabel } from '@/lib/carrierLink/sampleView'
+import { samplesParams } from '@/lib/carrierLink/planRecords'
 
 const input = 'border border-gray-300 rounded-lg px-3 py-2 text-sm'
 
@@ -25,10 +27,13 @@ export function ClSamples() {
   const readOnly = !canEdit('cl_samples')
   const { plans, cityName, loading: plansLoading } = useClPlans(accountId)
 
-  const [planId, setPlanId] = useState<string | null>(null)
-  const [week, setWeek] = useState<string | null>(null)
-  const [origin, setOrigin] = useState('')
-  const [destination, setDestination] = useState('')
+  // Filtros iniciales desde la URL (enlace "Ver muestras" de una cuota en Planes de Asignación); sin parámetros, los de siempre.
+  const [searchParams] = useSearchParams()
+  const [initial] = useState(() => samplesParams(searchParams))
+  const [planId, setPlanId] = useState<string | null>(initial.plan)
+  const [week, setWeek] = useState<string | null>(initial.week)
+  const [origin, setOrigin] = useState(initial.origin)
+  const [destination, setDestination] = useState(initial.destination)
   const [misroutedOnly, setMisroutedOnly] = useState(false)
   const [page, setPage] = useState(0)
   const [openId, setOpenId] = useState<string | null>(null)
@@ -37,10 +42,12 @@ export function ClSamples() {
 
   // Por defecto: el plan activo mas reciente (la lista ya viene de mas reciente a mas antiguo).
   useEffect(() => {
+    // Mientras carga la lista no se descarta el plan de la URL.
+    if (plansLoading) return
     if (planId && plans.some((p) => p.id === planId)) return
     const def = plans.find((p) => p.status === 'active') ?? plans[0]
     setPlanId(def?.id ?? null)
-  }, [plans, planId])
+  }, [plans, planId, plansLoading])
 
   const plan = plans.find((p) => p.id === planId) ?? null
   const weeks = useMemo(() => (plan ? planWeekKeys(plan.start_date, plan.end_date) : []), [plan])
