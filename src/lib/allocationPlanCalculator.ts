@@ -760,7 +760,7 @@ function applyPobox(
   return uncovered
 }
 
-interface PlanWeek {
+export interface PlanWeek {
   weekNumber: number
   /** Working days of this ISO week inside the plan period (never empty). */
   days: Date[]
@@ -776,7 +776,7 @@ const MONTH_KEYS: (keyof SeasonalDistribution)[] = [
  * an account non-working day. Weeks without any working day are left out, so a partial first or last week
  * only offers its own days.
  */
-function buildPlanWeeks(startDate: Date, endDate: Date, cal: WorkingCalendar): PlanWeek[] {
+export function buildPlanWeeks(startDate: Date, endDate: Date, cal: WorkingCalendar): PlanWeek[] {
   const weeks = new Map<string, PlanWeek>()
   const d = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate())
   const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate())
@@ -804,11 +804,12 @@ function buildPlanWeeks(startDate: Date, endDate: Date, cal: WorkingCalendar): P
  * many routes and few samples per route (Kenya: 706 routes, 1.7 samples each) almost the whole plan landed
  * in weeks 1-2. Drawing them at random keeps every route's total and spreads the plan evenly over time.
  */
-function distributeSamplesAcrossWeeks(
+export function distributeSamplesAcrossWeeks(
   totalSamples: number,
   weeks: PlanWeek[],
   useSeasonalDistribution: boolean,
-  seasonalDistribution?: SeasonalDistribution
+  seasonalDistribution?: SeasonalDistribution,
+  rng: () => number = Math.random
 ): number[] {
   const weights = weeks.map(week => {
     let w = week.days.length
@@ -829,7 +830,7 @@ function distributeSamplesAcrossWeeks(
     // Weighted draw without replacement on the fractional parts; plain weights only as a rounding fallback.
     const pool = fractions.some(f => f > 1e-9) ? fractions : weights
     const poolSum = pool.reduce((sum, f) => sum + f, 0)
-    let r = Math.random() * poolSum
+    let r = rng() * poolSum
     let idx = 0
     while (idx < pool.length - 1 && r >= pool[idx]) {
       r -= pool[idx]
