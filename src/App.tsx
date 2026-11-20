@@ -64,6 +64,7 @@ import { ClSamples } from './pages/carrier-link/ClSamples'
 import { ClReadingPoints } from './pages/carrier-link/ClReadingPoints'
 import { ClConnectors } from './pages/carrier-link/ClConnectors'
 import { ClMonitor } from './pages/carrier-link/ClMonitor'
+import { ClComingSoon } from './pages/carrier-link/ClComingSoon'
 
 
 function App() {
@@ -132,9 +133,29 @@ function App() {
                     {/* Carrier Link */}
                     <Route
                       path="/carrier-link/plans"
+                      element={<Navigate to="/carrier-link/allocation-generator" replace />}
+                    />
+                    <Route
+                      path="/carrier-link/allocation-generator"
                       element={
                         <ProtectedRoute option="cl_plans">
                           <ClPlans />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/carrier-link/load-balancing"
+                      element={
+                        <ProtectedRoute option="cl_plans">
+                          <ClComingSoon titleKey="menu.load_balancing" />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/carrier-link/allocation-plans"
+                      element={
+                        <ProtectedRoute option="cl_plans">
+                          <ClComingSoon titleKey="menu.allocation_plans" />
                         </ProtectedRoute>
                       }
                     />

@@ -29,6 +29,9 @@ describe('access', () => {
   it('las 5 opciones cl_* tienen ruta propia', () => {
     const rutas: Record<string, string> = {
       '/carrier-link/plans': 'cl_plans',
+      '/carrier-link/allocation-generator': 'cl_plans',
+      '/carrier-link/load-balancing': 'cl_plans',
+      '/carrier-link/allocation-plans': 'cl_plans',
       '/carrier-link/samples': 'cl_samples',
       '/carrier-link/reading-points': 'cl_reading_points',
       '/carrier-link/connectors': 'cl_connectors',
@@ -36,6 +39,16 @@ describe('access', () => {
     }
     for (const [path, opt] of Object.entries(rutas)) expect(routeAccess(path)).toBe(opt)
     expect(OPTION_ROUTE.cl_monitor).toBe('/carrier-link/monitor')
+    expect(OPTION_ROUTE.cl_plans).toBe('/carrier-link/allocation-generator')
+  })
+
+  it('/carrier-link/plans redirige a allocation-generator en App.tsx', () => {
+    const src = readFileSync(resolve(__dirname, '../../App.tsx'), 'utf8')
+    expect(src).toMatch(/path="\/carrier-link\/plans"\s*element=\{<Navigate to="\/carrier-link\/allocation-generator" replace \/>\}/)
+  })
+
+  it('landingPath: quien solo ve cl_plans aterriza en una pantalla de Carrier Link', () => {
+    expect(landingPath(o => o === 'cl_plans')).toBe('/carrier-link/allocation-generator')
   })
 
   it('landingPath: quien solo ve cl_samples aterriza en /carrier-link/samples', () => {

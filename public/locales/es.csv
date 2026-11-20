@@ -5725,3 +5725,5 @@ hc.delivery_standard_form.cl_last_mile_time,Tiempo equiv. último tramo
 help_center.doc.carrier_link.title,Carrier Link
 help_center.doc.carrier_link.desc,"Qué es Carrier Link, en qué orden se configura, qué hace cada pantalla y qué significa cada aviso."
 cl.help_link,Ayuda
+menu.capture_panelists,Panelistas
+cl.coming_soon,En preparación.

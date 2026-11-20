@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Loader2, AlertTriangle, CheckCircle2 } from 'lucide-react'
 import { useTranslation } from '@/hooks/useTranslation'
 import { ClHelpLink } from '@/components/carrier-link/ClHelpLink'
+import { ClBadge } from '@/components/carrier-link/ClBadge'
 import { usePermissions } from '@/contexts/PermissionsContext'
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
 import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge'
@@ -134,6 +135,7 @@ export function ClMonitor() {
     <div className="p-6 space-y-4">
       <div className="flex items-center gap-3">
         <h1 className="text-2xl font-bold text-gray-900">{t('cl.monitor.title')}</h1>
+        <ClBadge />
         <ClHelpLink section="monitor" />
         {readOnly && <ReadOnlyBadge />}
       </div>
