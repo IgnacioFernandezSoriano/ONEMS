@@ -64,6 +64,15 @@ export const HELP_DOCS: HelpDoc[] = [
     public: false,
   },
   {
+    id: 'carrier-link',
+    file: 'carrier-link',
+    titleKey: 'help_center.doc.carrier_link.title',
+    descKey: 'help_center.doc.carrier_link.desc',
+    audience: 'managers',
+    managersOnly: true,
+    public: false,
+  },
+  {
     // Para todos los usuarios con sesión: explica qué ve cada uno y a quién pedir un cambio
     id: 'roles-access',
     file: 'roles-access',

@@ -1,3 +1,4 @@
+import { parseEquivalenceInput } from '@/lib/carrierLink/equivalenceInput'
 import { useState, useMemo } from 'react'
 import { useDeliveryStandards } from '@/hooks/useDeliveryStandards'
 import { GenerateCombinationsModal } from '@/components/delivery-standards/GenerateCombinationsModal'
@@ -252,7 +253,7 @@ export function DeliveryStandards() {
 
   const handleInlineUpdate = async (
     id: string,
-    field: 'standard_time' | 'success_percentage' | 'time_unit',
+    field: 'standard_time' | 'success_percentage' | 'time_unit' | 'cl_first_mile_time' | 'cl_last_mile_time',
     value: any
   ) => {
     try {
@@ -855,6 +856,32 @@ export function DeliveryStandards() {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   <div className="flex items-center gap-1">
+                    {t('hc.delivery_standards.cl_first_mile')}
+                    <span className="group relative">
+                      <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                      <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                        {t('hc.delivery_standards.cl_equivalence_tip')}
+                      </div>
+                    </span>
+                  </div>
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  <div className="flex items-center gap-1">
+                    {t('hc.delivery_standards.cl_last_mile')}
+                    <span className="group relative">
+                      <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                      <div className="invisible group-hover:visible absolute z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg -top-1 left-5 normal-case font-normal">
+                        {t('hc.delivery_standards.cl_equivalence_tip')}
+                      </div>
+                    </span>
+                  </div>
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  <div className="flex items-center gap-1">
                     Std %
                     <span className="group relative">
                       <svg className="w-3 h-3 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
@@ -979,6 +1006,42 @@ export function DeliveryStandards() {
                       <option value="hours">{t('deliverystandards.hours')}</option>
                       <option value="days">{t('deliverystandards.days')}</option>
                     </select>}
+                  </td>
+                  <td className="px-6 py-4">
+                    {readOnly ? <span className="text-sm text-gray-900">{std.cl_first_mile_time ?? 0}</span> : <input
+                      key={`cl_first_mile_time-${std.id}-${std.cl_first_mile_time}`}
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      defaultValue={std.cl_first_mile_time ?? 0}
+                      onBlur={(e) => {
+                        const v = parseEquivalenceInput(e.target.value)
+                        if (v === null) {
+                          e.target.value = String(std.cl_first_mile_time ?? 0)
+                          return
+                        }
+                        if (v !== (std.cl_first_mile_time ?? 0)) handleInlineUpdate(std.id, 'cl_first_mile_time', v)
+                      }}
+                      className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                    />}
+                  </td>
+                  <td className="px-6 py-4">
+                    {readOnly ? <span className="text-sm text-gray-900">{std.cl_last_mile_time ?? 0}</span> : <input
+                      key={`cl_last_mile_time-${std.id}-${std.cl_last_mile_time}`}
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      defaultValue={std.cl_last_mile_time ?? 0}
+                      onBlur={(e) => {
+                        const v = parseEquivalenceInput(e.target.value)
+                        if (v === null) {
+                          e.target.value = String(std.cl_last_mile_time ?? 0)
+                          return
+                        }
+                        if (v !== (std.cl_last_mile_time ?? 0)) handleInlineUpdate(std.id, 'cl_last_mile_time', v)
+                      }}
+                      className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                    />}
                   </td>
                   <td className="px-6 py-4">
                     {readOnly ? <span className="text-sm text-gray-900">{std.success_percentage ?? '-'}</span> : <input

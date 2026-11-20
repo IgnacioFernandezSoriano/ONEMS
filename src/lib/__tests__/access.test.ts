@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import {
-  ACCESS_OPTIONS, ROUTE_OPTION, firstAllowedPath, isPermissionsLoading,
+  ACCESS_OPTIONS, ROUTE_OPTION, OPTION_ROUTE, firstAllowedPath, isPermissionsLoading,
   routeAccess, canAccess, landingPath, deniedRedirect, NO_ACCESS_PATH,
   permissionsRetryDelay, permissionsStatus, PERMISSIONS_RETRY_DELAYS_MS,
   type AccessOption, type AccessLevel,
@@ -26,10 +26,20 @@ describe('access', () => {
     }
   })
 
-  it('ninguna opción cl_* tiene ruta (fase 2)', () => {
-    const cl = ACCESS_OPTIONS.filter(o => o.key.startsWith('cl_')).map(o => o.key)
-    expect(cl.length).toBe(5)
-    for (const v of Object.values(ROUTE_OPTION)) expect(cl).not.toContain(v)
+  it('las 5 opciones cl_* tienen ruta propia', () => {
+    const rutas: Record<string, string> = {
+      '/carrier-link/plans': 'cl_plans',
+      '/carrier-link/samples': 'cl_samples',
+      '/carrier-link/reading-points': 'cl_reading_points',
+      '/carrier-link/connectors': 'cl_connectors',
+      '/carrier-link/monitor': 'cl_monitor',
+    }
+    for (const [path, opt] of Object.entries(rutas)) expect(routeAccess(path)).toBe(opt)
+    expect(OPTION_ROUTE.cl_monitor).toBe('/carrier-link/monitor')
+  })
+
+  it('landingPath: quien solo ve cl_samples aterriza en /carrier-link/samples', () => {
+    expect(landingPath(o => o === 'cl_samples')).toBe('/carrier-link/samples')
   })
 
   it('firstAllowedPath: solo reporting -> territory-equity', () => {

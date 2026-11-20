@@ -59,6 +59,11 @@ import { PanelistAvailabilityIncidents } from './pages/incidents/PanelistAvailab
 import { PanelistReportedIncidents } from './pages/incidents/PanelistReportedIncidents'
 import { ReceiptErrors } from './pages/incidents/ReceiptErrors'
 import { HelpCenter } from './pages/HelpCenter'
+import { ClPlans } from './pages/carrier-link/ClPlans'
+import { ClSamples } from './pages/carrier-link/ClSamples'
+import { ClReadingPoints } from './pages/carrier-link/ClReadingPoints'
+import { ClConnectors } from './pages/carrier-link/ClConnectors'
+import { ClMonitor } from './pages/carrier-link/ClMonitor'
 
 
 function App() {
@@ -124,6 +129,48 @@ function App() {
                       }
                     />
                     
+                    {/* Carrier Link */}
+                    <Route
+                      path="/carrier-link/plans"
+                      element={
+                        <ProtectedRoute option="cl_plans">
+                          <ClPlans />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/carrier-link/samples"
+                      element={
+                        <ProtectedRoute option="cl_samples">
+                          <ClSamples />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/carrier-link/reading-points"
+                      element={
+                        <ProtectedRoute option="cl_reading_points">
+                          <ClReadingPoints />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/carrier-link/connectors"
+                      element={
+                        <ProtectedRoute option="cl_connectors">
+                          <ClConnectors />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/carrier-link/monitor"
+                      element={
+                        <ProtectedRoute option="cl_monitor">
+                          <ClMonitor />
+                        </ProtectedRoute>
+                      }
+                    />
+
                     {/* Delivery Standards */}
                     <Route
                       path="/delivery-standards"

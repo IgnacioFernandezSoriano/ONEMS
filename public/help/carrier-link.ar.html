@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مساعدة: Carrier Link</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  :root {
+    --white: #ffffff; --g50: #f9fafb; --g100: #f3f4f6; --g200: #e5e7eb; --g300: #d1d5db;
+    --g400: #9ca3af; --g500: #6b7280; --g600: #4b5563; --g700: #374151; --g900: #111827;
+    --b50: #eff6ff; --b100: #dbeafe; --b600: #2563eb; --b700: #1d4ed8;
+    --r100: #fee2e2; --r700: #b91c1c; --gr100: #dcfce7; --gr700: #15803d;
+    --y100: #fef9c3; --y800: #854d0e; --p100: #f3e8ff; --p700: #7e22ce;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+      'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased; background: var(--g50); color: var(--g700); line-height: 1.6; font-size: 15px;
+  }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* Sidebar, same look as the ONE menu */
+  .side {
+    width: 272px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--g200);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column;
+  }
+  .brand { padding: 24px 24px 16px; }
+  .brand h1 { font-size: 24px; line-height: 32px; font-weight: 700; color: var(--g900); }
+  .brand p { font-size: 14px; color: var(--g500); margin-top: 4px; }
+  .brand .doc { margin-top: 16px; font-size: 12px; font-weight: 600; color: var(--b700); background: var(--b50);
+    display: inline-block; padding: 2px 10px; border-radius: 999px; }
+  .nav { padding: 8px 12px 24px; flex: 1; }
+  .nav h3 { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--g400);
+    padding: 16px 12px 6px; }
+  .nav a {
+    display: block; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--g600);
+    text-decoration: none; transition: background .15s, color .15s;
+  }
+  .nav a:hover { background: var(--g100); }
+  .nav a.active { background: var(--b50); color: var(--b700); }
+  .side-foot { padding: 16px 24px; border-top: 1px solid var(--g200); font-size: 12px; color: var(--g500); }
+
+  /* Content */
+  .main { flex: 1; min-width: 0; padding: 40px 32px 80px; }
+  .page { max-width: 880px; margin: 0 auto; }
+  .page > header { margin-bottom: 32px; }
+  .page > header h2 { font-size: 30px; line-height: 38px; font-weight: 700; color: var(--g900); }
+  .page > header p { margin-top: 8px; font-size: 17px; color: var(--g600); max-width: 640px; }
+  section { margin-top: 48px; }
+  section > h2 { font-size: 22px; font-weight: 700; color: var(--g900); padding-bottom: 8px; margin-bottom: 16px;
+    border-bottom: 1px solid var(--g200); }
+  h3 { font-size: 17px; font-weight: 600; color: var(--g900); margin: 28px 0 8px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0 8px 22px; }
+  li { margin: 4px 0; }
+  strong { color: var(--g900); font-weight: 600; }
+  code, kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px;
+    background: var(--g100); border: 1px solid var(--g200); border-radius: 6px; padding: 1px 6px; color: var(--g900); }
+  .card { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0; }
+  .grid .card { margin: 0; }
+  .card h4 { font-size: 15px; font-weight: 600; color: var(--g900); margin-bottom: 4px; }
+  .card p { margin: 4px 0; font-size: 14px; color: var(--g600); }
+
+  .badge { display: inline-block; font-size: 12px; font-weight: 500; padding: 1px 10px; border-radius: 999px; white-space: nowrap; }
+  .b-red { background: var(--r100); color: var(--r700); }
+  .b-blue { background: var(--b100); color: var(--b700); }
+  .b-green { background: var(--gr100); color: var(--gr700); }
+  .b-yellow { background: var(--y100); color: var(--y800); }
+  .b-gray { background: var(--g100); color: var(--g600); }
+  .b-purple { background: var(--p100); color: var(--p700); }
+  .btn { display: inline-block; font-size: 13px; font-weight: 500; padding: 2px 10px; border-radius: 8px;
+    background: var(--white); border: 1px solid var(--g300); color: var(--g700); white-space: nowrap; }
+  .btn.primary { background: var(--b600); border-color: var(--b600); color: #fff; }
+
+  .callout { border-radius: 12px; padding: 14px 18px; margin: 16px 0; font-size: 14px; border: 1px solid; }
+  .callout.info { background: var(--b50); border-color: var(--b100); color: #1e3a8a; }
+  .callout.ok { background: #f0fdf4; border-color: var(--gr100); color: #14532d; }
+  .callout.warn { background: #fffbeb; border-color: var(--y100); color: var(--y800); }
+  .callout strong { color: inherit; }
+
+  .table-wrap { overflow-x: auto; margin: 16px 0; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--g500); background: var(--g50); padding: 10px 14px; border-bottom: 1px solid var(--g200); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--g100); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 500; color: var(--g900); }
+
+  /* Steps */
+  ol.steps { list-style: none; margin: 12px 0; counter-reset: s; }
+  ol.steps > li { counter-increment: s; position: relative; padding: 4px 0 12px 44px; margin: 0; }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--b100); color: var(--b700); font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Telegram chat mock-ups */
+  .chat { background: #e9eef5; border: 1px solid var(--g200); border-radius: 16px; padding: 16px; margin: 16px 0; max-width: 460px; }
+  .chat .who { text-align: center; font-size: 12px; color: var(--g500); margin-bottom: 8px; font-weight: 500; }
+  .msg { max-width: 85%; padding: 8px 12px; border-radius: 14px; margin: 6px 0; font-size: 14px; line-height: 1.45; box-shadow: 0 1px 1px rgba(0,0,0,.06); }
+  .msg.bot { background: var(--white); border-top-left-radius: 4px; margin-right: auto; color: var(--g900); }
+  .msg.me { background: #dbeafe; border-top-right-radius: 4px; margin-left: auto; color: var(--g900); }
+  .kb { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; max-width: 85%; }
+  .kb span { flex: 1 1 auto; text-align: center; background: rgba(37,99,235,.12); color: var(--b700); font-size: 13px; font-weight: 500;
+    padding: 6px 10px; border-radius: 10px; }
+  .kb.col span { flex-basis: 100%; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+  .two .chat { margin: 8px 0; }
+  .cap { font-size: 13px; color: var(--g500); margin-top: -6px; max-width: 460px; }
+
+  /* Flow */
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; margin: 16px 0; }
+  .flow .node { flex: 1 1 150px; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; padding: 12px 14px; font-size: 13px; position: relative; }
+  .flow .node b { display: block; color: var(--g900); font-size: 14px; margin-bottom: 2px; }
+  .flow .node .tag { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--b700); }
+  .flow .arrow { align-self: center; color: var(--g400); font-size: 18px; }
+
+  details { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; margin: 8px 0; }
+  summary { cursor: pointer; padding: 14px 18px; font-weight: 600; color: var(--g900); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; color: var(--g400); font-size: 20px; line-height: 1; }
+  details[open] summary::after { content: '\2212'; }
+  details > div { padding: 0 18px 14px; color: var(--g600); font-size: 14px; }
+
+  /* ONEMS screen drawings */
+  .app { background: var(--white); border: 1px solid var(--g200); border-radius: 12px; overflow: hidden; margin: 16px 0 6px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .app-bar { display: flex; gap: 6px; align-items: center; background: var(--g100); border-bottom: 1px solid var(--g200); padding: 8px 12px; font-size: 12px; color: var(--g500); }
+  .app-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--g300); display: inline-block; }
+  .app-bar span { margin-left: 8px; }
+  .app-body { padding: 20px; font-size: 13px; color: var(--g700); overflow-x: auto; }
+  .app-body.cols { display: grid; grid-template-columns: 210px 1fr; padding: 0; }
+  .app-body.cols > .sb { border-right: 1px solid var(--g200); padding: 14px 10px; background: #fff; }
+  .app-body.cols > .ct { padding: 20px; }
+  .sb .t { font-size: 20px; font-weight: 700; color: var(--g900); padding: 0 8px; }
+  .sb .s { font-size: 11px; color: var(--g500); padding: 0 8px 8px; }
+  .sb h5 { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--g400); padding: 10px 8px 4px; }
+  .mi { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; font-size: 13px; color: var(--g700); }
+  .mi.on { background: var(--b50); color: var(--b600); }
+  .mi .ic { width: 14px; height: 14px; border-radius: 4px; background: var(--g300); flex-shrink: 0; }
+  .mi.on .ic { background: var(--b600); }
+  .mi .badge { margin-left: auto; font-size: 11px; padding: 0 7px; }
+  .m-h { font-size: 18px; font-weight: 700; color: var(--g900); margin-bottom: 12px; }
+  .m-h3 { font-size: 15px; font-weight: 700; color: var(--g900); margin: 0 0 6px; }
+  .m-sel { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 24px 3px 8px; font-size: 12px; background: #fff; color: var(--g700); margin-right: 8px; position: relative; }
+  .m-sel::after { content: '\25BE'; position: absolute; right: 8px; color: var(--g400); }
+  .m-card { border: 1px solid var(--g200); border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.05); margin: 10px 0; }
+  .app table { font-size: 12px; }
+  .app th { padding: 8px 12px; font-size: 11px; }
+  .app td { padding: 8px 12px; }
+  .app td:first-child { font-weight: 400; color: inherit; }
+  .app .num { text-align: right; }
+  .m-link { color: var(--b600); }
+  .m-box { border: 1px solid var(--g200); border-radius: 6px; padding: 14px; margin: 10px 0; }
+  .m-note { background: var(--g50); border-radius: 6px; padding: 10px 12px; margin: 8px 0; font-size: 12px; }
+  .m-muted { color: var(--g500); font-size: 12px; }
+  .m-pbtn, .m-sbtn { display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 12px; margin: 2px 6px 2px 0; }
+  .m-pbtn { background: var(--b600); color: #fff; }
+  .m-sbtn { background: var(--g200); color: var(--g700); }
+  .m-ta { border: 1px solid var(--g300); border-radius: 4px; padding: 8px; font-size: 12px; color: var(--g400); background: #fff; margin: 6px 0 10px; }
+  .m-in { display: inline-block; border: 1px solid var(--g300); border-radius: 4px; padding: 3px 8px; font-size: 12px; background: #fff; min-width: 90px; }
+  .m-bub { max-width: 80%; padding: 6px 10px; border-radius: 10px; margin: 5px 0; font-size: 12px; }
+  .m-bub small { display: block; color: var(--g500); font-size: 10px; margin-top: 2px; }
+  .m-bub.l { background: var(--g100); margin-right: auto; }
+  .m-bub.r { background: var(--b100); margin-left: auto; }
+  .pin { display: inline-flex; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; align-items: center; justify-content: center; margin-left: 6px; vertical-align: middle; flex-shrink: 0; }
+  .legend { counter-reset: l; list-style: none; margin: 10px 0 20px; }
+  .legend li { counter-increment: l; position: relative; padding: 2px 0 6px 34px; font-size: 14px; }
+  .legend li::before { content: counter(l); position: absolute; left: 0; top: 1px; width: 20px; height: 20px; border-radius: 50%; background: var(--b600); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .heat td { text-align: center; }
+  .heat .ok { background: #f0fdf4; } .heat .hi { background: var(--y100); } .heat .sat { background: var(--r100); }
+  .heat .off { background: repeating-linear-gradient(45deg, var(--g100), var(--g100) 4px, #fff 4px, #fff 8px); color: var(--g400); }
+  .heat .now { outline: 2px solid var(--b600); outline-offset: -2px; }
+
+  /* Right-to-left (Arabic) */
+  [dir=rtl] .side { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] .app-body.cols > .sb { border-right: 0; border-left: 1px solid var(--g200); }
+  [dir=rtl] th, [dir=rtl] td, [dir=rtl] .nav a { text-align: right; }
+  [dir=rtl] ul, [dir=rtl] ol { margin: 8px 22px 8px 0; }
+  [dir=rtl] ol.steps > li { padding: 4px 44px 12px 0; }
+  [dir=rtl] ol.steps > li::before { left: auto; right: 0; }
+  [dir=rtl] .legend li { padding: 2px 34px 6px 0; }
+  [dir=rtl] .legend li::before { left: auto; right: 0; }
+  [dir=rtl] .msg.bot { border-top-left-radius: 14px; border-top-right-radius: 4px; margin-right: 0; margin-left: auto; }
+  [dir=rtl] .msg.me { border-top-right-radius: 14px; border-top-left-radius: 4px; margin-left: 0; margin-right: auto; }
+  [dir=rtl] .m-bub.l { margin-right: 0; margin-left: auto; }
+  [dir=rtl] .m-bub.r { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .pin { margin-left: 0; margin-right: 6px; }
+  [dir=rtl] .m-sel { padding: 3px 8px 3px 24px; margin-right: 0; margin-left: 8px; }
+  [dir=rtl] .m-sel::after { right: auto; left: 8px; }
+  [dir=rtl] .m-pbtn, [dir=rtl] .m-sbtn { margin: 2px 0 2px 6px; }
+  [dir=rtl] .mi .badge { margin-left: 0; margin-right: auto; }
+  [dir=rtl] .app-bar span { margin-left: 0; margin-right: 8px; }
+  [dir=rtl] .flow .arrow { transform: scaleX(-1); }
+  [dir=rtl] .app td:first-child { font-weight: 400; }
+  .mobile-top { display: none; }
+  @media (max-width: 900px) {
+    .app-body.cols { grid-template-columns: 1fr; }
+    .app-body.cols > .sb { border-right: 0; border-bottom: 1px solid var(--g200); }
+    .layout { display: block; }
+    .side { display: none; }
+    .mobile-top { display: block; position: sticky; top: 0; z-index: 5; background: var(--white); border-bottom: 1px solid var(--g200); padding: 10px 16px; }
+    .mobile-top b { font-size: 18px; color: var(--g900); }
+    .mobile-top span { font-size: 13px; color: var(--g500); margin-left: 6px; }
+    .mobile-top select { width: 100%; margin-top: 8px; padding: 8px; border: 1px solid var(--g300); border-radius: 8px; font-size: 14px; background: #fff; color: var(--g700); }
+    .main { padding: 24px 16px 64px; }
+    .page > header h2 { font-size: 24px; line-height: 32px; }
+  }
+  @media print { .side, .mobile-top { display: none; } .main { padding: 0; } body { background: #fff; } section { break-inside: avoid-page; } }
+</style>
+</head>
+<body>
+<div class="mobile-top">
+  <b>ONE</b><span>for Regulators &middot; مساعدة</span>
+  <select id="jump" aria-label="الانتقال إلى القسم"></select>
+</div>
+<div class="layout">
+  <aside class="side">
+    <div class="brand">
+      <h1>ONE</h1>
+      <p>for Regulators</p>
+      <span class="doc">مساعدة &middot; Carrier Link</span>
+    </div>
+    <nav class="nav" id="nav">
+      <h3>البدء</h3>
+      <a href="#overview">ما هو Carrier Link</a>
+      <a href="#order">ترتيب العمل</a>
+      <h3>الشاشات</h3>
+      <a href="#reading-points">نقاط القراءة</a>
+      <a href="#connectors">الموصّلات</a>
+      <a href="#plans">خطط أخذ العينات</a>
+      <a href="#samples">العينات</a>
+      <a href="#monitor">مراقب الالتقاط</a>
+      <h3>مرجع</h3>
+      <a href="#equivalence">وقت المعادلة</a>
+      <a href="#alerts">معنى كل تنبيه</a>
+      <a href="#faq">أسئلة</a>
+    </nav>
+    <div class="side-foot">آخر تحديث: <span dir="ltr">20</span> نوفمبر <span dir="ltr">2026</span></div>
+  </aside>
+
+  <main class="main">
+  <div class="page">
+    <header>
+      <h2>Carrier Link: عينات من سجلات الناقل نفسه</h2>
+      <p>ما هو، وبأي ترتيب يُعدّ، وماذا تفعل كل شاشة في قسم Carrier Link في ONEMS.</p>
+    </header>
+
+    <section id="overview">
+    <h2>ما هو Carrier Link</h2>
+<p>كان ONEMS حتى الآن يقيس بشحنات تجريبية يحرّكها المشاركون (E2E) وبقراءات RFID في المراكز البريدية (التشخيص). يضيف <strong>Carrier Link</strong> مصدراً ثالثاً: يأخذ ONEMS <strong>عشوائياً</strong> شحنات حقيقية مغلقة بالفعل من سجلات الناقل نفسه (قراءة المغادرة وقراءة الوصول) ويستخدمها كعينات.</p>
+<div class="grid">
+  <div class="card"><h4>عينات عشوائية</h4><p>يقترح الناقل شحنات كثيرة ويجري ONEMS السحب النهائي. ويمكن إعادة إنتاج السحب أمام مدقّق.</p></div>
+  <div class="card"><h4>سجلات مغلقة بالفعل</h4><p>لا تُستخدم إلا الشحنات التي لها قراءة بداية وقراءة وصول، لأن ذلك يحدد المسار (من مدينة إلى مدينة) الذي سلكته.</p></div>
+  <div class="card"><h4>التقارير نفسها</h4><p>لا توجد تقارير جديدة: تظهر العينات في تقارير E2E والتشخيص المعتادة، موسومة بالمصدر «carrier».</p></div>
+</div>
+<p>بدلاً من مشارك مصدر ومشارك وجهة، لكل عينة <strong>نقطة قراءة للبداية</strong> و<strong>نقطة قراءة للنهاية</strong>. ويمتد زمن E2E من أول قراءة عند البداية إلى آخر قراءة عند النهاية.</p>
+<div class="callout info"><strong>الحجم.</strong> قد تصل الخطة إلى نحو <span dir="ltr">15,000</span> عينة في السنة لكل منتج. لذلك تُوزَّع الحصص بحسب المسار (من مدينة إلى مدينة) والأسبوع، دون أن تضطر إلى اختيار الشحنات واحدة واحدة.</div>
+<div class="callout warn"><strong>ما لا يظهر.</strong> لا تدخل إلا الشحنات التي وصلت. أما التي لا تصل أبداً أو تبقى في مدينة أخرى فلا تظهر كعينة، ولا تتم متابعة المغادرات. كما لا توجد مسارات داخل المدينة الواحدة. ويؤثر معيار التسليم في تحليل التقارير فقط، ولا يؤثر أبداً في الالتقاط ولا في الخطة.</div>
+    </section>
+
+    <section id="order">
+    <h2>ترتيب العمل</h2>
+<ol class="steps">
+  <li><strong>نقاط القراءة.</strong> في <strong>نقاط القراءة</strong> سجّل أماكن الناقل التي تُقرأ فيها كل شحنة وحدّد في أي مدينة تبدأ المسارات أو تنتهي. تحتاج كل مدينة إلى نقطة بداية ونقطة نهاية على الأقل.</li>
+  <li><strong>الموصّل.</strong> في <strong>الموصّلات</strong> أنشئ موصّل الناقل: مطابقات الحقول والمنتجات، وجدول الطلبات، والمفتاح. وجرّبه بدفعة تجريبية.</li>
+  <li><strong>معيار التسليم.</strong> في <strong>معايير التسليم</strong> تأكد من أن لكل مسار معياره، ومن وقت المعادلة إذا أردت المقارنة مع المشاركين (انظر <a href="#equivalence">وقت المعادلة</a>).</li>
+  <li><strong>خطة أخذ العينات.</strong> في <strong>خطط أخذ العينات</strong> أنشئ الخطة وولّد الحصص واحفظها ثم اضغط <span class="btn primary">تفعيل الخطة</span>.</li>
+  <li><strong>تفعيل الموصّل.</strong> عندما يصبح كل شيء جاهزاً انقل الموصّل من اختبار إلى نشط. وحتى ذلك الحين لا يقبل إلا التجارب ولا تُنشأ أي عينة.</li>
+  <li><strong>المتابعة.</strong> في <strong>مراقب الالتقاط</strong> تابع الطلبات والدفعات والتنبيهات، وفي <strong>العينات</strong> راجع العينات التي تصل تباعاً.</li>
+</ol>
+<div class="callout ok"><strong>وبعد ذلك:</strong> يطلب ONEMS الشحنات من الناقل في الأيام والساعة المحددة في جدول الموصّل، ويجري السحب، ويضع العينات في تقارير E2E. وكل ما عليك هو معالجة التنبيهات.</div>
+    </section>
+
+    <section id="reading-points">
+    <h2>نقاط القراءة</h2>
+<p>شاشة <strong>نقاط القراءة</strong>. نقطة القراءة هي مكان (ووضع إن أردت: قبول، مغادرة، تسليم...) يقرأ فيه الناقل الشحنات. وتقع كل نقطة في مركز بريدي، وبالتالي في مدينة.</p>
+<ol class="steps">
+  <li>اختر الناقل واضغط <span class="btn primary">إضافة نقطة قراءة</span>.</li>
+  <li>اكتب <strong>المكان</strong> (الرمز الذي يستخدمه الناقل) و<strong>الوضع</strong> عند الاقتضاء. إذا تركت الوضع فارغاً فإن النقطة تقبل أي وضع.</li>
+  <li>اختر <strong>المركز البريدي</strong>. وتأتي المدينة من المركز.</li>
+  <li>اختر <strong>الدور في المسار</strong>: البداية، أو النهاية، أو البداية والنهاية، أو وسيط.</li>
+</ol>
+<div class="callout warn">المركز البريدي الذي لا مدينة له لا يمكن أن يكون إلا نقطة <strong>وسيط</strong>. ولكي تكون المدينة مصدراً أو وجهة للمسارات يجب أن يكون لمركزها مدينة.</div>
+<p>تسرد كتلة <strong>أماكن بلا نقطة قراءة</strong> الأماكن التي وصلت منها قراءات خلال آخر <span dir="ltr">90</span> يوماً دون أن يمكن إسنادها. اضغط <span class="btn">تسجيل</span> لتحويلها إلى نقاط.</p>
+    </section>
+
+    <section id="connectors">
+    <h2>الموصّلات</h2>
+<p>شاشة <strong>الموصّلات</strong>. الموصّل هو القناة التي يسلّم بها الناقل بياناته إلى ONEMS. ويوجد واحد أو أكثر لكل ناقل.</p>
+<h3>ما الذي يُعدّ</h3>
+<ul>
+  <li><strong>الجدول:</strong> أيام الأسبوع والساعة التي يجوز فيها لـ ONEMS طلب البيانات، حتى لا يزعج قاعدة بيانات الناقل. وإذا تركت المنطقة الزمنية فارغة فتُستخدم منطقة الحساب.</li>
+  <li><strong>مطابقات الحقول:</strong> أي حقل عند الناقل يحوي كل معلومة (معرّف الشحنة، المنتج، تاريخ القراءة ووقتها، المكان والوضع). وما دام أحدها ناقصاً لا يستطيع ONEMS قراءة البيانات.</li>
+  <li><strong>مطابقات المنتجات:</strong> أي منتج في ONEMS يقابل كل قيمة منتج عند الناقل.</li>
+  <li><strong>الحقول الإضافية المسموح بها:</strong> حقول أخرى عند الناقل تُحفظ مع كل قراءة. وأي حقل آخر يُهمل عند الدخول حتى لا تُحفظ بيانات شخصية.</li>
+</ul>
+<h3>حالات الموصّل</h3>
+<div class="table-wrap"><table>
+<tr><th>الحالة</th><th>ما الذي يحدث</th></tr>
+<tr><td><span class="badge b-yellow">اختبار</span></td><td>لا يقبل إلا الدفعات التجريبية: يجري فحصها كما لو كانت حقيقية، لكن لا يُحفظ شيء ولا تُنشأ أي عينة.</td></tr>
+<tr><td><span class="badge b-green">نشط</span></td><td>يستقبل دفعات حقيقية وينشئ عينات. وعند تفعيله تُغلق الطلبات التي فُتحت أثناء الاختبار.</td></tr>
+<tr><td><span class="badge b-gray">متوقف مؤقتًا</span></td><td>لا يستقبل دفعات ولا تُرسل طلبات إلى أن يُستأنف.</td></tr>
+</table></div>
+<h3>مفتاح الناقل</h3>
+<p>يستخدم الناقل مفتاحاً لإرسال دفعاته. <strong>لا يستطيع إنشاء المفاتيح إلا المشرف الأعلى (superadmin) أو UPU Account Manager.</strong> اضغط <span class="btn">مفتاح جديد</span> وأعطه اسماً وتاريخ انتهاء إن شئت.</p>
+<div class="callout warn"><strong>يُعرض المفتاح مرة واحدة فقط.</strong> انسخه وسلّمه إلى الناقل عبر قناة آمنة: بعد ذلك لا يحتفظ ONEMS إلا ببادئة للتعرّف عليه. وإذا فُقد فأنشئ مفتاحاً آخر وعطّل القديم.</div>
+<h3>اختبار دفعة</h3>
+<p>في <strong>اختبار دفعة (تجربة)</strong> ارفع ملف دفعة من الناقل. يبيّن ONEMS هل سيقبلها، وإن لم يقبلها فلماذا. ولا يُحفظ شيء.</p>
+    </section>
+
+    <section id="plans">
+    <h2>خطط أخذ العينات</h2>
+<p>شاشة <strong>خطط أخذ العينات</strong>. تحدد الخطة عدد العينات المطلوبة، ولأي ناقل ومنتج، وفي أي تواريخ، وبين أي مدن.</p>
+<ol class="steps">
+  <li>اضغط <span class="btn primary">خطة جديدة</span> واملأ الاسم والناقل والمنتج والموصّل والتواريخ والعدد الإجمالي للعينات. ولا تحدّد خانة التشخيص إلا إذا أردت أيضاً حفظ بيانات لتحليل التشخيص.</li>
+  <li>اضغط <span class="btn">توليد الحصص</span>. يوزّع ONEMS الإجمالي على المسارات (من مدينة إلى مدينة) والأسابيع، ويعرض معاينة غير محفوظة.</li>
+  <li>راجع المعاينة واضغط <span class="btn">حفظ الحصص</span>. وإذا غيّرت الإجمالي أو التواريخ فولّد الحصص واحفظها من جديد.</li>
+  <li>إذا ذكر تنبيه <strong>نقاط قراءة مفقودة</strong> مدناً، فسجّل نقاط بدايتها ونهايتها في <strong>نقاط القراءة</strong>. وما دام أحدها ناقصاً لا يمكن تفعيل الخطة.</li>
+  <li>اضغط <span class="btn primary">تفعيل الخطة</span> وأكّد.</li>
+</ol>
+<div class="callout warn">المسار الذي ليس له معيار تسليم تُؤخذ منه العينات أيضاً، لكن عيناته تدخل دون «في الوقت» إلى أن يُنشأ المعيار. إنه مجرد تنبيه: لا يمنع تفعيل الخطة.</div>
+<div class="callout info">بعد التفعيل لا يمكن تغيير الناقل ولا المنتج ولا الموصّل ولا تاريخ البداية ولا الحصص. أما العينات التي تم الحصول عليها فلا تُمسّ.</div>
+<h3>جدول الحصص</h3>
+<p>تعرض كل خلية <strong>المخطَّط</strong>، و<strong>المرحَّل</strong> من أسابيع سابقة بين قوسين، وبعد بدء الخطة <strong>المتحصَّل عليه</strong>. يمكنك عرضه بحسب الأسبوع أو الشهر والتصفية بحسب المسار.</p>
+<h3>إذا لم تكتمل حصة</h3>
+<p>إذا لم يكن لدى الناقل شحنات كافية يعيد ONEMS طلب الناقص (حتى <span dir="ltr">3</span> مرات في الأسبوع نفسه). وما يبقى ناقصاً يُوزَّع على الأسابيع المتبقية من الشهر، وإن لم يتّسع فعلى أسابيع الأشهر التالية. وما يبقى ناقصاً عند انتهاء الخطة يظل غير مكتمل ويولّد تنبيهاً.</p>
+<div class="callout ok"><strong>وبعد ذلك:</strong> عندما تكون الخطة نشطة والموصّل نشطاً يطلب النظام الشحنات بنفسه أسبوعاً بعد أسبوع. ولا حاجة إلى فعل أي شيء آخر.</div>
+    </section>
+
+    <section id="samples">
+    <h2>العينات</h2>
+<p>شاشة <strong>العينات</strong>. تسرد العينات التي تم الحصول عليها، واحدة لكل شحنة.</p>
+<ul>
+  <li><strong>المرشّحات:</strong> الخطة، الأسبوع، مدينة المصدر والوجهة، و«احتمال سوء التوجيه فقط».</li>
+  <li><strong>الأعمدة:</strong> معرّف الشحنة، المسار، قراءة البداية والنهاية، زمن العبور (بالأيام والساعات)، وهل وصلت في الوقت.</li>
+  <li><strong>القراءات:</strong> عند فتح عينة تظهر جميع قراءاتها، موسومة بأنها بداية أو نهاية أو وسيطة.</li>
+</ul>
+<p>تظهر علامة <span class="badge b-yellow">احتمال سوء التوجيه</span> عندما يكون لشحنة قراءات في أكثر من نقطة أو في مدينة غير المطلوبة. وتُحتسب العينة مع ذلك ضمن حصة المسار، لكن يُستحسن مراجعتها.</p>
+<p>هذه الشاشة للاطلاع فقط: لا تُعدَّل العينات.</p>
+    </section>
+
+    <section id="monitor">
+    <h2>مراقب الالتقاط</h2>
+<p>شاشة <strong>مراقب الالتقاط</strong>. هنا تتابع ما يحدث في التقاط البيانات.</p>
+<ul>
+  <li><strong>الطلبات إلى الناقل:</strong> مفتوحة أو منجزة أو جزئية أو فاشلة (بما فيها التجريبية).</li>
+  <li><strong>الدفعات المستلمة:</strong> كل دفعة مع حالتها (مستلمة، تم التحقق، تم أخذ العينات، مرفوضة، تم التراجع، أو منتهية)، وعدد الشحنات والمرفوضة والمختارة.</li>
+  <li><strong>التنبيهات:</strong> مع درجة خطورتها (منخفضة أو متوسطة أو عالية). يمكنك عرض المفتوحة فقط وتحديدها بـ <span class="btn">تحديد كمشاهد</span> أو <span class="btn">إهمال</span>. ومعنى كل منها في <a href="#alerts">معنى كل تنبيه</a>.</li>
+</ul>
+<h3>التراجع عن دفعة</h3>
+<p>إذا كانت دفعة خاطئة فاضغط <span class="btn">تراجع</span> في صفها وأكّد. تُزال العينات المختارة في تلك الدفعة من تقارير E2E وتُعاد حسابات الحصص المتأثرة. ويبيّن ONEMS كم حصة عادت إلى الانتظار، وأيّها يجب مراجعته لأنه رُحِّل من قبل.</p>
+    </section>
+
+    <section id="equivalence">
+    <h2>وقت المعادلة</h2>
+<p>لا تشمل قراءة الناقل المرحلة الأخيرة حتى المستلم ولا تأخيرات الإقرار التي يتضمنها القياس مع المشاركين. ولكي يكون القياسان قابلين للمقارنة يقبل معيار التسليم <strong>وقت معادلة</strong>.</p>
+<ol class="steps">
+  <li>افتح شاشة معايير التسليم (<strong>معايير التسليم</strong>).</li>
+  <li>في المسار الذي تريده املأ <strong>وقت معادلة المرحلة الأولى</strong> و<strong>وقت معادلة المرحلة الأخيرة</strong>، بنفس وحدة المعيار. وقيمتهما الافتراضية <span dir="ltr">0</span>.</li>
+</ol>
+<div class="callout info"><strong>لعينات الناقل فقط.</strong> يُضاف هذا الوقت إلى عينات الناقل وحدها؛ أما عينات المشاركين فلا تتغير. يحفظ ONEMS الوقت المقيس والوقت المضاف كلاً على حدة، وتستخدم التقارير (بما فيها «في الوقت») المجموع.</div>
+<p>مثال: إذا قاس الناقل يومين وحُدّدت المرحلة الأخيرة بيوم واحد، يحتسب التقرير <span dir="ltr">3</span> أيام.</p>
+    </section>
+
+    <section id="alerts">
+    <h2>معنى كل تنبيه</h2>
+<p>تظهر التنبيهات في <strong>مراقب الالتقاط</strong>. هذه هي الأنواع وما يجب فعله مع كل منها.</p>
+<div class="table-wrap"><table>
+<tr><th>التنبيه</th><th>معناه</th><th>ما العمل</th></tr>
+<tr><td>مرشحون غير كافين</td><td>أرسل الناقل شحنات صالحة أقل مما يلزم لمسار وأسبوع معيّنين.</td><td>يعيد ONEMS عادةً طلب الشحنات الناقصة. إذا تكرر ذلك فتحدّث إلى الناقل.</td></tr>
+<tr><td>شريحة فارغة</td><td>لم يُعد الناقل أي شحنة لمسار ما.</td><td>تحقق من صحة نقطتي البداية والنهاية في تلك المدن ومن أن لدى الناقل حركة على ذلك المسار.</td></tr>
+<tr><td>انخفاض في عدد المجتمع</td><td>انخفضت الشحنات المتاحة على مسار ما إلى أقل من <span dir="ltr">30%</span> من المعتاد (وسيط آخر 6 أسابيع).</td><td>اسأل الناقل هل حدث انقطاع في بياناته أو تغيّر فعلي في الحركة.</td></tr>
+<tr><td>عدد مجتمع غير متسق</td><td>يذكر الناقل عدداً من الشحنات المتاحة أقل من عدد المرشحين الذين أرسلهم.</td><td>هذا خطأ في استخراج بياناته: اطلب منه مراجعته.</td></tr>
+<tr><td>توزيع مشبوه</td><td>وصلت جميع عينات دفعة ما (<span dir="ltr">20</span> أو أكثر) في الوقت المحدد. هذا نادر وقد يعني أن الناقل لا يختار عشوائياً.</td><td>اطلب من الناقل أن يشرح كيف يختار الشحنات وراجع الدفعات التالية.</td></tr>
+<tr><td>دفعة متأخرة</td><td>وصلت الدفعة بعد الموعد المتوقع.</td><td>إذا تكرر ذلك فراجع مع الناقل جدول الموصّل.</td></tr>
+<tr><td>منتج غير معروف</td><td>أرسل الناقل منتجاً ليس له مطابقة في ONEMS.</td><td>أضف المطابقة في <strong>الموصّلات</strong>، في كتلة مطابقة المنتجات.</td></tr>
+<tr><td>نقطة قراءة غير معروفة</td><td>وصلت قراءات من مكان غير مسجّل كنقطة قراءة.</td><td>سجّل المكان في <strong>نقاط القراءة</strong> (كتلة أماكن بلا نقطة قراءة). يُستفاد من تلك القراءات عند تسجيله.</td></tr>
+<tr><td>شحنة قد تكون موجهة خطأً</td><td>لشحنة ما قراءات في أكثر من نقطة، أو في مدينة غير المطلوبة.</td><td>راجعها في <strong>العينات</strong>. وتُحتسب مع ذلك ضمن حصة المسار.</td></tr>
+<tr><td>معيار التسليم مفقود</td><td>ليس لمسار ما معيار تسليم، ولذلك لا يمكن معرفة هل تصل عيناته في الوقت المحدد.</td><td>أنشئ معيار ذلك المسار في <strong>معايير التسليم</strong>. تُعاد حسابات العينات تلقائياً.</td></tr>
+<tr><td>عدد كبير من القراءات المرفوضة</td><td>رُفض أكثر من <span dir="ltr">20%</span> من قراءات دفعة ما.</td><td>راجع المطابقات ونقاط القراءة؛ وتُظهر دفعة تجريبية في <strong>الموصّلات</strong> الأسباب.</td></tr>
+<tr><td>حصة غير مكتملة</td><td>عند انتهاء الخطة لم تكتمل إحدى الحصص بالكامل.</td><td>راجع التنبيهات السابقة لذلك المسار؛ ومدّد الخطة إذا لزم الأمر.</td></tr>
+<tr><td>لم يستجب الناقل</td><td>الموصّل نشط، لكن الناقل لم يستجب لطلب حان موعده.</td><td>تأكد مع الناقل من أن نظامه يعمل، وراجع الجدول وحالة الموصّل.</td></tr>
+<tr><td>نقاط البداية أو النهاية مفقودة</td><td>نقاط البداية أو النهاية مفقودة في إحدى المدن.</td><td>سجّل النقاط الناقصة في <strong>نقاط القراءة</strong>.</td></tr>
+<tr><td>المنطقة الزمنية للحساب غير صالحة</td><td>المنطقة الزمنية للحساب غير صالحة ولا يعرف ONEMS في أي ساعة يطلب البيانات.</td><td>صحّحها في الحساب أو حدّد منطقة زمنية خاصة في جدول الموصّل.</td></tr>
+<tr><td>تعذر إرسال الطلب</td><td>تعذّر على ONEMS إرسال الطلب إلى الناقل.</td><td>اطلع على آخر خطأ للموصّل في <strong>الموصّلات</strong> وراجع إعداداته.</td></tr>
+<tr><td>طريقة اختيار مختلفة</td><td>استخدم الناقل طريقة اختيار تختلف عن المتفق عليها.</td><td>اطلب منه استخدام الطريقة المتفق عليها وتحقق بدفعة تجريبية.</td></tr>
+<tr><td>قارئ بلا مدينة</td><td>نقطة قراءة تقع في مركز بريدي ليس له مدينة.</td><td>عيّن مدينة للمركز البريدي.</td></tr>
+<tr><td>تم التراجع عن دفعة بعد ترحيل الحصة</td><td>جرى التراجع عن دفعة بعد أن كانت حصتها قد وُزّعت على أسابيع أخرى.</td><td>راجع حصص الخطة: تظهر على أنها مرحّلة (للمراجعة).</td></tr>
+</table></div>
+    </section>
+
+    <section id="faq">
+    <h2>أسئلة</h2>
+<details><summary>كم عينة يمكن أن تحوي الخطة؟</summary><div>قد تصل الخطة إلى نحو <span dir="ltr">15,000</span> عينة في السنة لكل منتج.</div></details>
+<details><summary>هل يستطيع الناقل أن يختار الشحنات التي يرسلها؟</summary><div>لا. يقترح الناقل مرشحين كثيرين ويجري ONEMS السحب النهائي. وتُحدَّد بذرة السحب قبل استلام المرشحين، فلا يستطيع أحد اختيارها بعد رؤيتهم.</div></details>
+<details><summary>هل تُحفظ بيانات شخصية؟</summary><div>لا. لا تُحفظ إلا الحقول الواردة في قائمة الحقول الإضافية المسموح بها؛ وما عداها يُهمل عند الدخول.</div></details>
+<details><summary>من يستطيع إنشاء مفاتيح الموصّل؟</summary><div>المشرف الأعلى (superadmin) أو UPU Account Manager فقط. ويُعرض المفتاح مرة واحدة عند إنشائه.</div></details>
+<details><summary>فعّلت الخطة ولا تصل عينات. لماذا؟</summary><div>تحقق من أن الموصّل نشط (في وضع الاختبار لا يقبل إلا التجارب) ومن أن يوم الجدول وساعته قد مضيا. ثم انظر <strong>مراقب الالتقاط</strong>.</div></details>
+<details><summary>كيف أميّز هذه العينات في التقارير؟</summary><div>تحمل المصدر «carrier»، المختلف عن عينات المشاركين، ويمكن فصلها.</div></details>
+<details><summary>من يرى كل شاشة؟</summary><div>يعدّل Account Manager (وUPU Account Manager) الخطط والنقاط والموصّلات والمراقب، ويرى العينات. ويعدّل Allocation Plan Manager الخطط ويرى الباقي عدا الموصّلات. ويعدّل DO Coordinator نقاط القراءة ويرى الباقي عدا الموصّلات. أما Panelist Manager وMaterials Supplier فلا وصول لهما. وتعرض الشاشة ذات القراءة فقط وسم القراءة فقط.</div></details>
+    </section>
+
+  </div>
+  </main>
+</div>
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('#nav a'));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+
+  // Mobile section picker
+  var jump = document.getElementById('jump');
+  links.forEach(function (a) {
+    var o = document.createElement('option');
+    o.value = a.getAttribute('href'); o.textContent = a.textContent; jump.appendChild(o);
+  });
+  jump.addEventListener('change', function () { location.hash = jump.value; });
+
+  // Highlight the current section in the side menu
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id); });
+          jump.value = '#' + e.target.id;
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>

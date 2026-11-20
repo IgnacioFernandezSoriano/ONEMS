@@ -5387,3 +5387,333 @@ onedb.source_panelist,Panéliste
 onedb.source_carrier,Transporteur
 onedb.measured_time,Mesuré
 onedb.equivalence_added,Équivalence ajoutée
+cl.error.cl_bad_payload,Les données envoyées ne sont pas valides.
+cl.error.cl_batch_already_undone,Ce lot a déjà été annulé.
+cl.error.cl_batch_not_found,Le lot est introuvable.
+cl.error.cl_batch_not_undoable,Ce lot ne peut plus être annulé.
+cl.error.cl_batch_not_validated,Le lot n'a pas encore été validé.
+cl.error.cl_demand_not_open,La demande n'est pas ouverte et ne peut donc pas être modifiée.
+cl.error.cl_duplicate_quota,Un quota avec les mêmes valeurs existe déjà dans ce plan.
+cl.error.cl_feed_carrier_mismatch,Le connecteur appartient à un autre transporteur que celui du plan.
+cl.error.cl_feed_paused,Le connecteur est en pause. Réactivez-le pour continuer.
+cl.error.cl_mapping_incomplete,La correspondance des champs est incomplète. Complétez-la avant de continuer.
+cl.error.cl_missing_points,Il manque des points de départ ou d'arrivée pour certaines villes du plan.
+cl.error.cl_no_feed,Aucun connecteur n'est associé au plan.
+cl.error.cl_no_quotas,Le plan n'a pas encore de quotas. Ajoutez-en au moins un.
+cl.error.cl_plan_closed,Le plan est clos et ne peut pas être modifié.
+cl.error.cl_plan_locked_field,Ce champ ne peut plus être modifié car le plan a déjà commencé.
+cl.error.cl_plan_not_draft,Seuls les plans en brouillon peuvent être modifiés ainsi.
+cl.error.cl_quota_locked,Ce quota ne peut plus être modifié car il a déjà des échantillons.
+cl.error.cl_quota_not_found,Le quota n'existe plus. Rechargez la page.
+cl.error.cl_stratum_already_delivered,Une strate de ce lot a déjà été livrée pour cette demande.
+cl.error.cl_too_many_rows,Le fichier contient trop de lignes. Divisez-le en fichiers plus petits.
+cl.error.cl_unknown_stratum,Certaines lignes font référence à une ville ou un trajet absent du plan.
+cl.error.cl_forbidden,Vous n'avez pas l'autorisation de faire cela dans Carrier Link.
+cl.error.cl_demand_testing_dry_run_only,Cette demande est en mode test et n'autorise qu'une simulation.
+cl.error.forbidden,Vous n'avez pas l'autorisation de faire cela.
+cl.error.generic,Une erreur s'est produite. Veuillez réessayer.
+cl.select_account.title,Sélectionnez un compte
+cl.select_account.body,Choisissez un compte dans la barre supérieure pour utiliser Carrier Link.
+cl.plans.title,Plans d'échantillonnage
+cl.plans.help,Définissez quels trajets et volumes sont échantillonnés à partir des scans du transporteur.
+cl.samples.title,Échantillons
+cl.samples.help,Consultez les échantillons générés à partir des scans du transporteur.
+cl.reading_points.title,Points de lecture
+cl.reading_points.help,Gérez les points du transporteur où les scans sont capturés.
+cl.connectors.title,Connecteurs
+cl.connectors.help,Configurez la manière dont les données de scan du transporteur parviennent à ONEMS.
+cl.monitor.title,Suivi de capture
+cl.monitor.help,Suivez l'état de la capture des données des transporteurs.
+cl.reading_points.carrier,Transporteur
+cl.reading_points.add,Ajouter un point de lecture
+cl.reading_points.edit,Modifier le point de lecture
+cl.reading_points.place,Lieu (code du transporteur)
+cl.reading_points.mode,Mode
+cl.reading_points.mode_hint,Laissez vide pour accepter tout mode à ce lieu.
+cl.reading_points.any_mode,Tout mode
+cl.reading_points.center,Centre postal
+cl.reading_points.select_center,Sélectionnez un centre postal
+cl.reading_points.center_no_city,Ce centre n'a pas de ville : il ne peut être qu'un point intermédiaire.
+cl.reading_points.city,Ville
+cl.reading_points.role,Rôle dans la route
+cl.reading_points.role.origin,Début
+cl.reading_points.role.destination,Fin
+cl.reading_points.role.both,Début et fin
+cl.reading_points.role.none,Intermédiaire
+cl.reading_points.name,Nom (facultatif)
+cl.reading_points.empty,Aucun point de lecture pour ce transporteur.
+cl.reading_points.no_carriers,Aucun transporteur actif dans ce compte.
+cl.reading_points.unknown_title,Lieux sans point de lecture
+cl.reading_points.unknown_help,Des scans des 90 derniers jours proviennent de ces lieux sans correspondance.
+cl.reading_points.readings,Lectures
+cl.reading_points.register,Enregistrer
+cl.reading_points.delete_title,Supprimer le point de lecture
+cl.reading_points.delete_confirm,Supprimer le point de lecture {name} ?
+cl.reading_points.error.no_account,Sélectionnez d'abord un compte.
+cl.reading_points.error.missing_place,Indiquez le code du lieu.
+cl.reading_points.error.missing_carrier,Sélectionnez un transporteur.
+cl.reading_points.error.missing_center,Sélectionnez un centre postal.
+cl.reading_points.error.duplicate,Il existe déjà un point de lecture de ce transporteur avec ce lieu et ce mode.
+cl.connectors.carrier,Transporteur
+cl.connectors.connector,Connecteur
+cl.connectors.add,Nouveau connecteur
+cl.connectors.edit,Modifier le connecteur
+cl.connectors.empty,Ce transporteur n'a pas encore de connecteur.
+cl.connectors.name,Nom
+cl.connectors.extraction_model,Modèle d'extraction
+cl.connectors.emit_days,Jours de demande
+cl.connectors.emit_hour,Heure
+cl.connectors.emit_timezone,Fuseau horaire
+cl.connectors.account_timezone,(fuseau du compte)
+cl.connectors.calendar_hint,Les demandes au transporteur sont envoyées ces jours-là à cette heure. Laissez le fuseau vide pour utiliser celui du compte (p. ex. Europe/Madrid).
+cl.connectors.calendar,Calendrier
+cl.connectors.last_batch,Dernier lot
+cl.connectors.last_error,Dernière erreur
+cl.connectors.testing_hint,"En mode test, le connecteur n'accepte que des essais ; aucun échantillon n'est créé."
+cl.connectors.mapping_incomplete,Les équivalences de champs sont incomplètes : les données du transporteur ne peuvent pas encore être lues.
+cl.connectors.status.testing,Test
+cl.connectors.status.active,Actif
+cl.connectors.status.paused,En pause
+cl.connectors.set_status.testing,Revenir en test
+cl.connectors.set_status.active,Activer
+cl.connectors.set_status.paused,Mettre en pause
+cl.connectors.status_confirm.testing,Le connecteur n'acceptera de nouveau que des essais.
+cl.connectors.status_confirm.active,Le connecteur recevra des lots réels et créera des échantillons. Les demandes ouvertes en mode test seront fermées.
+cl.connectors.status_confirm.paused,Le connecteur cessera de recevoir des lots et aucune demande ne sera envoyée jusqu'à sa reprise.
+cl.connectors.delete_title,Supprimer le connecteur
+cl.connectors.delete_confirm,Supprimer le connecteur {name} ?
+cl.connectors.error.name_required,Saisissez un nom pour le connecteur.
+cl.connectors.error.no_days,Choisissez au moins un jour.
+cl.connectors.error.bad_day,Les jours ne sont pas valides.
+cl.connectors.error.bad_hour,L'heure doit être comprise entre 00:00 et 23:00.
+cl.connectors.error.duplicate,Cette valeur existe déjà pour ce transporteur.
+cl.connectors.error.in_use,Impossible de le supprimer car il est utilisé (clés ou plans). Mettez-le plutôt en pause.
+cl.connectors.error.invalid_value,Une valeur n'est pas valide (vérifiez le fuseau horaire).
+cl.connectors.fields.title,Équivalences de champs
+cl.connectors.fields.help,Quel champ du transporteur contient chaque donnée. Commun à tous les connecteurs de ce transporteur.
+cl.connectors.fields.missing,Champs obligatoires manquants : {fields}
+cl.connectors.fields.standard,Champ ONEMS
+cl.connectors.fields.carrier_field,Champ du transporteur
+cl.connectors.fields.format,Format
+cl.connectors.fields.timezone,Fuseau horaire
+cl.connectors.field.item_id,Identifiant de l'envoi
+cl.connectors.field.product,Produit
+cl.connectors.field.scan_at,Date et heure de lecture
+cl.connectors.field.place_ref,Lieu
+cl.connectors.field.mode_ref,Mode
+cl.connectors.values.title,Équivalences de produit
+cl.connectors.values.help,Traduisez les valeurs de produit du transporteur en produits ONEMS.
+cl.connectors.values.empty,Aucune équivalence de produit pour l'instant.
+cl.connectors.values.carrier_value,Valeur du transporteur
+cl.connectors.values.product,Produit ONEMS
+cl.connectors.values.select_product,Choisissez un produit
+cl.connectors.extras.title,Champs supplémentaires autorisés
+cl.connectors.extras.help,Autres champs du transporteur conservés avec chaque lecture. Tout autre champ est ignoré.
+cl.connectors.extras.empty,Aucun champ supplémentaire.
+cl.connectors.extras.field,Champ du transporteur
+cl.connectors.keys.title,Clés du connecteur
+cl.connectors.keys.help,Le transporteur utilise une clé pour envoyer ses lots. Seul un superadmin ou le UPU Account Manager peut émettre des clés.
+cl.connectors.keys.invalid,Vérifiez le nom et la date d'expiration (elle doit être future).
+cl.connectors.keys.empty,Ce connecteur n'a pas de clés.
+cl.connectors.keys.name,Nom
+cl.connectors.keys.prefix,Préfixe
+cl.connectors.keys.expires,Expire
+cl.connectors.keys.expires_optional,Expire (facultatif)
+cl.connectors.keys.last_used,Dernière utilisation
+cl.connectors.keys.never,Jamais
+cl.connectors.keys.inactive,Désactivée
+cl.connectors.keys.deactivate_confirm,Désactiver cette clé ? Le transporteur ne pourra plus l'utiliser.
+cl.connectors.keys.new,Nouvelle clé
+cl.connectors.keys.issue,Émettre la clé
+cl.connectors.dry_run.title,Tester un lot (essai)
+cl.connectors.dry_run.help,Téléversez un fichier de lot au format JSON. Il est vérifié comme s'il était réel mais rien n'est enregistré.
+cl.connectors.dry_run.choose,Choisir un fichier JSON
+cl.connectors.dry_run.running,Vérification...
+cl.connectors.dry_run.bad_json,Le fichier n'est pas un JSON valide.
+cl.connectors.dry_run.replayed,Ce lot a déjà été testé : le résultat affiché est celui enregistré à ce moment-là.
+cl.connectors.dry_run.validated,Le lot serait accepté. Résultat par strate :
+cl.connectors.dry_run.rejected,Le lot serait rejeté.
+cl.connectors.dry_run.bad_method,La méthode de sélection n'est pas celle attendue ({expected}).
+cl.connectors.dry_run.stratum,Strate
+cl.connectors.dry_run.rows,Lectures
+cl.connectors.dry_run.candidates,Candidats
+cl.connectors.dry_run.valid,Valides
+cl.connectors.dry_run.rejected_by_reason,Rejetés par motif
+cl.connectors.dry_run.rows_rejected,Lectures rejetées
+cl.reason.already_sampled,Déjà échantillonné
+cl.reason.bad_timestamp,Date ou heure incorrecte
+cl.reason.bad_value,Valeur incorrecte
+cl.reason.end_out_of_period,Fin hors période
+cl.reason.missing_field,Champ manquant
+cl.reason.no_end,Pas de lecture de fin
+cl.reason.no_start,Pas de lecture de début
+cl.reason.product_mismatch,Produit différent
+cl.reason.same_reading,Début et fin sont la même lecture
+cl.reason.start_after_end,Début après la fin
+cl.reason.unknown_product,Produit inconnu
+cl.reason.unknown_reading_point,Point de lecture inconnu
+cl.plans.new,Nouveau plan
+cl.plans.edit,Modifier le plan
+cl.plans.name,Nom
+cl.plans.product,Produit
+cl.plans.carrier,Transporteur
+cl.plans.connector,Connecteur
+cl.plans.no_connector,Pas encore de connecteur
+cl.plans.connector_hint,"Uniquement les connecteurs du même transporteur. Sans connecteur, le plan ne peut pas être activé."
+cl.plans.select,Sélectionner...
+cl.plans.start,Date de début
+cl.plans.end,Date de fin
+cl.plans.period,Période
+cl.plans.total,Total d'échantillons
+cl.plans.total_hint,"Si vous modifiez le total ou les dates, générez et enregistrez à nouveau les quotas."
+cl.plans.status,Statut
+cl.plans.status.draft,Brouillon
+cl.plans.status.active,Actif
+cl.plans.status.closed,Clôturé
+cl.plans.empty,Il n'y a pas encore de plan.
+cl.plans.samples,{count} échantillons
+cl.plans.feed_diagnosis,Diagnostic du connecteur (conserver des données supplémentaires pour analyse)
+cl.plans.locked_hint,"Le plan n'est plus un brouillon : le transporteur, le produit, le connecteur et la date de début ne peuvent plus être modifiés."
+cl.plans.error.no_account,Choisissez d'abord un compte.
+cl.plans.error.bad_period,La date de fin ne peut pas être antérieure à la date de début.
+cl.plans.error.bad_total,Le total doit être un nombre entier d'au moins 1.
+cl.plans.error.missing_field,"Renseignez le nom, le transporteur, le produit et les dates."
+cl.plans.generate,Générer les quotas
+cl.plans.no_routes,Le transporteur n'a pas de points de lecture actifs avec une ville de départ et une ville d'arrivée : il n'y a pas de trajets.
+cl.plans.preview_title,Aperçu (pas encore enregistré)
+cl.plans.save_quotas,Enregistrer les quotas
+cl.plans.saving_quotas,Enregistrement de {count} quotas...
+cl.plans.discard,Annuler
+cl.plans.quotas_saved,{count} quotas enregistrés.
+cl.plans.quotas_title,Quotas
+cl.plans.no_quotas,Ce plan n'a pas encore de quotas. Utilisez « Générer les quotas ».
+cl.plans.missing_points_title,Points de lecture manquants
+cl.plans.missing_points_help,Enregistrez un point actif du transporteur dans ces villes avant d'activer le plan.
+cl.plans.missing.origin,pas de point de départ
+cl.plans.missing.destination,pas de point d'arrivée
+cl.plans.missing_standards_title,{count} trajets sans norme de livraison
+cl.plans.missing_standards_help,"Ces trajets sont échantillonnés, mais sans norme on ne peut pas calculer s'ils arrivent dans les délais. Cela n'empêche pas l'activation."
+cl.plans.no_standard,compté sans délai
+cl.plans.more,et {count} de plus (marqués ⚠ dans le tableau)
+cl.plans.activate,Activer le plan
+cl.plans.activate_confirm,"Activer le plan {name} ? Ensuite, le transporteur, le produit, le connecteur, la date de début et les quotas ne pourront plus être modifiés."
+cl.plans.activate_blocked,Le plan ne peut pas être activé tant qu'il manque des points de lecture.
+cl.plans.matrix.filter,Filtrer par trajet...
+cl.plans.matrix.by_week,Par semaine
+cl.plans.matrix.by_month,Par mois
+cl.plans.matrix.summary,"{routes} trajets, {total} échantillons"
+cl.plans.matrix.legend,Chaque cellule : prévu (+reporté).
+cl.plans.matrix.legend_obtained,Chaque cellule : prévu (+reporté) ✓obtenu.
+cl.plans.matrix.expand_hint,"Ouvrez une ville d'origine pour voir ses trajets ; au-delà de {cells} cellules, une seule ville reste ouverte."
+cl.plans.matrix.no_match,Aucun trajet ne correspond au filtre.
+cl.plans.matrix.route,Trajet
+cl.plans.matrix.total,Total
+cl.plans.matrix.routes,{count} trajets
+cl.plans.error.quotas_mismatch,Les quotas ne correspondent pas aux dates du plan : générez-les à nouveau.
+cl.plans.regenerate_notice,Le total ou les dates ont changé : générez et enregistrez à nouveau les quotas.
+cl.samples.plan,Plan
+cl.samples.week,Semaine
+cl.samples.all,Toutes
+cl.samples.origin,Origine
+cl.samples.destination,Destination
+cl.samples.misrouted_only,Seulement mauvais acheminement possible
+cl.samples.item,Envoi
+cl.samples.route,Route
+cl.samples.start,Début
+cl.samples.end,Fin
+cl.samples.transit,Transit
+cl.samples.transit_value,{days} jours ({hours} h)
+cl.samples.on_time,À l'heure
+cl.samples.yes,Oui
+cl.samples.no,Non
+cl.samples.misrouted,Mauvais acheminement possible
+cl.samples.empty,Aucun échantillon pour ces filtres.
+cl.samples.total,{count} échantillons
+cl.samples.prev,Précédent
+cl.samples.next,Suivant
+cl.samples.page,Page {page} sur {pages}
+cl.samples.scans,Lectures
+cl.samples.close,Fermer
+cl.samples.no_scans,Cet échantillon n'a pas de lectures.
+cl.samples.role.start,Lecture de début
+cl.samples.role.end,Lecture de fin
+cl.samples.role.intermediate,Lecture intermédiaire
+cl.monitor.plan,Plan
+cl.monitor.all_plans,Tous les plans
+cl.monitor.demands,Demandes au transporteur (y compris les demandes de test)
+cl.monitor.demand.open,Ouvertes
+cl.monitor.demand.fulfilled,Satisfaites
+cl.monitor.demand.partial,Partielles
+cl.monitor.demand.failed,Échouées
+cl.monitor.batches,Lots reçus
+cl.monitor.batches_empty,Aucun lot pour le moment.
+cl.monitor.col.date,Reçu
+cl.monitor.col.status,Statut
+cl.monitor.col.shipments,Envois
+cl.monitor.col.rejected,Rejetés
+cl.monitor.col.selected,Sélectionnés
+cl.monitor.batch.received,Reçu
+cl.monitor.batch.validated,Validé
+cl.monitor.batch.sampled,Échantillonné
+cl.monitor.batch.rejected,Rejeté
+cl.monitor.batch.undone,Annulé
+cl.monitor.batch.expired,Expiré
+cl.monitor.undo,Annuler
+cl.monitor.undo_title,Annuler ce lot ?
+cl.monitor.undo_effect,Les échantillons sélectionnés dans ce lot seront retirés des rapports E2E et les quotas concernés seront recalculés.
+cl.monitor.undo_confirm,"Oui, annuler le lot"
+cl.monitor.undo_cancel,Annuler
+cl.monitor.undo_done,Lot annulé. Quotas remis en attente : {pending} ; reportés (à vérifier) : {carried} ; maintenus ouverts par une autre demande : {kept}.
+cl.monitor.alerts,Alertes
+cl.monitor.alerts_empty,Aucune alerte.
+cl.monitor.alert_filter_open,Ouvertes uniquement
+cl.monitor.alert_filter_all,Toutes
+cl.monitor.alert.open,Ouverte
+cl.monitor.alert.acknowledged,Vue
+cl.monitor.alert.dismissed,Écartée
+cl.monitor.acknowledge,Marquer comme vue
+cl.monitor.dismiss,Écarter
+cl.monitor.severity.low,Faible
+cl.monitor.severity.medium,Moyenne
+cl.monitor.severity.high,Élevée
+cl.monitor.total,{count} au total
+cl.alert.insufficient_candidates,Candidats insuffisants
+cl.alert.empty_stratum,Strate vide
+cl.alert.population_drop,Baisse de population
+cl.alert.population_incoherent,Population incohérente
+cl.alert.suspicious_distribution,Distribution suspecte
+cl.alert.late_batch,Lot en retard
+cl.alert.unknown_product,Produit inconnu
+cl.alert.unknown_reading_point,Point de lecture inconnu
+cl.alert.possible_misrouting,Envoi peut-être mal acheminé
+cl.alert.missing_standard,Norme de livraison manquante
+cl.alert.rejected_ratio,Beaucoup de lectures rejetées
+cl.alert.quota_unfilled,Quota non atteint
+cl.alert.feed_silent,Le transporteur n'a pas répondu
+cl.alert.missing_points,Points de départ ou d'arrivée manquants
+cl.alert.invalid_timezone,Fuseau horaire du compte invalide
+cl.alert.emit_failed,La demande n'a pas pu être envoyée
+cl.alert.selection_method,Méthode de sélection différente
+cl.alert.reader_without_city,Lecteur sans ville
+cl.alert.undo_after_carry,Lot annulé après report du quota
+cl.alert.route,Trajet : {origin} -> {destination}
+cl.alert.detail.insufficient_candidates,{valid} candidats valides pour {required} échantillons requis.
+cl.alert.detail.quota_unfilled,Il manque {missing} échantillons sur {planned} prévus.
+cl.alert.detail.rejected_ratio,{rejected} lectures rejetées sur {candidates} ({percent} %).
+cl.alert.detail.population_incoherent,Le transporteur indique une population de {population} mais a envoyé {candidates} candidats.
+cl.alert.detail.suspicious_distribution,Les {samples} échantillons ont tous été livrés dans les délais.
+cl.alert.detail.missing_points,Points de départ : {start} ; points d'arrivée : {end}.
+cl.alert.detail.items,Envois : {items}
+cl.alert.detail.products,Produits reçus : {values}
+cl.alert.detail.points,Points de lecture : {points}
+cl.alert.detail.feed_silent,La demande du {date} est restée sans réponse.
+cl.alert.detail.selection_method,Méthode attendue : {expected}.
+hc.delivery_standards.cl_first_mile,Premier tronçon transporteur
+hc.delivery_standards.cl_last_mile,Dernier tronçon transporteur
+hc.delivery_standards.cl_equivalence_tip,Ajouté uniquement aux échantillons du transporteur
+hc.delivery_standard_form.cl_equivalence_invalid,Durée du premier/dernier tronçon invalide (nombre >= 0)
+hc.delivery_standard_form.cl_first_mile_time,Durée équiv. premier tronçon
+hc.delivery_standard_form.cl_last_mile_time,Durée équiv. dernier tronçon
+help_center.doc.carrier_link.title,Carrier Link
+help_center.doc.carrier_link.desc,"Ce qu’est Carrier Link, dans quel ordre le configurer, ce que fait chaque écran et ce que signifie chaque alerte."
+cl.help_link,Aide

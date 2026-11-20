@@ -226,7 +226,7 @@ BEGIN
   PERFORM pg_temp.ok(pg_temp.sqlstate_of($q$UPDATE public.cl_plans SET close_lag_days = 366$q$) = '23514', 'close_lag > 365 rechazado');
   PERFORM pg_temp.ok(pg_temp.sqlstate_of($q$UPDATE public.cl_plans SET close_lag_days = -1$q$) = '23514', 'close_lag < 0 rechazado');
   PERFORM pg_temp.ok(pg_temp.sqlstate_of($q$UPDATE public.cl_plans SET total_samples = 0$q$) = '23514', 'total_samples 0 rechazado');
-  FOREACH f IN ARRAY ARRAY['cl_build_demand(uuid,uuid[])','cl_active_points(uuid,uuid)','cl_effective_tz(uuid,uuid)','cl_raise_alert(uuid,uuid,text,text,jsonb)'] LOOP
+  FOREACH f IN ARRAY ARRAY['cl_build_demand(uuid,uuid[])','cl_active_points(uuid,uuid)','cl_effective_tz(uuid,uuid)','cl_raise_alert(uuid,uuid,text,text,jsonb,uuid)'] LOOP
     PERFORM pg_temp.ok(NOT has_function_privilege('service_role', ('public.' || f)::regprocedure, 'EXECUTE'), f || ' sin EXECUTE para service_role');
     PERFORM pg_temp.ok(NOT has_function_privilege('authenticated', ('public.' || f)::regprocedure, 'EXECUTE'), f || ' sin EXECUTE para authenticated');
   END LOOP;
