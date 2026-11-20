@@ -24,3 +24,30 @@ The draft plan's "Generar cuotas" opens the same generator controls (matrix A/B/
 ## Task 3: Direct load from CSV
 Files: src/lib/carrierLink/quotaCsv.ts (+ test), ClPlans.tsx, locales.
 Template download (header: origin_city,destination_city,week,samples; week as YYYY-Www; also accept a date YYYY-MM-DD → its ISO week); parse (comma or semicolon), city by name (case/accents-insensitive) or id within the account; validation per row (unknown city, same city, week outside plan period, duplicates, samples not integer ≥ 0, route without origin/destination point) with row-numbered translated errors; valid file → same preview → Guardar cuotas. Max 50,000 rows.
+
+---
+# v2 (20/11, owner): "todo ha de ser prácticamente una copia para no despistar al usuario que al final necesita lo mismo que es hacer un allocation plan"
+Owner decisions (verbatim essence): same names as the E2E Allocation section ("se tiene que llamar todo igual pero sin que lo pueda confundir"); Load Balancing also needed "pero sin el máximo por panelista porque aquí no hay". Controller rulings: button "Aplicar" = activate the plan (demands start); balancing works on generated (draft) and applied (active) plans with the same fence rule as E2E (only weeks not yet requested from the carrier can change on an active plan).
+
+## Target structure of the Carrier Link tab (mirror of E2E)
+| E2E | Carrier Link | Route | Option |
+|---|---|---|---|
+| Configuración → Panelistas | Configuración → Puntos de lectura, Conectores | /carrier-link/reading-points, /carrier-link/connectors | cl_reading_points, cl_connectors |
+| Asignación → Generador de Asignaciones (tabs Generador / Planes generados / Planes aplicados; CSV import + template; download CSV; Aplicar; Eliminar) | Asignación → Generador de Asignaciones (same tabs/actions; "Aplicar" = cl_plan_activate) | /carrier-link/allocation-generator | cl_plans |
+| Asignación → Balanceo de Carga | Asignación → Balanceo de Carga (no per-panelist max; nodes = origin cities / routes) | /carrier-link/load-balancing | cl_plans |
+| Asignación → Planes de Asignación (records) | Asignación → Planes de Asignación (records = quotas route×week: planned, carried, obtained, status; link to their samples) | /carrier-link/allocation-plans | cl_plans |
+| — | Muestras, Monitor (unchanged) | existing | cl_samples, cl_monitor |
+Same i18n texts as E2E (reuse the same keys where the text is identical); every Carrier Link page shows a "Carrier Link" badge in its header and the tab has its own accent colour so pages cannot be confused. Old routes /carrier-link/plans redirect to the generator. Help page sections updated to the new names.
+
+## Task 2: Menu/routes mirror (frontend)
+Sidebar Carrier Link group restructured as above (sub-groups Configuración / Asignación + Muestras + Monitor), routes + ROUTE_OPTION/OPTION_ROUTE, redirect from /carrier-link/plans, header badge component used by all Carrier Link pages; access tests updated.
+## Task 3: Generador de Asignaciones (copy)
+Copy of src/pages/AllocationPlanGenerator.tsx + its form (Task 1 engine; matrix A/B/C, seasonal, totals/dates, carrier/product/connector instead of panelist-specific fields) with the same tabs and actions: generate → "Planes generados" (draft plans with quotas saved), download CSV, CSV import with template (quota rows origin_city,destination_city,week,samples, validated per row), "Aplicar" (cl_plan_activate with missing-points/standards notices), "Eliminar" (draft only). Replaces ClPlans.tsx.
+## Task 4: Planes de Asignación (copy)
+Copy of src/pages/AllocationPlans.tsx layout/filters for quotas (plan, origin, destination, week, status), paginated server-side, totals, link to Muestras filtered by quota.
+## Task 5: DB support for balancing (migration, applied with owner confirmation)
+`cl_plan_rebalance_quotas(p_plan_id uuid, p_changes jsonb)` SECURITY DEFINER, cl_plan_authorize edit; changes = [{origin_city_id, destination_city_id, iso_year, iso_week, samples}] absolute values; plan total must be preserved; draft plans: any week; active plans: only quotas with status 'pending' and period_start > fence (same fence semantics as E2E balancing: read how E2E computes it); validated set-based; safeupdate; tests incl. 15k scale < 2 s. Also check/ensure draft plan deletion is possible for the generator's "Eliminar" (RPC if RLS forbids).
+## Task 6: Balanceo de Carga (copy)
+Copy of src/pages/NodeLoadBalancing.tsx + useNodeLoadBalancing (read its algorithm/UX: expected average, acceptable deviation, fence, compensation) applied to quotas: nodes = origin cities (and per-week view), no capacity limit; proposals saved through cl_plan_rebalance_quotas.
+## Task 7: Help + cleanup
+Help page carrier-link.* updated to the new structure/names (5 languages); remove dead code (old ClPlans pieces, generateClQuotas if unused).
