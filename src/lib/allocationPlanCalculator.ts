@@ -59,6 +59,15 @@ export interface AllocationPlanParams {
   cityPolicies?: Map<string, { datePolicy: DatePolicy; pobox: boolean }>
   /** Called once per kind of problem: 'dropped_sample' (no valid day/node) and 'pobox_uncovered' (POBOX day left empty). */
   onWarning?: (w: { code: string; count: number }) => void
+  /**
+   * Optional restriction (Carrier Link): only these nodes may SEND. Omitted = every usable node may send
+   * (today's behaviour). Not applied by POBOX, which Carrier Link does not use.
+   */
+  originNodeIds?: string[]
+  /** Optional restriction (Carrier Link): only these nodes may RECEIVE. Omitted = every usable node. */
+  destinationNodeIds?: string[]
+  /** Random source for the week draw of left-over samples. Default Math.random (today's behaviour). */
+  rng?: () => number
 }
 
 export interface AllocationEntry {
@@ -187,11 +196,18 @@ export function generateAllocationPlan(params: AllocationPlanParams): Allocation
     unavailabilityByNode,
     cityPolicies,
     onWarning,
+    originNodeIds,
+    destinationNodeIds,
+    rng,
   } = params
 
   // Only nodes with an active panelist can send or receive (a node without anyone produces impossible shipments).
   const eligible = eligibleNodeIds ? new Set(eligibleNodeIds) : null
   const usableNodes = eligible ? nodes.filter(n => eligible.has(n.id)) : nodes
+  const roles: NodeRoles = {
+    origin: originNodeIds ? new Set(originNodeIds) : null,
+    destination: destinationNodeIds ? new Set(destinationNodeIds) : null,
+  }
 
   const cal: WorkingCalendar = {
     workingDows: workingDows ?? new Set([1, 2, 3, 4, 5]),
@@ -224,11 +240,11 @@ export function generateAllocationPlan(params: AllocationPlanParams): Allocation
   const entries: AllocationEntry[] = []
 
   // PASO 1: Aplicar matriz A-B-C para obtener rutas ciudad-ciudad
-  const cityRoutes = generateCityRoutes(totalSamples, cities, usableNodes, cityDistributionMatrix)
+  const cityRoutes = generateCityRoutes(totalSamples, cities, usableNodes, cityDistributionMatrix, roles)
 
   // PASO 2: Para cada ruta ciudad-ciudad, distribuir temporalmente y por nodos
   for (const route of cityRoutes) {
-    entries.push(...generateEntriesForRoute(route, weeks, usableNodes, useSeasonalDistribution, seasonalDistribution, ctx))
+    entries.push(...generateEntriesForRoute(route, weeks, usableNodes, useSeasonalDistribution, seasonalDistribution, ctx, roles, rng))
   }
 
   const warn = (code: string, count: number) => {
@@ -246,6 +262,15 @@ export function generateAllocationPlan(params: AllocationPlanParams): Allocation
 
   return entries
 }
+
+/** Optional send/receive restriction per node; null = no restriction on that side. */
+interface NodeRoles {
+  origin: Set<string> | null
+  destination: Set<string> | null
+}
+
+const canSend = (roles: NodeRoles, n: Node) => !roles.origin || roles.origin.has(n.id)
+const canReceive = (roles: NodeRoles, n: Node) => !roles.destination || roles.destination.has(n.id)
 
 /** Shared state of one generation run: the day loads let routes of the same nodes/city avoid piling up. */
 interface GenerationContext {
@@ -306,7 +331,8 @@ function generateCityRoutes(
   totalSamples: number,
   cities: City[],
   nodes: Node[],
-  matrix: CityDistributionMatrix
+  matrix: CityDistributionMatrix,
+  roles: NodeRoles
 ): CityPairRoute[] {
   const routes: CityPairRoute[] = []
 
@@ -368,8 +394,10 @@ function generateCityRoutes(
     const totalForThisRoute = Math.round(totalSamples * (percentage / 100))
     if (totalForThisRoute === 0) continue
 
-    const originCities = citiesByClass.get(matrixRoute.originClass) || []
-    const destCities = citiesByClass.get(matrixRoute.destClass) || []
+    const originCities = (citiesByClass.get(matrixRoute.originClass) || [])
+      .filter(c => !roles.origin || nodesByCity.get(c.id)!.some(n => canSend(roles, n)))
+    const destCities = (citiesByClass.get(matrixRoute.destClass) || [])
+      .filter(c => !roles.destination || nodesByCity.get(c.id)!.some(n => canReceive(roles, n)))
 
     if (originCities.length === 0 || destCities.length === 0) {
       console.warn(`Skipping route ${matrixRoute.originClass}→${matrixRoute.destClass}: ` +
@@ -431,13 +459,15 @@ function generateEntriesForRoute(
   allNodes: Node[],
   useSeasonalDistribution: boolean,
   seasonalDistribution: SeasonalDistribution | undefined,
-  ctx: GenerationContext
+  ctx: GenerationContext,
+  roles: NodeRoles,
+  rng: (() => number) | undefined
 ): AllocationEntry[] {
   const entries: AllocationEntry[] = []
 
   // Obtener nodos de origen y destino
-  const originNodes = allNodes.filter(n => n.status === 'active' && n.city_id === route.originCity.id)
-  const destNodes = allNodes.filter(n => n.status === 'active' && n.city_id === route.destCity.id)
+  const originNodes = allNodes.filter(n => n.status === 'active' && n.city_id === route.originCity.id && canSend(roles, n))
+  const destNodes = allNodes.filter(n => n.status === 'active' && n.city_id === route.destCity.id && canReceive(roles, n))
 
   if (originNodes.length === 0 || destNodes.length === 0) {
     console.warn(`No nodes available for route ${route.originCity.name}→${route.destCity.name}`)
@@ -445,7 +475,7 @@ function generateEntriesForRoute(
   }
 
   // Distribuir muestras por semanas (aplicando estacionalidad si está habilitada)
-  const samplesPerWeek = distributeSamplesAcrossWeeks(route.samples, weeks, useSeasonalDistribution, seasonalDistribution)
+  const samplesPerWeek = distributeSamplesAcrossWeeks(route.samples, weeks, useSeasonalDistribution, seasonalDistribution, rng)
 
   // Para cada semana, crear asignaciones con balanceo bidireccional
   for (let i = 0; i < weeks.length; i++) {
