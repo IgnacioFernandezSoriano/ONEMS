@@ -74,3 +74,17 @@ Deno.test('summaryStratumIds', () => {
   assertEquals(summaryStratumIds(null), [])
   assertEquals(summaryStratumIds({}), [])
 })
+
+import { sqlErrorToHttp } from './lib.ts'
+
+Deno.test('sqlErrorToHttp: testing-only demand -> 403 with its code', () => {
+  assertEquals(sqlErrorToHttp({ code: '22023', message: 'CL_DEMAND_TESTING_DRY_RUN_ONLY: this demand was issued while the connector was testing' }),
+    { status: 403, code: 'CL_DEMAND_TESTING_DRY_RUN_ONLY' })
+})
+Deno.test('sqlErrorToHttp: defaults unchanged', () => {
+  assertEquals(sqlErrorToHttp({ code: '22023', message: 'CL_BAD_PAYLOAD: x' }), { status: 400, code: 'CL_BAD_PAYLOAD' })
+  assertEquals(sqlErrorToHttp({ code: '22023', message: 'plan not found' }), { status: 400, code: 'CL_BAD_REQUEST' })
+  assertEquals(sqlErrorToHttp({ code: '42501', message: 'Forbidden' }), { status: 403, code: 'CL_FORBIDDEN' })
+  assertEquals(sqlErrorToHttp({ code: 'P0001', message: 'CL_DEMAND_NOT_OPEN: x' }), null)
+  assertEquals(sqlErrorToHttp({}), null)
+})

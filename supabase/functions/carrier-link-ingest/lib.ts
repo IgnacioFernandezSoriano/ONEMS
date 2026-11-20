@@ -73,3 +73,19 @@ export function summaryStratumIds(summary: unknown): string[] {
   }
   return out
 }
+
+// CL_ codes whose HTTP status is not the default for their SQLSTATE (22023 -> 400, 42501 -> 403).
+// A demand issued while the connector was testing only accepts dry_run (same 403 as CL_FEED_TESTING_DRY_RUN_ONLY).
+const STATUS_BY_CODE: Record<string, number> = {
+  CL_DEMAND_TESTING_DRY_RUN_ONLY: 403,
+}
+
+// Maps a Postgres error to { status, code }; null = unexpected (the caller answers 500 and logs only the SQLSTATE).
+// Only the CL_ code token is ever echoed: SQL text is never returned.
+export function sqlErrorToHttp(err: { code?: string; message?: string }): { status: number; code: string } | null {
+  const m = /^(CL_[A-Z_]+)/.exec(err.message ?? '')
+  const cl = m ? m[1] : null
+  if (err.code === '22023') return { status: (cl && STATUS_BY_CODE[cl]) || 400, code: cl ?? 'CL_BAD_REQUEST' }
+  if (err.code === '42501') return { status: (cl && STATUS_BY_CODE[cl]) || 403, code: cl ?? 'CL_FORBIDDEN' }
+  return null
+}
