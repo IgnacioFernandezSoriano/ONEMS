@@ -5430,3 +5430,32 @@ cl.connectors.title,Conectores
 cl.connectors.help,Configura cómo llegan a ONEMS los datos de escaneo del carrier.
 cl.monitor.title,Monitor de captura
 cl.monitor.help,Sigue el estado de la captura de datos de los carriers.
+cl.reading_points.carrier,Transportista
+cl.reading_points.add,Añadir punto de lectura
+cl.reading_points.edit,Editar punto de lectura
+cl.reading_points.place,Lugar (código del carrier)
+cl.reading_points.mode,Modo
+cl.reading_points.mode_hint,Déjalo vacío para aceptar cualquier modo en este lugar.
+cl.reading_points.any_mode,Cualquier modo
+cl.reading_points.center,Centro postal
+cl.reading_points.select_center,Selecciona un centro postal
+cl.reading_points.center_no_city,Este centro no tiene ciudad: solo puede ser punto intermedio.
+cl.reading_points.city,Ciudad
+cl.reading_points.role,Papel en la ruta
+cl.reading_points.role.origin,Inicio
+cl.reading_points.role.destination,Fin
+cl.reading_points.role.both,Inicio y fin
+cl.reading_points.role.none,Intermedio
+cl.reading_points.name,Nombre (opcional)
+cl.reading_points.empty,Este carrier aún no tiene puntos de lectura.
+cl.reading_points.no_carriers,No hay carriers activos en esta cuenta.
+cl.reading_points.unknown_title,Lugares sin punto de lectura
+cl.reading_points.unknown_help,En los últimos 90 días llegaron escaneos de estos lugares sin poder asignarlos.
+cl.reading_points.readings,Lecturas
+cl.reading_points.register,Dar de alta
+cl.reading_points.delete_title,Eliminar punto de lectura
+cl.reading_points.delete_confirm,¿Eliminar el punto de lectura
+cl.reading_points.error.no_account,Selecciona primero una cuenta.
+cl.reading_points.error.missing_place,Indica el código del lugar.
+cl.reading_points.error.missing_carrier,Selecciona un carrier.
+cl.reading_points.error.missing_center,Selecciona un centro postal.

@@ -5430,3 +5430,32 @@ cl.connectors.title,Connectors
 cl.connectors.help,Configure how carrier scan data reaches ONEMS.
 cl.monitor.title,Capture monitor
 cl.monitor.help,Follow the status of data capture from carriers.
+cl.reading_points.carrier,Carrier
+cl.reading_points.add,Add reading point
+cl.reading_points.edit,Edit reading point
+cl.reading_points.place,Place (carrier code)
+cl.reading_points.mode,Mode
+cl.reading_points.mode_hint,Leave empty to accept any mode at this place.
+cl.reading_points.any_mode,Any mode
+cl.reading_points.center,Postal center
+cl.reading_points.select_center,Select a postal center
+cl.reading_points.center_no_city,This center has no city: it can only be an intermediate point.
+cl.reading_points.city,City
+cl.reading_points.role,Role in the route
+cl.reading_points.role.origin,Start
+cl.reading_points.role.destination,End
+cl.reading_points.role.both,Start and end
+cl.reading_points.role.none,Intermediate
+cl.reading_points.name,Name (optional)
+cl.reading_points.empty,No reading points for this carrier yet.
+cl.reading_points.no_carriers,There are no active carriers in this account.
+cl.reading_points.unknown_title,Places without a reading point
+cl.reading_points.unknown_help,Scans from the last 90 days arrived from these places and could not be matched.
+cl.reading_points.readings,Readings
+cl.reading_points.register,Register
+cl.reading_points.delete_title,Delete reading point
+cl.reading_points.delete_confirm,Delete the reading point
+cl.reading_points.error.no_account,Select an account first.
+cl.reading_points.error.missing_place,Enter the place code.
+cl.reading_points.error.missing_carrier,Select a carrier.
+cl.reading_points.error.missing_center,Select a postal center.

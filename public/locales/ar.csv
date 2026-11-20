@@ -5422,3 +5422,32 @@ cl.connectors.title,الموصلات
 cl.connectors.help,اضبط كيفية وصول بيانات مسح الناقل إلى ONEMS.
 cl.monitor.title,مراقب الالتقاط
 cl.monitor.help,تابع حالة التقاط البيانات من الناقلين.
+cl.reading_points.carrier,الناقل
+cl.reading_points.add,إضافة نقطة قراءة
+cl.reading_points.edit,تعديل نقطة القراءة
+cl.reading_points.place,المكان (رمز الناقل)
+cl.reading_points.mode,الوضع
+cl.reading_points.mode_hint,اتركه فارغا لقبول أي وضع في هذا المكان.
+cl.reading_points.any_mode,أي وضع
+cl.reading_points.center,المركز البريدي
+cl.reading_points.select_center,اختر مركزا بريديا
+cl.reading_points.center_no_city,هذا المركز بلا مدينة: يمكن أن يكون نقطة وسيطة فقط.
+cl.reading_points.city,المدينة
+cl.reading_points.role,الدور في المسار
+cl.reading_points.role.origin,البداية
+cl.reading_points.role.destination,النهاية
+cl.reading_points.role.both,البداية والنهاية
+cl.reading_points.role.none,وسيط
+cl.reading_points.name,الاسم (اختياري)
+cl.reading_points.empty,لا توجد نقاط قراءة لهذا الناقل بعد.
+cl.reading_points.no_carriers,لا يوجد ناقلون نشطون في هذا الحساب.
+cl.reading_points.unknown_title,أماكن بلا نقطة قراءة
+cl.reading_points.unknown_help,وصلت خلال آخر 90 يوما عمليات مسح من هذه الأماكن دون مطابقة.
+cl.reading_points.readings,القراءات
+cl.reading_points.register,تسجيل
+cl.reading_points.delete_title,حذف نقطة القراءة
+cl.reading_points.delete_confirm,حذف نقطة القراءة
+cl.reading_points.error.no_account,اختر حسابا أولا.
+cl.reading_points.error.missing_place,أدخل رمز المكان.
+cl.reading_points.error.missing_carrier,اختر ناقلا.
+cl.reading_points.error.missing_center,اختر مركزا بريديا.
