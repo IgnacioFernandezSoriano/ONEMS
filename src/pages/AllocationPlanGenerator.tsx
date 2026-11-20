@@ -16,7 +16,7 @@ import { clErrorKey } from '@/lib/carrierLink/clErrors'
 import type { ClQuota } from '@/lib/carrierLink/quotaCalculator'
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
 import { useClPlans, type ClPlan } from '@/hooks/carrierLink/useClPlans'
-import { useClConnectors } from '@/hooks/carrierLink/useClConnectors'
+import { useClFeedOptions } from '@/hooks/carrierLink/useClFeedOptions'
 import type { ClGeneratorSupport } from '@/hooks/carrierLink/useClGeneratorFlow'
 import { ClPlanActionPanel, type ClPlanAction } from '@/components/carrier-link/ClPlanActionPanel'
 
@@ -67,10 +67,12 @@ export function AllocationPlanGenerator() {
   const accountId = useEffectiveAccountId()
   const clOn = carrierLinkCaptureAvailable({ flagOn: carrierLinkOn, canEditPlans: canEdit('cl_plans'), accountId, carriers })
   const cl = useClPlans(clOn ? accountId : null)
-  const { feeds: clFeeds } = useClConnectors(clOn ? accountId : null)
+  const { feeds: clFeeds } = useClFeedOptions(clOn ? accountId : null)
   const [capture, setCapture] = useState<Capture>('panelists')
   const [clAction, setClAction] = useState<{ plan: ClPlan; action: ClPlanAction } | null>(null)
   const [clMessage, setClMessage] = useState<{ kind: 'error' | 'info'; key: string; vars?: Record<string, string | number> } | null>(null)
+  // Aplicar/Eliminar de un plan de Carrier Link: como los de panelistas (no en modo consulta) y con Edit en cl_plans.
+  const clCanAct = clOn && !readOnly && canEdit('cl_plans')
   const clGenerated = clOn ? clGeneratedPlans(cl.plans) : []
   const clApplied = clOn ? clAppliedPlans(cl.plans) : []
 
@@ -376,13 +378,13 @@ export function AllocationPlanGenerator() {
                 {t(clMessage.key, clMessage.vars)}
               </p>
             )}
-            {clOn && clAction && (
+            {clCanAct && clAction && (
               <div className="mb-4">
                 <ClPlanActionPanel
                   plan={clAction.plan}
                   action={clAction.action}
                   cityName={cl.cityName}
-                  quotas={cl.quotas}
+                  quotaCount={cl.quotaCount}
                   missingPoints={cl.missingPoints}
                   missingStandards={cl.missingStandards}
                   activate={cl.activate}
@@ -494,7 +496,7 @@ export function AllocationPlanGenerator() {
                             >
                               {t('allocation_generator.download_csv')}
                             </button>
-                            {plan.status === 'draft' && (
+                            {clCanAct && plan.status === 'draft' && (
                               <>
                                 <button
                                   onClick={() => {

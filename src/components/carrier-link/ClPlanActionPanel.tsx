@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { AlertTriangle, Loader2 } from 'lucide-react'
 import { useTranslation } from '@/hooks/useTranslation'
 import { clErrorKey } from '@/lib/carrierLink/clErrors'
-import { routeKey, type QuotaInput } from '@/lib/carrierLink/planView'
+import { routeKey } from '@/lib/carrierLink/planView'
 import type { ClMissingPoint, ClMissingStandard, ClPlan, ClPlanResult } from '@/hooks/carrierLink/useClPlans'
 
 const btnPrimary = 'inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50'
@@ -18,7 +18,8 @@ interface Props {
   plan: ClPlan
   action: ClPlanAction
   cityName: (id: string) => string
-  quotas: (planId: string) => Promise<QuotaInput[]>
+  /** Número de cuotas del plan (contado en el servidor). */
+  quotaCount: (planId: string) => Promise<number>
   missingPoints: (planId: string) => Promise<ClMissingPoint[]>
   missingStandards: (planId: string) => Promise<ClMissingStandard[]>
   activate: (planId: string) => Promise<ClPlanResult>
@@ -34,7 +35,7 @@ interface Checks {
 }
 
 /** Confirmación en página de "Aplicar" (activar) o "Eliminar" un plan borrador de Carrier Link. */
-export function ClPlanActionPanel({ plan, action, cityName, quotas, missingPoints, missingStandards, activate, remove, onClose }: Props) {
+export function ClPlanActionPanel({ plan, action, cityName, quotaCount, missingPoints, missingStandards, activate, remove, onClose }: Props) {
   const { t } = useTranslation()
   const [checks, setChecks] = useState<Checks | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -46,9 +47,9 @@ export function ClPlanActionPanel({ plan, action, cityName, quotas, missingPoint
     let cancelled = false
     setChecks(null)
     setLoadError(null)
-    void Promise.all([quotas(plan.id), missingPoints(plan.id), missingStandards(plan.id)])
-      .then(([q, mp, ms]) => {
-        if (!cancelled) setChecks({ quotaCount: q.length, missingPoints: mp, missingStandards: ms })
+    void Promise.all([quotaCount(plan.id), missingPoints(plan.id), missingStandards(plan.id)])
+      .then(([n, mp, ms]) => {
+        if (!cancelled) setChecks({ quotaCount: n, missingPoints: mp, missingStandards: ms })
       })
       .catch((e) => {
         if (!cancelled) setLoadError(clErrorKey(e as { message?: string; code?: string }))
@@ -56,7 +57,7 @@ export function ClPlanActionPanel({ plan, action, cityName, quotas, missingPoint
     return () => {
       cancelled = true
     }
-  }, [action, plan.id, quotas, missingPoints, missingStandards])
+  }, [action, plan.id, quotaCount, missingPoints, missingStandards])
 
   const run = async () => {
     setRunning(true)

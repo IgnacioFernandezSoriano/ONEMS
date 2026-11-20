@@ -5,6 +5,7 @@ import { fetchAllPages } from '@/lib/fetchAllPages'
 import { workingDowsFromSchedule } from '@/lib/workingDays'
 import type { ClQuota } from '@/lib/carrierLink/quotaCalculator'
 import { buildPlanRow, LOCKED_WHEN_NOT_DRAFT, type PlanForm, type QuotaInput } from '@/lib/carrierLink/planView'
+import { toQuotaFilterTotals } from '@/lib/carrierLink/planRecords'
 
 export type ClPlanStatus = 'draft' | 'active' | 'closed'
 
@@ -138,6 +139,13 @@ export function useClPlans(accountId: string | null) {
     [],
   )
 
+  /** Número de cuotas del plan, contado en el servidor (cl_plan_quota_totals), sin traer las filas. */
+  const quotaCount = useCallback(async (planId: string): Promise<number> => {
+    const { data, error: e } = await supabase.rpc('cl_plan_quota_totals', { p_plan_id: planId })
+    if (e) throw e
+    return toQuotaFilterTotals(data)?.quotas ?? 0
+  }, [])
+
   const create = async (f: PlanForm): Promise<ClPlanResult> => {
     const built = buildPlanRow(accountId, f)
     if (!built.ok) return { success: false, error: { message: built.error }, key: `cl.plans.error.${built.error}` }
@@ -237,6 +245,7 @@ export function useClPlans(accountId: string | null) {
     error,
     refetch,
     quotas,
+    quotaCount,
     create,
     update,
     setQuotas,
