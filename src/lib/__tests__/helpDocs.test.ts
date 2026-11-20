@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { HELP_DOCS, HELP_LANGS, canSeeHelpDoc, helpDocUrl } from '../helpDocs'
+import { visibleHelpDocs, HELP_DOCS, HELP_LANGS, canSeeHelpDoc, helpDocUrl } from '../helpDocs'
 
 const none = { isSuperadmin: false, canManageAccess: false, hasAnyEdit: false }
 
@@ -41,5 +41,13 @@ describe('ayuda de Carrier Link', () => {
   })
   it('los enlaces de las pantallas apuntan a la sección correcta', () => {
     expect(helpDocUrl('carrier-link', 'es', 'reading-points')).toBe('/help/carrier-link.es.html#reading-points')
+  })
+})
+
+
+describe('visibleHelpDocs', () => {
+  it('oculta la ayuda carrier-link cuando Carrier Link esta deshabilitado', () => {
+    expect(visibleHelpDocs(false).some(d => d.id === 'carrier-link')).toBe(false)
+    expect(visibleHelpDocs(true).some(d => d.id === 'carrier-link')).toBe(true)
   })
 })

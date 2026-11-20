@@ -46,6 +46,9 @@ import { useIncidentAttention } from '../../lib/hooks/useIncidentAttention'
 import { useDeferredSamples } from '../../hooks/useDeferredSamples'
 import { usePermissions } from '../../contexts/PermissionsContext'
 import { canAccess, routeAccess, type RouteAccess } from '../../lib/access'
+import { isCarrierLinkEnabled } from '@/lib/featureFlags'
+
+const carrierLinkOn = isCarrierLinkEnabled()
 
 interface MenuItem {
   path: string
@@ -105,7 +108,7 @@ export function Sidebar() {
   
   // Al entrar en una pantalla de Carrier Link (p. ej. aterrizaje), se muestra su pestaña
   useEffect(() => {
-    if (location.pathname.startsWith('/carrier-link')) {
+    if (carrierLinkOn && location.pathname.startsWith('/carrier-link')) {
       setModuleFilter('carrier_link')
       setExpandedSections(prev => (prev.includes('/carrier-link') ? prev : [...prev, '/carrier-link']))
     }
@@ -502,7 +505,7 @@ export function Sidebar() {
   }
 
   // Always show the Operations (all modules) menu
-  const menuGroups: MenuGroup[] = allModulesMenuGroups
+  const menuGroups: MenuGroup[] = allModulesMenuGroups.filter(g => carrierLinkOn || g.label !== 'CARRIER_LINK')
 
   const hasAccess = (item: MenuItem): boolean => {
     if (item.children) return item.children.some(hasAccess)
@@ -512,7 +515,7 @@ export function Sidebar() {
   }
 
   // La pestaña Carrier Link solo se ve si el usuario ve alguna opción cl_*
-  const showCarrierLinkTab = menuGroups.some(g => g.label === 'CARRIER_LINK' && g.items.some(hasAccess))
+  const showCarrierLinkTab = carrierLinkOn && menuGroups.some(g => g.label === 'CARRIER_LINK' && g.items.some(hasAccess))
 
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(path + '/')
