@@ -59,12 +59,10 @@ import { PanelistAvailabilityIncidents } from './pages/incidents/PanelistAvailab
 import { PanelistReportedIncidents } from './pages/incidents/PanelistReportedIncidents'
 import { ReceiptErrors } from './pages/incidents/ReceiptErrors'
 import { HelpCenter } from './pages/HelpCenter'
-import { ClPlans } from './pages/carrier-link/ClPlans'
 import { ClSamples } from './pages/carrier-link/ClSamples'
 import { ClReadingPoints } from './pages/carrier-link/ClReadingPoints'
 import { ClConnectors } from './pages/carrier-link/ClConnectors'
 import { ClMonitor } from './pages/carrier-link/ClMonitor'
-import { ClComingSoon } from './pages/carrier-link/ClComingSoon'
 import { isCarrierLinkEnabled } from './lib/featureFlags'
 
 const carrierLinkOn = isCarrierLinkEnabled()
@@ -138,34 +136,11 @@ function App() {
                       <Route path="/carrier-link/*" element={<Navigate to="/" replace />} />
                     )}
                     {carrierLinkOn && (<>
-                    <Route
-                      path="/carrier-link/plans"
-                      element={<Navigate to="/carrier-link/allocation-generator" replace />}
-                    />
-                    <Route
-                      path="/carrier-link/allocation-generator"
-                      element={
-                        <ProtectedRoute option="cl_plans">
-                          <ClPlans />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/carrier-link/load-balancing"
-                      element={
-                        <ProtectedRoute option="cl_plans">
-                          <ClComingSoon titleKey="menu.load_balancing" />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/carrier-link/allocation-plans"
-                      element={
-                        <ProtectedRoute option="cl_plans">
-                          <ClComingSoon titleKey="menu.allocation_plans" />
-                        </ProtectedRoute>
-                      }
-                    />
+                    {/* Asignación de Carrier Link = las mismas pantallas E2E (campo "Forma de captura") */}
+                    <Route path="/carrier-link/plans" element={<Navigate to="/allocation-plan-generator" replace />} />
+                    <Route path="/carrier-link/allocation-generator" element={<Navigate to="/allocation-plan-generator" replace />} />
+                    <Route path="/carrier-link/load-balancing" element={<Navigate to="/node-load-balancing" replace />} />
+                    <Route path="/carrier-link/allocation-plans" element={<Navigate to="/allocation-plans" replace />} />
                     <Route
                       path="/carrier-link/samples"
                       element={

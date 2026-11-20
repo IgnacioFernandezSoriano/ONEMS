@@ -5732,3 +5732,30 @@ cl.capture_method.help,"Que capturas a transportadora aceita no Gerador de aloca
 cl.capture_method.panelists,Painelistas
 cl.capture_method.carrier_link,Carrier Link
 cl.capture_method.both,Ambos
+cl.generator.capture_column,Captura
+cl.generator.capture_hint,Escolha primeiro o transportador: a sua forma de captura define as opções.
+cl.generator.cl_hint,Carrier Link: sem panelistas. As cidades vêm dos pontos de leitura ativos do transportador. Gere a pré-visualização e guarde-a como plano rascunho.
+cl.generator.generate_preview,Gerar pré-visualização
+cl.generator.save_plan,Guardar plano (rascunho)
+cl.generator.requested_vs_generated,Pedidas: {requested} · Geradas: {generated}
+cl.generator.generated_less,Não foi possível distribuir {missing} amostras: não há rotas ou dias úteis suficientes no período.
+cl.generator.saved,Plano {name} guardado como rascunho com {count} quotas. Aparece em Planos gerados.
+cl.generator.no_quotas,Este plano não tem quotas.
+cl.generator.activated,Plano {name} aplicado (ativo).
+cl.generator.deleted,Plano {name} eliminado.
+cl.generator.delete_confirm,Eliminar o plano rascunho {name} e as suas quotas?
+cl.generator.delete_not_allowed,Não foi possível eliminar o plano: já não é um rascunho ou não tem permissão.
+cl.generator.more_routes,e mais {count}
+cl.generator.csv.title,Importar quotas do Carrier Link (CSV)
+cl.generator.csv.help,"Preencha primeiro o nome, o transportador, o produto e as datas. Colunas: origin_city, destination_city (código ou nome), week (2026-W05 ou uma data), samples. O total vem do ficheiro."
+cl.generator.csv.errors_title,O ficheiro tem {count} erros; nada foi importado.
+cl.generator.csv.more_errors,e mais {count} erros
+cl.generator.csv.missing_columns,Faltam colunas: {columns}.
+cl.generator.csv.empty,O ficheiro não tem nenhuma linha com amostras.
+cl.generator.csv.unknown_city,Linha {row}: cidade desconhecida «{city}».
+cl.generator.csv.same_city,Linha {row}: origem e destino são a mesma cidade.
+cl.generator.csv.bad_week,Linha {row}: semana inválida «{week}» (use 2026-W05 ou uma data como 2026-01-31).
+cl.generator.csv.week_outside,Linha {row}: a semana {week} está fora das datas do plano.
+cl.generator.csv.duplicate,Linha {row}: repete a rota e a semana da linha {first}.
+cl.generator.csv.bad_samples,"Linha {row}: amostras inválidas «{value}» (número inteiro, 0 ou mais)."
+cl.generator.csv.no_points,Linha {row}: a rota {origin} → {destination} não tem pontos de leitura ativos do transportador.

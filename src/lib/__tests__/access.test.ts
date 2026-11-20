@@ -39,16 +39,25 @@ describe('access', () => {
     }
     for (const [path, opt] of Object.entries(rutas)) expect(routeAccess(path)).toBe(opt)
     expect(OPTION_ROUTE.cl_monitor).toBe('/carrier-link/monitor')
-    expect(OPTION_ROUTE.cl_plans).toBe('/carrier-link/allocation-generator')
+    expect(OPTION_ROUTE.cl_plans).toBe('/allocation-plan-generator')
   })
 
-  it('/carrier-link/plans redirige a allocation-generator en App.tsx', () => {
+  it('las rutas antiguas de asignación de Carrier Link redirigen a las pantallas E2E en App.tsx', () => {
     const src = readFileSync(resolve(__dirname, '../../App.tsx'), 'utf8')
-    expect(src).toMatch(/path="\/carrier-link\/plans"\s*element=\{<Navigate to="\/carrier-link\/allocation-generator" replace \/>\}/)
+    const redirects: [string, string][] = [
+      ['/carrier-link/plans', '/allocation-plan-generator'],
+      ['/carrier-link/allocation-generator', '/allocation-plan-generator'],
+      ['/carrier-link/load-balancing', '/node-load-balancing'],
+      ['/carrier-link/allocation-plans', '/allocation-plans'],
+    ]
+    for (const [from, to] of redirects) {
+      expect(src).toContain(`<Route path="${from}" element={<Navigate to="${to}" replace />} />`)
+    }
+    expect(src).not.toMatch(/ClPlans|ClComingSoon/)
   })
 
-  it('landingPath: quien solo ve cl_plans aterriza en una pantalla de Carrier Link', () => {
-    expect(landingPath(o => o === 'cl_plans', true)).toBe('/carrier-link/allocation-generator')
+  it('landingPath: quien solo ve cl_plans aterriza en el Generador de Asignaciones', () => {
+    expect(landingPath(o => o === 'cl_plans', true)).toBe('/allocation-plan-generator')
   })
 
   it('landingPath: quien solo ve cl_samples aterriza en /carrier-link/samples', () => {

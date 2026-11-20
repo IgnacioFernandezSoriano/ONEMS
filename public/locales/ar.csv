@@ -5724,3 +5724,30 @@ cl.capture_method.help,طرق الالتقاط التي يقبلها الناق�
 cl.capture_method.panelists,المشاركون
 cl.capture_method.carrier_link,Carrier Link
 cl.capture_method.both,كلاهما
+cl.generator.capture_column,الالتقاط
+cl.generator.capture_hint,اختر شركة النقل أولاً: طريقة الالتقاط الخاصة بها تحدد الخيارات.
+cl.generator.cl_hint,Carrier Link: بدون مشاركين. تأتي المدن من نقاط القراءة النشطة لشركة النقل. أنشئ المعاينة واحفظها كخطة مسودة.
+cl.generator.generate_preview,إنشاء المعاينة
+cl.generator.save_plan,حفظ الخطة (مسودة)
+cl.generator.requested_vs_generated,المطلوب: {requested} · المُنشأ: {generated}
+cl.generator.generated_less,تعذّر توزيع {missing} عينة: لا توجد مسارات أو أيام عمل كافية في الفترة.
+cl.generator.saved,تم حفظ الخطة {name} كمسودة مع {count} حصة. تظهر في الخطط المُنشأة.
+cl.generator.no_quotas,لا تحتوي هذه الخطة على حصص.
+cl.generator.activated,تم تطبيق الخطة {name} (نشطة).
+cl.generator.deleted,تم حذف الخطة {name}.
+cl.generator.delete_confirm,هل تريد حذف خطة المسودة {name} وحصصها؟
+cl.generator.delete_not_allowed,تعذّر حذف الخطة: لم تعد مسودة أو ليس لديك إذن.
+cl.generator.more_routes,و{count} أخرى
+cl.generator.csv.title,استيراد حصص Carrier Link (CSV)
+cl.generator.csv.help,املأ أولاً الاسم وشركة النقل والمنتج والتواريخ. الأعمدة: origin_city، destination_city (الرمز أو الاسم)، week (2026-W05 أو تاريخ)، samples. يأتي الإجمالي من الملف.
+cl.generator.csv.errors_title,يحتوي الملف على {count} أخطاء؛ لم يتم استيراد أي شيء.
+cl.generator.csv.more_errors,و{count} أخطاء أخرى
+cl.generator.csv.missing_columns,أعمدة مفقودة: {columns}.
+cl.generator.csv.empty,لا يحتوي الملف على أي صف به عينات.
+cl.generator.csv.unknown_city,الصف {row}: مدينة غير معروفة «{city}».
+cl.generator.csv.same_city,الصف {row}: المصدر والوجهة هما نفس المدينة.
+cl.generator.csv.bad_week,الصف {row}: أسبوع غير صالح «{week}» (استخدم 2026-W05 أو تاريخاً مثل 2026-01-31).
+cl.generator.csv.week_outside,الصف {row}: الأسبوع {week} خارج تواريخ الخطة.
+cl.generator.csv.duplicate,الصف {row}: يكرر المسار والأسبوع في الصف {first}.
+cl.generator.csv.bad_samples,الصف {row}: عدد عينات غير صالح «{value}» (عدد صحيح، 0 أو أكثر).
+cl.generator.csv.no_points,الصف {row}: المسار {origin} → {destination} ليس له نقاط قراءة نشطة لشركة النقل.

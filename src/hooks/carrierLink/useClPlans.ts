@@ -206,6 +206,25 @@ export function useClPlans(accountId: string | null) {
     return { success: true }
   }
 
+  /**
+   * Borra un plan borrador (sus cuotas caen en cascada). Si la base no deja borrar la fila (permisos o ya no es
+   * borrador) no se borra nada y se devuelve la clave del aviso.
+   */
+  const remove = async (planId: string): Promise<ClPlanResult> => {
+    if (!accountId) return { success: false, error: { message: 'no_account' }, key: 'cl.plans.error.no_account' }
+    const { data, error: e } = await supabase
+      .from('cl_plans')
+      .delete()
+      .eq('id', planId)
+      .eq('account_id', accountId)
+      .eq('status', 'draft')
+      .select('id')
+    if (e) return { success: false, error: e }
+    await refetch()
+    if (!data || data.length === 0) return { success: false, error: { message: 'not_deleted' }, key: 'cl.generator.delete_not_allowed' }
+    return { success: true }
+  }
+
   const cityName = useCallback((id: string) => cityNames.get(id) ?? id, [cityNames])
 
   return {
@@ -225,5 +244,6 @@ export function useClPlans(accountId: string | null) {
     missingStandards,
     standardRoutes,
     activate,
+    remove,
   }
 }

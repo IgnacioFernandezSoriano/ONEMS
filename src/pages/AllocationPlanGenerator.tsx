@@ -2,8 +2,23 @@ import { useState } from 'react'
 import { useAllocationPlans } from '@/hooks/useAllocationPlans'
 import { useAppliedAllocationPlans } from '@/hooks/useAppliedAllocationPlans'
 import { AllocationPlanGeneratorForm } from '@/components/allocation-plans/AllocationPlanGeneratorForm'
-import { carriersForCapture } from '@/lib/carrierCapture'
+import type { Capture } from '@/lib/carrierCapture'
 import { isCarrierLinkEnabled } from '@/lib/featureFlags'
+import {
+  carrierLinkCaptureAvailable,
+  generatorCarriers,
+  clGeneratedPlans,
+  clAppliedPlans,
+} from '@/lib/carrierLink/generatorCapture'
+import { quotasToCsv } from '@/lib/carrierLink/quotaCsv'
+import { setQuotasErrorKey, type PlanForm } from '@/lib/carrierLink/planView'
+import { clErrorKey } from '@/lib/carrierLink/clErrors'
+import type { ClQuota } from '@/lib/carrierLink/quotaCalculator'
+import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
+import { useClPlans, type ClPlan } from '@/hooks/carrierLink/useClPlans'
+import { useClConnectors } from '@/hooks/carrierLink/useClConnectors'
+import type { ClGeneratorSupport } from '@/hooks/carrierLink/useClGeneratorFlow'
+import { ClPlanActionPanel, type ClPlanAction } from '@/components/carrier-link/ClPlanActionPanel'
 
 import { CSVHandler } from '@/components/allocation-plans/CSVHandler'
 import { PageHeader } from '@/components/common/PageHeader'
@@ -46,6 +61,65 @@ export function AllocationPlanGenerator() {
   } = useAllocationPlans()
 
   const { appliedPlans, loading: appliedLoading } = useAppliedAllocationPlans()
+
+  // ---- Carrier Link: solo en DEV, con Edit en cl_plans y algún carrier de Carrier Link. Si no, la página es la de siempre.
+  const accountId = useEffectiveAccountId()
+  const clOn = carrierLinkCaptureAvailable({ flagOn: carrierLinkOn, canEditPlans: canEdit('cl_plans'), accountId, carriers })
+  const cl = useClPlans(clOn ? accountId : null)
+  const { feeds: clFeeds } = useClConnectors(clOn ? accountId : null)
+  const [capture, setCapture] = useState<Capture>('panelists')
+  const [clAction, setClAction] = useState<{ plan: ClPlan; action: ClPlanAction } | null>(null)
+  const [clMessage, setClMessage] = useState<{ kind: 'error' | 'info'; key: string; vars?: Record<string, string | number> } | null>(null)
+  const clGenerated = clOn ? clGeneratedPlans(cl.plans) : []
+  const clApplied = clOn ? clAppliedPlans(cl.plans) : []
+
+  const saveClPlan = async (form: PlanForm, quotas: ClQuota[]): Promise<{ ok: true } | { ok: false; key: string }> => {
+    const created = await cl.create(form)
+    if (!created.success) return { ok: false, key: created.key ?? clErrorKey(created.error) }
+    if (!created.id) return { ok: false, key: 'cl.error.generic' }
+    const res = await cl.setQuotas(created.id, quotas)
+    if (!res.success) {
+      // Sin cuotas el borrador no sirve: se quita (como un plan de panelistas sin envíos).
+      await cl.remove(created.id)
+      return { ok: false, key: setQuotasErrorKey(res.error) }
+    }
+    return { ok: true }
+  }
+
+  const clSupport: ClGeneratorSupport | undefined =
+    clOn && accountId ? { accountId, feeds: clFeeds, standardRoutes: cl.standardRoutes, save: saveClPlan } : undefined
+
+  const cityCode = (id: string) => cities.find((c) => c.id === id)?.code || cl.cityName(id)
+
+  const handleClDownload = async (plan: ClPlan) => {
+    setClMessage(null)
+    try {
+      const quotas = await cl.quotas(plan.id)
+      if (quotas.length === 0) {
+        setClMessage({ kind: 'error', key: 'cl.generator.no_quotas' })
+        return
+      }
+      const filename = `${plan.plan_name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`
+      downloadCSV(filename, quotasToCsv(quotas, cityCode))
+    } catch (e) {
+      setClMessage({ kind: 'error', key: clErrorKey(e as { message?: string; code?: string }) })
+    }
+  }
+
+  const clCaptureCell = (c: Capture) =>
+    clOn ? <td className="px-6 py-4">{t(`cl.capture_method.${c}`)}</td> : null
+  const clCaptureHeader = clOn ? (
+    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('cl.generator.capture_column')}</th>
+  ) : null
+  const clStatusBadge = (p: ClPlan) => (
+    <span
+      className={`px-2 py-1 rounded text-xs ${
+        p.status === 'draft' ? 'bg-yellow-100 text-yellow-800' : p.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+      }`}
+    >
+      {t(`cl.plans.status.${p.status}`)}
+    </span>
+  )
 
   const handleGenerate = async (planData: any, details: any[]) => {
     const plan = await createPlan(planData)
@@ -245,7 +319,7 @@ export function AllocationPlanGenerator() {
                 : 'border-transparent text-gray-600'
             }`}
           >
-            {t('allocation_generator.tab_generated_plans')} ({generatedPlans.length})
+            {t('allocation_generator.tab_generated_plans')} ({generatedPlans.length + clGenerated.length})
           </button>
           <button
             onClick={() => setActiveTab('applied')}
@@ -255,7 +329,7 @@ export function AllocationPlanGenerator() {
                 : 'border-transparent text-gray-600'
             }`}
           >
-            {t('allocation_generator.tab_applied_plans')} ({appliedPlans.length})
+            {t('allocation_generator.tab_applied_plans')} ({appliedPlans.length + clApplied.length})
           </button>
         </div>
       </div>
@@ -266,7 +340,7 @@ export function AllocationPlanGenerator() {
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-lg font-medium mb-4">{t('allocation_generator.automatic_generator')}</h2>
             <AllocationPlanGeneratorForm
-              carriers={carrierLinkOn ? carriersForCapture(carriers, 'panelists') : carriers}
+              carriers={generatorCarriers(carriers, { flagOn: carrierLinkOn, clAvailable: clOn })}
               products={products}
               cities={cities}
               nodes={nodes}
@@ -277,13 +351,17 @@ export function AllocationPlanGenerator() {
               cityPolicies={cityPolicies}
               unavailabilityByNode={unavailabilityByNode}
               onGenerate={handleGenerate}
+              carrierLink={clSupport}
+              onCaptureChange={setCapture}
             />
           </div>
 
+          {!(clOn && capture === 'carrier_link') && (
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-lg font-medium mb-4">{t('allocation_generator.manual_import')}</h2>
             <CSVHandler onImport={handleImportCSV} onDownloadTemplate={handleDownloadTemplate} />
           </div>
+          )}
         </div>
       )}
 
@@ -291,7 +369,30 @@ export function AllocationPlanGenerator() {
         <div className="bg-white rounded-lg shadow">
           <div className="p-6">
             <h2 className="text-lg font-medium mb-4">{t('allocation_generator.generated_plans_title')}</h2>
-            {generatedPlans.length === 0 ? (
+            {clOn && clMessage && (
+              <p className={`mb-4 text-sm ${clMessage.kind === 'error' ? 'text-red-600' : 'text-green-700'}`}>
+                {t(clMessage.key, clMessage.vars)}
+              </p>
+            )}
+            {clOn && clAction && (
+              <div className="mb-4">
+                <ClPlanActionPanel
+                  plan={clAction.plan}
+                  action={clAction.action}
+                  cityName={cl.cityName}
+                  quotas={cl.quotas}
+                  missingPoints={cl.missingPoints}
+                  missingStandards={cl.missingStandards}
+                  activate={cl.activate}
+                  remove={cl.remove}
+                  onClose={(m) => {
+                    setClAction(null)
+                    if (m) setClMessage(m)
+                  }}
+                />
+              </div>
+            )}
+            {generatedPlans.length + clGenerated.length === 0 ? (
               <div className="text-gray-500 text-center py-8">{t('allocation_generator.no_generated_plans')}</div>
             ) : (
               <div className="overflow-x-auto">
@@ -310,6 +411,7 @@ export function AllocationPlanGenerator() {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                         {t('allocation_generator.samples')}
                       </th>
+                      {clCaptureHeader}
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                         {t('allocation_generator.period')}
                       </th>
@@ -328,6 +430,7 @@ export function AllocationPlanGenerator() {
                         <td className="px-6 py-4">{plan.carrier?.name}</td>
                         <td className="px-6 py-4">{plan.product?.description}</td>
                         <td className="px-6 py-4">{plan.details_count}</td>
+                        {clCaptureCell('panelists')}
                         <td className="px-6 py-4">
                           {plan.start_date} {t('allocation_generator.to')} {plan.end_date}
                         </td>
@@ -370,6 +473,51 @@ export function AllocationPlanGenerator() {
                         </td>
                       </tr>
                     ))}
+                    {clGenerated.map((plan) => (
+                      <tr key={`cl-${plan.id}`}>
+                        <td className="px-6 py-4">{plan.plan_name}</td>
+                        <td className="px-6 py-4">{plan.carrier_name}</td>
+                        <td className="px-6 py-4">{plan.product_label}</td>
+                        <td className="px-6 py-4">{plan.total_samples}</td>
+                        {clCaptureCell('carrier_link')}
+                        <td className="px-6 py-4">
+                          {plan.start_date} {t('allocation_generator.to')} {plan.end_date}
+                        </td>
+                        <td className="px-6 py-4">{clStatusBadge(plan)}</td>
+                        <td className="px-6 py-4">
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => void handleClDownload(plan)}
+                              className="text-blue-600 hover:text-blue-800 text-sm"
+                            >
+                              {t('allocation_generator.download_csv')}
+                            </button>
+                            {plan.status === 'draft' && (
+                              <>
+                                <button
+                                  onClick={() => {
+                                    setClMessage(null)
+                                    setClAction({ plan, action: 'activate' })
+                                  }}
+                                  className="text-green-600 hover:text-green-800 text-sm"
+                                >
+                                  {t('allocation_generator.apply')}
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setClMessage(null)
+                                    setClAction({ plan, action: 'delete' })
+                                  }}
+                                  className="text-red-600 hover:text-red-800 text-sm"
+                                >
+                                  {t('allocation_generator.delete')}
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -382,7 +530,7 @@ export function AllocationPlanGenerator() {
         <div className="bg-white rounded-lg shadow">
           <div className="p-6">
             <h2 className="text-lg font-medium mb-4">{t('allocation_generator.applied_plans_historical')}</h2>
-            {appliedPlans.length === 0 ? (
+            {appliedPlans.length + clApplied.length === 0 ? (
               <div className="text-gray-500 text-center py-8">{t('allocation_generator.no_applied_plans')}</div>
             ) : (
               <div className="overflow-x-auto">
@@ -401,6 +549,7 @@ export function AllocationPlanGenerator() {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                         {t('allocation_generator.samples')}
                       </th>
+                      {clCaptureHeader}
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                         {t('allocation_generator.applied_date')}
                       </th>
@@ -416,6 +565,7 @@ export function AllocationPlanGenerator() {
                         <td className="px-6 py-4">{plan.carrier?.name}</td>
                         <td className="px-6 py-4">{plan.product?.description}</td>
                         <td className="px-6 py-4">{plan.details_count}</td>
+                        {clCaptureCell('panelists')}
                         <td className="px-6 py-4">
                           {new Date(plan.applied_date).toLocaleDateString()}
                         </td>
@@ -424,6 +574,19 @@ export function AllocationPlanGenerator() {
                             {plan.status}
                           </span>
                         </td>
+                      </tr>
+                    ))}
+                    {clApplied.map((plan) => (
+                      <tr key={`cl-${plan.id}`}>
+                        <td className="px-6 py-4">{plan.plan_name}</td>
+                        <td className="px-6 py-4">{plan.carrier_name}</td>
+                        <td className="px-6 py-4">{plan.product_label}</td>
+                        <td className="px-6 py-4">{plan.total_samples}</td>
+                        {clCaptureCell('carrier_link')}
+                        <td className="px-6 py-4">
+                          {plan.start_date} {t('allocation_generator.to')} {plan.end_date}
+                        </td>
+                        <td className="px-6 py-4">{clStatusBadge(plan)}</td>
                       </tr>
                     ))}
                   </tbody>

@@ -5724,3 +5724,30 @@ cl.capture_method.help,"Captures acceptées par le transporteur dans le Généra
 cl.capture_method.panelists,Panélistes
 cl.capture_method.carrier_link,Carrier Link
 cl.capture_method.both,Les deux
+cl.generator.capture_column,Capture
+cl.generator.capture_hint,Choisissez d’abord le transporteur : son mode de capture détermine les options.
+cl.generator.cl_hint,Carrier Link : sans panélistes. Les villes viennent des points de lecture actifs du transporteur. Générez l’aperçu et enregistrez-le comme plan brouillon.
+cl.generator.generate_preview,Générer l’aperçu
+cl.generator.save_plan,Enregistrer le plan (brouillon)
+cl.generator.requested_vs_generated,Demandés : {requested} · Générés : {generated}
+cl.generator.generated_less,{missing} échantillons n’ont pas pu être répartis : pas assez de routes ou de jours ouvrés sur la période.
+cl.generator.saved,Plan {name} enregistré comme brouillon avec {count} quotas. Il apparaît dans Plans générés.
+cl.generator.no_quotas,Ce plan n’a pas de quotas.
+cl.generator.activated,Plan {name} appliqué (actif).
+cl.generator.deleted,Plan {name} supprimé.
+cl.generator.delete_confirm,Supprimer le plan brouillon {name} et ses quotas ?
+cl.generator.delete_not_allowed,Le plan n’a pas pu être supprimé : ce n’est plus un brouillon ou vous n’avez pas l’autorisation.
+cl.generator.more_routes,et {count} de plus
+cl.generator.csv.title,Importer des quotas Carrier Link (CSV)
+cl.generator.csv.help,"Renseignez d’abord le nom, le transporteur, le produit et les dates. Colonnes : origin_city, destination_city (code ou nom), week (2026-W05 ou une date), samples. Le total vient du fichier."
+cl.generator.csv.errors_title,Le fichier contient {count} erreurs ; rien n’a été importé.
+cl.generator.csv.more_errors,et {count} autres erreurs
+cl.generator.csv.missing_columns,Colonnes manquantes : {columns}.
+cl.generator.csv.empty,Le fichier ne contient aucune ligne avec des échantillons.
+cl.generator.csv.unknown_city,Ligne {row} : ville inconnue « {city} ».
+cl.generator.csv.same_city,Ligne {row} : l’origine et la destination sont la même ville.
+cl.generator.csv.bad_week,Ligne {row} : semaine non valide « {week} » (utilisez 2026-W05 ou une date comme 2026-01-31).
+cl.generator.csv.week_outside,Ligne {row} : la semaine {week} est hors des dates du plan.
+cl.generator.csv.duplicate,Ligne {row} : répète la route et la semaine de la ligne {first}.
+cl.generator.csv.bad_samples,"Ligne {row} : échantillons non valides « {value} » (nombre entier, 0 ou plus)."
+cl.generator.csv.no_points,Ligne {row} : la route {origin} → {destination} n’a pas de points de lecture actifs du transporteur.

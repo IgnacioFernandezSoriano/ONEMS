@@ -5732,3 +5732,30 @@ cl.capture_method.help,"Qué capturas admite el carrier en el Generador de Asign
 cl.capture_method.panelists,Panelistas
 cl.capture_method.carrier_link,Carrier Link
 cl.capture_method.both,Ambos
+cl.generator.capture_column,Captura
+cl.generator.capture_hint,Elige primero el carrier: su forma de captura decide las opciones.
+cl.generator.cl_hint,Carrier Link: sin panelistas. Las ciudades salen de los puntos de lectura activos del carrier. Genera la vista previa y guárdala como plan borrador.
+cl.generator.generate_preview,Generar vista previa
+cl.generator.save_plan,Guardar plan (borrador)
+cl.generator.requested_vs_generated,Pedidas: {requested} · Generadas: {generated}
+cl.generator.generated_less,No se han podido repartir {missing} muestras: no hay suficientes rutas o días laborables en el periodo.
+cl.generator.saved,Plan {name} guardado como borrador con {count} cuotas. Aparece en Planes generados.
+cl.generator.no_quotas,Este plan no tiene cuotas.
+cl.generator.activated,Plan {name} aplicado (activo).
+cl.generator.deleted,Plan {name} eliminado.
+cl.generator.delete_confirm,¿Eliminar el plan borrador {name} y sus cuotas?
+cl.generator.delete_not_allowed,No se pudo eliminar el plan: ya no es un borrador o no tienes permiso.
+cl.generator.more_routes,y {count} más
+cl.generator.csv.title,Importar cuotas de Carrier Link (CSV)
+cl.generator.csv.help,"Rellena antes el nombre, el carrier, el producto y las fechas. Columnas: origin_city, destination_city (código o nombre), week (2026-W05 o una fecha), samples. El total sale del fichero."
+cl.generator.csv.errors_title,El fichero tiene {count} errores; no se ha importado nada.
+cl.generator.csv.more_errors,y {count} errores más
+cl.generator.csv.missing_columns,Faltan columnas: {columns}.
+cl.generator.csv.empty,El fichero no tiene ninguna fila con muestras.
+cl.generator.csv.unknown_city,Fila {row}: ciudad desconocida «{city}».
+cl.generator.csv.same_city,Fila {row}: origen y destino son la misma ciudad.
+cl.generator.csv.bad_week,Fila {row}: semana no válida «{week}» (usa 2026-W05 o una fecha como 2026-01-31).
+cl.generator.csv.week_outside,Fila {row}: la semana {week} está fuera de las fechas del plan.
+cl.generator.csv.duplicate,Fila {row}: repite la ruta y la semana de la fila {first}.
+cl.generator.csv.bad_samples,"Fila {row}: muestras no válidas «{value}» (número entero, 0 o más)."
+cl.generator.csv.no_points,Fila {row}: la ruta {origin} → {destination} no tiene puntos de lectura activos del carrier.

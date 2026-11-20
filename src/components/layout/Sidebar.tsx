@@ -194,7 +194,6 @@ export function Sidebar() {
           icon: Target,
           tooltip: t('menu.allocation.tooltip'),
           children: [
-            { path: '#panelists-alloc', label: t('menu.capture_panelists'), icon: UserCircle, heading: true, onlyWithOtherHeadings: true },
             {
               path: '/allocation-plan-generator',
               label: t('menu.allocation_generator'),
@@ -216,10 +215,6 @@ export function Sidebar() {
               option: 'allocation_plans',
               tooltip: t('menu.allocation_plans.tooltip'),
             },
-            { path: '#cl-alloc', label: t('menu.carrier_link'), icon: Truck, heading: true, accent: true },
-            { path: '/carrier-link/allocation-generator', label: t('menu.allocation_generator'), icon: Target, option: 'cl_plans' },
-            { path: '/carrier-link/load-balancing', label: t('menu.load_balancing'), icon: Scale, option: 'cl_plans' },
-            { path: '/carrier-link/allocation-plans', label: t('menu.allocation_plans'), icon: Calendar, option: 'cl_plans' },
           ],
         },
         {

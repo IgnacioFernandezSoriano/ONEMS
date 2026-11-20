@@ -108,7 +108,8 @@ export const ROUTE_OPTION: Record<string, AccessOption | 'superadmin' | 'open'> 
   '/incidents/panelist-reported': 'reported_incidents',
   '/incidents/receipts': 'receipts',
   '/help-center': 'help_center',
-  '/carrier-link/plans': 'cl_plans', // redirige a allocation-generator
+  // Rutas antiguas de la asignación de Carrier Link: redirigen a las pantallas E2E (misma pantalla, campo "Forma de captura").
+  '/carrier-link/plans': 'cl_plans',
   '/carrier-link/allocation-generator': 'cl_plans',
   '/carrier-link/load-balancing': 'cl_plans',
   '/carrier-link/allocation-plans': 'cl_plans',
@@ -136,7 +137,7 @@ export const OPTION_ROUTE: Partial<Record<AccessOption, string>> = {
   e2e_db: '/one-db',
   e2e_db_api: '/one-db-api',
   postal_centers: '/postal-centers',
-  cl_plans: '/carrier-link/allocation-generator',
+  cl_plans: '/allocation-plan-generator',
   cl_samples: '/carrier-link/samples',
   cl_reading_points: '/carrier-link/reading-points',
   cl_connectors: '/carrier-link/connectors',

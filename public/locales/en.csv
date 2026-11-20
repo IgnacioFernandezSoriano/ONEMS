@@ -5732,3 +5732,30 @@ cl.capture_method.help,"Which captures the carrier accepts in the Allocation Gen
 cl.capture_method.panelists,Panelists
 cl.capture_method.carrier_link,Carrier Link
 cl.capture_method.both,Both
+cl.generator.capture_column,Capture
+cl.generator.capture_hint,Choose the carrier first: its capture method decides the options.
+cl.generator.cl_hint,Carrier Link: no panelists. The cities come from the carrier’s active reading points. Generate the preview and save it as a draft plan.
+cl.generator.generate_preview,Generate preview
+cl.generator.save_plan,Save plan (draft)
+cl.generator.requested_vs_generated,Requested: {requested} · Generated: {generated}
+cl.generator.generated_less,{missing} samples could not be placed: there are not enough routes or working days in the period.
+cl.generator.saved,Plan {name} saved as a draft with {count} quotas. It appears in Generated Plans.
+cl.generator.no_quotas,This plan has no quotas.
+cl.generator.activated,Plan {name} applied (active).
+cl.generator.deleted,Plan {name} deleted.
+cl.generator.delete_confirm,Delete the draft plan {name} and its quotas?
+cl.generator.delete_not_allowed,The plan could not be deleted: it is no longer a draft or you do not have permission.
+cl.generator.more_routes,and {count} more
+cl.generator.csv.title,Import Carrier Link quotas (CSV)
+cl.generator.csv.help,"Fill in the name, carrier, product and dates first. Columns: origin_city, destination_city (code or name), week (2026-W05 or a date), samples. The total comes from the file."
+cl.generator.csv.errors_title,The file has {count} errors; nothing was imported.
+cl.generator.csv.more_errors,and {count} more errors
+cl.generator.csv.missing_columns,Missing columns: {columns}.
+cl.generator.csv.empty,The file has no row with samples.
+cl.generator.csv.unknown_city,"Row {row}: unknown city ""{city}""."
+cl.generator.csv.same_city,Row {row}: origin and destination are the same city.
+cl.generator.csv.bad_week,"Row {row}: invalid week ""{week}"" (use 2026-W05 or a date such as 2026-01-31)."
+cl.generator.csv.week_outside,Row {row}: week {week} is outside the plan dates.
+cl.generator.csv.duplicate,Row {row}: repeats the route and week of row {first}.
+cl.generator.csv.bad_samples,"Row {row}: invalid samples ""{value}"" (whole number, 0 or more)."
+cl.generator.csv.no_points,Row {row}: the route {origin} → {destination} has no active reading points of the carrier.
