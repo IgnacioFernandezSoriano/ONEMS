@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Plus, Pencil, Trash2, Copy, CheckCircle, Ban, Upload } from 'lucide-react'
 import { useTranslation } from '@/hooks/useTranslation'
+import { ClHelpLink } from '@/components/carrier-link/ClHelpLink'
 import { usePermissions } from '@/contexts/PermissionsContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
@@ -129,6 +130,7 @@ export function ClConnectors() {
     <div className="p-6 space-y-4">
       <div className="flex items-center gap-3">
         <h1 className="text-2xl font-bold text-gray-900">{t('cl.connectors.title')}</h1>
+        <ClHelpLink section="connectors" />
         {readOnly && <ReadOnlyBadge />}
       </div>
       <p className="text-sm text-gray-600">{t('cl.connectors.help')}</p>

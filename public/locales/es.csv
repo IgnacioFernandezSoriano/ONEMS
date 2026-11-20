@@ -5718,3 +5718,6 @@ hc.delivery_standards.cl_equivalence_tip,Solo se suma a las muestras del carrier
 hc.delivery_standard_form.cl_equivalence_invalid,Tiempo de primer/último tramo no válido (use un número >= 0)
 hc.delivery_standard_form.cl_first_mile_time,Tiempo equiv. primer tramo
 hc.delivery_standard_form.cl_last_mile_time,Tiempo equiv. último tramo
+help_center.doc.carrier_link.title,Carrier Link
+help_center.doc.carrier_link.desc,"Qué es Carrier Link, en qué orden se configura, qué hace cada pantalla y qué significa cada aviso."
+cl.help_link,Ayuda

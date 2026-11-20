@@ -5710,3 +5710,6 @@ hc.delivery_standards.cl_equivalence_tip,يُضاف فقط إلى عينات ا�
 hc.delivery_standard_form.cl_equivalence_invalid,وقت المرحلة الأولى/الأخيرة غير صالح (أدخل رقما >= 0)
 hc.delivery_standard_form.cl_first_mile_time,وقت معادلة المرحلة الأولى
 hc.delivery_standard_form.cl_last_mile_time,وقت معادلة المرحلة الأخيرة
+help_center.doc.carrier_link.title,Carrier Link
+help_center.doc.carrier_link.desc,"ما هو Carrier Link، وبأي ترتيب يُعدّ، وماذا تفعل كل شاشة، ومعنى كل تنبيه."
+cl.help_link,مساعدة

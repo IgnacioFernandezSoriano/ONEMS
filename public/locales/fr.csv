@@ -5710,3 +5710,6 @@ hc.delivery_standards.cl_equivalence_tip,Ajouté uniquement aux échantillons du
 hc.delivery_standard_form.cl_equivalence_invalid,Durée du premier/dernier tronçon invalide (nombre >= 0)
 hc.delivery_standard_form.cl_first_mile_time,Durée équiv. premier tronçon
 hc.delivery_standard_form.cl_last_mile_time,Durée équiv. dernier tronçon
+help_center.doc.carrier_link.title,Carrier Link
+help_center.doc.carrier_link.desc,"Ce qu’est Carrier Link, dans quel ordre le configurer, ce que fait chaque écran et ce que signifie chaque alerte."
+cl.help_link,Aide

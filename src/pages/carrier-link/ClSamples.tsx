@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Loader2, AlertTriangle, X } from 'lucide-react'
 import { useTranslation } from '@/hooks/useTranslation'
+import { ClHelpLink } from '@/components/carrier-link/ClHelpLink'
 import { usePermissions } from '@/contexts/PermissionsContext'
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
 import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge'
@@ -104,6 +105,7 @@ export function ClSamples() {
     <div className="p-6 space-y-4">
       <div className="flex items-center gap-3">
         <h1 className="text-2xl font-bold text-gray-900">{t('cl.samples.title')}</h1>
+        <ClHelpLink section="samples" />
         {readOnly && <ReadOnlyBadge />}
       </div>
       <p className="text-sm text-gray-600">{t('cl.samples.help')}</p>

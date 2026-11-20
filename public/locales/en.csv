@@ -5718,3 +5718,6 @@ hc.delivery_standards.cl_equivalence_tip,Only added to carrier samples
 hc.delivery_standard_form.cl_equivalence_invalid,Invalid first/last leg time (use a number >= 0)
 hc.delivery_standard_form.cl_first_mile_time,First-leg equivalence time
 hc.delivery_standard_form.cl_last_mile_time,Last-leg equivalence time
+help_center.doc.carrier_link.title,Carrier Link
+help_center.doc.carrier_link.desc,"What Carrier Link is, the order to set it up in, what each screen does and what each alert means."
+cl.help_link,Help

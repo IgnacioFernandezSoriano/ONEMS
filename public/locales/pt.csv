@@ -5718,3 +5718,6 @@ hc.delivery_standards.cl_equivalence_tip,Somado apenas às amostras da transport
 hc.delivery_standard_form.cl_equivalence_invalid,Tempo de primeiro/último trecho inválido (use um número >= 0)
 hc.delivery_standard_form.cl_first_mile_time,Tempo equiv. primeiro trecho
 hc.delivery_standard_form.cl_last_mile_time,Tempo equiv. último trecho
+help_center.doc.carrier_link.title,Carrier Link
+help_center.doc.carrier_link.desc,"O que é o Carrier Link, por que ordem se configura, o que faz cada ecrã e o que significa cada alerta."
+cl.help_link,Ajuda

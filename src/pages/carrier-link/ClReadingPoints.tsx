@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
 import { useTranslation } from '@/hooks/useTranslation'
+import { ClHelpLink } from '@/components/carrier-link/ClHelpLink'
 import { usePermissions } from '@/contexts/PermissionsContext'
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
 import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge'
@@ -96,6 +97,7 @@ export function ClReadingPoints() {
     <div className="p-6 space-y-4">
       <div className="flex items-center gap-3">
         <h1 className="text-2xl font-bold text-gray-900">{t('cl.reading_points.title')}</h1>
+        <ClHelpLink section="reading-points" />
         {readOnly && <ReadOnlyBadge />}
       </div>
       <p className="text-sm text-gray-600">{t('cl.reading_points.help')}</p>
