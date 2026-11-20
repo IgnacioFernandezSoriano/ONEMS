@@ -66,8 +66,6 @@ interface MenuItem {
   heading?: boolean
   /** Subencabezado con el color de acento de Carrier Link. */
   accent?: boolean
-  /** Subencabezado que solo se ve si en el mismo submenú se ve otro (p. ej. el de Carrier Link). */
-  onlyWithOtherHeadings?: boolean
 }
 
 interface MenuGroup {

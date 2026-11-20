@@ -86,10 +86,13 @@ export function ClPlanActionPanel({ plan, action, cityName, quotas, missingPoint
     )
   }
 
-  const blocked = !checks || checks.quotaCount === 0 || checks.missingPoints.length > 0
+  // Un borrador antiguo sin conector no se puede activar (la base daría CL_NO_FEED) ni editar desde aquí.
+  const noFeed = !plan.feed_id
+  const blocked = noFeed || !checks || checks.quotaCount === 0 || checks.missingPoints.length > 0
   return (
     <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 space-y-3">
       <p className="text-sm text-blue-900">{t('cl.plans.activate_confirm', { name: plan.plan_name })}</p>
+      {noFeed && <p className="text-sm text-red-700">{t('cl.generator.needs_connector')}</p>}
       {!checks && !loadError && <p className="text-sm text-gray-500">{t('common.loading')}</p>}
       {loadError && <p className="text-sm text-red-600">{t(loadError)}</p>}
       {checks && checks.quotaCount === 0 && <p className="text-sm text-red-700">{t('cl.generator.no_quotas')}</p>}

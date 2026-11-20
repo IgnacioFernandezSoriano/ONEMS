@@ -5717,8 +5717,6 @@ hc.delivery_standard_form.cl_last_mile_time,وقت معادلة المرحلة �
 help_center.doc.carrier_link.title,Carrier Link
 help_center.doc.carrier_link.desc,"ما هو Carrier Link، وبأي ترتيب يُعدّ، وماذا تفعل كل شاشة، ومعنى كل تنبيه."
 cl.help_link,مساعدة
-menu.capture_panelists,المشاركون
-cl.coming_soon,قيد الإعداد.
 cl.capture_method.label,طريقة الالتقاط
 cl.capture_method.help,طرق الالتقاط التي يقبلها الناقل في مولد التخصيص: المشاركون، أو Carrier Link (عمليات مسح الناقل؛ ويفعّل أيضًا وصلاته ونقاط قراءته)، أو كلاهما.
 cl.capture_method.panelists,المشاركون
@@ -5751,3 +5749,5 @@ cl.generator.csv.week_outside,الصف {row}: الأسبوع {week} خارج ت�
 cl.generator.csv.duplicate,الصف {row}: يكرر المسار والأسبوع في الصف {first}.
 cl.generator.csv.bad_samples,الصف {row}: عدد عينات غير صالح «{value}» (عدد صحيح، 0 أو أكثر).
 cl.generator.csv.no_points,الصف {row}: المسار {origin} → {destination} ليس له نقاط قراءة نشطة لشركة النقل.
+cl.generator.connector_required,اختر الموصل: لا يمكن تطبيق خطة Carrier Link بدونه، ولا يمكن تعديل الخطط المحفوظة.
+cl.generator.needs_connector,لا يحتوي هذا المخطط على موصل ولا يمكن تطبيقه. احذفه وأنشئه من جديد مع اختيار موصل.

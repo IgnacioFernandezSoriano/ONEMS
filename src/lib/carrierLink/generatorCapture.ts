@@ -1,6 +1,6 @@
 import { captureOptionsFor, carriersForCapture, type Capture } from '../carrierCapture'
 import type { ClQuota } from './quotaCalculator'
-import type { QuotaInput } from './planView'
+import { buildPlanRow, type PlanForm, type QuotaInput } from './planView'
 
 /**
  * Reglas del campo "Forma de captura" del Generador de Asignaciones.
@@ -60,4 +60,14 @@ export function toQuotaInputs(quotas: ClQuota[]): QuotaInput[] {
     samples_obtained: 0,
     status: 'pending',
   }))
+}
+
+/**
+ * Error (clave i18n) del formulario de un plan de Carrier Link antes de generar o importar; null si vale.
+ * El conector es obligatorio: los planes guardados no se editan y sin conector no se pueden aplicar.
+ */
+export function clGeneratorFormError(accountId: string | null, form: PlanForm): string | null {
+  const built = buildPlanRow(accountId, form)
+  if (!built.ok) return `cl.plans.error.${built.error}`
+  return form.feed_id ? null : 'cl.generator.connector_required'
 }

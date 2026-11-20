@@ -5725,8 +5725,6 @@ hc.delivery_standard_form.cl_last_mile_time,Tiempo equiv. último tramo
 help_center.doc.carrier_link.title,Carrier Link
 help_center.doc.carrier_link.desc,"Qué es Carrier Link, en qué orden se configura, qué hace cada pantalla y qué significa cada aviso."
 cl.help_link,Ayuda
-menu.capture_panelists,Panelistas
-cl.coming_soon,En preparación.
 cl.capture_method.label,Forma de captura
 cl.capture_method.help,"Qué capturas admite el carrier en el Generador de Asignaciones: Panelistas, Carrier Link (escaneos del carrier; también habilita sus conectores y puntos de lectura) o Ambos."
 cl.capture_method.panelists,Panelistas
@@ -5759,3 +5757,5 @@ cl.generator.csv.week_outside,Fila {row}: la semana {week} está fuera de las fe
 cl.generator.csv.duplicate,Fila {row}: repite la ruta y la semana de la fila {first}.
 cl.generator.csv.bad_samples,"Fila {row}: muestras no válidas «{value}» (número entero, 0 o más)."
 cl.generator.csv.no_points,Fila {row}: la ruta {origin} → {destination} no tiene puntos de lectura activos del carrier.
+cl.generator.connector_required,Elige el conector: un plan de Carrier Link no se puede aplicar sin él y los planes guardados no se editan.
+cl.generator.needs_connector,Este plan no tiene conector y no se puede aplicar. Elimínalo y vuelve a generarlo eligiendo un conector.

@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useLatestRequest } from '@/lib/latestRequest'
 import { generateClQuotasLikeAllocation, buildClGeneratorNodes } from '@/lib/carrierLink/clGenerator'
 import type { ClQuota } from '@/lib/carrierLink/quotaCalculator'
-import { buildPlanRow, routesWithoutStandard, type PlanForm } from '@/lib/carrierLink/planView'
+import { routesWithoutStandard, type PlanForm } from '@/lib/carrierLink/planView'
+import { clGeneratorFormError } from '@/lib/carrierLink/generatorCapture'
 import { parseQuotaCsv, type QuotaCsvError } from '@/lib/carrierLink/quotaCsv'
 import type { CityDistributionMatrix, SeasonalDistribution } from '@/lib/allocationPlanCalculator'
 import type { City } from '@/lib/types'
@@ -67,10 +68,7 @@ export function useClGeneratorFlow(p: {
     .filter((pt) => pt.city_id)
     .map((pt) => ({ city_id: pt.city_id as string, e2e_role: pt.e2e_role, is_active: pt.is_active }))
 
-  const checkForm = (form: PlanForm): string | null => {
-    const built = buildPlanRow(support?.accountId ?? null, form)
-    return built.ok ? null : `cl.plans.error.${built.error}`
-  }
+  const checkForm = (form: PlanForm): string | null => clGeneratorFormError(support?.accountId ?? null, form)
 
   const showPreview = async (form: PlanForm, quotas: ClQuota[], requested: number, source: ClPreview['source']) => {
     const isStale = begin()
@@ -152,11 +150,12 @@ export function useClGeneratorFlow(p: {
     return true
   }
 
-  const discard = () => {
+  /** Descarta la vista previa (y una generación en curso). Estable: se usa al cambiar cualquier dato del formulario. */
+  const discard = useCallback(() => {
     begin()
     setBusy(false)
     setPreview(null)
-  }
+  }, [begin])
 
   return { pointsReady, preview, message, csvErrors, busy, saving, generate, importCsv, save, discard }
 }

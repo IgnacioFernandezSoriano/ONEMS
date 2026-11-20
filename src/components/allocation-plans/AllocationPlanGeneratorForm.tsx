@@ -114,6 +114,13 @@ export function AllocationPlanGeneratorForm({
     setFeedId('')
   }, [formData.carrier_id])
 
+  // La vista previa de Carrier Link guarda nombre, fechas, producto, total, matriz, estacionalidad y conector:
+  // si cambia cualquiera deja de valer (el cambio de carrier ya lo descarta el propio flujo).
+  const { discard: discardClPreview } = clFlow
+  useEffect(() => {
+    if (clMode) discardClPreview()
+  }, [clMode, formData, matrix, seasonal, useSeasonalDist, feedId, discardClPreview])
+
   const availableProducts = products.filter(
     (p) => !formData.carrier_id || p.carrier_id === formData.carrier_id
   )
@@ -456,9 +463,9 @@ export function AllocationPlanGeneratorForm({
           </div>
           {clMode && (
             <div>
-              <label className="block text-sm font-medium mb-1">{t('cl.plans.connector')}</label>
-              <select value={feedId} onChange={(e) => setFeedId(e.target.value)} className="w-full px-3 py-2 border rounded-md">
-                <option value="">{t('cl.plans.no_connector')}</option>
+              <label className="block text-sm font-medium mb-1">{t('cl.plans.connector')} *</label>
+              <select required value={feedId} onChange={(e) => setFeedId(e.target.value)} className="w-full px-3 py-2 border rounded-md">
+                <option value="">{clFeeds.length === 0 ? t('cl.plans.no_connector') : t('cl.plans.select')}</option>
                 {clFeeds.map((f) => (
                   <option key={f.id} value={f.id}>
                     {f.name}

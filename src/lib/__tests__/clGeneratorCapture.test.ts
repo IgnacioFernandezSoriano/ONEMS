@@ -8,8 +8,9 @@ import {
   clGeneratedPlans,
   clAppliedPlans,
   toQuotaInputs,
+  clGeneratorFormError,
 } from '../carrierLink/generatorCapture'
-import { carriersForCapture } from '../carrierCapture'
+import { carriersForCapture, CAPTURE_METHODS } from '../carrierCapture'
 
 type C = { id: string; capture_method?: string | null }
 const ids = (l: C[]) => l.map((c) => c.id)
@@ -119,11 +120,26 @@ describe('traducciones del generador con Carrier Link', () => {
     '../../components/allocation-plans/AllocationPlanGeneratorForm.tsx',
     '../../pages/AllocationPlanGenerator.tsx',
   ]
+  // Claves con plantilla (`cl.x.${valor}`): cada familia se enumera con su conjunto finito de valores.
+  const templateFamilies: Record<string, readonly string[]> = {
+    'cl.capture_method': CAPTURE_METHODS,
+    'cl.plans.status': ['draft', 'active', 'closed'],
+    'cl.plans.missing': ['origin', 'destination'],
+    'cl.plans.error': ['no_account', 'bad_period', 'bad_total', 'missing_field'],
+  }
   const used = new Set<string>()
+  const templatePrefixes = new Set<string>()
   for (const f of files) {
     const src = readFileSync(resolve(__dirname, f), 'utf8')
     for (const m of src.matchAll(/'(cl\.(?:generator|plans|capture_method)\.[a-z_.]+)'/g)) used.add(m[1])
+    for (const m of src.matchAll(/`(cl\.[a-z_.]+)\.\$\{/g)) templatePrefixes.add(m[1])
   }
+  for (const [prefix, values] of Object.entries(templateFamilies)) for (const v of values) used.add(`${prefix}.${v}`)
+
+  it('cada clave con plantilla usada pertenece a una familia enumerada', () => {
+    expect(templatePrefixes.size).toBeGreaterThan(0)
+    expect([...templatePrefixes].filter((p) => !(p in templateFamilies))).toEqual([])
+  })
   for (const lang of ['en', 'es', 'fr', 'ar', 'pt']) {
     it(`todas las claves cl.* usadas existen en ${lang}.csv`, () => {
       const csv = readFileSync(resolve(__dirname, `../../../public/locales/${lang}.csv`), 'utf8')
@@ -132,4 +148,29 @@ describe('traducciones del generador con Carrier Link', () => {
       expect([...used].filter((k) => !keys.has(k))).toEqual([])
     })
   }
+})
+
+describe('clGeneratorFormError', () => {
+  const form = {
+    plan_name: 'Plan',
+    carrier_id: 'c',
+    product_id: 'p',
+    feed_id: 'f',
+    start_date: '2026-01-01',
+    end_date: '2026-03-31',
+    total_samples: 100,
+    feed_diagnosis: false,
+  }
+  it('formulario completo con conector: sin error', () => {
+    expect(clGeneratorFormError('acc', form)).toBeNull()
+  })
+  it('el conector es obligatorio', () => {
+    expect(clGeneratorFormError('acc', { ...form, feed_id: '' })).toBe('cl.generator.connector_required')
+  })
+  it('primero los errores del plan (cuenta, campos, periodo, total)', () => {
+    expect(clGeneratorFormError(null, form)).toBe('cl.plans.error.no_account')
+    expect(clGeneratorFormError('acc', { ...form, plan_name: ' ', feed_id: '' })).toBe('cl.plans.error.missing_field')
+    expect(clGeneratorFormError('acc', { ...form, end_date: '2025-12-31' })).toBe('cl.plans.error.bad_period')
+    expect(clGeneratorFormError('acc', { ...form, total_samples: 0 })).toBe('cl.plans.error.bad_total')
+  })
 })

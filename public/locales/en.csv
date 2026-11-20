@@ -5725,8 +5725,6 @@ hc.delivery_standard_form.cl_last_mile_time,Last-leg equivalence time
 help_center.doc.carrier_link.title,Carrier Link
 help_center.doc.carrier_link.desc,"What Carrier Link is, the order to set it up in, what each screen does and what each alert means."
 cl.help_link,Help
-menu.capture_panelists,Panelists
-cl.coming_soon,In preparation.
 cl.capture_method.label,Capture method
 cl.capture_method.help,"Which captures the carrier accepts in the Allocation Generator: Panelists, Carrier Link (carrier scans; also enables its connectors and reading points) or Both."
 cl.capture_method.panelists,Panelists
@@ -5759,3 +5757,5 @@ cl.generator.csv.week_outside,Row {row}: week {week} is outside the plan dates.
 cl.generator.csv.duplicate,Row {row}: repeats the route and week of row {first}.
 cl.generator.csv.bad_samples,"Row {row}: invalid samples ""{value}"" (whole number, 0 or more)."
 cl.generator.csv.no_points,Row {row}: the route {origin} → {destination} has no active reading points of the carrier.
+cl.generator.connector_required,"Choose the connector: a Carrier Link plan cannot be applied without one, and saved plans cannot be edited."
+cl.generator.needs_connector,"This plan has no connector, so it cannot be applied. Delete it and generate it again choosing a connector."

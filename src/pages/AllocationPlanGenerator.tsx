@@ -583,9 +583,8 @@ export function AllocationPlanGenerator() {
                         <td className="px-6 py-4">{plan.product_label}</td>
                         <td className="px-6 py-4">{plan.total_samples}</td>
                         {clCaptureCell('carrier_link')}
-                        <td className="px-6 py-4">
-                          {plan.start_date} {t('allocation_generator.to')} {plan.end_date}
-                        </td>
+                        {/* cl_plans no guarda fecha de activación */}
+                        <td className="px-6 py-4">—</td>
                         <td className="px-6 py-4">{clStatusBadge(plan)}</td>
                       </tr>
                     ))}
