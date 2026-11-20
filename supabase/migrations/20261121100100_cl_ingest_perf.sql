@@ -10,6 +10,7 @@
 --    tzdata no BORRE un nombre (tzdata los conserva como enlaces de compatibilidad). No se comprueba con AT TIME ZONE:
 --    Postgres acepta ahi cadenas que no son zonas (p. ej. 'Fake/Zone' se lee como POSIX) y daria otro resultado.
 --    SECURITY DEFINER para leer la cache sin conceder la tabla (RLS activado, sin politicas).
+--    La cache no se concede a nadie (tampoco a service_role); la funcion no la ejecuta anon.
 -- 2. El resumen por estrato de cl_ingest_batch hacia 4 subconsultas correlacionadas por estrato (recorrido completo de
 --    las tablas temporales y cast uuid -> text en cada fila): O(estratos x lecturas). Ahora se agrega una sola vez con
 --    GROUP BY stratum_id y se une por uuid. El texto del stratum_id del lote es siempre el canonico (tiene que coincidir
@@ -22,7 +23,7 @@ CREATE TABLE IF NOT EXISTS public.cl_timezone_names (
   name text PRIMARY KEY
 );
 ALTER TABLE public.cl_timezone_names ENABLE ROW LEVEL SECURITY;
-REVOKE ALL ON TABLE public.cl_timezone_names FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON TABLE public.cl_timezone_names FROM PUBLIC, anon, authenticated, service_role;
 INSERT INTO public.cl_timezone_names (name)
 SELECT DISTINCT z.name FROM pg_catalog.pg_timezone_names z
 ON CONFLICT (name) DO NOTHING;
@@ -38,6 +39,9 @@ AS $$
       OR EXISTS (SELECT 1 FROM public.cl_timezone_names c WHERE c.name = p_tz)
       OR EXISTS (SELECT 1 FROM pg_catalog.pg_timezone_names z WHERE z.name = p_tz)
 $$;
+-- Sin anon: la usa el CHECK de cl_feeds (authenticated) y las funciones de emision (service_role / propietario).
+REVOKE ALL ON FUNCTION public.cl_is_valid_timezone(text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.cl_is_valid_timezone(text) TO authenticated, service_role;
 
 -- ================================================================ 2. cl_ingest_batch (de 20261120111000)
 CREATE OR REPLACE FUNCTION public.cl_ingest_batch(p_feed_id uuid, p_payload jsonb, p_dry_run boolean DEFAULT false)

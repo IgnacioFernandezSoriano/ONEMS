@@ -35,6 +35,14 @@ SELECT pg_temp.ok(NOT EXISTS ((SELECT z.name FROM pg_catalog.pg_timezone_names z
 SELECT pg_temp.ok(NOT has_table_privilege('anon', 'public.cl_timezone_names', 'SELECT')
               AND NOT has_table_privilege('authenticated', 'public.cl_timezone_names', 'SELECT'),
                   'cl_timezone_names must not be granted to anon/authenticated');
+SELECT pg_temp.ok(NOT has_table_privilege('service_role', 'public.cl_timezone_names', 'SELECT')
+              AND NOT has_table_privilege('service_role', 'public.cl_timezone_names', 'INSERT'),
+                  'cl_timezone_names must not be granted to service_role');
+SELECT pg_temp.ok(NOT has_function_privilege('anon', 'public.cl_is_valid_timezone(text)', 'EXECUTE'),
+                  'anon must not execute cl_is_valid_timezone');
+SELECT pg_temp.ok(has_function_privilege('authenticated', 'public.cl_is_valid_timezone(text)', 'EXECUTE')
+              AND has_function_privilege('service_role', 'public.cl_is_valid_timezone(text)', 'EXECUTE'),
+                  'authenticated and service_role keep EXECUTE on cl_is_valid_timezone (cl_feeds CHECK)');
 SELECT pg_temp.ok((SELECT relrowsecurity FROM pg_class WHERE oid = 'public.cl_timezone_names'::regclass),
                   'cl_timezone_names must have RLS enabled');
 
