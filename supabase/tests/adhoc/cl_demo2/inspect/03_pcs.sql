@@ -1,0 +1,1 @@
+SELECT pc.id, pc.code, pc.name, pc.city, pc.city_id, (SELECT count(*) FROM public.readers r WHERE r.postal_center_id = pc.id) AS readers FROM public.postal_centers pc WHERE pc.account_id = 'f4d823d2-93e6-4755-9a89-9da87e7fa86e' ORDER BY pc.code;
