@@ -5556,3 +5556,60 @@ cl.reason.same_reading,Início e fim são a mesma leitura
 cl.reason.start_after_end,Início depois do fim
 cl.reason.unknown_product,Produto desconhecido
 cl.reason.unknown_reading_point,Ponto de leitura desconhecido
+cl.plans.new,Novo plano
+cl.plans.edit,Editar plano
+cl.plans.name,Nome
+cl.plans.product,Produto
+cl.plans.carrier,Transportadora
+cl.plans.connector,Conector
+cl.plans.no_connector,Ainda sem conector
+cl.plans.connector_hint,Apenas conectores da mesma transportadora. Sem conector o plano não pode ser ativado.
+cl.plans.select,Selecione...
+cl.plans.start,Data de início
+cl.plans.end,Data de fim
+cl.plans.period,Período
+cl.plans.total,Total de amostras
+cl.plans.total_hint,"Se alterar o total ou as datas, gere e guarde as quotas novamente."
+cl.plans.status,Estado
+cl.plans.status.draft,Rascunho
+cl.plans.status.active,Ativo
+cl.plans.status.closed,Fechado
+cl.plans.empty,Ainda não há planos.
+cl.plans.samples,{count} amostras
+cl.plans.feed_diagnosis,Diagnóstico do conector (guardar dados extra para análise)
+cl.plans.locked_hint,"O plano já não é um rascunho: não é possível alterar a transportadora, o produto, o conector nem a data de início."
+cl.plans.error.no_account,Escolha primeiro uma conta.
+cl.plans.error.bad_period,A data de fim não pode ser anterior à data de início.
+cl.plans.error.bad_total,O total deve ser um número inteiro maior ou igual a 1.
+cl.plans.error.missing_field,"Preencha o nome, a transportadora, o produto e as datas."
+cl.plans.generate,Gerar quotas
+cl.plans.no_routes,A transportadora não tem pontos de leitura ativos com cidade de início e de fim: não há rotas.
+cl.plans.preview_title,Pré-visualização (ainda não guardada)
+cl.plans.save_quotas,Guardar quotas
+cl.plans.saving_quotas,A guardar {count} quotas...
+cl.plans.discard,Descartar
+cl.plans.quotas_saved,{count} quotas guardadas.
+cl.plans.quotas_title,Quotas
+cl.plans.no_quotas,"Este plano ainda não tem quotas. Use ""Gerar quotas""."
+cl.plans.missing_points_title,Faltam pontos de leitura
+cl.plans.missing_points_help,Registe um ponto ativo da transportadora nestas cidades antes de ativar o plano.
+cl.plans.missing.origin,sem ponto de início
+cl.plans.missing.destination,sem ponto de fim
+cl.plans.missing_standards_title,{count} rotas sem padrão de entrega
+cl.plans.missing_standards_help,"Estas rotas são amostradas, mas sem padrão não é possível calcular se chegam dentro do prazo. Não impede a ativação."
+cl.plans.no_standard,entra sem prazo
+cl.plans.more,e mais {count} (marcadas com ⚠ na tabela)
+cl.plans.activate,Ativar plano
+cl.plans.activate_confirm,"Ativar o plano {name}? Depois não será possível alterar a transportadora, o produto, o conector, a data de início nem as quotas."
+cl.plans.activate_blocked,Não é possível ativar enquanto faltarem pontos de leitura.
+cl.plans.matrix.filter,Filtrar por rota...
+cl.plans.matrix.by_week,Por semana
+cl.plans.matrix.by_month,Por mês
+cl.plans.matrix.summary,"{routes} rotas, {total} amostras"
+cl.plans.matrix.legend,Cada célula: previsto (+transitado).
+cl.plans.matrix.legend_obtained,Cada célula: previsto (+transitado) ✓obtido.
+cl.plans.matrix.expand_hint,Abra uma cidade de origem para ver as suas rotas; acima de {cells} células só fica aberta uma cidade.
+cl.plans.matrix.no_match,Nenhuma rota corresponde ao filtro.
+cl.plans.matrix.route,Rota
+cl.plans.matrix.total,Total
+cl.plans.matrix.routes,{count} rotas

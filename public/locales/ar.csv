@@ -5548,3 +5548,60 @@ cl.reason.same_reading,البداية والنهاية هما القراءة ن�
 cl.reason.start_after_end,البداية بعد النهاية
 cl.reason.unknown_product,منتج غير معروف
 cl.reason.unknown_reading_point,نقطة قراءة غير معروفة
+cl.plans.new,خطة جديدة
+cl.plans.edit,تعديل الخطة
+cl.plans.name,الاسم
+cl.plans.product,المنتج
+cl.plans.carrier,الناقل
+cl.plans.connector,الموصل
+cl.plans.no_connector,لا يوجد موصل بعد
+cl.plans.connector_hint,موصلات الناقل نفسه فقط. لا يمكن تفعيل الخطة بدون موصل.
+cl.plans.select,اختر...
+cl.plans.start,تاريخ البدء
+cl.plans.end,تاريخ الانتهاء
+cl.plans.period,الفترة
+cl.plans.total,إجمالي العينات
+cl.plans.total_hint,إذا غيّرت الإجمالي أو التواريخ، أعد توليد الحصص وحفظها.
+cl.plans.status,الحالة
+cl.plans.status.draft,مسودة
+cl.plans.status.active,نشط
+cl.plans.status.closed,مغلق
+cl.plans.empty,لا توجد خطط بعد.
+cl.plans.samples,{count} عينة
+cl.plans.feed_diagnosis,تشخيص الموصل (الاحتفاظ ببيانات إضافية للتحليل)
+cl.plans.locked_hint,لم تعد الخطة مسودة: لا يمكن تغيير الناقل أو المنتج أو الموصل أو تاريخ البدء.
+cl.plans.error.no_account,اختر حسابًا أولاً.
+cl.plans.error.bad_period,لا يمكن أن يكون تاريخ الانتهاء قبل تاريخ البدء.
+cl.plans.error.bad_total,يجب أن يكون الإجمالي عددًا صحيحًا لا يقل عن 1.
+cl.plans.error.missing_field,املأ الاسم والناقل والمنتج والتواريخ.
+cl.plans.generate,توليد الحصص
+cl.plans.no_routes,لا يملك الناقل نقاط قراءة نشطة بمدينة بداية ومدينة نهاية: لا توجد مسارات.
+cl.plans.preview_title,معاينة (لم تُحفظ بعد)
+cl.plans.save_quotas,حفظ الحصص
+cl.plans.saving_quotas,جارٍ حفظ {count} حصة...
+cl.plans.discard,تجاهل
+cl.plans.quotas_saved,تم حفظ {count} حصة.
+cl.plans.quotas_title,الحصص
+cl.plans.no_quotas,"لا تحتوي هذه الخطة على حصص بعد. استخدم ""توليد الحصص""."
+cl.plans.missing_points_title,نقاط قراءة مفقودة
+cl.plans.missing_points_help,سجّل نقطة نشطة للناقل في هذه المدن قبل تفعيل الخطة.
+cl.plans.missing.origin,لا توجد نقطة بداية
+cl.plans.missing.destination,لا توجد نقطة نهاية
+cl.plans.missing_standards_title,{count} مسار بدون معيار تسليم
+cl.plans.missing_standards_help,تُؤخذ عينات من هذه المسارات، لكن بدون معيار لا يمكن حساب الوصول في الموعد. لا يمنع ذلك التفعيل.
+cl.plans.no_standard,يُحتسب دون الالتزام بالموعد
+cl.plans.more,و{count} أخرى (مُعلّمة بـ ⚠ في الجدول)
+cl.plans.activate,تفعيل الخطة
+cl.plans.activate_confirm,تفعيل الخطة {name}؟ بعد ذلك لا يمكن تغيير الناقل أو المنتج أو الموصل أو تاريخ البدء أو الحصص.
+cl.plans.activate_blocked,لا يمكن تفعيل الخطة ما دامت هناك نقاط قراءة مفقودة.
+cl.plans.matrix.filter,تصفية حسب المسار...
+cl.plans.matrix.by_week,حسب الأسبوع
+cl.plans.matrix.by_month,حسب الشهر
+cl.plans.matrix.summary,{routes} مسار، {total} عينة
+cl.plans.matrix.legend,كل خلية: المخطط (+المُرحّل).
+cl.plans.matrix.legend_obtained,كل خلية: المخطط (+المُرحّل) ✓المُحصّل.
+cl.plans.matrix.expand_hint,افتح مدينة منشأ لرؤية مساراتها؛ فوق {cells} خلية تبقى مدينة واحدة فقط مفتوحة.
+cl.plans.matrix.no_match,لا يوجد مسار يطابق عامل التصفية.
+cl.plans.matrix.route,المسار
+cl.plans.matrix.total,الإجمالي
+cl.plans.matrix.routes,{count} مسار
