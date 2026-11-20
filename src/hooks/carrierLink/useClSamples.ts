@@ -34,8 +34,12 @@ export interface ClSampleScan {
 
 export type ClSamplesError = { message?: string; code?: string }
 
+/** planId para listar las muestras de todos los planes de la cuenta (p. ej. sin View en cl_plans no hay lista de planes). */
+export const CL_ALL_PLANS = 'all'
+
 /**
- * Muestras activas de un plan, paginadas en el servidor (50 por pagina, `.range()` + `count: 'exact'`).
+ * Muestras activas de un plan (o de todos con CL_ALL_PLANS; null = aun sin decidir, no consulta), paginadas en el
+ * servidor (50 por pagina, `.range()` + `count: 'exact'`).
  * Los filtros se aplican en la consulta: ruta con `.eq` sobre origen/destino; semana con un filtro sobre la cuota
  * incrustada (`cl_plan_quotas!inner`, iso_year + iso_week); mal encaminadas con `.eq('possible_misrouting', true)`.
  */
@@ -85,8 +89,8 @@ export function useClSamples(accountId: string | null, planId: string | null, fi
         { count: 'exact' },
       )
       .eq('account_id', accountId)
-      .eq('plan_id', planId)
       .eq('status', 'active')
+    if (planId !== CL_ALL_PLANS) q = q.eq('plan_id', planId)
     if (wk) q = q.eq('quota.iso_year', wk.iso_year).eq('quota.iso_week', wk.iso_week)
     if (origin) q = q.eq('origin_city_id', origin)
     if (destination) q = q.eq('destination_city_id', destination)

@@ -76,6 +76,8 @@ export interface DryRunSummary {
   /** Motivo de rechazo del lote entero (p. ej. 'selection_method'). */
   reason: string | null
   expected: string | null
+  /** true = ese lote (batch_id) ya se habia ensayado: es el resumen guardado, no un ensayo nuevo. */
+  replayed: boolean
   strata: DryRunStratum[]
 }
 
@@ -103,6 +105,7 @@ export function parseDryRunResult(data: unknown): DryRunSummary {
     status: str(o.status),
     reason: str(o.reason),
     expected: str(o.expected),
+    replayed: o.replayed === true,
     strata: strata
       .filter((e): e is Record<string, unknown> => !!e && typeof e === 'object')
       .map((e) => ({

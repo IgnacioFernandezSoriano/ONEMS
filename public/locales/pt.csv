@@ -5412,6 +5412,8 @@ cl.error.cl_plan_closed,O plano está fechado e não pode ser alterado.
 cl.error.cl_plan_locked_field,Este campo já não pode ser alterado porque o plano já começou.
 cl.error.cl_plan_not_draft,Só os planos em rascunho podem ser alterados assim.
 cl.error.cl_quota_locked,Esta quota já não pode ser alterada porque já tem amostras.
+cl.error.cl_quota_not_found,A quota já não existe. Recarregue a página.
+cl.error.cl_stratum_already_delivered,Um estrato deste lote já foi entregue para esta procura.
 cl.error.cl_too_many_rows,O ficheiro tem demasiadas linhas. Divida-o em ficheiros mais pequenos.
 cl.error.cl_unknown_stratum,Algumas linhas referem-se a uma cidade ou rota que não está no plano.
 cl.error.cl_forbidden,Não tem permissão para fazer isto no Carrier Link.
@@ -5459,6 +5461,7 @@ cl.reading_points.error.no_account,Selecione primeiro uma conta.
 cl.reading_points.error.missing_place,Indique o código do local.
 cl.reading_points.error.missing_carrier,Selecione uma transportadora.
 cl.reading_points.error.missing_center,Selecione um centro postal.
+cl.reading_points.error.duplicate,Já existe um ponto de leitura desta transportadora com esse local e modo.
 cl.connectors.carrier,Transportadora
 cl.connectors.connector,Conector
 cl.connectors.add,Novo conector
@@ -5535,6 +5538,7 @@ cl.connectors.dry_run.help,Carregue um ficheiro de lote em formato JSON. É veri
 cl.connectors.dry_run.choose,Escolher ficheiro JSON
 cl.connectors.dry_run.running,A verificar...
 cl.connectors.dry_run.bad_json,O ficheiro não é um JSON válido.
+cl.connectors.dry_run.replayed,Este lote já tinha sido testado: o resultado mostrado é o guardado nessa altura.
 cl.connectors.dry_run.validated,O lote seria aceite. Resultado por estrato:
 cl.connectors.dry_run.rejected,O lote seria rejeitado.
 cl.connectors.dry_run.bad_method,O método de seleção não é o esperado ({expected}).

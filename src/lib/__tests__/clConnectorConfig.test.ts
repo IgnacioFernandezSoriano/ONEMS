@@ -119,6 +119,7 @@ describe('parseDryRunResult', () => {
       status: 'validated',
       reason: null,
       expected: null,
+      replayed: false,
       strata: [
         {
           stratum_id: 's1',
@@ -147,8 +148,12 @@ describe('parseDryRunResult', () => {
     expect(r.expected).toBe('uniform_without_replacement')
     expect(r.strata[0]).toMatchObject({ stratum_id: 's1', candidates: null, rejected: [] })
   })
+  it('lote ya ensayado: replayed solo si la base devuelve true', () => {
+    expect(parseDryRunResult({ status: 'validated', replayed: true, strata: [] }).replayed).toBe(true)
+    expect(parseDryRunResult({ status: 'validated', replayed: 'yes', strata: [] }).replayed).toBe(false)
+  })
   it('respuesta sin forma esperada → sin estratos', () => {
-    expect(parseDryRunResult(null)).toEqual({ status: null, reason: null, expected: null, strata: [] })
+    expect(parseDryRunResult(null)).toEqual({ status: null, reason: null, expected: null, replayed: false, strata: [] })
   })
 })
 

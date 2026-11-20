@@ -90,7 +90,7 @@ export function ClReadingPoints() {
     if (!deleting) return
     const res = await remove(deleting.id)
     if (res.success) setDeleting(null)
-    else setFormError(clErrorKey({ message: res.error }))
+    else setFormError(res.key ?? clErrorKey({ message: res.error }))
   }
 
   return (

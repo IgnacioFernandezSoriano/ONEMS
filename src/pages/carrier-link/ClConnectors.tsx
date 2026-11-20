@@ -932,6 +932,7 @@ function DryRunSection(props: { t: T; feedId: string; cl: Cl }) {
       {err && <p className="text-sm text-red-600">{t(err)}</p>}
       {result && (
         <div className="space-y-2">
+          {result.replayed && <p className="text-sm text-amber-700">{t('cl.connectors.dry_run.replayed')}</p>}
           <p className="text-sm font-medium">
             {dryRunOutcome(result) === 'accepted' ? t('cl.connectors.dry_run.validated') : t('cl.connectors.dry_run.rejected')}
           </p>

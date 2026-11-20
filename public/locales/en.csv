@@ -5412,6 +5412,8 @@ cl.error.cl_plan_closed,The plan is closed and cannot be changed.
 cl.error.cl_plan_locked_field,This field can no longer be changed because the plan has already started.
 cl.error.cl_plan_not_draft,Only plans in draft status can be changed this way.
 cl.error.cl_quota_locked,This quota can no longer be changed because it already has samples.
+cl.error.cl_quota_not_found,The quota no longer exists. Reload the page.
+cl.error.cl_stratum_already_delivered,A stratum of this batch was already delivered for this demand.
 cl.error.cl_too_many_rows,The file has too many rows. Split it into smaller files.
 cl.error.cl_unknown_stratum,Some rows refer to a city or route that is not in the plan.
 cl.error.cl_forbidden,You do not have permission to do this in Carrier Link.
@@ -5459,6 +5461,7 @@ cl.reading_points.error.no_account,Select an account first.
 cl.reading_points.error.missing_place,Enter the place code.
 cl.reading_points.error.missing_carrier,Select a carrier.
 cl.reading_points.error.missing_center,Select a postal center.
+cl.reading_points.error.duplicate,There is already a reading point for this carrier with this place and mode.
 cl.connectors.carrier,Carrier
 cl.connectors.connector,Connector
 cl.connectors.add,New connector
@@ -5535,6 +5538,7 @@ cl.connectors.dry_run.help,Upload a batch file in JSON format. It is checked as 
 cl.connectors.dry_run.choose,Choose JSON file
 cl.connectors.dry_run.running,Checking...
 cl.connectors.dry_run.bad_json,The file is not valid JSON.
+cl.connectors.dry_run.replayed,This batch was already tested: the result shown is the one saved at that time.
 cl.connectors.dry_run.validated,The batch would be accepted. Result per stratum:
 cl.connectors.dry_run.rejected,The batch would be rejected.
 cl.connectors.dry_run.bad_method,The selection method is not the expected one ({expected}).

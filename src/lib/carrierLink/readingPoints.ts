@@ -1,3 +1,5 @@
+import { clErrorKey } from './clErrors'
+
 export type E2eRole = 'origin' | 'destination' | 'both' | 'none'
 
 export interface ReadingPointForm {
@@ -50,19 +52,41 @@ export interface UnknownPlace {
   readings: number
 }
 
-/** Lugares/modos escaneados que no corresponden a ningún punto de lectura, por lecturas desc. */
-export function unknownPlaces(
-  scans: { place_ref: string; mode_ref: string | null; reject_reason: string | null; reader_id: string | null }[],
-): UnknownPlace[] {
-  const map = new Map<string, UnknownPlace>()
-  for (const s of scans) {
-    if (s.reject_reason !== 'unknown_reading_point' && s.reader_id !== null) continue
-    const key = JSON.stringify([s.place_ref, s.mode_ref])
-    const cur = map.get(key)
-    if (cur) cur.readings += 1
-    else map.set(key, { place_ref: s.place_ref, mode_ref: s.mode_ref, readings: 1 })
+/**
+ * Filas de la rpc cl_unknown_places (lugares/modos escaneados sin punto de lectura, ya agregados en el servidor),
+ * leidas sin fiarse de su forma: se descartan las de lugar vacio o NULL y el modo en blanco cuenta como sin modo.
+ */
+export function parseUnknownPlaces(data: unknown): UnknownPlace[] {
+  if (!Array.isArray(data)) return []
+  const out: UnknownPlace[] = []
+  for (const r of data) {
+    if (!r || typeof r !== 'object') continue
+    const o = r as Record<string, unknown>
+    const place = typeof o.place_ref === 'string' ? o.place_ref.trim() : ''
+    if (!place) continue
+    const mode = typeof o.mode_ref === 'string' && o.mode_ref.trim() !== '' ? o.mode_ref.trim() : null
+    const n = Number(o.readings)
+    out.push({ place_ref: place, mode_ref: mode, readings: Number.isFinite(n) ? n : 0 })
   }
-  return [...map.values()].sort((a, b) => b.readings - a.readings)
+  return out
+}
+
+/**
+ * Campos para reactivar un punto dado de baja (baja logica) con los datos del formulario: el reader_id generado
+ * (CL:cuenta:carrier:lugar[:modo]) es unico por cuenta tambien entre los borrados, asi que dar de alta otra vez el
+ * mismo lugar/modo reutiliza la fila borrada en vez de insertar otra.
+ */
+export function reviveReadingPointFields(row: Record<string, unknown>, now: string): Record<string, unknown> {
+  const { account_id: _a, capture_source: _c, ...fields } = row
+  void _a
+  void _c
+  return { ...fields, deleted_at: null, is_active: true, updated_at: now }
+}
+
+/** Clave i18n del error al guardar o borrar un punto: 23505 = ya hay un punto (o uno borrado) con ese lugar y modo. */
+export function readingPointErrorKey(err: { message?: string; code?: string } | null): string {
+  if (err?.code === '23505') return 'cl.reading_points.error.duplicate'
+  return clErrorKey(err)
 }
 
 /** Quita de la lista los lugares que ya tienen un punto activo (modo NULL del punto = cualquier modo). */

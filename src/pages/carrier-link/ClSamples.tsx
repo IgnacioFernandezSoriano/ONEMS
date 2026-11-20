@@ -8,7 +8,7 @@ import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge'
 import { SelectAccountNotice } from '@/components/carrier-link/SelectAccountNotice'
 import { clErrorKey } from '@/lib/carrierLink/clErrors'
 import { useClPlans } from '@/hooks/carrierLink/useClPlans'
-import { useClSamples, type ClSampleScan } from '@/hooks/carrierLink/useClSamples'
+import { useClSamples, CL_ALL_PLANS, type ClSampleScan } from '@/hooks/carrierLink/useClSamples'
 import { SAMPLES_PAGE_SIZE, clampPage, planWeekKeys, transitLabel } from '@/lib/carrierLink/sampleView'
 
 const input = 'border border-gray-300 rounded-lg px-3 py-2 text-sm'
@@ -22,7 +22,7 @@ export function ClSamples() {
   const { canEdit } = usePermissions()
   const accountId = useEffectiveAccountId()
   const readOnly = !canEdit('cl_samples')
-  const { plans, cityName } = useClPlans(accountId)
+  const { plans, cityName, loading: plansLoading } = useClPlans(accountId)
 
   const [planId, setPlanId] = useState<string | null>(null)
   const [week, setWeek] = useState<string | null>(null)
@@ -44,12 +44,19 @@ export function ClSamples() {
   const plan = plans.find((p) => p.id === planId) ?? null
   const weeks = useMemo(() => (plan ? planWeekKeys(plan.start_date, plan.end_date) : []), [plan])
   const route = origin || destination ? `${origin}>${destination}` : null
-  const { samples, total, scans, cities, loading, error } = useClSamples(
-    accountId,
-    planId,
-    { week, route, misroutedOnly },
-    page,
-  )
+  // Se espera a la lista de planes (sin consultas dobles). Sin planes visibles (p. ej. sin View en cl_plans): todas las
+  // muestras de la cuenta.
+  const ready = !plansLoading && (planId === null ? plans.length === 0 : plans.some((p) => p.id === planId))
+  const samplesScope = !ready ? null : (planId ?? CL_ALL_PLANS)
+  const {
+    samples,
+    total,
+    scans,
+    cities,
+    loading: samplesLoading,
+    error,
+  } = useClSamples(accountId, samplesScope, { week, route, misroutedOnly }, page)
+  const loading = samplesLoading || !ready
 
   const resetPage = () => {
     setPage(0)

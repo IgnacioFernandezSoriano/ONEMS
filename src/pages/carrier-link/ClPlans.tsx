@@ -77,7 +77,7 @@ export function ClPlans() {
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const selected = cl.plans.find((p) => p.id === selectedId) ?? null
-  const { points, loading: pointsLoading } = useClReadingPoints(accountId, selected?.carrier_id ?? null)
+  const { points, loading: pointsLoading } = useClReadingPoints(accountId, selected?.carrier_id ?? null, { withUnknown: false })
 
   const [editor, setEditor] = useState<EditorState | null>(null)
   const [saving, setSaving] = useState(false)

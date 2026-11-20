@@ -10,6 +10,7 @@ export interface ClBatchRow {
   id: string
   status: string
   created_at: string
+  /** Solo `{ strata }` del resumen del lote (cl_batches.summary->strata). */
   summary: unknown
   /** Muestras elegidas del lote (suma de cl_sampling_runs.samples_selected). */
   selected: number
@@ -83,9 +84,10 @@ export function useClMonitor(accountId: string | null, planId: string | null, op
       return q
     })
 
+    // Del resumen solo se trae strata (lo unico que usa batchSummary), no el jsonb entero.
     let bq = supabase
       .from('cl_batches')
-      .select('id, status, created_at, summary, demand:cl_demands!inner(plan_id)', { count: 'exact' })
+      .select('id, status, created_at, strata:summary->strata, demand:cl_demands!inner(plan_id)', { count: 'exact' })
       .eq('account_id', accountId)
     if (planId) bq = bq.eq('demand.plan_id', planId)
     const bFrom = batchPage * MONITOR_PAGE_SIZE
@@ -133,7 +135,7 @@ export function useClMonitor(accountId: string | null, planId: string | null, op
         id: b.id,
         status: b.status,
         created_at: b.created_at,
-        summary: b.summary,
+        summary: { strata: b.strata ?? null },
         selected: selectedByBatch.get(b.id) ?? 0,
       })),
     )

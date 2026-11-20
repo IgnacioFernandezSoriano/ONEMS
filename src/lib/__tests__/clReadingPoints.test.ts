@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { buildReadingPointRow, unknownPlaces, excludeRegistered } from '../carrierLink/readingPoints'
+import {
+  buildReadingPointRow,
+  parseUnknownPlaces,
+  excludeRegistered,
+  reviveReadingPointFields,
+  readingPointErrorKey,
+} from '../carrierLink/readingPoints'
 
 const base = {
   carrier_id: 'c1',
@@ -39,12 +45,56 @@ describe('buildReadingPointRow', () => {
   })
 })
 
-describe('unknownPlaces', () => {
-  it('agrupa lecturas del mismo lugar/modo e ignora las resueltas', () => {
-    const s = (reader_id: string | null, reject_reason: string | null = null) =>
-      ({ place_ref: 'X', mode_ref: 'M', reject_reason, reader_id })
-    const out = unknownPlaces([s(null), s(null, 'unknown_reading_point'), s('r1'), s(null)])
-    expect(out).toEqual([{ place_ref: 'X', mode_ref: 'M', readings: 3 }])
+describe('parseUnknownPlaces', () => {
+  it('lee las filas de cl_unknown_places: recorta, modo en blanco = null, readings numérico', () => {
+    const out = parseUnknownPlaces([
+      { place_ref: ' NBO ', mode_ref: 'ADM', readings: 3 },
+      { place_ref: 'XYZ', mode_ref: '  ', readings: '2' },
+      { place_ref: 'MBA', mode_ref: null, readings: 1 },
+    ])
+    expect(out).toEqual([
+      { place_ref: 'NBO', mode_ref: 'ADM', readings: 3 },
+      { place_ref: 'XYZ', mode_ref: null, readings: 2 },
+      { place_ref: 'MBA', mode_ref: null, readings: 1 },
+    ])
+  })
+  it('descarta lugares NULL o en blanco y respuestas sin forma', () => {
+    expect(parseUnknownPlaces([{ place_ref: null, mode_ref: 'M', readings: 1 }, { place_ref: '  ', readings: 4 }, null])).toEqual([])
+    expect(parseUnknownPlaces(null)).toEqual([])
+    expect(parseUnknownPlaces({ place_ref: 'X' })).toEqual([])
+  })
+})
+
+describe('reviveReadingPointFields', () => {
+  it('reactiva la fila borrada con los datos del formulario, sin tocar cuenta ni origen', () => {
+    const built = buildReadingPointRow('a1', { ...base, carrier_mode_ref: 'ADM', e2e_role: 'both', name: 'Hub' })
+    expect(built.ok).toBe(true)
+    if (!built.ok) return
+    const f = reviveReadingPointFields(built.row, '2026-11-20T10:00:00.000Z')
+    expect(f).toEqual({
+      carrier_id: 'c1',
+      carrier_place_ref: 'NYC-RDC',
+      carrier_mode_ref: 'ADM',
+      postal_center_id: 'pc1',
+      e2e_role: 'both',
+      type: 'Mixed',
+      name: 'Hub',
+      deleted_at: null,
+      is_active: true,
+      updated_at: '2026-11-20T10:00:00.000Z',
+    })
+  })
+})
+
+describe('readingPointErrorKey', () => {
+  it('23505 -> duplicado; 42501 -> forbidden; CL_* y resto como clErrorKey', () => {
+    expect(readingPointErrorKey({ code: '23505', message: 'duplicate key value violates unique constraint' })).toBe(
+      'cl.reading_points.error.duplicate',
+    )
+    expect(readingPointErrorKey({ code: '42501', message: 'new row violates row-level security policy' })).toBe('cl.error.forbidden')
+    expect(readingPointErrorKey({ message: 'CL_FORBIDDEN' })).toBe('cl.error.cl_forbidden')
+    expect(readingPointErrorKey({ message: 'boom' })).toBe('cl.error.generic')
+    expect(readingPointErrorKey(null)).toBe('cl.error.generic')
   })
 })
 

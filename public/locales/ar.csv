@@ -5404,6 +5404,8 @@ cl.error.cl_plan_closed,الخطة مغلقة ولا يمكن تعديلها.
 cl.error.cl_plan_locked_field,لم يعد بالإمكان تغيير هذا الحقل لأن الخطة بدأت بالفعل.
 cl.error.cl_plan_not_draft,لا يمكن تعديل بهذه الطريقة إلا الخطط في حالة المسودة.
 cl.error.cl_quota_locked,لم يعد بالإمكان تغيير هذه الحصة لأنها تحتوي على عينات بالفعل.
+cl.error.cl_quota_not_found,لم تعد هذه الحصة موجودة. أعد تحميل الصفحة.
+cl.error.cl_stratum_already_delivered,تم بالفعل تسليم طبقة من هذه الدفعة لهذا الطلب.
 cl.error.cl_too_many_rows,يحتوي الملف على عدد كبير جدًا من الصفوف. قسّمه إلى ملفات أصغر.
 cl.error.cl_unknown_stratum,تشير بعض الصفوف إلى مدينة أو مسار غير موجود في الخطة.
 cl.error.cl_forbidden,ليس لديك إذن للقيام بذلك في Carrier Link.
@@ -5451,6 +5453,7 @@ cl.reading_points.error.no_account,اختر حسابا أولا.
 cl.reading_points.error.missing_place,أدخل رمز المكان.
 cl.reading_points.error.missing_carrier,اختر ناقلا.
 cl.reading_points.error.missing_center,اختر مركزا بريديا.
+cl.reading_points.error.duplicate,توجد بالفعل نقطة قراءة لهذا الناقل بنفس المكان والوضع.
 cl.connectors.carrier,شركة النقل
 cl.connectors.connector,الموصل
 cl.connectors.add,موصل جديد
@@ -5527,6 +5530,7 @@ cl.connectors.dry_run.help,حمّل ملف دفعة بتنسيق JSON. يُفح�
 cl.connectors.dry_run.choose,اختر ملف JSON
 cl.connectors.dry_run.running,جارٍ الفحص...
 cl.connectors.dry_run.bad_json,الملف ليس JSON صالحًا.
+cl.connectors.dry_run.replayed,سبق اختبار هذه الدفعة: النتيجة المعروضة هي المحفوظة في ذلك الوقت.
 cl.connectors.dry_run.validated,ستُقبل الدفعة. النتيجة لكل طبقة:
 cl.connectors.dry_run.rejected,ستُرفض الدفعة.
 cl.connectors.dry_run.bad_method,طريقة الاختيار ليست المتوقعة ({expected}).

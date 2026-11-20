@@ -37,7 +37,7 @@ export function ClMonitor() {
   const { canEdit } = usePermissions()
   const accountId = useEffectiveAccountId()
   const readOnly = !canEdit('cl_monitor')
-  const { plans, cityName } = useClPlans(accountId)
+  const { plans, cityName, loading: plansLoading } = useClPlans(accountId)
 
   const [planSel, setPlanSel] = useState<string | null>(null) // null = aun sin elegir; ALL = todos los planes
   const [batchPage, setBatchPage] = useState(0)
@@ -56,12 +56,23 @@ export function ClMonitor() {
   }, [plans, planSel])
 
   const planId = planSel && planSel !== ALL ? planSel : null
-  const ready = planSel !== null || plans.length === 0
-  const { demands, batches, batchTotal, alerts, alertTotal, loading, error, undo, setAlertStatus } = useClMonitor(
-    ready ? accountId : null,
-    planId,
-    { batchPage, alertPage, alertFilter },
-  )
+  // Se espera a la lista de planes antes de la primera carga (sin pasar por "todos los planes" ni consultar dos veces).
+  // Sin planes visibles (p. ej. sin View en cl_plans) se carga todo lo de la cuenta.
+  const ready =
+    !plansLoading &&
+    (planSel === null ? plans.length === 0 : planSel === ALL || plans.some((p) => p.id === planSel))
+  const {
+    demands,
+    batches,
+    batchTotal,
+    alerts,
+    alertTotal,
+    loading: monitorLoading,
+    error,
+    undo,
+    setAlertStatus,
+  } = useClMonitor(ready ? accountId : null, planId, { batchPage, alertPage, alertFilter })
+  const loading = monitorLoading || !ready
 
   const batchLast = Math.max(0, Math.ceil(batchTotal / MONITOR_PAGE_SIZE) - 1)
   const alertLast = Math.max(0, Math.ceil(alertTotal / MONITOR_PAGE_SIZE) - 1)

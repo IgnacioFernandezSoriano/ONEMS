@@ -3,9 +3,11 @@ import { supabase } from '@/lib/supabase'
 import { useLatestRequest } from '@/lib/latestRequest'
 import {
   buildReadingPointRow,
-  unknownPlaces,
+  parseUnknownPlaces,
   excludeRegistered,
   readerTypeForRole,
+  readingPointErrorKey,
+  reviveReadingPointFields,
   type E2eRole,
   type ReadingPointForm,
   type UnknownPlace,
@@ -42,7 +44,6 @@ export interface ClCarrierOption {
 export type ClWriteResult = { success: true } | { success: false; error: string; key?: string }
 
 const SCAN_WINDOW_DAYS = 90
-const SCAN_LIMIT = 5000
 
 /** Transportistas activos y centros postales (con ciudad) de la cuenta, para los desplegables. */
 export function useClCarriersAndCenters(accountId: string | null) {
@@ -88,7 +89,13 @@ export function useClCarriersAndCenters(accountId: string | null) {
   return { carriers, centers, error }
 }
 
-export function useClReadingPoints(accountId: string | null, carrierId: string | null) {
+export interface ClReadingPointsOptions {
+  /** Cargar tambien los lugares escaneados sin punto (rpc cl_unknown_places). Por defecto true. */
+  withUnknown?: boolean
+}
+
+export function useClReadingPoints(accountId: string | null, carrierId: string | null, opts: ClReadingPointsOptions = {}) {
+  const withUnknown = opts.withUnknown ?? true
   const beginLoad = useLatestRequest()
   const [points, setPoints] = useState<ClReadingPoint[]>([])
   const [unknown, setUnknown] = useState<UnknownPlace[]>([])
@@ -104,7 +111,6 @@ export function useClReadingPoints(accountId: string | null, carrierId: string |
       return
     }
     setLoading(true)
-    const since = new Date(Date.now() - SCAN_WINDOW_DAYS * 86400000).toISOString()
     const [pts, scans] = await Promise.all([
       supabase
         .from('readers')
@@ -116,14 +122,9 @@ export function useClReadingPoints(accountId: string | null, carrierId: string |
         .eq('carrier_id', carrierId)
         .is('deleted_at', null)
         .order('carrier_place_ref'),
-      supabase
-        .from('cl_batch_scans')
-        .select('place_ref, mode_ref, reject_reason, reader_id')
-        .eq('account_id', accountId)
-        .is('reader_id', null)
-        .gte('scan_at', since)
-        .order('scan_at', { ascending: false })
-        .limit(SCAN_LIMIT),
+      withUnknown
+        ? supabase.rpc('cl_unknown_places', { p_account_id: accountId, p_carrier_id: carrierId, p_days: SCAN_WINDOW_DAYS })
+        : Promise.resolve({ data: [], error: null }),
     ])
     if (isStale()) return
     if (pts.error) {
@@ -148,28 +149,53 @@ export function useClReadingPoints(accountId: string | null, carrierId: string |
         })),
       )
     }
-    // Sin permiso cl_monitor la consulta falla: lista vacía, sin error visible.
+    // Agregado en el servidor (cl_unknown_places). Sin View en cl_reading_points ni cl_monitor la rpc da 42501:
+    // lista vacía, sin error visible.
     const registered = ((pts.data ?? []) as any[]).map((r) => ({
       carrier_place_ref: r.carrier_place_ref as string,
       carrier_mode_ref: (r.carrier_mode_ref ?? null) as string | null,
       is_active: r.is_active as boolean,
     }))
-    setUnknown(scans.error ? [] : excludeRegistered(unknownPlaces((scans.data ?? []) as any[]), registered))
+    setUnknown(scans.error ? [] : excludeRegistered(parseUnknownPlaces(scans.data), registered))
     setLoading(false)
-  }, [accountId, carrierId, beginLoad])
+  }, [accountId, carrierId, withUnknown, beginLoad])
 
   useEffect(() => {
     void refetch()
   }, [refetch])
 
   const fail = (err: { message?: string; code?: string }): ClWriteResult => {
-    return { success: false, error: err.message ?? '' }
+    return { success: false, error: err.message ?? '', key: readingPointErrorKey(err) }
   }
 
+  /**
+   * Alta. Si ya hay un punto dado de baja con el mismo carrier, lugar y modo, se reactiva esa fila con los datos del
+   * formulario (su reader_id, unico por cuenta incluso entre los borrados, impide insertar otra).
+   */
   const create = async (f: ReadingPointForm): Promise<ClWriteResult> => {
     const built = buildReadingPointRow(accountId, f)
     if (!built.ok) return { success: false, error: built.error, key: `cl.reading_points.error.${built.error}` }
-    const { error: e } = await supabase.from('readers').insert(built.row)
+    const row = built.row
+    let q = supabase
+      .from('readers')
+      .select('id')
+      .eq('account_id', row.account_id as string)
+      .eq('capture_source', 'carrier_scan')
+      .eq('carrier_id', row.carrier_id as string)
+      .eq('carrier_place_ref', row.carrier_place_ref as string)
+      .not('deleted_at', 'is', null)
+    q = row.carrier_mode_ref === null ? q.is('carrier_mode_ref', null) : q.eq('carrier_mode_ref', row.carrier_mode_ref as string)
+    const { data: deleted, error: findError } = await q.order('deleted_at', { ascending: false }).limit(1)
+    if (findError) return fail(findError)
+    const reviveId = (deleted?.[0] as { id: string } | undefined)?.id
+    const { error: e } = reviveId
+      ? await supabase
+          .from('readers')
+          .update(reviveReadingPointFields(row, new Date().toISOString()))
+          .eq('id', reviveId)
+          .eq('capture_source', 'carrier_scan')
+          .not('deleted_at', 'is', null)
+      : await supabase.from('readers').insert(row)
     if (e) return fail(e)
     await refetch()
     return { success: true }
