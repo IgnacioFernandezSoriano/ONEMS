@@ -116,6 +116,8 @@ BEGIN
                                      'public.cl_undo_batch(uuid)'::regprocedure,
                                      'public.cl_settle_quota(uuid)'::regprocedure,
                                      'public.cl_feeds_on_activate()'::regprocedure,
+                                     'public.cl_close_testing_demands(uuid)'::regprocedure,
+                                     'public.cl_normalize_carrier_points()'::regprocedure,
                                      'public.readers_cl_defaults()'::regprocedure)), 'SECURITY DEFINER + search_path');
   PERFORM pg_temp.ok(NOT has_function_privilege('service_role','public.cl_raise_alert(uuid,uuid,text,text,jsonb,uuid)','EXECUTE')
                      AND NOT has_function_privilege('authenticated','public.cl_raise_alert(uuid,uuid,text,text,jsonb,uuid)','EXECUTE')
@@ -130,7 +132,12 @@ BEGIN
   PERFORM pg_temp.ok(NOT has_function_privilege('service_role','public.cl_settle_quota(uuid)','EXECUTE')
                      AND NOT has_function_privilege('authenticated','public.cl_settle_quota(uuid)','EXECUTE'), 'settle interna');
   PERFORM pg_temp.ok(NOT has_function_privilege('authenticated','public.cl_feeds_on_activate()','EXECUTE')
-                     AND NOT has_function_privilege('anon','public.cl_feeds_on_activate()','EXECUTE'), 'trigger de activacion sin EXECUTE');
+                     AND NOT has_function_privilege('anon','public.cl_feeds_on_activate()','EXECUTE')
+                     AND NOT has_function_privilege('service_role','public.cl_feeds_on_activate()','EXECUTE'), 'trigger de activacion sin EXECUTE');
+  PERFORM pg_temp.ok(NOT has_function_privilege('service_role','public.cl_close_testing_demands(uuid)','EXECUTE')
+                     AND NOT has_function_privilege('authenticated','public.cl_close_testing_demands(uuid)','EXECUTE')
+                     AND NOT has_function_privilege('service_role','public.cl_normalize_carrier_points()','EXECUTE')
+                     AND NOT has_function_privilege('authenticated','public.cl_normalize_carrier_points()','EXECUTE'), 'helpers internos');
   PERFORM pg_temp.ok(EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'cl_feeds_on_activate' AND tgrelid = 'public.cl_feeds'::regclass), 'trigger cl_feeds_on_activate');
   PERFORM pg_temp.ok(EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'cl_demands'
                               AND column_name = 'seq' AND is_nullable = 'NO' AND is_identity = 'YES'), 'cl_demands.seq identidad');
@@ -282,6 +289,8 @@ DO $$
 BEGIN
   PERFORM pg_temp.ok((SELECT reader_id FROM public.readers WHERE id = 'ad000000-0000-0000-0000-0000000000a1') = 'CL:acc:CARRIER A:NYC-RDC:ACC',
                      'reader_id recortado: ' || (SELECT reader_id FROM public.readers WHERE id = 'ad000000-0000-0000-0000-0000000000a1'));
+  PERFORM pg_temp.ok((SELECT carrier_place_ref = 'NYC-RDC' AND carrier_mode_ref = 'ACC' FROM public.readers
+                       WHERE id = 'ad000000-0000-0000-0000-0000000000a1'), 'lugar y modo guardados recortados');
 END $$;
 -- Un reader_id antiguo con espacios (generado antes del arreglo) se normaliza con cualquier UPDATE de la fila, que es lo
 -- que hace la migracion.
@@ -328,5 +337,104 @@ BEGIN
                      || COALESCE((SELECT string_agg(p.proname, ',') FROM pg_proc p WHERE p.proname LIKE 'cl\_%'
                                     AND p.prosrc ~* 'DROP\s+TABLE\s+IF\s+EXISTS\s+pg_temp\.'), ''));
 END $$;
+
+-- ===================================================================== 7. I2: relleno de demandas de prueba con el conector ya activo
+-- Estado previo a la migracion: conector activado sin el trigger, demanda de prueba aun abierta. El relleno es la misma
+-- sentencia que la migracion; no toca demandas cerradas y repetirlo no hace nada.
+BEGIN;
+\set fixture_sin_roles 1
+\ir fixtures/incident_city.sql
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+SELECT pg_temp.setup(ARRAY[42,43], ARRAY[2,3]);
+UPDATE public.cl_feeds SET status = 'testing' WHERE id = 'f0000000-0000-0000-0000-0000000000a1';
+DO $$
+DECLARE v_d uuid;
+BEGIN
+  v_d := pg_temp.emit('2026-10-26 03:00+00');
+  INSERT INTO public.cl_demands (id, account_id, plan_id, feed_id, status, random_seed, payload, feed_testing, requested_at)
+  VALUES ('de000000-0000-0000-0000-0000000000f1','a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-0000000000a1',
+          'f0000000-0000-0000-0000-0000000000a1','fulfilled','x','{"strata":[]}', true, '2026-10-19 03:00+00');
+END $$;
+ALTER TABLE public.cl_feeds DISABLE TRIGGER cl_feeds_on_activate;
+UPDATE public.cl_feeds SET status = 'active' WHERE id = 'f0000000-0000-0000-0000-0000000000a1';
+ALTER TABLE public.cl_feeds ENABLE TRIGGER cl_feeds_on_activate;
+DO $$
+DECLARE v_d uuid := (SELECT id FROM public.cl_demands WHERE status = 'open');
+BEGIN
+  PERFORM pg_temp.ok((SELECT status FROM public.cl_demands WHERE id = v_d) = 'open', 'antes: demanda de prueba abierta');
+  PERFORM pg_temp.ok((SELECT sum(r) FROM (SELECT public.cl_close_testing_demands(f.id) AS r FROM public.cl_feeds f
+                                            WHERE f.status <> 'testing' ORDER BY f.id) x) = 1, 'relleno: una demanda cerrada');
+  PERFORM pg_temp.ok((SELECT status = 'failed' AND summary->>'reason' = 'feed_activated' FROM public.cl_demands WHERE id = v_d), 'failed (feed_activated)');
+  PERFORM pg_temp.ok((pg_temp.qcol(42)).status = 'pending' AND (pg_temp.qcol(42)).demands_count = 0
+                     AND (pg_temp.qcol(43)).status = 'pending' AND (pg_temp.qcol(43)).demands_count = 0, 'cuotas pending sin contar');
+  PERFORM pg_temp.ok((SELECT status = 'fulfilled' AND summary IS NULL FROM public.cl_demands WHERE id = 'de000000-0000-0000-0000-0000000000f1'),
+                     'demanda cumplida intacta');
+  PERFORM pg_temp.ok((SELECT sum(r) FROM (SELECT public.cl_close_testing_demands(f.id) AS r FROM public.cl_feeds f
+                                            WHERE f.status <> 'testing') x) = 0, 'repetir el relleno no hace nada');
+END $$;
+ROLLBACK;
+
+-- ===================================================================== 8. I3/M1: normalizacion de puntos existentes sin choques
+-- Filas antiguas (sin el trigger): r1 'X' y r2 'X ' (mismo carrier) -> r2 chocaria: se omite; carriers 'A' y 'A ' -> el
+-- de 'A ' chocaria con el de 'A': se omite; carriers 'B ' y 'B  ' -> ambos darian el mismo id: se omiten los dos;
+-- r7 ' Z '/' M ' -> 'Z'/'M'; r8 borrado 'W ' -> se normaliza; r9 borrado 'Y ' chocaria con r10 activo 'Y' en la misma
+-- cuenta (readers_account_id_reader_id_key incluye borrados): se omite.
+BEGIN;
+\set fixture_sin_roles 1
+\ir fixtures/incident_city.sql
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+INSERT INTO public.carriers (id, account_id, code, name) VALUES
+  ('ca000000-0000-0000-0000-0000000000b1','a0000000-0000-0000-0000-000000000001','A','A'),
+  ('ca000000-0000-0000-0000-0000000000b2','a0000000-0000-0000-0000-000000000001','A ','A2'),
+  ('ca000000-0000-0000-0000-0000000000b3','a0000000-0000-0000-0000-000000000001','B ','B'),
+  ('ca000000-0000-0000-0000-0000000000b4','a0000000-0000-0000-0000-000000000001','B  ','B2');
+INSERT INTO public.postal_centers (id, account_id, code, name, city, city_id) VALUES
+  ('d1000000-0000-0000-0000-0000000000c1','a0000000-0000-0000-0000-000000000001','PC1','Center 1','City1','c1000000-0000-0000-0000-000000000001');
+ALTER TABLE public.readers DISABLE TRIGGER readers_cl_defaults;
+INSERT INTO public.readers (id, account_id, postal_center_id, reader_id, name, type, capture_source, carrier_id, carrier_place_ref, carrier_mode_ref, e2e_role, deleted_at) VALUES
+  ('ad000000-0000-0000-0000-0000000000e1','a0000000-0000-0000-0000-000000000001','d1000000-0000-0000-0000-0000000000c1','CL:acc:CA:X','r1','Entry','carrier_scan','ca000000-0000-0000-0000-000000000001','X',NULL,'none',NULL),
+  ('ad000000-0000-0000-0000-0000000000e2','a0000000-0000-0000-0000-000000000001','d1000000-0000-0000-0000-0000000000c1','CL:acc:CA:X ','r2','Entry','carrier_scan','ca000000-0000-0000-0000-000000000001','X ',NULL,'none',NULL),
+  ('ad000000-0000-0000-0000-0000000000e3','a0000000-0000-0000-0000-000000000001','d1000000-0000-0000-0000-0000000000c1','CL:acc:A:P','r3','Entry','carrier_scan','ca000000-0000-0000-0000-0000000000b1','P',NULL,'none',NULL),
+  ('ad000000-0000-0000-0000-0000000000e4','a0000000-0000-0000-0000-000000000001','d1000000-0000-0000-0000-0000000000c1','CL:acc:A :P','r4','Entry','carrier_scan','ca000000-0000-0000-0000-0000000000b2','P',NULL,'none',NULL),
+  ('ad000000-0000-0000-0000-0000000000e5','a0000000-0000-0000-0000-000000000001','d1000000-0000-0000-0000-0000000000c1','CL:acc:B :Q','r5','Entry','carrier_scan','ca000000-0000-0000-0000-0000000000b3','Q',NULL,'none',NULL),
+  ('ad000000-0000-0000-0000-0000000000e6','a0000000-0000-0000-0000-000000000001','d1000000-0000-0000-0000-0000000000c1','CL:acc:B  :Q','r6','Entry','carrier_scan','ca000000-0000-0000-0000-0000000000b4','Q',NULL,'none',NULL),
+  ('ad000000-0000-0000-0000-0000000000e7','a0000000-0000-0000-0000-000000000001','d1000000-0000-0000-0000-0000000000c1','CL:acc:CA: Z : M ','r7','Entry','carrier_scan','ca000000-0000-0000-0000-000000000001',' Z ',' M ','none',NULL),
+  ('ad000000-0000-0000-0000-0000000000e8','a0000000-0000-0000-0000-000000000001','d1000000-0000-0000-0000-0000000000c1','CL:acc:CA:W ','r8','Entry','carrier_scan','ca000000-0000-0000-0000-000000000001','W ',NULL,'none',now()),
+  ('ad000000-0000-0000-0000-0000000000e9','a0000000-0000-0000-0000-000000000001','d1000000-0000-0000-0000-0000000000c1','CL:acc:CA:Y ','r9','Entry','carrier_scan','ca000000-0000-0000-0000-000000000001','Y ',NULL,'none',now()),
+  ('ad000000-0000-0000-0000-0000000000ea','a0000000-0000-0000-0000-000000000001','d1000000-0000-0000-0000-0000000000c1','CL:acc:CA:Y','r10','Entry','carrier_scan','ca000000-0000-0000-0000-000000000001','Y',NULL,'none',NULL);
+ALTER TABLE public.readers ENABLE TRIGGER readers_cl_defaults;
+DO $$
+DECLARE v_n int;
+BEGIN
+  v_n := public.cl_normalize_carrier_points();
+  PERFORM pg_temp.ok(v_n = 2, 'dos filas normalizadas: ' || v_n);
+  PERFORM pg_temp.ok((SELECT array_agg(name || '=' || reader_id || '|' || carrier_place_ref || '|' || COALESCE(carrier_mode_ref, '-') ORDER BY name)
+                        FROM public.readers WHERE id::text LIKE 'ad000000-0000-0000-0000-0000000000e%')
+                     = ARRAY['r1=CL:acc:CA:X|X|-', 'r10=CL:acc:CA:Y|Y|-', 'r2=CL:acc:CA:X |X |-', 'r3=CL:acc:A:P|P|-', 'r4=CL:acc:A :P|P|-',
+                             'r5=CL:acc:B :Q|Q|-', 'r6=CL:acc:B  :Q|Q|-', 'r7=CL:acc:CA:Z:M|Z|M', 'r8=CL:acc:CA:W|W|-', 'r9=CL:acc:CA:Y |Y |-'],
+                     'resultado: ' || (SELECT string_agg(name || '=' || reader_id || '|' || carrier_place_ref, ', ' ORDER BY name)
+                                         FROM public.readers WHERE id::text LIKE 'ad000000-0000-0000-0000-0000000000e%'));
+  PERFORM pg_temp.ok(public.cl_normalize_carrier_points() = 0, 'repetir no hace nada');
+END $$;
+ROLLBACK;
+
+-- ===================================================================== 9. M1: punto guardado con espacios casa con la lectura recortada
+BEGIN;
+\set fixture_sin_roles 1
+\ir fixtures/incident_city.sql
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+SELECT pg_temp.setup(ARRAY[42], ARRAY[1]);
+UPDATE public.readers SET carrier_place_ref = ' NBO ', carrier_mode_ref = ' ADM ' WHERE id = 'ad000000-0000-0000-0000-000000000001';
+DO $$
+DECLARE v_d uuid;
+BEGIN
+  PERFORM pg_temp.ok((SELECT carrier_place_ref = 'NBO' AND carrier_mode_ref = 'ADM' AND reader_id = 'CL:acc:CA:NBO:ADM'
+                        FROM public.readers WHERE id = 'ad000000-0000-0000-0000-000000000001'), 'punto guardado recortado');
+  v_d := pg_temp.emit('2026-10-26 03:00+00');
+  PERFORM pg_temp.deliver(v_d, 'B1', jsonb_build_array(pg_temp.stratum(42, 1, ARRAY['P1'])));
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_samples WHERE item_id = 'P1' AND status = 'active'
+                        AND start_reader_id = 'ad000000-0000-0000-0000-000000000001') = 1, 'lectura NBO/ADM casa con el punto');
+END $$;
+ROLLBACK;
 
 \echo cl_wave2: OK
