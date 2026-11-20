@@ -57,7 +57,7 @@ export function ClSamples() {
   }
   const lastPage = Math.max(0, Math.ceil(total / SAMPLES_PAGE_SIZE) - 1)
 
-  // Si el total se reduce (o el servidor responde 416) y la página queda fuera de rango, se ajusta y se recarga.
+  // Si el total se reduce (o el servidor responde 416) y la pÃ¡gina queda fuera de rango, se ajusta y se recarga.
   useEffect(() => {
     if (loading) return
     const c = clampPage(page, total)
