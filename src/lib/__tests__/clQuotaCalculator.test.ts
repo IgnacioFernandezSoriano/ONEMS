@@ -75,7 +75,32 @@ describe('generateClQuotas', () => {
     expect(sum(q)).toBe(10)
     expect(q.some(x => x.destination_city_id === 'B' && x.origin_city_id === 'A')).toBe(false)
   })
+  it('all weights <= 0 falls back to equal weights without losing the total', () => {
+    const q = generateClQuotas({
+      totalSamples: 18, startDate: '2026-11-02', endDate: '2026-11-15',
+      routes: routes3.map(r => ({ ...r, weight: 0 })),
+    })
+    expect(sum(q)).toBe(18)
+    expect(q.every(x => x.samples === 3)).toBe(true)
+  })
   it('no routes -> []', () => {
     expect(generateClQuotas({ totalSamples: 10, startDate: '2026-11-02', endDate: '2026-11-15', routes: [] })).toEqual([])
+  })
+})
+
+describe('generateClQuotas at real scale', () => {
+  it('15000 samples, 870 routes, one year', () => {
+    const cities = Array.from({ length: 30 }, (_, i) => `C${String(i).padStart(2, '0')}`)
+    const routes = buildClRoutes(cities.map(c => ({ city_id: c, e2e_role: 'both' as const })))
+    expect(routes).toHaveLength(870)
+    const t0 = performance.now()
+    const q = generateClQuotas({ totalSamples: 15000, startDate: '2027-01-01', endDate: '2027-12-31', routes })
+    const ms = performance.now() - t0
+    expect(ms).toBeLessThan(1000)
+    expect(sum(q)).toBe(15000)
+    expect(q.every(x => x.samples > 0)).toBe(true)
+    expect(q.length).toBeLessThan(45300)
+    const covered = new Set(q.map(x => `${x.origin_city_id}>${x.destination_city_id}`))
+    expect(covered.size).toBe(870)
   })
 })

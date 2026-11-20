@@ -46,21 +46,22 @@ function parseLocalDate(s: string): Date {
   return new Date(y, m - 1, d)
 }
 
-/** Split `total` by weights using largest remainders; ties go to the route nearest after `start` (cyclic). */
-function splitByWeight(total: number, weights: number[], start = 0): number[] {
+/** Split `total` by weights using largest remainders; ties go to the route nearest after `start` (cyclic). Also returns how many leftovers were handed out. */
+function splitByWeight(total: number, weights: number[], start = 0): { counts: number[]; extras: number } {
   const n = weights.length
   const sum = weights.reduce((a, b) => a + b, 0)
-  if (sum <= 0 || total <= 0) return weights.map(() => 0)
+  if (sum <= 0 || total <= 0) return { counts: weights.map(() => 0), extras: 0 }
   const exact = weights.map(w => (total * w) / sum)
   const counts = exact.map(Math.floor)
   let remaining = total - counts.reduce((a, b) => a + b, 0)
+  const extras = remaining
   const order = exact
     .map((e, i) => ({ i, frac: e - counts[i] }))
     .sort((a, b) => b.frac - a.frac || ((a.i - start + n) % n) - ((b.i - start + n) % n))
   for (let k = 0; remaining > 0 && order.length > 0; k = (k + 1) % order.length, remaining--) {
     counts[order[k].i]++
   }
-  return counts
+  return { counts, extras }
 }
 
 /** Spread a plan total over ISO weeks (by working days) and, within each week, over routes by weight. */
@@ -81,14 +82,18 @@ export function generateClQuotas(p: {
   if (weeks.length === 0) return []
 
   const perWeek = distributeSamplesAcrossWeeks(p.totalSamples, weeks, false, undefined, () => 0.5)
-  const weights = p.routes.map(r => {
+  const rawWeights = p.routes.map(r => {
     const w = r.weight ?? 1
     return Number.isNaN(w) ? 0 : Math.max(0, w)
   })
+  // All weights <= 0 must not lose the total: fall back to equal weights.
+  const weights = rawWeights.some(w => w > 0) ? rawWeights : rawWeights.map(() => 1)
   const quotas: ClQuota[] = []
+  let cursor = 0
   weeks.forEach((week, wi) => {
     const { iso_year, iso_week } = isoWeekOf(week.days[0])
-    const perRoute = splitByWeight(perWeek[wi], weights, wi % weights.length)
+    const { counts: perRoute, extras } = splitByWeight(perWeek[wi], weights, cursor)
+    cursor = (cursor + extras) % weights.length // leftovers keep rotating across weeks
     p.routes.forEach((r, ri) => {
       if (perRoute[ri] > 0) {
         quotas.push({
