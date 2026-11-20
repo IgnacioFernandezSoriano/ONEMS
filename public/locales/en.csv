@@ -5756,6 +5756,7 @@ cl.records.status.carried,Carried over
 cl.records.status.unfilled,Unfilled
 cl.records.filter_total,Total (all quotas with these filters)
 cl.records.plan_total,Total (whole plan)
+cl.records.totals_unavailable,Full totals not available right now: the figures shown are for this page only.
 cl.balancing.plan_label,Plan
 cl.balancing.panelists_option,Panelists (by period)
 cl.balancing.no_max_note,Carrier Link plan: the nodes are the origin cities and the load is the planned samples per week. There is no per-panelist maximum: the reference is the expected average of each origin city according to the working days of each week.

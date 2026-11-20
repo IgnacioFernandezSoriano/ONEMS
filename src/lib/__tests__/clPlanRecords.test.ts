@@ -13,9 +13,13 @@ import {
   quotaTotals,
   quotaTotalsParams,
   toQuotaFilterTotals,
+  wholeQuotaTotals,
   samplesLink,
   samplesParams,
   clPlanOptionLabel,
+  clMenuCarrierScope,
+  carrierLinkMenuVisible,
+  CL_ALL_ACCOUNTS,
 } from '../carrierLink/planRecords'
 
 type C = { id: string; capture_method?: string | null }
@@ -43,6 +47,26 @@ describe('carrierLinkPlansVisible (regresión: sin Carrier Link, la página de s
   it('false en una cuenta solo de panelistas (Kenya/Senegal) o sin carriers', () => {
     expect(carrierLinkPlansVisible({ ...base, carriers: kenya })).toBe(false)
     expect(carrierLinkPlansVisible({ ...base, carriers: [] })).toBe(false)
+  })
+})
+
+describe('menú de Carrier Link (solo en DEV y con algún carrier carrier_link|both)', () => {
+  it('flag apagado (producción): no se consulta nada y no se muestra', () => {
+    expect(clMenuCarrierScope({ flagOn: false, isSuperadmin: true, accountId: null })).toBeNull()
+    expect(clMenuCarrierScope({ flagOn: false, isSuperadmin: false, accountId: 'acc' })).toBeNull()
+    expect(carrierLinkMenuVisible({ flagOn: false, carriers: mixed })).toBe(false)
+  })
+  it('cuenta elegida: sus carriers; superadmin con "todas las cuentas": todas; sin cuenta y no superadmin: nada', () => {
+    expect(clMenuCarrierScope({ flagOn: true, isSuperadmin: false, accountId: 'acc' })).toBe('acc')
+    expect(clMenuCarrierScope({ flagOn: true, isSuperadmin: true, accountId: 'acc' })).toBe('acc')
+    expect(clMenuCarrierScope({ flagOn: true, isSuperadmin: true, accountId: null })).toBe(CL_ALL_ACCOUNTS)
+    expect(clMenuCarrierScope({ flagOn: true, isSuperadmin: false, accountId: null })).toBeNull()
+  })
+  it('visible solo con algún carrier carrier_link o both', () => {
+    expect(carrierLinkMenuVisible({ flagOn: true, carriers: mixed })).toBe(true)
+    expect(carrierLinkMenuVisible({ flagOn: true, carriers: [{ capture_method: 'both' }] })).toBe(true)
+    expect(carrierLinkMenuVisible({ flagOn: true, carriers: kenya })).toBe(false)
+    expect(carrierLinkMenuVisible({ flagOn: true, carriers: [] })).toBe(false)
   })
 })
 
@@ -210,6 +234,15 @@ describe('totales de todo el filtro (cl_plan_quota_totals)', () => {
     })
     expect(toQuotaFilterTotals([])).toBeNull()
     expect(toQuotaFilterTotals(null)).toBeNull()
+  })
+  it('total de todo el filtro: servidor, una página, cargando o no disponible (nunca "…" para siempre)', () => {
+    const page = { planned: 5, carried_in: 1, obtained: 2, demands: 0 }
+    const server = { quotas: 9, planned: 50, carried_in: 3, obtained: 8, demands: 1 }
+    expect(wholeQuotaTotals(server, false, 4, page)).toEqual({ kind: 'ready', totals: server })
+    expect(wholeQuotaTotals(null, true, 1, page)).toEqual({ kind: 'ready', totals: page })
+    expect(wholeQuotaTotals(null, false, 1, page)).toEqual({ kind: 'ready', totals: page })
+    expect(wholeQuotaTotals(null, false, 4, page)).toEqual({ kind: 'loading' })
+    expect(wholeQuotaTotals(null, true, 4, page)).toEqual({ kind: 'unavailable' })
   })
 })
 

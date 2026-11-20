@@ -5748,6 +5748,7 @@ cl.records.status.carried,مُرحَّلة
 cl.records.status.unfilled,غير مكتملة
 cl.records.filter_total,الإجمالي (كل الحصص بهذه المرشحات)
 cl.records.plan_total,الإجمالي (الخطة كاملة)
+cl.records.totals_unavailable,الإجماليات الكاملة غير متاحة حاليًا: الأرقام المعروضة تخص هذه الصفحة فقط.
 cl.balancing.plan_label,الخطة
 cl.balancing.panelists_option,المشاركون (حسب الفترة)
 cl.balancing.no_max_note,خطة Carrier Link: العُقد هي مدن المنشأ والحمل هو العينات المخططة في كل أسبوع. لا يوجد حد أقصى لكل مشارك: المرجع هو المتوسط المتوقع لكل مدينة منشأ حسب أيام العمل في كل أسبوع.

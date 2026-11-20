@@ -5756,6 +5756,7 @@ cl.records.status.carried,Arrastrada
 cl.records.status.unfilled,Sin cubrir
 cl.records.filter_total,Total (todas las cuotas con estos filtros)
 cl.records.plan_total,Total (todo el plan)
+cl.records.totals_unavailable,Los totales completos no están disponibles ahora: las cifras mostradas son solo de esta página.
 cl.balancing.plan_label,Plan
 cl.balancing.panelists_option,Panelistas (por periodo)
 cl.balancing.no_max_note,Plan de Carrier Link: los nodos son las ciudades de origen y la carga son las muestras previstas por semana. No hay máximo por panelista: la referencia es la media esperada de cada ciudad de origen según los días laborables de cada semana.

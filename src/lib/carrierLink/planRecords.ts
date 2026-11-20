@@ -17,6 +17,24 @@ export function carrierLinkPlansVisible(p: {
   return p.flagOn && p.canViewPlans && p.accountId !== null && carriersForCapture(p.carriers, 'carrier_link').length > 0
 }
 
+/** Ámbito "todas las cuentas" de useClCaptureCarriers (superadmin sin cuenta elegida). */
+export const CL_ALL_ACCOUNTS = 'all'
+
+/**
+ * Qué carriers consultar para el menú de Carrier Link: null = nada (flag apagado, o sin cuenta y no superadmin);
+ * CL_ALL_ACCOUNTS = superadmin con "todas las cuentas"; si no, la cuenta elegida.
+ */
+export function clMenuCarrierScope(p: { flagOn: boolean; isSuperadmin: boolean; accountId: string | null }): string | null {
+  if (!p.flagOn) return null
+  if (p.accountId) return p.accountId
+  return p.isSuperadmin ? CL_ALL_ACCOUNTS : null
+}
+
+/** Enlaces de Carrier Link del menú: solo con el flag y algún carrier con captura carrier_link o both. */
+export function carrierLinkMenuVisible(p: { flagOn: boolean; carriers: { capture_method?: string | null }[] }): boolean {
+  return p.flagOn && carriersForCapture(p.carriers, 'carrier_link').length > 0
+}
+
 const CL_OPTION_PREFIX = 'cl:'
 
 /** Valor de un plan de Carrier Link en el selector de plan (los de panelistas siguen con su id). */
@@ -149,6 +167,30 @@ export function toQuotaFilterTotals(data: unknown): QuotaFilterTotals | null {
     obtained: n(row.obtained),
     demands: n(row.demands),
   }
+}
+
+export type PageQuotaTotals = ReturnType<typeof quotaTotals>
+
+/** Fila "total de todo el filtro": lista, cargando, o no disponible (la RPC falló o no existe). */
+export type WholeQuotaTotals =
+  | { kind: 'ready'; totals: PageQuotaTotals }
+  | { kind: 'loading' }
+  | { kind: 'unavailable' }
+
+/**
+ * Total de todo el filtro. El del servidor si llegó; con una sola página, el de la página (ya es el de todo el
+ * filtro, también si la RPC falla); varias páginas y la RPC falló: no disponible (la pantalla deja los de la página
+ * con un aviso, nunca "…" para siempre); si no, cargando.
+ */
+export function wholeQuotaTotals(
+  server: QuotaFilterTotals | null,
+  serverFailed: boolean,
+  totalPages: number,
+  pageTotals: PageQuotaTotals,
+): WholeQuotaTotals {
+  if (server) return { kind: 'ready', totals: server }
+  if (totalPages <= 1) return { kind: 'ready', totals: pageTotals }
+  return serverFailed ? { kind: 'unavailable' } : { kind: 'loading' }
 }
 
 export const SAMPLES_PATH = '/carrier-link/samples'

@@ -12,6 +12,7 @@ import {
   clPlanOptionLabel,
   clPlanOptionValue,
   quotaTotals,
+  wholeQuotaTotals,
   samplesLink,
   EMPTY_QUOTA_FILTERS,
   QUOTA_STATUSES,
@@ -75,8 +76,10 @@ export function ClPlanRecords({
   const totals = quotaTotals(rows)
   // Totales de todas las cuotas con estos filtros (no solo la página), calculados en el servidor.
   const filterTotals = useClPlanQuotaTotals(plan.id, filters)
-  // Con una sola página los de la página ya son los de todo el filtro (también si la RPC falla).
-  const wholeTotals = filterTotals ?? (totalPages <= 1 ? totals : null)
+  // Con una sola página los de la página ya son los de todo el filtro (también si la RPC falla); con varias y la RPC
+  // fallida, se quedan los de la página con un aviso.
+  const whole = wholeQuotaTotals(filterTotals.totals, filterTotals.failed, totalPages, totals)
+  const wholeTotals = whole.kind === 'ready' ? whole.totals : null
 
   // Si el total se reduce y la página queda fuera de rango, se vuelve a la última.
   useEffect(() => {
@@ -298,12 +301,20 @@ export function ClPlanRecords({
                     <td className="px-4 py-2" colSpan={2}>
                       {hasFilters ? t('cl.records.filter_total') : t('cl.records.plan_total')}
                     </td>
-                    <td className="px-4 py-2 text-end">{wholeTotals ? wholeTotals.planned : '…'}</td>
-                    <td className="px-4 py-2 text-end">{wholeTotals ? wholeTotals.carried_in : '…'}</td>
-                    <td className="px-4 py-2 text-end">{wholeTotals ? wholeTotals.obtained : '…'}</td>
-                    <td />
-                    <td className="px-4 py-2 text-end">{wholeTotals ? wholeTotals.demands : '…'}</td>
-                    {canViewSamples && <td />}
+                    {whole.kind === 'unavailable' ? (
+                      <td className="px-4 py-2 text-sm font-normal text-amber-700" colSpan={canViewSamples ? 6 : 5}>
+                        {t('cl.records.totals_unavailable')}
+                      </td>
+                    ) : (
+                      <>
+                        <td className="px-4 py-2 text-end">{wholeTotals ? wholeTotals.planned : '…'}</td>
+                        <td className="px-4 py-2 text-end">{wholeTotals ? wholeTotals.carried_in : '…'}</td>
+                        <td className="px-4 py-2 text-end">{wholeTotals ? wholeTotals.obtained : '…'}</td>
+                        <td />
+                        <td className="px-4 py-2 text-end">{wholeTotals ? wholeTotals.demands : '…'}</td>
+                        {canViewSamples && <td />}
+                      </>
+                    )}
                   </tr>
                 </tfoot>
               </table>

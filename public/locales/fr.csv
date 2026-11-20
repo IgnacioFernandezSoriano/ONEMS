@@ -5748,6 +5748,7 @@ cl.records.status.carried,Reporté
 cl.records.status.unfilled,Non couvert
 cl.records.filter_total,Total (tous les quotas avec ces filtres)
 cl.records.plan_total,Total (tout le plan)
+cl.records.totals_unavailable,Les totaux complets ne sont pas disponibles pour le moment : les chiffres affichés concernent uniquement cette page.
 cl.balancing.plan_label,Plan
 cl.balancing.panelists_option,Panélistes (par période)
 cl.balancing.no_max_note,Plan Carrier Link : les nœuds sont les villes d'origine et la charge est le nombre d'échantillons prévus par semaine. Il n'y a pas de maximum par panéliste : la référence est la moyenne attendue de chaque ville d'origine selon les jours ouvrables de chaque semaine.

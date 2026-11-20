@@ -5756,6 +5756,7 @@ cl.records.status.carried,Transitada
 cl.records.status.unfilled,Por cobrir
 cl.records.filter_total,Total (todas as quotas com estes filtros)
 cl.records.plan_total,Total (todo o plano)
+cl.records.totals_unavailable,Os totais completos não estão disponíveis agora: os valores mostrados são apenas desta página.
 cl.balancing.plan_label,Plano
 cl.balancing.panelists_option,Panelistas (por período)
 cl.balancing.no_max_note,Plano Carrier Link: os nós são as cidades de origem e a carga são as amostras previstas por semana. Não há máximo por panelista: a referência é a média esperada de cada cidade de origem segundo os dias úteis de cada semana.

@@ -9,6 +9,7 @@ import {
   QUOTA_ORDER,
   quotaTotalsParams,
   toQuotaFilterTotals,
+  CL_ALL_ACCOUNTS,
   type QuotaFilters,
   type QuotaFilterTotals,
   type QuotaRecord,
@@ -23,8 +24,9 @@ interface QuotaQuery extends PromiseLike<{ data: unknown[] | null; count: number
 }
 
 /**
- * Forma de captura de los carriers de la cuenta, para decidir si Planes de Asignación muestra Carrier Link.
+ * Forma de captura de los carriers de la cuenta, para decidir si Planes de Asignación (o el menú) muestra Carrier Link.
  * Con accountId null no consulta nada (producción, sin permiso o sin cuenta): la página es la de siempre.
+ * CL_ALL_ACCOUNTS: los de todas las cuentas que deje ver RLS (superadmin con "todas las cuentas").
  */
 type CaptureCarrier = { id: string; capture_method: string | null }
 /** Siempre el mismo array vacío: sin cuenta no hay ni consulta ni re-render (producción, la página de siempre). */
@@ -38,11 +40,9 @@ export function useClCaptureCarriers(accountId: string | null) {
       return
     }
     let cancelled = false
-    supabase
-      .from('carriers')
-      .select('id, capture_method')
-      .eq('account_id', accountId)
-      .in('capture_method', ['carrier_link', 'both'])
+    let query = supabase.from('carriers').select('id, capture_method').in('capture_method', ['carrier_link', 'both'])
+    if (accountId !== CL_ALL_ACCOUNTS) query = query.eq('account_id', accountId)
+    query
       .limit(50)
       .then(({ data, error }) => {
         if (cancelled) return
@@ -102,21 +102,30 @@ export function useClPlanQuotas(planId: string | null, filters: QuotaFilters, pa
 export function useClPlanQuotaTotals(planId: string | null, filters: QuotaFilters) {
   const beginLoad = useLatestRequest()
   const [totals, setTotals] = useState<QuotaFilterTotals | null>(null)
+  const [failed, setFailed] = useState(false)
   const { origin, destination, week, status } = filters
 
   useEffect(() => {
     const isStale = beginLoad()
     // Mientras llegan los de estos filtros no se muestran los anteriores.
     setTotals(null)
+    setFailed(false)
     if (!planId) return
     supabase
       .rpc('cl_plan_quota_totals', quotaTotalsParams(planId, { origin, destination, week, status }))
-      .then(({ data, error }) => {
-        if (isStale()) return
-        // Sin totales (error): la pantalla se queda con los de la página.
-        setTotals(error ? null : toQuotaFilterTotals(data))
-      })
+      .then(
+        ({ data, error }) => {
+          if (isStale()) return
+          // Sin totales (error o sin fila): la pantalla se queda con los de la página y un aviso.
+          const read = error ? null : toQuotaFilterTotals(data)
+          setTotals(read)
+          setFailed(read === null)
+        },
+        () => {
+          if (!isStale()) setFailed(true)
+        },
+      )
   }, [planId, origin, destination, week, status, beginLoad])
 
-  return totals
+  return { totals, failed }
 }

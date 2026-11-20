@@ -48,6 +48,9 @@ import { usePermissions } from '../../contexts/PermissionsContext'
 import { canAccess, routeAccess, type RouteAccess } from '../../lib/access'
 import { visibleEntries } from '../../lib/menuHeadings'
 import { isCarrierLinkEnabled } from '@/lib/featureFlags'
+import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
+import { useClCaptureCarriers } from '@/hooks/carrierLink/useClPlanRecords'
+import { carrierLinkMenuVisible, clMenuCarrierScope } from '@/lib/carrierLink/planRecords'
 
 // Carrier Link solo en DEV: fuera de DEV sus enlaces (y con ellos sus subencabezados) no se muestran.
 const carrierLinkOn = isCarrierLinkEnabled()
@@ -80,6 +83,13 @@ export function Sidebar() {
   const { selectedAccountId, setSelectedAccountId, myAccounts, switchActiveAccount } = useAccount()
   const { canView, canManageAccess, loading: permissionsLoading } = usePermissions()
   const isSuperadmin = profile?.role === 'superadmin'
+  // En DEV, los enlaces de Carrier Link solo si la cuenta elegida (superadmin con "todas": alguna) tiene un carrier con
+  // captura carrier_link o both. Con el flag apagado (producción) no se consulta nada y no se muestran.
+  const effectiveAccountId = useEffectiveAccountId()
+  const clMenuCarriers = useClCaptureCarriers(
+    clMenuCarrierScope({ flagOn: carrierLinkOn, isSuperadmin, accountId: effectiveAccountId }),
+  )
+  const clMenuOn = carrierLinkMenuVisible({ flagOn: carrierLinkOn, carriers: clMenuCarriers })
   const [switchingAccount, setSwitchingAccount] = useState(false)
   const [switchError, setSwitchError] = useState(false)
   const location = useLocation()
@@ -497,7 +507,7 @@ export function Sidebar() {
 
   const hasAccess = (item: MenuItem): boolean => {
     if (item.heading) return false
-    if (!carrierLinkOn && item.path.startsWith('/carrier-link')) return false
+    if (!clMenuOn && item.path.startsWith('/carrier-link')) return false
     if (item.children) return item.children.some(hasAccess)
     // Mientras cargan los derechos no se enseña nada que dependa de ellos (evita parpadeo de opciones).
     if (permissionsLoading && item.option !== 'open') return false
