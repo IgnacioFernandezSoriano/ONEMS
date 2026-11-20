@@ -62,6 +62,8 @@ interface MenuItem {
   heading?: boolean
   /** Subencabezado con el color de acento de Carrier Link. */
   accent?: boolean
+  /** Subencabezado que solo se ve si en el mismo submenú se ve otro (p. ej. el de Carrier Link). */
+  onlyWithOtherHeadings?: boolean
 }
 
 interface MenuGroup {
@@ -188,7 +190,7 @@ export function Sidebar() {
           icon: Target,
           tooltip: t('menu.allocation.tooltip'),
           children: [
-            { path: '#panelists-alloc', label: t('menu.capture_panelists'), icon: UserCircle, heading: true },
+            { path: '#panelists-alloc', label: t('menu.capture_panelists'), icon: UserCircle, heading: true, onlyWithOtherHeadings: true },
             {
               path: '/allocation-plan-generator',
               label: t('menu.allocation_generator'),

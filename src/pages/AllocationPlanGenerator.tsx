@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAllocationPlans } from '@/hooks/useAllocationPlans'
 import { useAppliedAllocationPlans } from '@/hooks/useAppliedAllocationPlans'
 import { AllocationPlanGeneratorForm } from '@/components/allocation-plans/AllocationPlanGeneratorForm'
+import { carriersForCapture } from '@/lib/carrierCapture'
 import { CSVHandler } from '@/components/allocation-plans/CSVHandler'
 import { PageHeader } from '@/components/common/PageHeader'
 import { Button } from '@/components/common/Button'
@@ -260,7 +261,7 @@ export function AllocationPlanGenerator() {
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-lg font-medium mb-4">{t('allocation_generator.automatic_generator')}</h2>
             <AllocationPlanGeneratorForm
-              carriers={carriers}
+              carriers={carriersForCapture(carriers, 'panelists')}
               products={products}
               cities={cities}
               nodes={nodes}

@@ -5450,7 +5450,7 @@ cl.reading_points.role.both,Start and end
 cl.reading_points.role.none,Intermediate
 cl.reading_points.name,Name (optional)
 cl.reading_points.empty,No reading points for this carrier yet.
-cl.reading_points.no_carriers,There are no active carriers in this account.
+cl.reading_points.no_carriers,There are no active carriers with Carrier Link capture in this account. Set the capture method in Carriers & Products.
 cl.reading_points.unknown_title,Places without a reading point
 cl.reading_points.unknown_help,Scans from the last 90 days arrived from these places and could not be matched.
 cl.reading_points.readings,Readings
@@ -5727,3 +5727,8 @@ help_center.doc.carrier_link.desc,"What Carrier Link is, the order to set it up 
 cl.help_link,Help
 menu.capture_panelists,Panelists
 cl.coming_soon,In preparation.
+cl.capture_method.label,Capture method
+cl.capture_method.help,"Panelists: E2E allocation generator. Carrier Link: carrier scans (Carrier Link generator, connectors and reading points). Both: available in both."
+cl.capture_method.panelists,Panelists
+cl.capture_method.carrier_link,Carrier Link
+cl.capture_method.both,Both

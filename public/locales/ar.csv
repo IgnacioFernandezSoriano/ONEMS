@@ -5442,7 +5442,7 @@ cl.reading_points.role.both,البداية والنهاية
 cl.reading_points.role.none,وسيط
 cl.reading_points.name,الاسم (اختياري)
 cl.reading_points.empty,لا توجد نقاط قراءة لهذا الناقل بعد.
-cl.reading_points.no_carriers,لا يوجد ناقلون نشطون في هذا الحساب.
+cl.reading_points.no_carriers,لا يوجد ناقلون نشطون بالتقاط Carrier Link في هذا الحساب. حدّد طريقة الالتقاط في المشغلون والمنتجات.
 cl.reading_points.unknown_title,أماكن بلا نقطة قراءة
 cl.reading_points.unknown_help,وصلت خلال آخر 90 يوما عمليات مسح من هذه الأماكن دون مطابقة.
 cl.reading_points.readings,القراءات
@@ -5719,3 +5719,8 @@ help_center.doc.carrier_link.desc,"ما هو Carrier Link، وبأي ترتيب 
 cl.help_link,مساعدة
 menu.capture_panelists,المشاركون
 cl.coming_soon,قيد الإعداد.
+cl.capture_method.label,طريقة الالتقاط
+cl.capture_method.help,المشاركون: مولّد التخصيص E2E. Carrier Link: عمليات مسح الناقل (مولّد ووصلات ونقاط قراءة Carrier Link). كلاهما: متاح في الاثنين.
+cl.capture_method.panelists,المشاركون
+cl.capture_method.carrier_link,Carrier Link
+cl.capture_method.both,كلاهما

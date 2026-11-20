@@ -1,3 +1,5 @@
+import type { CaptureMethod } from './carrierCapture'
+
 export type Role = 'superadmin' | 'admin' | 'user'
 export type Status = 'active' | 'inactive'
 
@@ -97,6 +99,8 @@ export interface Carrier {
   name: string
   type?: string
   status: 'active' | 'inactive'
+  /** Forma de captura (panelists | carrier_link | both); ver src/lib/carrierCapture.ts. */
+  capture_method?: CaptureMethod
   created_at: string
   updated_at: string
 }

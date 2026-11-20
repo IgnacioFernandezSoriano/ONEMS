@@ -5450,7 +5450,7 @@ cl.reading_points.role.both,Inicio y fin
 cl.reading_points.role.none,Intermedio
 cl.reading_points.name,Nombre (opcional)
 cl.reading_points.empty,Este carrier aún no tiene puntos de lectura.
-cl.reading_points.no_carriers,No hay carriers activos en esta cuenta.
+cl.reading_points.no_carriers,No hay carriers activos con captura Carrier Link en esta cuenta. Cambia la forma de captura en Operadores y productos.
 cl.reading_points.unknown_title,Lugares sin punto de lectura
 cl.reading_points.unknown_help,En los últimos 90 días llegaron escaneos de estos lugares sin poder asignarlos.
 cl.reading_points.readings,Lecturas
@@ -5727,3 +5727,8 @@ help_center.doc.carrier_link.desc,"Qué es Carrier Link, en qué orden se config
 cl.help_link,Ayuda
 menu.capture_panelists,Panelistas
 cl.coming_soon,En preparación.
+cl.capture_method.label,Forma de captura
+cl.capture_method.help,"Panelistas: generador de asignación E2E. Carrier Link: escaneos del carrier (generador, conectores y puntos de lectura de Carrier Link). Ambos: disponible en los dos."
+cl.capture_method.panelists,Panelistas
+cl.capture_method.carrier_link,Carrier Link
+cl.capture_method.both,Ambos

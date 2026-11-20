@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Carrier, Product, ProductMaterial } from '@/lib/types'
+import type { CaptureMethod } from '@/lib/carrierCapture'
 import { useEffectiveAccountId } from './useEffectiveAccountId'
 import { useLatestRequest } from '@/lib/latestRequest'
 
@@ -62,7 +63,7 @@ export function useCarriers() {
   }, [effectiveAccountId])
 
   // Carrier operations
-  const createCarrier = async (data: { code: string; name: string; type?: string; status?: string }) => {
+  const createCarrier = async (data: { code: string; name: string; type?: string; status?: string; capture_method?: CaptureMethod }) => {
     const carrierData = { ...data, account_id: effectiveAccountId }
     const { data: newCarrier, error } = await supabase.from('carriers').insert(carrierData).select().single()
     if (error) throw error

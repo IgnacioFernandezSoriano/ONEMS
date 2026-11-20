@@ -5450,7 +5450,7 @@ cl.reading_points.role.both,Início e fim
 cl.reading_points.role.none,Intermédio
 cl.reading_points.name,Nome (opcional)
 cl.reading_points.empty,Esta transportadora ainda não tem pontos de leitura.
-cl.reading_points.no_carriers,Não há transportadoras ativas nesta conta.
+cl.reading_points.no_carriers,Não há transportadoras ativas com captura Carrier Link nesta conta. Defina a forma de captura em Transportadoras e produtos.
 cl.reading_points.unknown_title,Locais sem ponto de leitura
 cl.reading_points.unknown_help,Nos últimos 90 dias chegaram leituras destes locais sem correspondência.
 cl.reading_points.readings,Leituras
@@ -5727,3 +5727,8 @@ help_center.doc.carrier_link.desc,"O que é o Carrier Link, por que ordem se con
 cl.help_link,Ajuda
 menu.capture_panelists,Painelistas
 cl.coming_soon,Em preparação.
+cl.capture_method.label,Forma de captura
+cl.capture_method.help,"Painelistas: gerador de alocação E2E. Carrier Link: leituras da transportadora (gerador, conectores e pontos de leitura do Carrier Link). Ambos: disponível nos dois."
+cl.capture_method.panelists,Painelistas
+cl.capture_method.carrier_link,Carrier Link
+cl.capture_method.both,Ambos
