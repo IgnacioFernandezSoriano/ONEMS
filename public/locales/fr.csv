@@ -5704,3 +5704,9 @@ cl.alert.detail.products,Produits reçus : {values}
 cl.alert.detail.points,Points de lecture : {points}
 cl.alert.detail.feed_silent,La demande du {date} est restée sans réponse.
 cl.alert.detail.selection_method,Méthode attendue : {expected}.
+hc.delivery_standards.cl_first_mile,Premier tronçon transporteur
+hc.delivery_standards.cl_last_mile,Dernier tronçon transporteur
+hc.delivery_standards.cl_equivalence_tip,Ajouté uniquement aux échantillons du transporteur
+hc.delivery_standard_form.cl_equivalence_invalid,Durée du premier/dernier tronçon invalide (nombre >= 0)
+hc.delivery_standard_form.cl_first_mile_time,Durée équiv. premier tronçon
+hc.delivery_standard_form.cl_last_mile_time,Durée équiv. dernier tronçon

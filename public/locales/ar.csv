@@ -5704,3 +5704,9 @@ cl.alert.detail.products,المنتجات المستلمة: {values}
 cl.alert.detail.points,نقاط القراءة: {points}
 cl.alert.detail.feed_silent,لم يتم الرد على طلب {date}.
 cl.alert.detail.selection_method,الطريقة المتوقعة: {expected}.
+hc.delivery_standards.cl_first_mile,المرحلة الأولى للناقل
+hc.delivery_standards.cl_last_mile,المرحلة الأخيرة للناقل
+hc.delivery_standards.cl_equivalence_tip,يُضاف فقط إلى عينات الناقل
+hc.delivery_standard_form.cl_equivalence_invalid,وقت المرحلة الأولى/الأخيرة غير صالح (أدخل رقما >= 0)
+hc.delivery_standard_form.cl_first_mile_time,وقت معادلة المرحلة الأولى
+hc.delivery_standard_form.cl_last_mile_time,وقت معادلة المرحلة الأخيرة

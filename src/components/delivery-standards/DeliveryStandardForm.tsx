@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { parseEquivalenceInput } from '@/lib/carrierLink/equivalenceInput'
 import type { DeliveryStandard, Carrier, Product, City } from '@/lib/types'
 
 import { useTranslation } from '@/hooks/useTranslation';
@@ -28,6 +29,8 @@ export function DeliveryStandardForm({
     standard_time: standard?.standard_time?.toString() || '',
     success_percentage: standard?.success_percentage?.toString() || '',
     time_unit: standard?.time_unit || 'hours',
+    cl_first_mile_time: standard?.cl_first_mile_time?.toString() || '',
+    cl_last_mile_time: standard?.cl_last_mile_time?.toString() || '',
     warning_threshold: standard?.warning_threshold?.toString() || '',
     critical_threshold: standard?.critical_threshold?.toString() || '',
     threshold_type: standard?.threshold_type || 'absolute',
@@ -58,6 +61,13 @@ export function DeliveryStandardForm({
       return
     }
 
+    const firstMile = parseEquivalenceInput(formData.cl_first_mile_time)
+    const lastMile = parseEquivalenceInput(formData.cl_last_mile_time)
+    if (firstMile === null || lastMile === null) {
+      alert(t('hc.delivery_standard_form.cl_equivalence_invalid'))
+      return
+    }
+
     setLoading(true)
     try {
       const data: any = {
@@ -70,6 +80,8 @@ export function DeliveryStandardForm({
           ? parseFloat(formData.success_percentage)
           : null,
         time_unit: formData.time_unit,
+        cl_first_mile_time: firstMile,
+        cl_last_mile_time: lastMile,
         warning_threshold: formData.warning_threshold ? parseFloat(formData.warning_threshold) : null,
         critical_threshold: formData.critical_threshold ? parseFloat(formData.critical_threshold) : null,
         threshold_type: formData.threshold_type,
@@ -215,6 +227,35 @@ export function DeliveryStandardForm({
           </select>
         </div>
       </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">{t('hc.delivery_standard_form.cl_first_mile_time')}</label>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            value={formData.cl_first_mile_time}
+            onChange={(e) => setFormData({ ...formData, cl_first_mile_time: e.target.value })}
+            className="w-full px-3 py-2 border rounded-md"
+            placeholder="0"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">{t('hc.delivery_standard_form.cl_last_mile_time')}</label>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            value={formData.cl_last_mile_time}
+            onChange={(e) => setFormData({ ...formData, cl_last_mile_time: e.target.value })}
+            className="w-full px-3 py-2 border rounded-md"
+            placeholder="0"
+          />
+        </div>
+      </div>
+      <p className="text-xs text-gray-500 -mt-2">{t('hc.delivery_standards.cl_equivalence_tip')}</p>
 
       <div className="grid grid-cols-3 gap-4">
         <div>

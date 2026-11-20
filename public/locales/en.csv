@@ -5712,3 +5712,9 @@ cl.alert.detail.products,Products received: {values}
 cl.alert.detail.points,Reading points: {points}
 cl.alert.detail.feed_silent,Request of {date} was never answered.
 cl.alert.detail.selection_method,Expected method: {expected}.
+hc.delivery_standards.cl_first_mile,Carrier first leg
+hc.delivery_standards.cl_last_mile,Carrier last leg
+hc.delivery_standards.cl_equivalence_tip,Only added to carrier samples
+hc.delivery_standard_form.cl_equivalence_invalid,Invalid first/last leg time (use a number >= 0)
+hc.delivery_standard_form.cl_first_mile_time,First-leg equivalence time
+hc.delivery_standard_form.cl_last_mile_time,Last-leg equivalence time

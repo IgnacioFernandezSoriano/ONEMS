@@ -5712,3 +5712,9 @@ cl.alert.detail.products,Productos recibidos: {values}
 cl.alert.detail.points,Puntos de lectura: {points}
 cl.alert.detail.feed_silent,La petición del {date} no obtuvo respuesta.
 cl.alert.detail.selection_method,Método esperado: {expected}.
+hc.delivery_standards.cl_first_mile,Primer tramo carrier
+hc.delivery_standards.cl_last_mile,Último tramo carrier
+hc.delivery_standards.cl_equivalence_tip,Solo se suma a las muestras del carrier
+hc.delivery_standard_form.cl_equivalence_invalid,Tiempo de primer/último tramo no válido (use un número >= 0)
+hc.delivery_standard_form.cl_first_mile_time,Tiempo equiv. primer tramo
+hc.delivery_standard_form.cl_last_mile_time,Tiempo equiv. último tramo
