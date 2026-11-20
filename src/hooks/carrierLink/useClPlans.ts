@@ -181,6 +181,24 @@ export function useClPlans(accountId: string | null) {
     [],
   )
 
+  /** Rutas con estándar de entrega para el carrier + producto (para marcar ⚠ en la vista previa antes de guardar). */
+  const standardRoutes = useCallback(
+    (carrierId: string, productId: string): Promise<ClMissingStandard[]> => {
+      if (!accountId) return Promise.resolve([])
+      return fetchAllPages<ClMissingStandard>((from, to) =>
+        supabase
+          .from('delivery_standards')
+          .select('origin_city_id, destination_city_id')
+          .eq('account_id', accountId)
+          .eq('carrier_id', carrierId)
+          .eq('product_id', productId)
+          .order('id')
+          .range(from, to),
+      )
+    },
+    [accountId],
+  )
+
   const activate = async (planId: string): Promise<ClPlanResult> => {
     const { error: e } = await supabase.rpc('cl_plan_activate', { p_plan_id: planId })
     if (e) return { success: false, error: e }
@@ -205,6 +223,7 @@ export function useClPlans(accountId: string | null) {
     setQuotas,
     missingPoints,
     missingStandards,
+    standardRoutes,
     activate,
   }
 }

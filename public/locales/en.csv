@@ -5613,3 +5613,5 @@ cl.plans.matrix.no_match,No route matches the filter.
 cl.plans.matrix.route,Route
 cl.plans.matrix.total,Total
 cl.plans.matrix.routes,{count} routes
+cl.plans.error.quotas_mismatch,The quotas do not match the plan dates: generate them again.
+cl.plans.regenerate_notice,The total or the dates have changed: generate and save the quotas again.

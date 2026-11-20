@@ -6,6 +6,7 @@ import {
   groupQuotaMatrix,
   originGroups,
   nextExpandedGroups,
+  fitExpandedGroups,
   MAX_EXPANDED_CELLS,
   type QuotaInput,
 } from '@/lib/carrierLink/planView'
@@ -51,7 +52,9 @@ export function QuotaMatrix({ quotas, cityName, showObtained, noStandard }: Prop
   const grandTotal = groups.reduce((a, g) => a + g.total, 0)
   const routeCount = groups.reduce((a, g) => a + g.rows.length, 0)
   const groupSize = (id: string) => (groups.find((g) => g.origin_city_id === id)?.rows.length ?? 0) * cols.length
-  const toggle = (id: string) => setExpanded((e) => nextExpandedGroups(e, id, groupSize))
+  // Si cambia el número de columnas (mes -> semana) o el filtro, el límite de celdas se vuelve a aplicar.
+  const shown = fitExpandedGroups(expanded, groupSize)
+  const toggle = (id: string) => setExpanded(nextExpandedGroups(shown, id, groupSize))
 
   return (
     <div className="space-y-3">
@@ -101,7 +104,7 @@ export function QuotaMatrix({ quotas, cityName, showObtained, noStandard }: Prop
             </thead>
             <tbody>
               {groups.map((g) => {
-                const open = expanded.includes(g.origin_city_id)
+                const open = shown.includes(g.origin_city_id)
                 return (
                   <Fragment key={g.origin_city_id}>
                     <tr className="border-t border-gray-200 bg-gray-50/60 font-medium">

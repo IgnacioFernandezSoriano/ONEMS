@@ -5613,3 +5613,5 @@ cl.plans.matrix.no_match,Ninguna ruta coincide con el filtro.
 cl.plans.matrix.route,Ruta
 cl.plans.matrix.total,Total
 cl.plans.matrix.routes,{count} rutas
+cl.plans.error.quotas_mismatch,Las cuotas no coinciden con las fechas del plan: vuelve a generarlas.
+cl.plans.regenerate_notice,Han cambiado el total o las fechas: vuelve a generar y guardar las cuotas.

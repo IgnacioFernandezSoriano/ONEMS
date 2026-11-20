@@ -5605,3 +5605,5 @@ cl.plans.matrix.no_match,لا يوجد مسار يطابق عامل التصفي
 cl.plans.matrix.route,المسار
 cl.plans.matrix.total,الإجمالي
 cl.plans.matrix.routes,{count} مسار
+cl.plans.error.quotas_mismatch,الحصص لا تتطابق مع تواريخ الخطة: أعد توليدها.
+cl.plans.regenerate_notice,تغيّر الإجمالي أو التواريخ: أعد توليد الحصص وحفظها.

@@ -5,6 +5,11 @@ import {
   originGroups,
   buildPlanRow,
   nextExpandedGroups,
+  fitExpandedGroups,
+  routesForPlan,
+  routesWithoutStandard,
+  setQuotasErrorKey,
+  planSaveFollowUp,
   type QuotaInput,
 } from '../carrierLink/planView'
 
@@ -109,6 +114,75 @@ describe('nextExpandedGroups', () => {
   })
   it('closes an open group', () => {
     expect(nextExpandedGroups(['a', 'c'], 'a', size)).toEqual(['c'])
+  })
+})
+
+describe('fitExpandedGroups', () => {
+  it('keeps only the last opened group when the cell count now exceeds 2,000 (month -> week)', () => {
+    const monthSize = (g: string) => ({ a: 300, b: 300 })[g] ?? 0
+    const weekSize = (g: string) => ({ a: 1300, b: 1300 })[g] ?? 0
+    expect(fitExpandedGroups(['a', 'b'], monthSize)).toEqual(['a', 'b'])
+    expect(fitExpandedGroups(['a', 'b'], weekSize)).toEqual(['b'])
+    expect(fitExpandedGroups([], weekSize)).toEqual([])
+  })
+})
+
+describe('routesForPlan', () => {
+  const pt = (carrier_id: string, city_id: string | null, e2e_role: 'origin' | 'destination' | 'both' | 'none', is_active = true) => ({
+    carrier_id,
+    city_id,
+    e2e_role,
+    is_active,
+  })
+  it('returns null while points of another carrier are still loaded', () => {
+    expect(routesForPlan([pt('old', 'A', 'origin'), pt('old', 'B', 'destination')], 'new')).toBeNull()
+  })
+  it('uses only active points with a city', () => {
+    const r = routesForPlan(
+      [pt('c', 'A', 'origin'), pt('c', 'B', 'destination'), pt('c', 'C', 'destination', false), pt('c', null, 'destination')],
+      'c',
+    )
+    expect(r).toEqual([{ origin_city_id: 'A', destination_city_id: 'B' }])
+  })
+})
+
+describe('routesWithoutStandard', () => {
+  it('marks the preview routes that have no delivery standard', () => {
+    const s = routesWithoutStandard(
+      [q('A', 'B', 2026, 45, 1), q('A', 'B', 2026, 46, 1), q('A', 'C', 2026, 45, 1)],
+      [{ origin_city_id: 'A', destination_city_id: 'B' }],
+    )
+    expect([...s]).toEqual(['A|C'])
+  })
+})
+
+describe('setQuotasErrorKey', () => {
+  it('maps a raw DB message (week outside the plan dates) to the translated mismatch message', () => {
+    expect(setQuotasErrorKey({ message: 'Week 2027-W02 is outside the plan dates', code: '22023' })).toBe('cl.plans.error.quotas_mismatch')
+  })
+  it('keeps CL_ codes and permission errors', () => {
+    expect(setQuotasErrorKey({ message: 'CL_PLAN_NOT_DRAFT: quotas can only be set on a draft plan' })).toBe('cl.error.cl_plan_not_draft')
+    expect(setQuotasErrorKey({ message: 'Forbidden', code: '42501' })).toBe('cl.error.forbidden')
+  })
+})
+
+describe('planSaveFollowUp', () => {
+  const period = { start_date: '2027-01-01', end_date: '2027-12-31', total_samples: 100 }
+  const base = { editedId: 'p1', selectedId: 'p1', status: 'draft', before: period, after: period, hadPreview: true, hasSavedQuotas: false }
+  it('editing the open plan always drops the preview', () => {
+    expect(planSaveFollowUp(base)).toEqual({ clearPreview: true, regenerateNotice: false })
+  })
+  it('changed total or dates on a draft with a preview or quotas -> regenerate notice', () => {
+    expect(planSaveFollowUp({ ...base, after: { ...period, total_samples: 200 } })).toEqual({ clearPreview: true, regenerateNotice: true })
+    expect(
+      planSaveFollowUp({ ...base, hadPreview: false, hasSavedQuotas: true, after: { ...period, end_date: '2027-06-30' } }).regenerateNotice,
+    ).toBe(true)
+  })
+  it('no notice without preview or quotas, nor on an active plan; nothing for another plan', () => {
+    const changed = { ...period, total_samples: 200 }
+    expect(planSaveFollowUp({ ...base, hadPreview: false, after: changed }).regenerateNotice).toBe(false)
+    expect(planSaveFollowUp({ ...base, status: 'active', after: changed }).regenerateNotice).toBe(false)
+    expect(planSaveFollowUp({ ...base, selectedId: 'p2', after: changed })).toEqual({ clearPreview: false, regenerateNotice: false })
   })
 })
 

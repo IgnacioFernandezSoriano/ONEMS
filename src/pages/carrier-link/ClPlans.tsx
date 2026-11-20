@@ -8,8 +8,16 @@ import { SelectAccountNotice } from '@/components/carrier-link/SelectAccountNoti
 import { QuotaMatrix } from '@/components/carrier-link/QuotaMatrix'
 import { clErrorKey } from '@/lib/carrierLink/clErrors'
 import { useLatestRequest } from '@/lib/latestRequest'
-import { buildClRoutes, generateClQuotas, type ClQuota } from '@/lib/carrierLink/quotaCalculator'
-import { routeKey, type PlanForm, type QuotaInput } from '@/lib/carrierLink/planView'
+import { generateClQuotas, type ClQuota } from '@/lib/carrierLink/quotaCalculator'
+import {
+  routeKey,
+  routesForPlan,
+  routesWithoutStandard,
+  setQuotasErrorKey,
+  planSaveFollowUp,
+  type PlanForm,
+  type QuotaInput,
+} from '@/lib/carrierLink/planView'
 import { useClReadingPoints, useClCarriersAndCenters } from '@/hooks/carrierLink/useClReadingPoints'
 import { useClConnectors } from '@/hooks/carrierLink/useClConnectors'
 import {
@@ -75,9 +83,12 @@ export function ClPlans() {
   const [formError, setFormError] = useState<string | null>(null)
 
   const beginDetail = useLatestRequest()
+  const beginGenerate = useLatestRequest()
   const [detail, setDetail] = useState<Detail | null>(null)
   const [detailLoading, setDetailLoading] = useState(false)
   const [preview, setPreview] = useState<ClQuota[] | null>(null)
+  const [previewNoStandard, setPreviewNoStandard] = useState<Set<string>>(new Set())
+  const [generating, setGenerating] = useState(false)
   const [savingQuotas, setSavingQuotas] = useState(false)
   const [confirmActivate, setConfirmActivate] = useState(false)
   const [activating, setActivating] = useState(false)
@@ -110,13 +121,15 @@ export function ClPlans() {
 
   // Al cambiar de plan (o de cuenta) se descarta la vista previa y se recargan las cuotas.
   useEffect(() => {
+    beginGenerate() // una generación en curso del plan anterior queda descartada
     setPreview(null)
+    setGenerating(false)
     setConfirmActivate(false)
     setMessage(null)
     setDetail(null)
     if (selectedId) void loadDetail(selectedId)
     else beginDetail()
-  }, [selectedId, loadDetail, beginDetail])
+  }, [selectedId, loadDetail, beginDetail, beginGenerate])
 
   useEffect(() => {
     setSelectedId(null)
@@ -192,31 +205,60 @@ export function ClPlans() {
       return
     }
     setEditor(null)
-    if (res.id) setSelectedId(res.id)
-    else if (editor.id && editor.id === selectedId) void loadDetail(editor.id)
+    if (res.id) {
+      setSelectedId(res.id)
+      return
+    }
+    const before = cl.plans.find((p) => p.id === editor.id) ?? null
+    const followUp = planSaveFollowUp({
+      editedId: editor.id,
+      selectedId,
+      status: editor.status,
+      before,
+      after: editor.form,
+      hadPreview: !!preview,
+      hasSavedQuotas: (detail?.quotas.length ?? 0) > 0,
+    })
+    if (followUp.clearPreview) {
+      setPreview(null)
+      setConfirmActivate(false)
+      setMessage(followUp.regenerateNotice ? { kind: 'info', key: 'cl.plans.regenerate_notice' } : null)
+      if (editor.id) void loadDetail(editor.id)
+    }
   }
 
   // ---------------------------------------------------------------- cuotas y activación
-  const generate = () => {
-    if (!selected) return
+  const generate = async () => {
+    if (!selected || pointsLoading) return
+    // Puntos aún del carrier anterior (un render tras cambiar de plan): no se genera nada.
+    const routes = routesForPlan(points, selected.carrier_id)
+    if (!routes) return
     setMessage(null)
-    const active = points.filter((p) => p.is_active && p.city_id)
-    const routes = buildClRoutes(active.map((p) => ({ city_id: p.city_id!, e2e_role: p.e2e_role })))
     if (routes.length === 0) {
       setPreview(null)
       setMessage({ kind: 'error', key: 'cl.plans.no_routes' })
       return
     }
-    setPreview(
-      generateClQuotas({
-        totalSamples: selected.total_samples,
-        startDate: selected.start_date,
-        endDate: selected.end_date,
-        routes,
-        nonWorkingDays: cl.nonWorkingDays,
-        workingDows: cl.workingDows,
-      }),
-    )
+    const quotas = generateClQuotas({
+      totalSamples: selected.total_samples,
+      startDate: selected.start_date,
+      endDate: selected.end_date,
+      routes,
+      nonWorkingDays: cl.nonWorkingDays,
+      workingDows: cl.workingDows,
+    })
+    const isStale = beginGenerate()
+    setGenerating(true)
+    let standards: { origin_city_id: string; destination_city_id: string }[] | null = null
+    try {
+      standards = await cl.standardRoutes(selected.carrier_id, selected.product_id)
+    } catch {
+      standards = null // sin estándares legibles no se marca ⚠ en la vista previa; tras guardar lo dice la base
+    }
+    if (isStale()) return
+    setGenerating(false)
+    setPreviewNoStandard(standards ? routesWithoutStandard(quotas, standards) : new Set())
+    setPreview(quotas)
   }
 
   const saveQuotas = async () => {
@@ -226,7 +268,7 @@ export function ClPlans() {
     const res = await cl.setQuotas(selected.id, preview)
     setSavingQuotas(false)
     if (!res.success) {
-      setMessage({ kind: 'error', key: clErrorKey(res.error) })
+      setMessage({ kind: 'error', key: setQuotasErrorKey(res.error) })
       return
     }
     setMessage({ kind: 'info', key: 'cl.plans.quotas_saved', vars: { count: preview.length } })
@@ -346,7 +388,13 @@ export function ClPlans() {
                   </button>
                 )}
                 {!readOnly && selected.status === 'draft' && (
-                  <button type="button" onClick={generate} disabled={pointsLoading || savingQuotas} className={btnSecondary}>
+                  <button
+                    type="button"
+                    onClick={() => void generate()}
+                    disabled={pointsLoading || generating || savingQuotas || routesForPlan(points, selected.carrier_id) === null}
+                    className={btnSecondary}
+                  >
+                    {generating && <Loader2 className="w-4 h-4 animate-spin" />}
                     {t('cl.plans.generate')}
                   </button>
                 )}
@@ -428,7 +476,7 @@ export function ClPlans() {
                       {t('cl.plans.discard')}
                     </button>
                   </div>
-                  <QuotaMatrix quotas={previewInput} cityName={cl.cityName} showObtained={false} />
+                  <QuotaMatrix quotas={previewInput} cityName={cl.cityName} showObtained={false} noStandard={previewNoStandard} />
                 </div>
               ) : detailLoading ? (
                 <p className="text-sm text-gray-500">{t('common.loading')}</p>

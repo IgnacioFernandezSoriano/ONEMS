@@ -5613,3 +5613,5 @@ cl.plans.matrix.no_match,Nenhuma rota corresponde ao filtro.
 cl.plans.matrix.route,Rota
 cl.plans.matrix.total,Total
 cl.plans.matrix.routes,{count} rotas
+cl.plans.error.quotas_mismatch,As quotas não coincidem com as datas do plano: gere-as novamente.
+cl.plans.regenerate_notice,O total ou as datas mudaram: gere e guarde as quotas novamente.

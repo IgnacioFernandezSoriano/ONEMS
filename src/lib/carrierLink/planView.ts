@@ -1,3 +1,6 @@
+import { buildClRoutes, type ClRoute } from './quotaCalculator'
+import { clErrorKey } from './clErrors'
+
 /** Cuota tal y como se lee de cl_plan_quotas (o se previsualiza desde el generador). */
 export interface QuotaInput {
   origin_city_id: string
@@ -155,6 +158,71 @@ export function nextExpandedGroups(
   const next = [...expanded, toggled]
   const cells = next.reduce((a, g) => a + cellCount(g), 0)
   return cells > limit ? [toggled] : next
+}
+
+/** Reaplica el límite de celdas a los grupos abiertos (p. ej. al pasar de mes a semana): si se pasa, queda solo el último abierto. */
+export function fitExpandedGroups(expanded: string[], cellCount: (group: string) => number, limit = MAX_EXPANDED_CELLS): string[] {
+  if (expanded.length === 0) return expanded
+  const last = expanded[expanded.length - 1]
+  return nextExpandedGroups(expanded.slice(0, -1), last, cellCount, limit)
+}
+
+/**
+ * Rutas para generar cuotas desde los puntos del carrier del plan: solo puntos activos con ciudad.
+ * Devuelve null si algún punto cargado es de otro carrier (carga del carrier anterior aún en pantalla).
+ */
+export function routesForPlan(
+  points: { carrier_id: string; city_id: string | null; e2e_role: 'origin' | 'destination' | 'both' | 'none'; is_active: boolean }[],
+  carrierId: string,
+): ClRoute[] | null {
+  if (points.some((p) => p.carrier_id !== carrierId)) return null
+  return buildClRoutes(
+    points.filter((p) => p.is_active && p.city_id).map((p) => ({ city_id: p.city_id as string, e2e_role: p.e2e_role })),
+  )
+}
+
+/** Claves de ruta de las cuotas que no tienen estándar de entrega (para marcar ⚠ en la vista previa). */
+export function routesWithoutStandard(
+  quotas: { origin_city_id: string; destination_city_id: string }[],
+  standards: { origin_city_id: string; destination_city_id: string }[],
+): Set<string> {
+  const have = new Set(standards.map((s) => routeKey(s.origin_city_id, s.destination_city_id)))
+  const out = new Set<string>()
+  for (const q of quotas) {
+    const k = routeKey(q.origin_city_id, q.destination_city_id)
+    if (!have.has(k)) out.add(k)
+  }
+  return out
+}
+
+/** Mensaje de un fallo de cl_plan_set_quotas: los CL_* y el permiso tienen el suyo; cualquier otro es que las cuotas no casan con el plan. */
+export function setQuotasErrorKey(err: { message?: string; code?: string } | null): string {
+  const key = clErrorKey(err)
+  return key === 'cl.error.generic' ? 'cl.plans.error.quotas_mismatch' : key
+}
+
+/**
+ * Qué hacer tras guardar los campos de un plan: si es el plan abierto se descarta la vista previa
+ * (podría tener el total o las fechas viejas); en un borrador con cuotas o vista previa, y con
+ * total o fechas cambiados, se avisa de volver a generar las cuotas.
+ */
+export function planSaveFollowUp(p: {
+  editedId: string | null
+  selectedId: string | null
+  status: string
+  before: { start_date: string; end_date: string; total_samples: number } | null
+  after: { start_date: string; end_date: string; total_samples: number }
+  hadPreview: boolean
+  hasSavedQuotas: boolean
+}): { clearPreview: boolean; regenerateNotice: boolean } {
+  const isSelected = !!p.editedId && p.editedId === p.selectedId
+  if (!isSelected) return { clearPreview: false, regenerateNotice: false }
+  const changed =
+    !p.before ||
+    p.before.start_date !== p.after.start_date ||
+    p.before.end_date !== p.after.end_date ||
+    p.before.total_samples !== p.after.total_samples
+  return { clearPreview: true, regenerateNotice: p.status === 'draft' && changed && (p.hadPreview || p.hasSavedQuotas) }
 }
 
 export interface PlanForm {

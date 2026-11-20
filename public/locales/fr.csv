@@ -5605,3 +5605,5 @@ cl.plans.matrix.no_match,Aucun trajet ne correspond au filtre.
 cl.plans.matrix.route,Trajet
 cl.plans.matrix.total,Total
 cl.plans.matrix.routes,{count} trajets
+cl.plans.error.quotas_mismatch,Les quotas ne correspondent pas aux dates du plan : générez-les à nouveau.
+cl.plans.regenerate_notice,Le total ou les dates ont changé : générez et enregistrez à nouveau les quotas.
