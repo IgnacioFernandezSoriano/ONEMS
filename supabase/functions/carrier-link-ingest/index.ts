@@ -2,7 +2,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import {
   MAX_BODY_BYTES, MAX_ROWS, MAX_DEMANDS, RATE_LIMIT_PER_MINUTE,
-  countRows, validateEnvelope, parseRoute, parseDryRun, extractApiKey, needsSampling, summaryStratumIds,
+  countRows, validateEnvelope, parseRoute, parseDryRun, extractApiKey, needsSampling, summaryStratumIds, sqlErrorToHttp,
 } from './lib.ts'
 
 // Server-to-server API: no CORS headers on purpose.
@@ -32,11 +32,10 @@ class HttpError extends Error {
   constructor(public status: number, public code: string) { super(code) }
 }
 
-// Maps a Postgres error to an HTTP error. Only the CL_ code token is echoed; SQL text is never returned.
+// Maps a Postgres error to an HTTP error (mapping in lib.ts). Only the CL_ code token is echoed; SQL text is never returned.
 function mapSqlError(err: { code?: string; message?: string }): HttpError {
-  const codeMatch = /^(CL_[A-Z_]+)/.exec(err.message ?? '')
-  if (err.code === '22023') return new HttpError(400, codeMatch ? codeMatch[1] : 'CL_BAD_REQUEST')
-  if (err.code === '42501') return new HttpError(403, codeMatch ? codeMatch[1] : 'CL_FORBIDDEN')
+  const mapped = sqlErrorToHttp(err)
+  if (mapped) return new HttpError(mapped.status, mapped.code)
   // Log only the SQLSTATE: messages/details may contain personal data.
   console.error('carrier-link-ingest db error', err.code)
   return new HttpError(500, 'Internal server error')
