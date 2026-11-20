@@ -36,7 +36,7 @@ rm -rf "$OUT"; mkdir -p "$OUT"
 
 echo "== 1. rebuild onems_t (baseline + migrations) with the local harness"
 bash "$ROOT/.superpowers/sdd/runlocal.sh" cl_masters
-[ -z "$(cd "$ROOT" && git status --porcelain supabase/migrations)" ] || die "runlocal.sh left supabase/migrations modified"
+(cd "$ROOT" && git diff --quiet -- supabase/migrations) || die "runlocal.sh left supabase/migrations modified"
 "${PSQL[@]}" -At -f "$HERE/fixture.sql"
 
 echo "== 2. quotas (cl_plan_set_quotas + cl_plan_activate)"
