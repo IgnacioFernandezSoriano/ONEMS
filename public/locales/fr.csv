@@ -5634,3 +5634,73 @@ cl.samples.no_scans,Cet échantillon n'a pas de lectures.
 cl.samples.role.start,Lecture de début
 cl.samples.role.end,Lecture de fin
 cl.samples.role.intermediate,Lecture intermédiaire
+cl.monitor.plan,Plan
+cl.monitor.all_plans,Tous les plans
+cl.monitor.demands,Demandes au transporteur
+cl.monitor.demand.open,Ouvertes
+cl.monitor.demand.fulfilled,Satisfaites
+cl.monitor.demand.partial,Partielles
+cl.monitor.demand.failed,Échouées
+cl.monitor.batches,Lots reçus
+cl.monitor.batches_empty,Aucun lot pour le moment.
+cl.monitor.col.date,Reçu
+cl.monitor.col.status,Statut
+cl.monitor.col.shipments,Envois
+cl.monitor.col.rejected,Rejetés
+cl.monitor.col.selected,Sélectionnés
+cl.monitor.batch.received,Reçu
+cl.monitor.batch.validated,Validé
+cl.monitor.batch.sampled,Échantillonné
+cl.monitor.batch.rejected,Rejeté
+cl.monitor.batch.undone,Annulé
+cl.monitor.batch.expired,Expiré
+cl.monitor.undo,Annuler
+cl.monitor.undo_title,Annuler ce lot ?
+cl.monitor.undo_effect,Les échantillons sélectionnés dans ce lot seront retirés des rapports E2E et les quotas concernés seront recalculés.
+cl.monitor.undo_confirm,"Oui, annuler le lot"
+cl.monitor.undo_cancel,Annuler
+cl.monitor.undo_done,Lot annulé. Quotas remis en attente : {pending} ; reportés (à vérifier) : {carried} ; maintenus ouverts par une autre demande : {kept}.
+cl.monitor.alerts,Alertes
+cl.monitor.alerts_empty,Aucune alerte.
+cl.monitor.alert_filter_open,Ouvertes uniquement
+cl.monitor.alert_filter_all,Toutes
+cl.monitor.alert.open,Ouverte
+cl.monitor.alert.acknowledged,Vue
+cl.monitor.alert.dismissed,Écartée
+cl.monitor.acknowledge,Marquer comme vue
+cl.monitor.dismiss,Écarter
+cl.monitor.severity.low,Faible
+cl.monitor.severity.medium,Moyenne
+cl.monitor.severity.high,Élevée
+cl.monitor.total,{count} au total
+cl.alert.insufficient_candidates,Candidats insuffisants
+cl.alert.empty_stratum,Strate vide
+cl.alert.population_drop,Baisse de population
+cl.alert.population_incoherent,Population incohérente
+cl.alert.suspicious_distribution,Distribution suspecte
+cl.alert.late_batch,Lot en retard
+cl.alert.unknown_product,Produit inconnu
+cl.alert.unknown_reading_point,Point de lecture inconnu
+cl.alert.possible_misrouting,Envoi peut-être mal acheminé
+cl.alert.missing_standard,Norme de livraison manquante
+cl.alert.rejected_ratio,Beaucoup de lectures rejetées
+cl.alert.quota_unfilled,Quota non atteint
+cl.alert.feed_silent,Le transporteur n'a pas répondu
+cl.alert.missing_points,Points de départ ou d'arrivée manquants
+cl.alert.invalid_timezone,Fuseau horaire du compte invalide
+cl.alert.emit_failed,La demande n'a pas pu être envoyée
+cl.alert.selection_method,Méthode de sélection différente
+cl.alert.reader_without_city,Lecteur sans ville
+cl.alert.undo_after_carry,Lot annulé après report du quota
+cl.alert.route,Trajet : {origin} -> {destination}
+cl.alert.detail.insufficient_candidates,{valid} candidats valides pour {required} échantillons requis.
+cl.alert.detail.quota_unfilled,Il manque {missing} échantillons sur {planned} prévus.
+cl.alert.detail.rejected_ratio,{rejected} lectures rejetées sur {candidates} ({percent} %).
+cl.alert.detail.population_incoherent,Le transporteur indique une population de {population} mais a envoyé {candidates} candidats.
+cl.alert.detail.suspicious_distribution,Les {samples} échantillons ont tous été livrés dans les délais.
+cl.alert.detail.missing_points,Points de départ : {start} ; points d'arrivée : {end}.
+cl.alert.detail.items,Envois : {items}
+cl.alert.detail.products,Produits reçus : {values}
+cl.alert.detail.points,Points de lecture : {points}
+cl.alert.detail.feed_silent,La demande du {date} est restée sans réponse.
+cl.alert.detail.selection_method,Méthode attendue : {expected}.

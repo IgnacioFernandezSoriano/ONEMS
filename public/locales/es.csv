@@ -5642,3 +5642,73 @@ cl.samples.no_scans,Esta muestra no tiene lecturas.
 cl.samples.role.start,Lectura de inicio
 cl.samples.role.end,Lectura de fin
 cl.samples.role.intermediate,Lectura intermedia
+cl.monitor.plan,Plan
+cl.monitor.all_plans,Todos los planes
+cl.monitor.demands,Peticiones al carrier
+cl.monitor.demand.open,Abiertas
+cl.monitor.demand.fulfilled,Cumplidas
+cl.monitor.demand.partial,Parciales
+cl.monitor.demand.failed,Fallidas
+cl.monitor.batches,Lotes recibidos
+cl.monitor.batches_empty,Aún no hay lotes.
+cl.monitor.col.date,Recibido
+cl.monitor.col.status,Estado
+cl.monitor.col.shipments,Envíos
+cl.monitor.col.rejected,Rechazados
+cl.monitor.col.selected,Elegidos
+cl.monitor.batch.received,Recibido
+cl.monitor.batch.validated,Validado
+cl.monitor.batch.sampled,Muestreado
+cl.monitor.batch.rejected,Rechazado
+cl.monitor.batch.undone,Deshecho
+cl.monitor.batch.expired,Caducado
+cl.monitor.undo,Deshacer
+cl.monitor.undo_title,¿Deshacer este lote?
+cl.monitor.undo_effect,Las muestras elegidas de este lote se quitarán de los informes E2E y las cuotas afectadas se recalcularán.
+cl.monitor.undo_confirm,"Sí, deshacer el lote"
+cl.monitor.undo_cancel,Cancelar
+cl.monitor.undo_done,Lote deshecho. Cuotas vueltas a pendiente: {pending}; arrastradas (a revisar): {carried}; abiertas por otra petición: {kept}.
+cl.monitor.alerts,Avisos
+cl.monitor.alerts_empty,No hay avisos.
+cl.monitor.alert_filter_open,Solo abiertos
+cl.monitor.alert_filter_all,Todos
+cl.monitor.alert.open,Abierto
+cl.monitor.alert.acknowledged,Visto
+cl.monitor.alert.dismissed,Descartado
+cl.monitor.acknowledge,Marcar como visto
+cl.monitor.dismiss,Descartar
+cl.monitor.severity.low,Baja
+cl.monitor.severity.medium,Media
+cl.monitor.severity.high,Alta
+cl.monitor.total,{count} en total
+cl.alert.insufficient_candidates,Candidatos insuficientes
+cl.alert.empty_stratum,Estrato vacío
+cl.alert.population_drop,Caída de población
+cl.alert.population_incoherent,Población incoherente
+cl.alert.suspicious_distribution,Distribución sospechosa
+cl.alert.late_batch,Lote tardío
+cl.alert.unknown_product,Producto desconocido
+cl.alert.unknown_reading_point,Punto de lectura desconocido
+cl.alert.possible_misrouting,Posible envío mal encaminado
+cl.alert.missing_standard,Falta el estándar de entrega
+cl.alert.rejected_ratio,Muchas lecturas rechazadas
+cl.alert.quota_unfilled,Cuota sin cubrir
+cl.alert.feed_silent,El carrier no respondió
+cl.alert.missing_points,Faltan puntos de inicio o fin
+cl.alert.invalid_timezone,Zona horaria de la cuenta no válida
+cl.alert.emit_failed,No se pudo enviar la petición
+cl.alert.selection_method,Método de selección distinto
+cl.alert.reader_without_city,Lector sin ciudad
+cl.alert.undo_after_carry,Lote deshecho tras arrastrar la cuota
+cl.alert.route,Ruta: {origin} -> {destination}
+cl.alert.detail.insufficient_candidates,{valid} candidatos válidos para {required} muestras necesarias.
+cl.alert.detail.quota_unfilled,Faltan {missing} muestras de las {planned} previstas.
+cl.alert.detail.rejected_ratio,{rejected} de {candidates} lecturas rechazadas ({percent}%).
+cl.alert.detail.population_incoherent,El carrier indica una población de {population} pero envió {candidates} candidatos.
+cl.alert.detail.suspicious_distribution,Las {samples} muestras se entregaron en plazo.
+cl.alert.detail.missing_points,Puntos de inicio: {start}; puntos de fin: {end}.
+cl.alert.detail.items,Envíos: {items}
+cl.alert.detail.products,Productos recibidos: {values}
+cl.alert.detail.points,Puntos de lectura: {points}
+cl.alert.detail.feed_silent,La petición del {date} no obtuvo respuesta.
+cl.alert.detail.selection_method,Método esperado: {expected}.

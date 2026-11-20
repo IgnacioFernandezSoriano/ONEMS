@@ -5642,3 +5642,73 @@ cl.samples.no_scans,Esta amostra não tem leituras.
 cl.samples.role.start,Leitura de início
 cl.samples.role.end,Leitura de fim
 cl.samples.role.intermediate,Leitura intermédia
+cl.monitor.plan,Plano
+cl.monitor.all_plans,Todos os planos
+cl.monitor.demands,Pedidos ao transportador
+cl.monitor.demand.open,Abertos
+cl.monitor.demand.fulfilled,Cumpridos
+cl.monitor.demand.partial,Parciais
+cl.monitor.demand.failed,Falhados
+cl.monitor.batches,Lotes recebidos
+cl.monitor.batches_empty,Ainda não há lotes.
+cl.monitor.col.date,Recebido
+cl.monitor.col.status,Estado
+cl.monitor.col.shipments,Envios
+cl.monitor.col.rejected,Rejeitados
+cl.monitor.col.selected,Selecionados
+cl.monitor.batch.received,Recebido
+cl.monitor.batch.validated,Validado
+cl.monitor.batch.sampled,Amostrado
+cl.monitor.batch.rejected,Rejeitado
+cl.monitor.batch.undone,Desfeito
+cl.monitor.batch.expired,Expirado
+cl.monitor.undo,Desfazer
+cl.monitor.undo_title,Desfazer este lote?
+cl.monitor.undo_effect,As amostras selecionadas deste lote serão removidas dos relatórios E2E e as quotas afetadas serão recalculadas.
+cl.monitor.undo_confirm,"Sim, desfazer o lote"
+cl.monitor.undo_cancel,Cancelar
+cl.monitor.undo_done,Lote desfeito. Quotas de volta a pendente: {pending}; transitadas (a rever): {carried}; mantidas abertas por outro pedido: {kept}.
+cl.monitor.alerts,Alertas
+cl.monitor.alerts_empty,Não há alertas.
+cl.monitor.alert_filter_open,Só abertos
+cl.monitor.alert_filter_all,Todos
+cl.monitor.alert.open,Aberto
+cl.monitor.alert.acknowledged,Visto
+cl.monitor.alert.dismissed,Descartado
+cl.monitor.acknowledge,Marcar como visto
+cl.monitor.dismiss,Descartar
+cl.monitor.severity.low,Baixa
+cl.monitor.severity.medium,Média
+cl.monitor.severity.high,Alta
+cl.monitor.total,{count} no total
+cl.alert.insufficient_candidates,Candidatos insuficientes
+cl.alert.empty_stratum,Estrato vazio
+cl.alert.population_drop,Queda da população
+cl.alert.population_incoherent,População incoerente
+cl.alert.suspicious_distribution,Distribuição suspeita
+cl.alert.late_batch,Lote tardio
+cl.alert.unknown_product,Produto desconhecido
+cl.alert.unknown_reading_point,Ponto de leitura desconhecido
+cl.alert.possible_misrouting,Possível envio mal encaminhado
+cl.alert.missing_standard,Falta o padrão de entrega
+cl.alert.rejected_ratio,Muitas leituras rejeitadas
+cl.alert.quota_unfilled,Quota por preencher
+cl.alert.feed_silent,O transportador não respondeu
+cl.alert.missing_points,Faltam pontos de início ou fim
+cl.alert.invalid_timezone,Fuso horário da conta inválido
+cl.alert.emit_failed,Não foi possível enviar o pedido
+cl.alert.selection_method,Método de seleção diferente
+cl.alert.reader_without_city,Leitor sem cidade
+cl.alert.undo_after_carry,Lote desfeito após transitar a quota
+cl.alert.route,Rota: {origin} -> {destination}
+cl.alert.detail.insufficient_candidates,{valid} candidatos válidos para {required} amostras necessárias.
+cl.alert.detail.quota_unfilled,Faltam {missing} amostras das {planned} previstas.
+cl.alert.detail.rejected_ratio,{rejected} de {candidates} leituras rejeitadas ({percent}%).
+cl.alert.detail.population_incoherent,O transportador indica uma população de {population} mas enviou {candidates} candidatos.
+cl.alert.detail.suspicious_distribution,Todas as {samples} amostras foram entregues a tempo.
+cl.alert.detail.missing_points,Pontos de início: {start}; pontos de fim: {end}.
+cl.alert.detail.items,Envios: {items}
+cl.alert.detail.products,Produtos recebidos: {values}
+cl.alert.detail.points,Pontos de leitura: {points}
+cl.alert.detail.feed_silent,O pedido de {date} ficou sem resposta.
+cl.alert.detail.selection_method,Método esperado: {expected}.

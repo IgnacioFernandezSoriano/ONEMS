@@ -5634,3 +5634,73 @@ cl.samples.no_scans,لا توجد قراءات لهذه العينة.
 cl.samples.role.start,قراءة البداية
 cl.samples.role.end,قراءة النهاية
 cl.samples.role.intermediate,قراءة وسيطة
+cl.monitor.plan,الخطة
+cl.monitor.all_plans,جميع الخطط
+cl.monitor.demands,الطلبات إلى الناقل
+cl.monitor.demand.open,مفتوحة
+cl.monitor.demand.fulfilled,مكتملة
+cl.monitor.demand.partial,جزئية
+cl.monitor.demand.failed,فاشلة
+cl.monitor.batches,الدفعات المستلمة
+cl.monitor.batches_empty,لا توجد دفعات بعد.
+cl.monitor.col.date,تاريخ الاستلام
+cl.monitor.col.status,الحالة
+cl.monitor.col.shipments,الشحنات
+cl.monitor.col.rejected,المرفوضة
+cl.monitor.col.selected,المختارة
+cl.monitor.batch.received,مستلمة
+cl.monitor.batch.validated,تم التحقق
+cl.monitor.batch.sampled,تم أخذ العينات
+cl.monitor.batch.rejected,مرفوضة
+cl.monitor.batch.undone,تم التراجع
+cl.monitor.batch.expired,منتهية
+cl.monitor.undo,تراجع
+cl.monitor.undo_title,هل تريد التراجع عن هذه الدفعة؟
+cl.monitor.undo_effect,ستتم إزالة العينات المختارة من هذه الدفعة من تقارير E2E وسيُعاد حساب الحصص المتأثرة.
+cl.monitor.undo_confirm,نعم، تراجع عن الدفعة
+cl.monitor.undo_cancel,إلغاء
+cl.monitor.undo_done,تم التراجع عن الدفعة. حصص عادت إلى الانتظار: {pending}؛ حصص مرحّلة (تحتاج مراجعة): {carried}؛ حصص بقيت مفتوحة بطلب آخر: {kept}.
+cl.monitor.alerts,التنبيهات
+cl.monitor.alerts_empty,لا توجد تنبيهات.
+cl.monitor.alert_filter_open,المفتوحة فقط
+cl.monitor.alert_filter_all,الكل
+cl.monitor.alert.open,مفتوح
+cl.monitor.alert.acknowledged,تمت المشاهدة
+cl.monitor.alert.dismissed,مُهمل
+cl.monitor.acknowledge,تحديد كمشاهد
+cl.monitor.dismiss,إهمال
+cl.monitor.severity.low,منخفضة
+cl.monitor.severity.medium,متوسطة
+cl.monitor.severity.high,عالية
+cl.monitor.total,الإجمالي: {count}
+cl.alert.insufficient_candidates,مرشحون غير كافين
+cl.alert.empty_stratum,شريحة فارغة
+cl.alert.population_drop,انخفاض في عدد المجتمع
+cl.alert.population_incoherent,عدد مجتمع غير متسق
+cl.alert.suspicious_distribution,توزيع مشبوه
+cl.alert.late_batch,دفعة متأخرة
+cl.alert.unknown_product,منتج غير معروف
+cl.alert.unknown_reading_point,نقطة قراءة غير معروفة
+cl.alert.possible_misrouting,شحنة قد تكون موجهة خطأً
+cl.alert.missing_standard,معيار التسليم مفقود
+cl.alert.rejected_ratio,عدد كبير من القراءات المرفوضة
+cl.alert.quota_unfilled,حصة غير مكتملة
+cl.alert.feed_silent,لم يستجب الناقل
+cl.alert.missing_points,نقاط البداية أو النهاية مفقودة
+cl.alert.invalid_timezone,المنطقة الزمنية للحساب غير صالحة
+cl.alert.emit_failed,تعذر إرسال الطلب
+cl.alert.selection_method,طريقة اختيار مختلفة
+cl.alert.reader_without_city,قارئ بلا مدينة
+cl.alert.undo_after_carry,تم التراجع عن دفعة بعد ترحيل الحصة
+cl.alert.route,المسار: {origin} -> {destination}
+cl.alert.detail.insufficient_candidates,{valid} مرشحًا صالحًا مقابل {required} عينات مطلوبة.
+cl.alert.detail.quota_unfilled,ينقص {missing} عينة من أصل {planned} مخطط لها.
+cl.alert.detail.rejected_ratio,تم رفض {rejected} قراءة من أصل {candidates} ({percent}%).
+cl.alert.detail.population_incoherent,أبلغ الناقل عن عدد مجتمع {population} لكنه أرسل {candidates} مرشحًا.
+cl.alert.detail.suspicious_distribution,تم تسليم جميع العينات ({samples}) في الموعد المحدد.
+cl.alert.detail.missing_points,نقاط البداية: {start}؛ نقاط النهاية: {end}.
+cl.alert.detail.items,الشحنات: {items}
+cl.alert.detail.products,المنتجات المستلمة: {values}
+cl.alert.detail.points,نقاط القراءة: {points}
+cl.alert.detail.feed_silent,لم يتم الرد على طلب {date}.
+cl.alert.detail.selection_method,الطريقة المتوقعة: {expected}.

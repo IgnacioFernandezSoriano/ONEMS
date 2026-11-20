@@ -5642,3 +5642,73 @@ cl.samples.no_scans,This sample has no scans.
 cl.samples.role.start,Start scan
 cl.samples.role.end,End scan
 cl.samples.role.intermediate,Intermediate scan
+cl.monitor.plan,Plan
+cl.monitor.all_plans,All plans
+cl.monitor.demands,Requests to the carrier
+cl.monitor.demand.open,Open
+cl.monitor.demand.fulfilled,Fulfilled
+cl.monitor.demand.partial,Partial
+cl.monitor.demand.failed,Failed
+cl.monitor.batches,Batches received
+cl.monitor.batches_empty,No batches yet.
+cl.monitor.col.date,Received
+cl.monitor.col.status,Status
+cl.monitor.col.shipments,Shipments
+cl.monitor.col.rejected,Rejected
+cl.monitor.col.selected,Selected
+cl.monitor.batch.received,Received
+cl.monitor.batch.validated,Validated
+cl.monitor.batch.sampled,Sampled
+cl.monitor.batch.rejected,Rejected
+cl.monitor.batch.undone,Undone
+cl.monitor.batch.expired,Expired
+cl.monitor.undo,Undo
+cl.monitor.undo_title,Undo this batch?
+cl.monitor.undo_effect,The samples selected from this batch will be removed from the E2E reports and the affected quotas will be recalculated.
+cl.monitor.undo_confirm,"Yes, undo batch"
+cl.monitor.undo_cancel,Cancel
+cl.monitor.undo_done,Batch undone. Quotas back to pending: {pending}; carried over (needs review): {carried}; kept open by another request: {kept}.
+cl.monitor.alerts,Alerts
+cl.monitor.alerts_empty,No alerts.
+cl.monitor.alert_filter_open,Open only
+cl.monitor.alert_filter_all,All
+cl.monitor.alert.open,Open
+cl.monitor.alert.acknowledged,Seen
+cl.monitor.alert.dismissed,Dismissed
+cl.monitor.acknowledge,Mark as seen
+cl.monitor.dismiss,Dismiss
+cl.monitor.severity.low,Low
+cl.monitor.severity.medium,Medium
+cl.monitor.severity.high,High
+cl.monitor.total,{count} in total
+cl.alert.insufficient_candidates,Not enough candidates
+cl.alert.empty_stratum,Empty stratum
+cl.alert.population_drop,Population dropped
+cl.alert.population_incoherent,Incoherent population
+cl.alert.suspicious_distribution,Suspicious distribution
+cl.alert.late_batch,Late batch
+cl.alert.unknown_product,Unknown product
+cl.alert.unknown_reading_point,Unknown reading point
+cl.alert.possible_misrouting,Possible misrouted shipment
+cl.alert.missing_standard,Missing delivery standard
+cl.alert.rejected_ratio,Many readings rejected
+cl.alert.quota_unfilled,Quota not filled
+cl.alert.feed_silent,Carrier did not answer
+cl.alert.missing_points,Missing start or end points
+cl.alert.invalid_timezone,Invalid account time zone
+cl.alert.emit_failed,Request could not be sent
+cl.alert.selection_method,Wrong selection method
+cl.alert.reader_without_city,Reader without city
+cl.alert.undo_after_carry,Batch undone after quota carry-over
+cl.alert.route,Route: {origin} -> {destination}
+cl.alert.detail.insufficient_candidates,{valid} valid candidates for {required} samples required.
+cl.alert.detail.quota_unfilled,{missing} samples missing out of {planned} planned.
+cl.alert.detail.rejected_ratio,{rejected} of {candidates} readings rejected ({percent}%).
+cl.alert.detail.population_incoherent,The carrier reports a population of {population} but sent {candidates} candidates.
+cl.alert.detail.suspicious_distribution,All {samples} samples were delivered on time.
+cl.alert.detail.missing_points,Start points: {start}; end points: {end}.
+cl.alert.detail.items,Items: {items}
+cl.alert.detail.products,Products received: {values}
+cl.alert.detail.points,Reading points: {points}
+cl.alert.detail.feed_silent,Request of {date} was never answered.
+cl.alert.detail.selection_method,Expected method: {expected}.
