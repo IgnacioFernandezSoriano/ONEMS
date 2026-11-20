@@ -22,8 +22,16 @@
 - Errores `CL_*` de la base se muestran traducidos (mapa en `src/lib/carrierLink/clErrors.ts`), nunca el texto crudo de Postgres.
 - `npm run lint` (0 warnings), `npm run build` y `npm test` pasan al final de cada tarea de frontend.
 
+## Escala (dato del responsable, 20/11)
+
+Planes de **~15.000 muestras al año** por cuenta. Referencia de dimensionado: 30 ciudades con puntos de inicio y fin → hasta 870 rutas × 52 semanas ≈ 45.000 celdas de cuota (la mayoría con 0 o 1 muestra), ~290 muestras por semana, ~1.450 candidatos por petición con sobremuestreo 5. Consecuencias obligatorias:
+- Ninguna lista de la web carga "todo" de una vez: Muestras y lecturas paginan en el servidor (`.range()`, filtros en la consulta; recordar el límite de 1.000 filas de PostgREST); el Monitor pagina lotes y avisos.
+- La tabla de cuotas no pinta 45.000 celdas: se agrupa por ciudad de origen (filas plegadas con totales), las semanas se pueden agrupar por mes, hay filtro por ruta, y solo se despliega lo que el usuario abre.
+- `cl_plan_set_quotas` recibe solo las cuotas con muestras > 0 (la calculadora ya las omite).
+
 ## Review Focus
 
+- Plan de 15.000 muestras con 30 ciudades → la calculadora responde en < 1 s, la suma es exacta y ninguna ruta queda a 0 en todo el año (test en Task 2b); la tabla de cuotas se abre sin congelar el navegador (Task 6).
 - Superadmin con "todas las cuentas" seleccionado → ninguna pantalla inserta con `account_id` nulo; aparece el aviso de elegir cuenta (tests de los constructores de filas en Tasks 4-6).
 - Plan que cruza fin de año (p. ej. 21/12/2026 → 10/01/2027) → semanas con año ISO correcto (2026-W53 y 2027-W01), sin duplicar ni perder semanas (test en Task 2).
 - Total menor que rutas × semanas → la suma de cuotas es exactamente el total y muchas celdas quedan a 0, sin negativos (test en Task 2).
@@ -78,6 +86,15 @@
 - [ ] **Step 3:** Implementar; `npx vitest run src/lib/__tests__/allocationPlanCalculator.test.ts` sigue PASS.
 - [ ] **Step 4:** `npx vitest run src/lib/__tests__/clQuotaCalculator.test.ts` → PASS.
 - [ ] **Step 5: Commit** `feat(carrier-link): calculadora de cuotas ruta x semana`.
+
+### Task 2b: Calculadora a escala real
+
+**Files:**
+- Test: `src/lib/__tests__/clQuotaCalculator.test.ts` (ampliar)
+
+- [ ] **Step 1: Test** `generateClQuotas` con `totalSamples: 15000`, 30 ciudades (todas origen y destino → 870 rutas), periodo 2027-01-01 → 2027-12-31: suma exacta 15000; ninguna cuota negativa; cada ruta recibe ≥ 1 muestra en el año; tiempo de ejecución < 1000 ms (medido con `performance.now()`); el resultado tiene menos de 45.300 elementos y ninguno con `samples = 0`.
+- [ ] **Step 2:** Si falla por rendimiento o por rutas a 0, ajustar `generateClQuotas` sin cambiar su interfaz. `npm test` PASS.
+- [ ] **Step 3: Commit** `test(carrier-link): calculadora a escala de 15.000 muestras`.
 
 ### Task 3: Pestaña, rutas, permisos y errores
 
@@ -149,10 +166,11 @@
 - Produces:
   - `quotaMatrix(quotas: { origin_city_id: string; destination_city_id: string; iso_year: number; iso_week: number; samples_planned: number; samples_carried_in: number; samples_obtained: number; status: string }[], cityName: (id: string) => string): { weeks: string[]; rows: { route: string; key: string; cells: Record<string, { planned: number; carried: number; obtained: number; status: string } | null>; total: number }[] }` — semanas como `'2026-W45'` ordenadas por (año, semana); filas por nombre de ruta `'Origen → Destino'`.
   - `buildPlanRow(accountId: string | null, f: { plan_name: string; carrier_id: string; product_id: string; feed_id: string; start_date: string; end_date: string; total_samples: number; feed_diagnosis: boolean }): { ok: true; row: Record<string, unknown> } | { ok: false; error: 'no_account'|'bad_period'|'bad_total'|'missing_field' }` (`bad_period` si fin < inicio; `bad_total` si < 1).
+  - `groupQuotaMatrix(m: ReturnType<typeof quotaMatrix>, by: 'week'|'month'): …` — misma forma con columnas por mes (`'2027-01'`, suma de las semanas cuyo lunes cae en ese mes) cuando `by='month'`; y `originGroups(rows)`: filas agrupadas por ciudad de origen con su total. `QuotaMatrix` muestra grupos plegados por defecto, filtro de texto por ruta y selector semana/mes; nunca pinta más de un grupo desplegado a la vez si supera 2.000 celdas.
   - Hook `useClPlans(accountId)`: `{ plans, quotas(planId), create(f), update(id, f), setQuotas(planId, q: ClQuota[]), missingPoints(planId), missingStandards(planId), activate(planId) }` — `create` inserta en `cl_plans` (queda `draft`); `setQuotas` = `rpc('cl_plan_set_quotas', {p_plan_id, p_quotas})`; `activate` = `rpc('cl_plan_activate', {p_plan_id})`.
 - Flujo: crear plan → "Generar cuotas" (calcula con `generateClQuotas` sobre las rutas de los puntos activos del carrier del plan y muestra la tabla antes de guardar) → "Guardar cuotas" → la página consulta `missingPoints` y `missingStandards` → "Activar" deshabilitado si hay puntos que faltan, con la lista de ciudades; rutas sin estándar con ⚠ y el texto "entra sin en plazo". En un plan activo solo se editan los campos que la base permite (nombre, total, fecha de fin…); los bloqueados aparecen deshabilitados.
 
-- [ ] **Step 1: Tests**: `quotaMatrix` con 2 rutas × 2 semanas → `weeks: ['2026-W45','2026-W46']`, celda con `carried: 1` conservado, `total` = suma de `planned + carried`; semana sin cuota para una ruta → `null`; orden 2026-W53 antes de 2027-W01; `buildPlanRow(null, …)` → `no_account`; fin antes de inicio → `bad_period`; total 0 → `bad_total`.
+- [ ] **Step 1: Tests**: `groupQuotaMatrix` por mes suma bien y conserva el total; `originGroups` con 870 rutas devuelve 30 grupos cuya suma = total; `quotaMatrix` con 2 rutas × 2 semanas → `weeks: ['2026-W45','2026-W46']`, celda con `carried: 1` conservado, `total` = suma de `planned + carried`; semana sin cuota para una ruta → `null`; orden 2026-W53 antes de 2027-W01; `buildPlanRow(null, …)` → `no_account`; fin antes de inicio → `bad_period`; total 0 → `bad_total`.
 - [ ] **Step 2:** FAIL. **Step 3:** Implementar. **Step 4:** tests PASS + lint + build.
 - [ ] **Step 5: Commit** `feat(carrier-link): pantalla de planes de muestreo con generador de cuotas`.
 
@@ -167,7 +185,7 @@
 - Produces:
   - `filterSamples<T extends { quota_week?: string; route_key: string; possible_misrouting: boolean }>(rows: T[], f: { week: string|null; route: string|null; misroutedOnly: boolean }): T[]`
   - `transitLabel(startAt: string, endAt: string): { days: number; hours: number }` — días con un decimal y horas enteras, a partir de la diferencia real.
-  - Hook `useClSamples(accountId, planId)`: `{ samples, scans(sampleId), loading, error }` — `cl_samples` con `status='active'` (las anuladas no se listan) unido a su fila de `one_db` por `cl_sample_id` para `on_time_delivery`; `scans` lee `cl_sample_scans` ordenadas por `scan_at`.
+  - Hook `useClSamples(accountId, planId, filters, page)`: `{ samples, total, scans(sampleId), loading, error }` — paginado en el servidor (50 por página, `.range()` y `count: 'exact'`), filtros de semana, ruta y mal encaminado aplicados en la consulta (no en el navegador) — `cl_samples` con `status='active'` (las anuladas no se listan) unido a su fila de `one_db` por `cl_sample_id` para `on_time_delivery`; `scans` lee `cl_sample_scans` ordenadas por `scan_at`.
 
 - [ ] **Step 1: Tests**: `misroutedOnly` deja solo las marcadas; filtro de ruta y semana combinados; `transitLabel('2026-11-03T09:12:00Z','2026-11-06T14:30:00Z')` → `{days: 3.2, hours: 77}`.
 - [ ] **Step 2:** FAIL. **Step 3:** Implementar (panel lateral con las lecturas al pulsar una fila). **Step 4:** tests PASS + lint + build.
@@ -216,6 +234,15 @@
 
 - [ ] **Step 1:** Ampliar el test → FAIL. **Step 2:** Escribir las páginas y la entrada. **Step 3:** `npm test && npm run lint && npm run build` → PASS.
 - [ ] **Step 4: Commit** `docs(carrier-link): página de ayuda en 5 idiomas`.
+
+### Task 10b: Prueba de volumen del motor (local)
+
+**Files:**
+- Create: `supabase/tests/adhoc/cl_volume/` (`run.sh`, generador de lote) — solo base local
+
+- [ ] **Step 1:** En el Postgres local, con un fixture de 30 ciudades y 870 rutas: plan de 15.000 muestras, una semana de petición (~290 muestras, ~1.450 candidatos, ~4.500 lecturas en uno o dos lotes ≤ 5.000 filas), llamar a `cl_ingest_batch`, `cl_sample_stratum` por estrato y `cl_finish_batch` como lo hace `carrier-link-ingest`.
+- [ ] **Step 2:** Medir y anotar en el informe: tiempo de entrada, tiempo total del sorteo de todos los estratos, tamaño del `payload` de la petición. Umbral: todo el lote por debajo de 120 s (límite de la Edge Function); si no, proponer en el informe el cambio (p. ej. sortear en una sola llamada) sin implementarlo.
+- [ ] **Step 3: Commit** `test(carrier-link): prueba de volumen local`.
 
 ### Task 11: Puesta en marcha (cada escritura con confirmación sobre `onems-dev` `sehbnpgzqljrsqimwyuz`)
 
