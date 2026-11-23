@@ -2,7 +2,7 @@
 import { assert, assertEquals, assertStringIncludes } from 'https://deno.land/std@0.224.0/assert/mod.ts'
 import { formatPeriods, LANGS, type NotifyItem, pickLang, renderEmail, TYPES } from './render.ts'
 import { type Deps, handle, type SendResult } from './handler.ts'
-import { makeResendSender } from './resend.ts'
+import { makeResendSender, SEND_TIMEOUT_MS } from './resend.ts'
 
 const SECRET = 'notify-secret-value-123'
 const RESEND_KEY = 're_SUPERSECRET_api_key'
@@ -181,4 +181,18 @@ Deno.test('resend: request shape, idempotency header, key only in Authorization;
   const net = makeResendSender(RESEND_KEY, () => Promise.reject(new Error(RESEND_KEY)))
   assertEquals(await net(m), { ok: false, final: false, code: 'RESEND_NETWORK' })
   assertEquals(await makeResendSender('')(m), { ok: false, final: false, code: 'CL_NOT_CONFIGURED' })
+})
+
+Deno.test('resend: a hung call times out as a retryable failure and is aborted (fix round 1)', async () => {
+  assertEquals(SEND_TIMEOUT_MS, 20_000)
+  let aborted = false
+  const hung = makeResendSender(RESEND_KEY, (_url, init) => new Promise<Response>((_res, rej) => {
+    init.signal?.addEventListener('abort', () => { aborted = true; rej(new Error('aborted')) })
+  }), 20)
+  const m = { from: 'f', to: ['a@b.c'], subject: 's', text: 't', idempotencyKey: 'k' }
+  assertEquals(await hung(m), { ok: false, final: false, code: 'RESEND_TIMEOUT' })
+  assert(aborted, 'request aborted')
+  // A fetch that ignores the signal still yields to the timeout.
+  const deaf = makeResendSender(RESEND_KEY, () => new Promise<Response>(() => {}), 20)
+  assertEquals(await deaf(m), { ok: false, final: false, code: 'RESEND_TIMEOUT' })
 })

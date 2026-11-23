@@ -5,22 +5,38 @@ import type { SendResult } from './handler.ts'
 
 export type Fetch = (input: string, init: RequestInit) => Promise<Response>
 
-export function makeResendSender(apiKey: string, fetchFn: Fetch = fetch) {
+/** Tiempo maximo de una llamada (muy por debajo del arriendo de 300 s del aviso). Agotado = fallo reintentable. */
+export const SEND_TIMEOUT_MS = 20_000
+
+export function makeResendSender(apiKey: string, fetchFn: Fetch = fetch, timeoutMs: number = SEND_TIMEOUT_MS) {
   return async (msg: { from: string; to: string[]; subject: string; text: string; idempotencyKey: string }): Promise<SendResult> => {
     if (!apiKey) return { ok: false, final: false, code: 'CL_NOT_CONFIGURED' }
     let r: Response
+    const ctrl = new AbortController()
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const timeout = new Promise<'timeout'>((resolve) => {
+      timer = setTimeout(() => { ctrl.abort(); resolve('timeout') }, timeoutMs)
+    })
     try {
-      r = await fetchFn('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-          'Idempotency-Key': msg.idempotencyKey,
-        },
-        body: JSON.stringify({ from: msg.from, to: msg.to, subject: msg.subject, text: msg.text }),
-      })
+      const res = await Promise.race([
+        fetchFn('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+            'Idempotency-Key': msg.idempotencyKey,
+          },
+          body: JSON.stringify({ from: msg.from, to: msg.to, subject: msg.subject, text: msg.text }),
+          signal: ctrl.signal,
+        }),
+        timeout,
+      ])
+      if (res === 'timeout') return { ok: false, final: false, code: 'RESEND_TIMEOUT' }
+      r = res
     } catch {
-      return { ok: false, final: false, code: 'RESEND_NETWORK' }
+      return { ok: false, final: false, code: ctrl.signal.aborted ? 'RESEND_TIMEOUT' : 'RESEND_NETWORK' }
+    } finally {
+      clearTimeout(timer)
     }
     if (r.ok) {
       let id: string | undefined

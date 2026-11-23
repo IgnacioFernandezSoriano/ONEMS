@@ -76,6 +76,9 @@ CREATE TABLE public.cl_notifications (
   account_id      uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
   incident_id     uuid NOT NULL REFERENCES public.cl_incidents(id) ON DELETE CASCADE,
   recipient_kind  text NOT NULL CHECK (recipient_kind IN ('account_manager','carrier')),
+  -- Un aviso = un correo a UNA direccion (ronda 1: nadie ve las direcciones de los demas). NULL solo en el registro
+  -- 'skipped' de una cuenta sin destinatarios. Sin grants: solo lo leen las funciones (la pantalla no lo ve).
+  recipient_email text CHECK (recipient_email IS NULL OR length(recipient_email) <= 254),
   event           text NOT NULL CHECK (event IN ('opened','appended')),
   periods         jsonb NOT NULL CHECK (jsonb_typeof(periods) = 'array'),   -- lo nuevo que anuncia este aviso
   status          text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','sending','sent','failed','skipped')),
@@ -88,8 +91,21 @@ CREATE TABLE public.cl_notifications (
   created_at      timestamptz NOT NULL DEFAULT now(),
   sent_at         timestamptz,
   updated_at      timestamptz NOT NULL DEFAULT now(),
-  CONSTRAINT cl_notifications_lease_shape CHECK ((status = 'sending') = (lease_token IS NOT NULL AND lease_until IS NOT NULL))
+  CONSTRAINT cl_notifications_lease_shape CHECK ((status = 'sending') = (lease_token IS NOT NULL AND lease_until IS NOT NULL)),
+  CONSTRAINT cl_notifications_recipient_shape CHECK (recipient_email IS NOT NULL OR status = 'skipped')
 );
+
+-- Periodos de un conector ya avisados como no recibidos (ronda 1 de la revision): cada periodo se avisa como mucho UNA
+-- vez, pase lo que pase con las incidencias (cierre al recibir, rechazo posterior, entregas atrasadas).
+CREATE TABLE public.cl_missing_notified (
+  account_id   uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
+  feed_id      uuid NOT NULL REFERENCES public.cl_feeds(id) ON DELETE CASCADE,
+  period_start date NOT NULL,
+  period_end   date NOT NULL,
+  notified_at  timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (feed_id, period_start, period_end)
+);
+CREATE INDEX cl_missing_notified_account_idx ON public.cl_missing_notified (account_id);
 CREATE INDEX cl_notifications_incident_idx ON public.cl_notifications (incident_id, created_at);
 CREATE INDEX cl_notifications_account_idx ON public.cl_notifications (account_id);
 CREATE INDEX cl_notifications_queue_idx ON public.cl_notifications (created_at) WHERE status IN ('pending','sending');
@@ -98,12 +114,16 @@ CREATE TRIGGER cl_same_account BEFORE INSERT OR UPDATE ON public.cl_incidents
   FOR EACH ROW EXECUTE FUNCTION public.cl_check_same_account('feed_id', 'cl_feeds', 'plan_id', 'cl_plans');
 CREATE TRIGGER cl_same_account BEFORE INSERT OR UPDATE ON public.cl_notifications
   FOR EACH ROW EXECUTE FUNCTION public.cl_check_same_account('incident_id', 'cl_incidents');
+CREATE TRIGGER cl_same_account BEFORE INSERT OR UPDATE ON public.cl_missing_notified
+  FOR EACH ROW EXECUTE FUNCTION public.cl_check_same_account('feed_id', 'cl_feeds');
 
 -- RLS: lectura de la propia cuenta con View en cl_incidents (o superadmin). Sin escritura directa: solo funciones.
 -- cl_notifications: sin politicas ni privilegios (los correos no se guardan; el detalle sale por cl_incident_get).
 ALTER TABLE public.cl_incidents     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.cl_notifications ENABLE ROW LEVEL SECURITY;
-REVOKE ALL ON public.cl_incidents, public.cl_notifications FROM PUBLIC, anon, authenticated, service_role;
+ALTER TABLE public.cl_missing_notified ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.cl_incidents, public.cl_notifications, public.cl_missing_notified
+  FROM PUBLIC, anon, authenticated, service_role;
 GRANT SELECT ON public.cl_incidents TO authenticated;
 CREATE POLICY cl_incidents_select_access ON public.cl_incidents FOR SELECT TO authenticated
   USING ((SELECT public.is_superadmin())
@@ -119,9 +139,30 @@ CREATE OR REPLACE FUNCTION public.cl_incident_is_carrier_side(p_type text)
  SET search_path = public, extensions
 AS $$ SELECT p_type IN ('missing_delivery','delivery_rejected','high_rejection') $$;
 
--- Encola un aviso por destinatario: siempre a la cuenta (recipient_kind 'account_manager' = AM + DO coordinator); al
--- carrier solo si el tipo es suyo y el carrier del conector tiene notification_email. Sin correo: ningun aviso al
--- carrier y ningun error.
+-- Destinatarios (decision del responsable 23/11): 'account_manager' = usuarios con rol 'account_manager' o
+-- 'do_coordinator' en account_user_role de la cuenta (correo de profiles); 'carrier' = carriers.notification_email
+-- del carrier del conector. En minusculas y sin repetir.
+CREATE OR REPLACE FUNCTION public.cl_incident_recipients(p_account_id uuid, p_feed_id uuid, p_kind text)
+ RETURNS SETOF text
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path = public, extensions
+AS $$
+  SELECT lower(btrim(p.email))
+    FROM public.account_user_role r JOIN public.profiles p ON p.id = r.user_id
+   WHERE p_kind = 'account_manager' AND r.account_id = p_account_id
+     AND r.role IN ('account_manager','do_coordinator')
+     AND p.email ~ '^[^@[:space:],;<>"]+@[^@[:space:],;<>"]+\.[^@[:space:],;<>"]+$'
+  UNION
+  SELECT lower(btrim(c.notification_email))
+    FROM public.cl_feeds f JOIN public.carriers c ON c.id = f.carrier_id
+   WHERE p_kind = 'carrier' AND f.id = p_feed_id AND f.account_id = p_account_id AND c.notification_email IS NOT NULL
+$$;
+
+-- Encola UN aviso (un correo) por direccion: siempre la cuenta (AM + DO); el carrier solo si el tipo es suyo y su
+-- carrier tiene notification_email (sin correo: nada al carrier y ningun error). Una cuenta sin destinatarios deja un
+-- registro 'skipped' (CL_NO_RECIPIENT) para que la pantalla lo vea. Las direcciones se fijan al encolar: cada correo
+-- tiene su propio estado y su propia clave de idempotencia (el id del aviso).
 CREATE OR REPLACE FUNCTION public.cl_incident_enqueue(p_incident_id uuid, p_event text, p_entries jsonb,
                                                       p_now timestamptz DEFAULT now())
  RETURNS integer
@@ -129,23 +170,30 @@ CREATE OR REPLACE FUNCTION public.cl_incident_enqueue(p_incident_id uuid, p_even
  SECURITY DEFINER
  SET search_path = public, extensions
 AS $$
-DECLARE v_n integer; v_m integer;
+DECLARE
+  v_inc   public.cl_incidents;
+  v_kind  text;
+  v_n     integer;
+  v_total integer := 0;
 BEGIN
-  INSERT INTO public.cl_notifications (account_id, incident_id, recipient_kind, event, periods, created_at,
-                                       next_attempt_at, updated_at)
-  SELECT i.account_id, i.id, 'account_manager', p_event, p_entries, p_now, p_now, p_now
-    FROM public.cl_incidents i WHERE i.id = p_incident_id;
-  GET DIAGNOSTICS v_n = ROW_COUNT;
-  INSERT INTO public.cl_notifications (account_id, incident_id, recipient_kind, event, periods, created_at,
-                                       next_attempt_at, updated_at)
-  SELECT i.account_id, i.id, 'carrier', p_event, p_entries, p_now, p_now, p_now
-    FROM public.cl_incidents i
-    JOIN public.cl_feeds f ON f.id = i.feed_id
-    JOIN public.carriers c ON c.id = f.carrier_id
-   WHERE i.id = p_incident_id AND public.cl_incident_is_carrier_side(i.incident_type)
-     AND c.notification_email IS NOT NULL;
-  GET DIAGNOSTICS v_m = ROW_COUNT;
-  RETURN v_n + v_m;
+  SELECT i.* INTO v_inc FROM public.cl_incidents i WHERE i.id = p_incident_id;
+  IF v_inc.id IS NULL THEN RETURN 0; END IF;
+  FOREACH v_kind IN ARRAY CASE WHEN public.cl_incident_is_carrier_side(v_inc.incident_type)
+                               THEN ARRAY['account_manager','carrier'] ELSE ARRAY['account_manager'] END LOOP
+    INSERT INTO public.cl_notifications (account_id, incident_id, recipient_kind, recipient_email, event, periods,
+                                         created_at, next_attempt_at, updated_at)
+    SELECT v_inc.account_id, v_inc.id, v_kind, e, p_event, p_entries, p_now, p_now, p_now
+      FROM public.cl_incident_recipients(v_inc.account_id, v_inc.feed_id, v_kind) e;
+    GET DIAGNOSTICS v_n = ROW_COUNT;
+    IF v_n = 0 AND v_kind = 'account_manager' THEN
+      INSERT INTO public.cl_notifications (account_id, incident_id, recipient_kind, recipient_email, event, periods,
+                                           status, last_error, created_at, next_attempt_at, updated_at)
+      VALUES (v_inc.account_id, v_inc.id, v_kind, NULL, p_event, p_entries, 'skipped', 'CL_NO_RECIPIENT',
+              p_now, p_now, p_now);
+    END IF;
+    v_total := v_total + v_n;
+  END LOOP;
+  RETURN v_total;
 END $$;
 
 -- Anota en la incidencia abierta del (conector, tipo) las entradas cuya 'key' aun no esta; la abre si no hay ninguna
@@ -260,11 +308,14 @@ AS $$
                                WHERE p.account_id = i.account_id AND p.carrier_id = f.carrier_id AND p.code = v.code))
      AND NOT EXISTS (
            SELECT 1 FROM jsonb_array_elements(COALESCE(i.details->'points', '[]'::jsonb)) pt
-            WHERE NOT EXISTS (SELECT 1 FROM public.readers r
+            -- Un punto sin lugar no se puede dar de alta (ni lo produce el paso resolve: seria missing_field): no
+            -- bloquea el cierre (ronda 1).
+            WHERE COALESCE(btrim(pt->>'place_ref'), '') <> ''
+              AND NOT EXISTS (SELECT 1 FROM public.readers r
                                WHERE r.account_id = i.account_id AND r.capture_source = 'carrier_scan'
                                  AND r.carrier_id = f.carrier_id AND r.deleted_at IS NULL AND r.is_active IS NOT FALSE
                                  AND r.carrier_place_ref = pt->>'place_ref'
-                                 AND (r.carrier_mode_ref IS NULL OR r.carrier_mode_ref = pt->>'mode_ref')))
+                                 AND (r.carrier_mode_ref IS NULL OR r.carrier_mode_ref IS NOT DISTINCT FROM pt->>'mode_ref')))
     FROM public.cl_incidents i JOIN public.cl_feeds f ON f.id = i.feed_id
    WHERE i.id = p_incident_id
 $$;
@@ -416,10 +467,13 @@ AS $$
 $$;
 
 -- Periodos vencidos sin entrega de un conector activo: desde el siguiente a lo ya entregado (cl_delivery_next_period,
--- que salta los huecos entre planes) mientras su hora limite haya pasado; solo los que solapan un plan activo. Los
--- periodos que ya figuran en una incidencia missing_delivery cerrada A MANO no se vuelven a avisar (el responsable ya
--- los dio por vistos); los de una cerrada sola (llego una entrega) si, si siguen sin llegar. Lo nuevo va a la
--- incidencia abierta con UN aviso por ejecucion (normalmente un periodo; varios solo si el job no corrio a su hora).
+-- que salta los huecos entre planes) mientras su hora limite haya pasado; solo los que solapan un plan activo.
+-- Ronda 1 de la revision: un periodo se avisa como no recibido COMO MUCHO UNA VEZ (cl_missing_notified, aparte del
+-- ciclo de las incidencias: una entrega recibida cierra la incidencia, R31, pero lo ya avisado no se vuelve a avisar
+-- aunque esa entrega se rechace despues o el carrier se ponga al dia de lo atrasado; esto incluye lo de una incidencia
+-- cerrada a mano). Tampoco es "no recibido" un periodo con una incidencia delivery_rejected (abierta o cerrada) ni con
+-- una entrega received/processing/failed. Lo nuevo va a la incidencia abierta (o a una nueva) con UN aviso por
+-- ejecucion (normalmente un periodo; varios solo si el job no corrio a su hora).
 CREATE OR REPLACE FUNCTION public.cl_incident_check_missing(p_feed public.cl_feeds, p_now timestamptz DEFAULT now())
  RETURNS integer
  LANGUAGE plpgsql
@@ -445,9 +499,14 @@ BEGIN
     IF EXISTS (SELECT 1 FROM public.cl_plans p
                 WHERE p.feed_id = p_feed.id AND p.carrier_id = p_feed.carrier_id AND p.status = 'active'
                   AND p.start_date <= v_end AND p.end_date >= v_start)
-       AND NOT EXISTS (SELECT 1 FROM public.cl_incidents x
-                        WHERE x.feed_id = p_feed.id AND x.incident_type = 'missing_delivery' AND x.closed_how = 'manual'
-                          AND x.periods @> jsonb_build_array(jsonb_build_object('key', v_key))) THEN
+       AND NOT EXISTS (SELECT 1 FROM public.cl_missing_notified m
+                        WHERE m.feed_id = p_feed.id AND m.period_start = v_start AND m.period_end = v_end)
+       AND NOT EXISTS (SELECT 1 FROM public.cl_incidents x, jsonb_array_elements(x.periods) e
+                        WHERE x.feed_id = p_feed.id AND x.incident_type = 'delivery_rejected'
+                          AND (e->>'period_start')::date <= v_end AND (e->>'period_end')::date >= v_start)
+       AND NOT EXISTS (SELECT 1 FROM public.cl_deliveries d
+                        WHERE d.feed_id = p_feed.id AND d.status IN ('received','processing','failed')
+                          AND d.period_start <= v_end AND d.period_end >= v_start) THEN
       v_entries := v_entries || jsonb_build_array(jsonb_build_object('key', v_key, 'period_start', v_start,
                                                                      'period_end', v_end));
     END IF;
@@ -455,13 +514,12 @@ BEGIN
     SELECT a.period_end INTO v_end FROM public.cl_delivery_aligned_period(p_feed.emit_days, v_start) a;
   END LOOP;
   IF jsonb_array_length(v_entries) = 0 THEN RETURN 0; END IF;
-  -- Cuantos son nuevos de verdad (cl_incident_record ignora los ya anotados).
-  SELECT count(*) INTO i FROM jsonb_array_elements(v_entries) e
-   WHERE NOT EXISTS (SELECT 1 FROM public.cl_incidents x
-                      WHERE x.feed_id = p_feed.id AND x.incident_type = 'missing_delivery' AND x.status <> 'resolved'
-                        AND x.periods @> jsonb_build_array(jsonb_build_object('key', e->>'key')));
+  INSERT INTO public.cl_missing_notified (account_id, feed_id, period_start, period_end, notified_at)
+  SELECT p_feed.account_id, p_feed.id, (e->>'period_start')::date, (e->>'period_end')::date, p_now
+    FROM jsonb_array_elements(v_entries) e
+  ON CONFLICT DO NOTHING;
   PERFORM public.cl_incident_record(p_feed.account_id, p_feed.id, NULL, 'missing_delivery', v_entries, NULL, p_now);
-  RETURN i;
+  RETURN jsonb_array_length(v_entries);
 END $$;
 
 -- ================================================================ 6. cl_settle_quota con cierre definitivo (D27)
@@ -922,35 +980,9 @@ REVOKE ALL ON FUNCTION public.cl_incidents_grant_demo2() FROM PUBLIC, anon, auth
 SELECT public.cl_incidents_grant_demo2();
 
 -- ================================================================ 10. cola de avisos (Edge Function carrier-link-notify)
--- Destinatarios de un aviso, resueltos al reclamarlo (decision del responsable 23/11): recipient_kind
--- 'account_manager' = usuarios con rol 'account_manager' o 'do_coordinator' en account_user_role de la cuenta (correo
--- de profiles); 'carrier' = carriers.notification_email del carrier del conector.
-CREATE OR REPLACE FUNCTION public.cl_notify_recipients(p_notification_id uuid)
- RETURNS jsonb
- LANGUAGE sql
- STABLE SECURITY DEFINER
- SET search_path = public, extensions
-AS $$
-  SELECT COALESCE((
-    SELECT jsonb_agg(DISTINCT e.email)
-      FROM public.cl_notifications n
-      JOIN public.cl_incidents i ON i.id = n.incident_id
-      JOIN public.cl_feeds f ON f.id = i.feed_id
-      CROSS JOIN LATERAL (
-        SELECT lower(btrim(p.email)) AS email
-          FROM public.account_user_role r JOIN public.profiles p ON p.id = r.user_id
-         WHERE n.recipient_kind = 'account_manager' AND r.account_id = n.account_id
-           AND r.role IN ('account_manager','do_coordinator')
-           AND p.email ~ '^[^@[:space:],;<>"]+@[^@[:space:],;<>"]+\.[^@[:space:],;<>"]+$'
-        UNION ALL
-        SELECT lower(btrim(c.notification_email)) FROM public.carriers c
-         WHERE n.recipient_kind = 'carrier' AND c.id = f.carrier_id AND c.notification_email IS NOT NULL) e
-     WHERE n.id = p_notification_id), '[]'::jsonb)
-$$;
-
 -- Reclama hasta p_limit avisos debidos (pending con next_attempt_at vencido, o sending con el arriendo caducado) con un
--- arriendo de p_lease_seconds para p_token. Cada aviso reclamado suma un intento. Sin destinatarios -> skipped. Con 5
--- intentos y el arriendo caducado -> failed. Devuelve [{notification_id, recipient_kind, to, language, incident_type,
+-- arriendo de p_lease_seconds para p_token. Cada aviso (= un correo a una direccion) reclamado suma un intento. Con 5
+-- intentos y el arriendo caducado -> failed. Devuelve [{notification_id, recipient_kind, to: [direccion], language, incident_type,
 -- event, connector, periods: [{period_start, period_end, recuentos}], open_periods}]: sin ids internos, codigos de
 -- error ni datos de envios.
 CREATE OR REPLACE FUNCTION public.cl_notify_claim(p_token text, p_limit integer DEFAULT 20,
@@ -962,7 +994,6 @@ CREATE OR REPLACE FUNCTION public.cl_notify_claim(p_token text, p_limit integer 
 AS $$
 DECLARE
   v_n     record;
-  v_to    jsonb;
   v_items jsonb := '[]'::jsonb;
 BEGIN
   IF p_token IS NULL OR p_token !~ '^[A-Za-z0-9-]{8,100}$' THEN
@@ -973,7 +1004,7 @@ BEGIN
          lease_until = NULL, updated_at = p_now
    WHERE n.status = 'sending' AND n.lease_until < p_now AND n.attempts >= 5;
 
-  FOR v_n IN SELECT n.id, n.recipient_kind, n.event, n.periods, i.incident_type, i.periods AS all_periods,
+  FOR v_n IN SELECT n.id, n.recipient_kind, n.recipient_email, n.event, n.periods, i.incident_type, i.periods AS all_periods,
                     f.name AS connector, a.default_language
                FROM public.cl_notifications n
                JOIN public.cl_incidents i ON i.id = n.incident_id
@@ -985,20 +1016,13 @@ BEGIN
               LIMIT LEAST(GREATEST(COALESCE(p_limit, 20), 1), 100)
                 FOR UPDATE OF n SKIP LOCKED
   LOOP
-    v_to := public.cl_notify_recipients(v_n.id);
-    IF jsonb_array_length(v_to) = 0 THEN
-      UPDATE public.cl_notifications n
-         SET status = 'skipped', last_error = 'CL_NO_RECIPIENT', lease_token = NULL, lease_until = NULL, updated_at = p_now
-       WHERE n.id = v_n.id;
-      CONTINUE;
-    END IF;
     UPDATE public.cl_notifications n
        SET status = 'sending', attempts = n.attempts + 1, lease_token = p_token,
            lease_until = p_now + make_interval(secs => LEAST(GREATEST(COALESCE(p_lease_seconds, 300), 30), 3600)),
            updated_at = p_now
      WHERE n.id = v_n.id;
     v_items := v_items || jsonb_build_array(jsonb_build_object(
-      'notification_id', v_n.id, 'recipient_kind', v_n.recipient_kind, 'to', v_to,
+      'notification_id', v_n.id, 'recipient_kind', v_n.recipient_kind, 'to', jsonb_build_array(v_n.recipient_email),
       'language', lower(COALESCE(v_n.default_language, 'en')), 'incident_type', v_n.incident_type,
       'event', v_n.event, 'connector', v_n.connector, 'open_periods', jsonb_array_length(v_n.all_periods),
       'periods', (SELECT COALESCE(jsonb_agg(jsonb_strip_nulls(jsonb_build_object(
@@ -1092,7 +1116,7 @@ REVOKE ALL ON FUNCTION public.cl_incident_check_missing(public.cl_feeds, timesta
 REVOKE ALL ON FUNCTION public.cl_settle_quota(uuid, boolean) FROM PUBLIC, anon, authenticated, service_role;
 REVOKE ALL ON FUNCTION public.cl_settle_quota(uuid) FROM PUBLIC, anon, authenticated, service_role;
 REVOKE ALL ON FUNCTION public.cl_incident_authorize(uuid, text) FROM PUBLIC, anon, authenticated, service_role;
-REVOKE ALL ON FUNCTION public.cl_notify_recipients(uuid) FROM PUBLIC, anon, authenticated, service_role;
+REVOKE ALL ON FUNCTION public.cl_incident_recipients(uuid, uuid, text) FROM PUBLIC, anon, authenticated, service_role;
 REVOKE ALL ON FUNCTION public.cl_notify_kick(timestamptz) FROM PUBLIC, anon, authenticated, service_role;
 
 -- Pantalla (authenticated).

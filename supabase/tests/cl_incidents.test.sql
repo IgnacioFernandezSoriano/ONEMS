@@ -34,10 +34,17 @@ CREATE OR REPLACE FUNCTION pg_temp.dlv(p_feed uuid, p_day date, p_n int, p_statu
   RETURNING id
 $$;
 
--- Avisos de las incidencias de un conector y tipo (opcional: destinatario).
+-- Avisos (uno por evento y tipo de destinatario, sea cual sea el numero de direcciones) de las incidencias de un
+-- conector y tipo (opcional: destinatario).
 CREATE OR REPLACE FUNCTION pg_temp.nn(p_feed uuid, p_type text, p_kind text DEFAULT NULL) RETURNS bigint LANGUAGE sql AS $$
-  SELECT count(*) FROM public.cl_notifications n JOIN public.cl_incidents i ON i.id = n.incident_id
+  SELECT count(DISTINCT (n.incident_id, n.recipient_kind, n.event, n.periods::text))
+    FROM public.cl_notifications n JOIN public.cl_incidents i ON i.id = n.incident_id
    WHERE i.feed_id = p_feed AND i.incident_type = p_type AND (p_kind IS NULL OR n.recipient_kind = p_kind)
+$$;
+-- Correos (una fila de cl_notifications = un correo a una direccion; sin contar los 'skipped' sin direccion).
+CREATE OR REPLACE FUNCTION pg_temp.ne(p_feed uuid, p_type text) RETURNS bigint LANGUAGE sql AS $$
+  SELECT count(*) FROM public.cl_notifications n JOIN public.cl_incidents i ON i.id = n.incident_id
+   WHERE i.feed_id = p_feed AND i.incident_type = p_type AND n.recipient_email IS NOT NULL
 $$;
 
 -- Incidencia abierta de un conector y tipo.
@@ -166,7 +173,8 @@ BEGIN
   v := pg_temp.inc(f1, 'missing_delivery');
   PERFORM pg_temp.ok(jsonb_array_length(v.periods) = 2 AND v.periods->1->>'period_start' = '2026-11-11'
                      AND pg_temp.nn(f1, 'missing_delivery') = 4
-                     AND (SELECT count(*) FROM public.cl_notifications n WHERE n.incident_id = v.id AND n.event = 'appended') = 2,
+                     AND (SELECT count(*) FROM public.cl_notifications n WHERE n.incident_id = v.id AND n.event = 'appended') = 3
+                     AND pg_temp.ne(f1, 'missing_delivery') = 6,
                      'R32: el 11/11 se anade a la misma incidencia con un aviso nuevo por destinatario');
   PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_incidents WHERE feed_id = f1 AND incident_type = 'missing_delivery') = 1,
                      'una sola incidencia');
@@ -179,7 +187,7 @@ BEGIN
   SELECT * INTO v FROM public.cl_incidents WHERE id = v.id;
   PERFORM pg_temp.ok(v.status = 'resolved' AND v.closed_how = 'auto' AND v.closed_by IS NULL, 'cerrada sola al recibir: ' || v.status);
   PERFORM pg_temp.ok(NOT EXISTS (SELECT 1 FROM public.cl_notifications n WHERE n.incident_id = v.id AND n.status = 'pending')
-                     AND (SELECT count(*) FROM public.cl_notifications n WHERE n.incident_id = v.id AND n.status = 'skipped') = 4,
+                     AND (SELECT count(*) FROM public.cl_notifications n WHERE n.incident_id = v.id AND n.status = 'skipped') = 6,
                      'avisos pendientes de la cerrada: skipped');
   -- Termina bien (sin abrir nada) para que F1 no quede "en vuelo".
   UPDATE public.cl_deliveries SET status = 'processing' WHERE id = d;
@@ -229,6 +237,72 @@ BEGIN
   h := public.cl_housekeeping('2026-11-14 04:00+03');
   PERFORM pg_temp.ok(jsonb_array_length((pg_temp.inc(f2, 'missing_delivery')).periods) = 1, 'pausado: sin periodos nuevos');
   UPDATE public.cl_feeds SET status = 'active' WHERE id = f2;
+END $$;
+
+-- ================================================================ 2b. un periodo se avisa como no recibido UNA vez (ronda 1)
+-- F3: diario, carrier CA (con correo), plan del 10/11 al 30/11.
+INSERT INTO public.cl_feeds (id, account_id, carrier_id, name, status, emit_days, emit_hour) VALUES
+  ('f0000000-0000-0000-0000-0000000000f3','a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000001','Feed Three','active','{1,2,3,4,5,6,7}',3);
+INSERT INTO public.cl_plans (id, account_id, plan_name, carrier_id, product_id, total_samples, start_date, end_date, status, feed_id) VALUES
+  ('90000000-0000-0000-0000-0000000000f3','a0000000-0000-0000-0000-000000000001','P3','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',10,'2026-11-10','2026-11-30','active','f0000000-0000-0000-0000-0000000000f3');
+DO $$
+DECLARE
+  f3 constant uuid := 'f0000000-0000-0000-0000-0000000000f3';
+  h jsonb; v public.cl_incidents; d uuid; k int; v_day date;
+BEGIN
+  -- 13/11 10:00: vencidos 10, 11 y 12/11 -> una incidencia, un aviso por direccion (AM, DO, carrier) = 3 correos.
+  h := public.cl_housekeeping('2026-11-13 10:00+03');
+  v := pg_temp.inc(f3, 'missing_delivery');
+  PERFORM pg_temp.ok(jsonb_array_length(v.periods) = 3 AND pg_temp.ne(f3, 'missing_delivery') = 3
+                     AND (SELECT count(*) FROM public.cl_missing_notified WHERE feed_id = f3) = 3,
+                     'tres periodos, tres correos: ' || coalesce(v.periods::text, 'null'));
+
+  -- (a) llega el 10/11 (cierra la incidencia, R31) y despues se rechaza: el job no vuelve a decir "no recibido".
+  d := pg_temp.dlv(f3, '2026-11-10', 100, 'pending_upload');
+  UPDATE public.cl_deliveries SET status = 'received', received_at = now() WHERE id = d;
+  PERFORM pg_temp.ok((pg_temp.inc(f3, 'missing_delivery')).id IS NULL, 'R31: cerrada al recibir');
+  UPDATE public.cl_deliveries SET status = 'rejected', error = 'CL_BAD_CSV_HEADER', finished_at = now() WHERE id = d;
+  PERFORM pg_temp.ok((pg_temp.inc(f3, 'delivery_rejected')).id IS NOT NULL, 'rechazo anotado');
+  h := public.cl_housekeeping('2026-11-13 11:00+03');
+  h := public.cl_housekeeping('2026-11-13 12:00+03');
+  PERFORM pg_temp.ok((pg_temp.inc(f3, 'missing_delivery')).id IS NULL AND pg_temp.ne(f3, 'missing_delivery') = 3,
+                     'recibida y rechazada: ningun segundo "no recibido": ' || h::text);
+
+  -- (b) el carrier se pone al dia del mas antiguo al mas nuevo, con el job entre cada paso: cero correos nuevos.
+  k := 101;
+  FOREACH v_day IN ARRAY ARRAY['2026-11-10','2026-11-11','2026-11-12']::date[] LOOP
+    d := pg_temp.dlv(f3, v_day, k, 'pending_upload'); k := k + 1;
+    UPDATE public.cl_deliveries SET status = 'received', received_at = now() WHERE id = d;
+    h := public.cl_housekeeping('2026-11-13 13:00+03');   -- en vuelo: se salta el conector
+    UPDATE public.cl_deliveries SET status = 'processing' WHERE id = d;
+    UPDATE public.cl_deliveries SET status = 'processed', finished_at = now() WHERE id = d;
+    h := public.cl_housekeeping('2026-11-13 14:00+03');
+    PERFORM pg_temp.ok((pg_temp.inc(f3, 'missing_delivery')).id IS NULL AND pg_temp.ne(f3, 'missing_delivery') = 3,
+                       'al dia hasta ' || v_day || ': sin correos nuevos');
+  END LOOP;
+  PERFORM pg_temp.ok((SELECT status FROM public.cl_incidents WHERE feed_id = f3 AND incident_type = 'delivery_rejected') = 'resolved',
+                     'el 10/11 procesado cierra el rechazo');
+
+  -- Un periodo realmente nuevo tras el cierre automatico (13/11, vence el 14/11 09:00): exactamente un aviso por
+  -- direccion, en una incidencia nueva; repetir el job no cambia nada.
+  h := public.cl_housekeeping('2026-11-14 10:00+03');
+  v := pg_temp.inc(f3, 'missing_delivery');
+  PERFORM pg_temp.ok(v.id IS NOT NULL AND jsonb_array_length(v.periods) = 1 AND v.periods->0->>'period_start' = '2026-11-13'
+                     AND (SELECT count(*) FROM public.cl_notifications n WHERE n.incident_id = v.id) = 3
+                     AND pg_temp.nn(f3, 'missing_delivery') = 4 AND pg_temp.ne(f3, 'missing_delivery') = 6,
+                     'periodo nuevo: un aviso: ' || coalesce(v.periods::text, 'null'));
+  h := public.cl_housekeeping('2026-11-14 11:00+03');
+  PERFORM pg_temp.ok(pg_temp.ne(f3, 'missing_delivery') = 6, 'repetido: igual');
+  -- Que no siga molestando en las secciones siguientes.
+  UPDATE public.cl_feeds SET status = 'paused' WHERE id = f3;
+
+  -- Punto desconocido sin lugar (no se puede dar de alta) no impide el cierre de unknown_data (ronda 1).
+  PERFORM public.cl_incident_record('a0000000-0000-0000-0000-000000000001', f3, NULL, 'unknown_data',
+    '[{"key":"delivery:x","period_start":"2026-11-13","period_end":"2026-11-13","products":1,"points":1}]',
+    '{"products":["PR"],"points":[{"place_ref":null,"mode_ref":null}]}');
+  PERFORM pg_temp.ok((pg_temp.inc(f3, 'unknown_data')).id IS NOT NULL, 'unknown_data abierta');
+  h := public.cl_housekeeping('2026-11-14 12:00+03');
+  PERFORM pg_temp.ok((pg_temp.inc(f3, 'unknown_data')).id IS NULL, 'punto sin lugar: cerrada sola: ' || h::text);
 END $$;
 
 -- ================================================================ 3. delivery_rejected
@@ -388,8 +462,12 @@ BEGIN
   j := public.cl_notify_claim('tok-aaaa-1111', 100, 300, t0);
   PERFORM pg_temp.ok(jsonb_array_length(j) > 0, 'hay avisos pendientes');
   -- Contenido: AM + DO de la cuenta (no el UPU del fixture), idioma de la cuenta, sin ids ni codigos internos.
+  -- Un correo por direccion (ronda 1): cada aviso lleva una sola direccion; AM y DO por separado.
+  PERFORM pg_temp.ok(NOT EXISTS (SELECT 1 FROM jsonb_array_elements(j) x WHERE jsonb_array_length(x->'to') <> 1), 'una direccion por aviso');
+  PERFORM pg_temp.ok((SELECT jsonb_agg(DISTINCT x->'to'->>0) FROM jsonb_array_elements(j) x
+                       WHERE x->>'recipient_kind' = 'account_manager' AND x->>'incident_type' = 'quota_unfilled')
+                     = '["am@t.l","do@t.l"]'::jsonb, 'destinatarios de la cuenta: AM y DO');
   SELECT x INTO it FROM jsonb_array_elements(j) x WHERE x->>'recipient_kind' = 'account_manager' AND x->>'incident_type' = 'quota_unfilled' LIMIT 1;
-  PERFORM pg_temp.ok(it->'to' = '["am@t.l","do@t.l"]'::jsonb, 'destinatarios de la cuenta: ' || coalesce((it->'to')::text, 'null'));
   PERFORM pg_temp.ok(it->>'language' = 'fr' AND it->>'connector' = 'Feed One' AND (it->'periods'->0->>'missing')::int > 0, 'datos del aviso: ' || it::text);
   PERFORM pg_temp.ok(j::text NOT LIKE '%quota_id%' AND j::text NOT LIKE '%"key"%' AND j::text NOT LIKE '%CL_%'
                      AND j::text NOT LIKE '%delivery:%' AND j::text NOT LIKE '%actor@t.l%', 'sin ids ni codigos ni otros correos');
@@ -439,7 +517,10 @@ BEGIN
   j := public.cl_notify_claim('tok-gggg-7777', 100, 300, t0 + interval '3 hours');
   PERFORM pg_temp.ok(NOT EXISTS (SELECT 1 FROM jsonb_array_elements(j) x WHERE x->>'recipient_kind' = 'account_manager'
                                    AND x->>'incident_type' = 'missing_delivery'), 'sin destinatarios: no sale');
-  PERFORM pg_temp.ok(EXISTS (SELECT 1 FROM public.cl_notifications WHERE status = 'skipped' AND last_error = 'CL_NO_RECIPIENT'), 'skipped');
+  PERFORM pg_temp.ok(EXISTS (SELECT 1 FROM public.cl_notifications WHERE status = 'skipped' AND last_error = 'CL_NO_RECIPIENT'
+                               AND recipient_email IS NULL AND recipient_kind = 'account_manager'), 'skipped sin direccion');
+  PERFORM pg_temp.ok(EXISTS (SELECT 1 FROM jsonb_array_elements(j) x WHERE x->>'recipient_kind' = 'carrier'
+                               AND x->>'incident_type' = 'missing_delivery'), 'el carrier si');
   INSERT INTO public.account_user_role (account_id, user_id, role) VALUES
     ('a0000000-0000-0000-0000-000000000001','91000000-0000-0000-0000-000000000091','account_manager'),
     ('a0000000-0000-0000-0000-000000000001','92000000-0000-0000-0000-000000000092','do_coordinator');
@@ -474,7 +555,7 @@ BEGIN
   PERFORM pg_temp.ok(pg_temp.raises(format('SELECT public.cl_incidents_list(%L, ''bogus'')', a1)) LIKE '22023:CL_BAD_REQUEST%', 'filtro invalido');
   SELECT (x->>'id')::uuid INTO v_id FROM jsonb_array_elements(public.cl_incidents_list(a1, NULL, 'quota_unfilled')->'items') x;
   j := public.cl_incident_get(v_id);
-  PERFORM pg_temp.ok(j->>'incident_type' = 'quota_unfilled' AND j->>'plan_name' = 'P1' AND jsonb_array_length(j->'notifications') = 2
+  PERFORM pg_temp.ok(j->>'incident_type' = 'quota_unfilled' AND j->>'plan_name' = 'P1' AND jsonb_array_length(j->'notifications') = 4
                      AND j::text NOT LIKE '%@%' AND NOT (j->>'carrier_notified')::boolean, 'detalle sin correos: ' || j::text);
   PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_incidents) >= 5 AND NOT EXISTS (SELECT 1 FROM public.cl_incidents WHERE account_id = a2),
                      'RLS: solo su cuenta');
