@@ -271,3 +271,38 @@ Cada fase se despliega a `onems-dev` con confirmación explícita.
 - D21. **Cuota por entrega**: la cuota semanal de cada ruta se reparte entre las entregas de esa semana en proporción a sus días laborables; el déficit pasa a las entregas siguientes (reutiliza el arrastre existente).
 - D22. Las **demandas** dejan de ser una petición de candidatos: el conector consulta una configuración (`GET /config`: productos, puntos con su papel, campos, calendario, periodo a entregar) y entrega según su calendario. Las entregas tardías o ausentes generan alerta.
 - D23. **Auditorías automáticas**: (a) testigos — si un envío de panelista que viaja por ese carrier (requiere conocer su número de seguimiento del carrier) se entregó en el periodo y no aparece, alerta; (b) distribución — tiempos del carrier frente a panelistas de la misma ruta/semana (prueba estadística), alerta si la cola lenta falta; (c) totales de control — recibidos vs declarados; (d) volumen anómalo frente a la mediana.
+
+## v4.1 (23/11/2026) — Control de incidencias de Carrier Link
+
+**Decisiones del responsable (no reabrir):**
+- R29. Carrier Link tiene su **propio control de incidencias**, distinto de las Incidencias de panelistas (que siguen solo en E2E).
+- R30. Opción **C**: cada incidencia tiene seguimiento (abierta / en curso / resuelta, responsable, notas) **y** avisa por
+  correo al responsable de la cuenta **y**, cuando el problema es del carrier, al propio carrier.
+- R31. **Entrega no recibida**: la incidencia se cierra **a mano** o **sola con la siguiente entrega que llegue** (la primera
+  que se reciba, sea del periodo que sea).
+- R32. Mientras siga abierta, **cada periodo que no llega envía un nuevo correo de aviso** (no se abre una incidencia nueva por
+  cada periodo: se añade el periodo a la misma incidencia).
+
+**Casos que vigila (propuesta, revisable):**
+
+| Caso | Se abre cuando | Se cierra sola cuando | Aviso al carrier |
+|---|---|---|---|
+| Entrega no recibida | pasa la hora de entrega del calendario + margen y no hay entrega del periodo | llega la siguiente entrega (R31) | sí |
+| Entrega rechazada | fichero que no cuadra con lo anunciado (huella, tamaño, formato, nº de filas) o rechazada tras 3 fallos | se recibe y procesa bien ese mismo periodo | sí |
+| Muchos envíos rechazados | proporción de envíos inválidos de una entrega por encima del umbral | la siguiente entrega queda por debajo | sí |
+| Datos desconocidos | puntos de lectura o productos que no están dados de alta | se dan de alta | no (lo arregla ONEMS) |
+| Cuota no cubierta | una semana se cierra con menos muestras de las pedidas | — (manual) | no |
+
+**Diseño (decisiones de diseño, revisables):**
+- D24. Tabla `cl_incidents` por cuenta (RLS por `account_id`): tipo, conector, plan, estado (open / in_progress / resolved),
+  periodos afectados, responsable, notas, cómo se cerró (manual / automática), fechas. Las `cl_alerts` actuales se quedan
+  como señales técnicas; las incidencias se abren a partir de ellas y de la vigilancia del calendario.
+- D25. Vigilancia del calendario: un pg_cron horario compara el calendario de cada conector activo con las entregas
+  recibidas; margen por defecto 6 horas tras la hora de entrega (configurable por conector).
+- D26. Correo: cola `cl_notifications` → Edge Function que envía con Resend (como el informe de operación). El
+  destinatario carrier es un **correo de contacto técnico por conector** (campo nuevo, obligatorio para activar el
+  aviso). Idioma: el de la cuenta. Textos escuetos, en los 5 idiomas. Nunca datos de envíos, solo recuentos y periodos.
+- D27. Semana sin entrega: la semana se liquida igualmente 3 días después de su final con lo que haya (déficit al
+  arrastre de siempre); la incidencia sigue abierta según R31.
+- D28. Pantalla "Incidencias" dentro de Carrier Link (solo DEV, mismo interruptor); permiso nuevo `cl_incidents` solo en
+  DEMO2.
