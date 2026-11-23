@@ -72,6 +72,7 @@ Fichero JSON (ver `config.example.json`). Las rutas relativas se leen desde la c
 | `dry_run` | `true` = solo valida, no guarda nada en ONEMS. Se puede forzar con `--dry-run` o `--real`. |
 | `max_rows` | Máximo de filas por lote (como mucho 5.000, el límite de ONEMS). Con un valor bajo salen varios lotes. |
 | `output_fields` | Campos que se envían de cada lectura. Por defecto, sin datos personales. |
+| `pii_fields` | Opcional: más campos personales prohibidos. El conector se niega a arrancar si `output_fields` incluye uno de ellos o de la lista fija (`recipient_name`, `recipient_phone`, `recipient_address`, `sender_email`…). |
 | `local` | Solo `local`: ruta de `psql` y conexión (`127.0.0.1`, puerto 5433, base `onems_t`). |
 
 ## Qué hace cada modo
@@ -89,7 +90,8 @@ Solo acepta un Postgres en `127.0.0.1`/`localhost`.
 con la cabecera `x-api-key`: `GET .../demands` y `POST .../batches` (con `?dry_run=true` en modo prueba).
 **Está construido pero no se ha ejecutado.** Necesita una clave de conector emitida en ONEMS y la confirmación del
 responsable: el programa se niega a llamar a un servidor que no sea local si no se define antes
-`CONFIRM_REMOTE=<ref del proyecto>` (por ejemplo `CONFIRM_REMOTE=sehbnpgzqljrsqimwyuz`). Recomendación: empezar
+`CONFIRM_REMOTE=<ref del proyecto>` (por ejemplo `CONFIRM_REMOTE=sehbnpgzqljrsqimwyuz`), exige `https` y no sigue
+redirecciones (así la clave nunca viaja a otra dirección). Recomendación: empezar
 siempre con `dry_run: true` y el conector en estado *testing* en ONEMS.
 
 ## La base de datos del carrier (`out/dataset/`)
@@ -130,7 +132,9 @@ Anomalías que genera (porcentajes en `network.json`):
 Por cada estrato de la demanda:
 
 1. **Población**: envíos del producto pedido (el servicio de su primera lectura legible está en `products`) con una
-   lectura en algún punto de inicio y otra en algún punto de fin **cuya fecha local cae dentro del periodo**.
+   lectura en algún punto de inicio y cuya **última** lectura en un punto de fin (distinta de esa lectura de inicio)
+   tiene la **fecha local dentro del periodo**: la misma regla que aplica ONEMS al validar. Si un envío tiene una
+   entrega dentro del periodo y otra posterior fuera, no cuenta.
    Solo cuentan las lecturas con hora legible. Un punto sin modo (`mode_ref` vacío) vale para cualquier evento de ese lugar.
 2. **Sorteo**: elige al azar, con la misma probabilidad para todos, `candidates_requested` envíos de la población
    (o todos si hay menos). El sorteo depende de la semilla, la demanda y el estrato: es repetible.

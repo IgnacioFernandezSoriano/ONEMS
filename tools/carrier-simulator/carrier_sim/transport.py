@@ -1,7 +1,8 @@
 """How the connector talks to ONEMS. Both transports answer (http_status, json_body) like carrier-link-ingest.
 
 DevTransport   real HTTP to the Edge Function (GET /demands, POST /batches[?dry_run=true]) with the connector key in
-               x-api-key. Refuses a non-loopback host unless CONFIRM_REMOTE=<project ref> is set (owner confirmation).
+               x-api-key. Refuses a non-loopback host unless CONFIRM_REMOTE=<project ref> is set (owner confirmation)
+               and the URL is https; never follows redirects (a 3xx is returned as is, the key is not re-sent).
 LocalTransport the local Postgres (127.0.0.1:5433, onems_t) through psql, calling the SAME SQL functions as
                supabase/functions/carrier-link-ingest/index.ts in the SAME order, one transaction per call:
                api_key_resolve -> (GET) open demands of the key's connector
@@ -44,7 +45,10 @@ class DevTransport:
         self.base = base_url.rstrip("/")
         self.key = key
         self.timeout = timeout
-        host = urllib.parse.urlparse(self.base).hostname or ""
+        url = urllib.parse.urlparse(self.base)
+        host = url.hostname or ""
+        if host not in LOOPBACK and url.scheme != "https":
+            raise TransportError("remote call refused: %s is not https (the key would travel in clear)" % self.base)
         if host not in LOOPBACK:
             ref = host.split(".")[0]
             if os.environ.get("CONFIRM_REMOTE") != ref:
@@ -59,7 +63,7 @@ class DevTransport:
             headers["Content-Type"] = "application/json"
         req = urllib.request.Request(self.base + path, data=data, method=method, headers=headers)
         try:
-            with urllib.request.urlopen(req, timeout=self.timeout) as r:
+            with _OPENER.open(req, timeout=self.timeout) as r:
                 return r.status, _json(r.read())
         except urllib.error.HTTPError as e:
             return e.code, _json(e.read())
@@ -69,6 +73,16 @@ class DevTransport:
 
     def post_batch(self, batch, dry_run):
         return self._call("POST", "/batches" + ("?dry_run=true" if dry_run else ""), batch)
+
+
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """Never follow a redirect: the x-api-key header must only reach the configured endpoint."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+_OPENER = urllib.request.build_opener(_NoRedirect)
 
 
 def _json(raw):

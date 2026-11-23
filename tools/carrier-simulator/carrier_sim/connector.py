@@ -1,11 +1,12 @@
 """Reference connector logic (no I/O): from a demand and the carrier's scans to the batches ONEMS expects.
 
 Per stratum (spec section 4, R4, R23):
-  * population = CLOSED items of the demand's products: a scan at one of the stratum's start points and a scan at one
-    of its end points whose LOCAL date is inside the period (only scans with a readable timestamp decide);
+  * population = CLOSED items of the demand's products: a scan at one of the stratum's start points and, as in
+    cl_ingest_batch, the LATEST scan at one of its end points (other than the first start scan) with its LOCAL date
+    inside the period (only scans with a readable timestamp decide);
   * candidates = min(candidates_requested, population) items drawn uniformly at random (seeded, reproducible);
   * rows = ALL scans of the candidates at the start/end points of ANY stratum of the demand (any city), or all their
-    scans when include_all_scans is true; only the configured output fields (no personal data).
+    scans when include_all_scans is true; only the configured output fields (personal data refused: PII_FIELDS).
 Batches: whole strata packed in demand order, at most max_rows rows and max_bytes bytes per batch. ONEMS accepts each
 stratum only once per demand (CL_STRATUM_ALREADY_DELIVERED), so a stratum is never split; a stratum larger than the
 limit is an error.
@@ -18,6 +19,9 @@ import random
 from . import contract
 
 DEFAULT_OUTPUT_FIELDS = ["tracking_no", "event_ts", "site_code", "event_code", "service", "weight_g"]
+# Personal data the connector must never send (spec R19 / anti-goals), on top of any configured pii_fields.
+PII_FIELDS = frozenset(["recipient_name", "recipient_phone", "recipient_address", "recipient_email",
+                        "sender_name", "sender_phone", "sender_address", "sender_email"])
 
 
 class ConnectorError(Exception):
@@ -75,9 +79,15 @@ def population(items, stratum, products):
         entries = items[tn]
         if item_service(entries) not in products:
             continue
-        has_start = any(t is not None and matches(s, start) for s, t in entries)
-        has_end = any(t is not None and matches(s, end) and p0 <= t.date() <= p1 for s, t in entries)
-        if has_start and has_end:
+        # Same rule as cl_ingest_batch: start = first readable start reading; end = LATEST readable end reading that
+        # is not that same reading (a single scan at a point with both roles is not a shipment). The item is closed
+        # in the period only if that latest end reading's local date is inside the period.
+        starts = [(t, i) for i, (s, t) in enumerate(entries) if t is not None and matches(s, start)]
+        if not starts:
+            continue
+        first_start = min(starts)[1]
+        ends = [t for i, (s, t) in enumerate(entries) if t is not None and matches(s, end) and i != first_start]
+        if ends and p0 <= max(ends).date() <= p1:
             pop.append(tn)
     return pop
 
@@ -87,9 +97,17 @@ def draw(pop, k, seed, demand_id, stratum_id):
     return sorted(rng.sample(pop, min(k, len(pop))))
 
 
-def build_strata(demand, items, seed, output_fields=None):
+def check_output_fields(fields, pii_fields=None):
+    banned = PII_FIELDS | set(pii_fields or [])
+    bad = sorted(f for f in fields if f in banned)
+    if bad:
+        raise ConnectorError("output_fields contains personal data, never sent to ONEMS: %s" % ", ".join(bad))
+
+
+def build_strata(demand, items, seed, output_fields=None, pii_fields=None):
     """Returns [{stratum_id, population_size, selection_method, rows}, ...] in demand order and a manifest."""
     fields = output_fields or DEFAULT_OUTPUT_FIELDS
+    check_output_fields(fields, pii_fields)
     products = set(demand.get("products") or [])
     all_points = set()
     for s in demand["strata"]:

@@ -122,7 +122,8 @@ def cmd_run(a):
         if d.get("carrier") != network["carrier"]:
             print("WARNING: demand %s is for carrier %r, the simulated network is %r"
                   % (d["demand_id"], d.get("carrier"), network["carrier"]))
-        strata, manifest = connector.build_strata(d, items, cfg["seed"], cfg.get("output_fields"))
+        strata, manifest = connector.build_strata(d, items, cfg["seed"], cfg.get("output_fields"),
+                                                  cfg.get("pii_fields"))
         batches = connector.pack_batches(d["demand_id"], strata, cfg["seed"], max_rows=max_rows)
         run_dir = os.path.join(cfg["out_dir"], d["demand_id"])
         save_json(os.path.join(run_dir, "demand.json"), d)

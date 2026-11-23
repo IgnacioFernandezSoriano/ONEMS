@@ -152,6 +152,29 @@ class ConnectorTest(unittest.TestCase):
         self.assertEqual(connector.population(self.items, s_ab, {"STD"}), ["I1", "I5"])
         self.assertEqual(connector.population(self.items, s_ae, {"STD"}), ["I5"])
 
+    def test_latest_end_scan_decides_the_period(self):
+        # Like cl_ingest_batch: end = the LATEST end reading; a later end scan outside the period excludes the item.
+        rows = [scan("J1", "09/11/2026 09:00:00", "NPT-PO", "ACC"), scan("J1", "12/11/2026 10:00:00", "SVL-PO", "DLV"),
+                scan("J1", "17/11/2026 10:00:00", "SVL-PO", "DLV"),
+                scan("J2", "05/11/2026 09:00:00", "NPT-PO", "ACC"), scan("J2", "07/11/2026 10:00:00", "SVL-PO", "DLV"),
+                scan("J2", "10/11/2026 10:00:00", "SVL-PO", "DLV")]
+        items = connector.index_items(rows, FMT)
+        self.assertEqual(connector.population(items, self.demand["strata"][0], {"STD"}), ["J2"])
+
+    def test_single_scan_at_a_both_point_is_not_closed(self):
+        rows = [scan("K1", "10/11/2026 09:00:00", "NPT-PO", "XFR"),
+                scan("K2", "10/11/2026 09:00:00", "NPT-PO", "XFR"), scan("K2", "11/11/2026 09:00:00", "NPT-PO", "XFR")]
+        s = stratum("s", [("NPT-PO", None)], [("NPT-PO", None)])
+        self.assertEqual(connector.population(connector.index_items(rows, FMT), s, {"STD"}), ["K2"])
+
+    def test_personal_data_never_sent(self):
+        for f in ("recipient_name", "recipient_phone", "recipient_address", "sender_email"):
+            with self.assertRaises(connector.ConnectorError):
+                connector.build_strata(self.demand, self.items, "seed", connector.DEFAULT_OUTPUT_FIELDS + [f])
+        with self.assertRaises(connector.ConnectorError):
+            connector.build_strata(self.demand, self.items, "seed", ["tracking_no", "weight_g"], pii_fields=["weight_g"])
+        connector.build_strata(self.demand, self.items, "seed", ["tracking_no", "weight_g"], pii_fields=["id_card"])
+
     def test_any_mode_point(self):
         s = stratum("s", [("NPT-PO", None)], [("SVL-PO", None)])
         self.assertEqual(connector.population(self.items, s, {"STD"}), ["I1", "I5"])
@@ -229,6 +252,7 @@ class StubHandler(http.server.BaseHTTPRequestHandler):
 
 class DevTransportTest(unittest.TestCase):
     def test_http_contract_against_loopback_stub(self):
+        StubHandler.seen = []
         srv = http.server.HTTPServer(("127.0.0.1", 0), StubHandler)
         th = threading.Thread(target=srv.serve_forever, daemon=True)
         th.start()
@@ -245,6 +269,40 @@ class DevTransportTest(unittest.TestCase):
             ("GET", "/functions/v1/carrier-link-ingest/demands", "onems_k"),
             ("POST", "/functions/v1/carrier-link-ingest/batches?dry_run=true", "onems_k"),
             ("POST", "/functions/v1/carrier-link-ingest/batches", "onems_k")])
+
+    def test_redirect_not_followed(self):
+        class Redirect(StubHandler):
+            def do_GET(self):
+                StubHandler.seen.append(("REDIRECT", self.path, self.headers.get("x-api-key"), None))
+                self.send_response(302)
+                self.send_header("Location", "http://127.0.0.1:%d/elsewhere" % target.server_port)
+                self.send_header("Content-Length", "2")
+                self.end_headers()
+                self.wfile.write(b"{}")
+        StubHandler.seen = []
+        target = http.server.HTTPServer(("127.0.0.1", 0), StubHandler)
+        src = http.server.HTTPServer(("127.0.0.1", 0), Redirect)
+        for srv in (target, src):
+            threading.Thread(target=srv.serve_forever, daemon=True).start()
+        try:
+            t = transport.DevTransport("http://127.0.0.1:%d/fn/carrier-link-ingest" % src.server_port, "onems_k")
+            self.assertEqual(t.get_demands()[0], 302)
+        finally:
+            for srv in (target, src):
+                srv.shutdown()
+                srv.server_close()
+        self.assertEqual([x[0] for x in StubHandler.seen], ["REDIRECT"])   # the target never saw the key
+
+    def test_remote_needs_https(self):
+        old = os.environ.get("CONFIRM_REMOTE")
+        os.environ["CONFIRM_REMOTE"] = "abcdef"
+        try:
+            with self.assertRaises(transport.TransportError):
+                transport.DevTransport("http://abcdef.supabase.co/functions/v1/carrier-link-ingest", "k")
+        finally:
+            os.environ.pop("CONFIRM_REMOTE", None)
+            if old is not None:
+                os.environ["CONFIRM_REMOTE"] = old
 
     def test_remote_needs_confirmation(self):
         old = os.environ.pop("CONFIRM_REMOTE", None)
