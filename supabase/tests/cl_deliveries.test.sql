@@ -59,7 +59,9 @@ INSERT INTO public.cl_feeds (id, account_id, carrier_id, name, status, emit_days
   ('f0000000-0000-0000-0000-0000000000a4','a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000001','Feed T','testing','{1,2,3,4,5,6,7}',3),
   ('f0000000-0000-0000-0000-0000000000a5','a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000001','Feed Z','paused','{1}',3),
   ('f0000000-0000-0000-0000-0000000000a6','a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000001','Feed W','active','{1}',3),
-  ('f0000000-0000-0000-0000-0000000000a7','a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000001','Feed M','active','{1,2,3,4,5,6,7}',3);
+  ('f0000000-0000-0000-0000-0000000000a7','a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000001','Feed M','active','{1,2,3,4,5,6,7}',3),
+  ('f0000000-0000-0000-0000-0000000000a8','a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000001','Feed G','active','{1}',3),
+  ('f0000000-0000-0000-0000-0000000000a9','a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000001','Feed R','active','{1,2,3,4,5,6,7}',3);
 INSERT INTO public.cl_field_mappings (account_id, carrier_id, standard_field, carrier_field, format, timezone) VALUES
   ('a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000001','item_id','trk',NULL,NULL),
   ('a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000001','product','svc',NULL,NULL),
@@ -75,7 +77,11 @@ INSERT INTO public.cl_plans (id, account_id, plan_name, carrier_id, product_id, 
   ('90000000-0000-0000-0000-0000000000a1','a0000000-0000-0000-0000-000000000001','P1','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',10,'2026-11-02','2026-11-29','active','f0000000-0000-0000-0000-0000000000a1',true),
   ('90000000-0000-0000-0000-0000000000a4','a0000000-0000-0000-0000-000000000001','PT','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',10,'2026-11-02','2026-11-29','active','f0000000-0000-0000-0000-0000000000a4',false),
   ('90000000-0000-0000-0000-0000000000a6','a0000000-0000-0000-0000-000000000001','PW','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',10,'2026-11-04','2026-11-29','active','f0000000-0000-0000-0000-0000000000a6',false),
-  ('90000000-0000-0000-0000-0000000000a7','a0000000-0000-0000-0000-000000000001','PM','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',10,current_date - 30,current_date + 30,'active','f0000000-0000-0000-0000-0000000000a7',false);
+  ('90000000-0000-0000-0000-0000000000a7','a0000000-0000-0000-0000-000000000001','PM','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',10,current_date - 30,current_date + 30,'active','f0000000-0000-0000-0000-0000000000a7',false),
+  -- G: dos planes con hueco (02/11-15/11 y 09/12 (miercoles)-20/12).
+  ('90000000-0000-0000-0000-0000000000a8','a0000000-0000-0000-0000-000000000001','PG1','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',10,'2026-11-02','2026-11-15','active','f0000000-0000-0000-0000-0000000000a8',false),
+  ('90000000-0000-0000-0000-0000000000b8','a0000000-0000-0000-0000-000000000001','PG2','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',10,'2026-12-09','2026-12-20','active','f0000000-0000-0000-0000-0000000000a8',false),
+  ('90000000-0000-0000-0000-0000000000a9','a0000000-0000-0000-0000-000000000001','PR','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',10,'2026-11-02','2026-11-29','active','f0000000-0000-0000-0000-0000000000a9',false);
 INSERT INTO public.cl_plan_quotas (id, account_id, plan_id, origin_city_id, destination_city_id, iso_year, iso_week, period_start, period_end, samples_planned) VALUES
   ('91000000-0000-0000-0000-0000000000b1','a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-0000000000a1','c1000000-0000-0000-0000-000000000001','c2000000-0000-0000-0000-000000000002',2026,47,'2026-11-16','2026-11-22',3);
 
@@ -380,6 +386,80 @@ BEGIN
   PERFORM pg_temp.ok(e LIKE 'P0001:CL_PERIOD_ALREADY_DELIVERED%', 'solape tras cambio: ' || coalesce(e, 'ok'));
   j := pg_temp.op(w, '2026-11-23', '2026-11-25', pg_temp.sha(8), '2026-11-26 10:00+03');
   PERFORM pg_temp.ok(j->>'status' = 'pending_upload', 'periodo recortado tras cambio de calendario');
+END $$;
+
+-- Fix 1: completar y sustituir no dejan dos entregas "entregadas" del mismo periodo.
+DO $$
+DECLARE
+  r constant text := 'f0000000-0000-0000-0000-0000000000a9';
+  v_now constant text := '2026-11-25 10:00+03';
+  d1 jsonb; d2 jsonb; j jsonb; e text; v_id uuid;
+BEGIN
+  -- Secuencia: abrir D1, abrir D2 (mismo periodo, otro fichero), completar D1, completar D2.
+  d1 := pg_temp.op(r, '2026-11-20', '2026-11-20', pg_temp.sha(50), v_now);
+  PERFORM pg_temp.put(d1->>'file_path', 10);
+  d2 := pg_temp.op(r, '2026-11-20', '2026-11-20', pg_temp.sha(51), v_now);
+  PERFORM pg_temp.put(d2->>'file_path', 10);
+  j := public.cl_delivery_complete_core(r::uuid, (d1->>'delivery_id')::uuid, 'api');
+  PERFORM pg_temp.ok(j->>'status' = 'rejected' AND j->>'error' = 'CL_SUPERSEDED', 'D1 superada no se recibe: ' || j::text);
+  j := public.cl_delivery_complete_core(r::uuid, (d2->>'delivery_id')::uuid, 'api');
+  PERFORM pg_temp.ok(j->>'status' = 'received', 'D2 recibida');
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_deliveries
+                       WHERE feed_id = r::uuid AND period_start = '2026-11-20' AND status = 'received') = 1,
+                     'una sola entrega recibida para el periodo');
+
+  -- Interleaving de la carrera: D3 pendiente que ya habia pasado la comprobacion de solape cuando otra entrega se
+  -- recibio. Al completarla se vuelve a comprobar el solape bajo el bloqueo del conector -> rejected.
+  v_id := gen_random_uuid();
+  INSERT INTO public.cl_deliveries (id, account_id, feed_id, period_start, period_end, source, format, compression, file_path, sha256)
+  VALUES (v_id, 'a0000000-0000-0000-0000-000000000001', r::uuid, '2026-11-20', '2026-11-20', 'api', 'jsonl', 'gzip',
+          'a0000000-0000-0000-0000-000000000001/' || r || '/' || v_id || '.jsonl.gz', pg_temp.sha(52));
+  PERFORM pg_temp.put('a0000000-0000-0000-0000-000000000001/' || r || '/' || v_id || '.jsonl.gz', 10);
+  j := public.cl_delivery_complete_core(r::uuid, v_id, 'api');
+  PERFORM pg_temp.ok(j->>'status' = 'rejected' AND j->>'error' = 'CL_PERIOD_ALREADY_DELIVERED',
+                     're-comprobacion al completar: ' || j::text);
+
+  -- Garantia en la base: dos entregas "entregadas" solapadas del mismo conector -> 23P01 (exclusion).
+  v_id := gen_random_uuid();
+  INSERT INTO public.cl_deliveries (id, account_id, feed_id, period_start, period_end, source, format, compression, file_path, sha256)
+  VALUES (v_id, 'a0000000-0000-0000-0000-000000000001', r::uuid, '2026-11-20', '2026-11-20', 'api', 'jsonl', 'gzip',
+          'x/' || v_id, pg_temp.sha(53));
+  e := pg_temp.raises(format('UPDATE public.cl_deliveries SET status = ''received'' WHERE id = %L', v_id));
+  PERFORM pg_temp.ok(e LIKE '23P01:%', 'exclusion por solape: ' || coalesce(e, 'ok'));
+  e := pg_temp.raises(format('INSERT INTO public.cl_deliveries (account_id, feed_id, period_start, period_end, source, format, compression, file_path, sha256, status) VALUES (%L, %L, ''2026-11-19'', ''2026-11-21'', ''api'', ''csv'', ''none'', ''y'', %L, ''failed'')',
+         'a0000000-0000-0000-0000-000000000001', r, pg_temp.sha(54)));
+  PERFORM pg_temp.ok(e LIKE '23P01:%', 'exclusion con failed: ' || coalesce(e, 'ok'));
+  -- Periodo contiguo sin solape: permitido.
+  INSERT INTO public.cl_deliveries (account_id, feed_id, period_start, period_end, source, format, compression, file_path, sha256, status)
+  VALUES ('a0000000-0000-0000-0000-000000000001', r::uuid, '2026-11-21', '2026-11-21', 'api', 'csv', 'none', 'z', pg_temp.sha(55), 'received');
+END $$;
+
+-- Fix 2: next_period salta el hueco entre planes (y la apertura acepta el periodo que devuelve).
+DO $$
+DECLARE
+  g constant text := 'f0000000-0000-0000-0000-0000000000a8';
+  c jsonb; j jsonb;
+BEGIN
+  j := pg_temp.op(g, '2026-11-09', '2026-11-15', pg_temp.sha(60), '2026-11-25 10:00+03');
+  PERFORM pg_temp.put(j->>'file_path', 10);
+  PERFORM public.cl_delivery_complete_core(g::uuid, (j->>'delivery_id')::uuid, 'api');
+  c := public.cl_connector_config(g::uuid, '2026-12-15 10:00+03');
+  -- El plan 2 empieza el miercoles 09/12: el periodo semanal alineado es lun 07..dom 13.
+  PERFORM pg_temp.ok(c->'next_period'->>'period_start' = '2026-12-07' AND c->'next_period'->>'period_end' = '2026-12-13'
+                     AND (c->'next_period'->>'deliverable')::boolean, 'salta el hueco: ' || (c->'next_period')::text);
+  j := pg_temp.op(g, c->'next_period'->>'period_start', c->'next_period'->>'period_end', pg_temp.sha(61), '2026-12-15 10:00+03');
+  PERFORM pg_temp.ok(j->>'status' = 'pending_upload', 'la apertura acepta el periodo propuesto');
+  PERFORM pg_temp.put(j->>'file_path', 10);
+  PERFORM public.cl_delivery_complete_core(g::uuid, (j->>'delivery_id')::uuid, 'api');
+  c := public.cl_connector_config(g::uuid, '2026-12-15 10:00+03');
+  PERFORM pg_temp.ok(c->'next_period'->>'period_start' = '2026-12-14' AND c->'next_period'->>'period_end' = '2026-12-20'
+                     AND NOT (c->'next_period'->>'deliverable')::boolean, 'siguiente dentro del plan 2: ' || (c->'next_period')::text);
+  j := pg_temp.op(g, '2026-12-14', '2026-12-20', pg_temp.sha(62), '2026-12-22 10:00+03');
+  PERFORM pg_temp.put(j->>'file_path', 10);
+  PERFORM public.cl_delivery_complete_core(g::uuid, (j->>'delivery_id')::uuid, 'api');
+  c := public.cl_connector_config(g::uuid, '2026-12-22 10:00+03');
+  PERFORM pg_temp.ok(c->'next_period' IS NULL OR jsonb_typeof(c->'next_period') = 'null',
+                     'sin plan pendiente: ' || coalesce((c->'next_period')::text, 'NULL'));
 END $$;
 
 -- ================================================================ 5. cl_connector_config

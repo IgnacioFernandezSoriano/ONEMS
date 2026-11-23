@@ -70,6 +70,12 @@ CREATE UNIQUE INDEX cl_deliveries_idem_uidx ON public.cl_deliveries (feed_id, pe
 CREATE UNIQUE INDEX cl_deliveries_one_processing_uidx ON public.cl_deliveries ((true)) WHERE status = 'processing';
 -- Cola del proceso en segundo plano.
 CREATE INDEX cl_deliveries_queue_idx ON public.cl_deliveries (received_at) WHERE status IN ('received','failed');
+-- Un periodo se entrega una sola vez: dos entregas "entregadas" (received/processing/processed/failed) del mismo
+-- conector no pueden solaparse en fechas (garantia en la base, ademas de los bloqueos de las funciones).
+CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA extensions;
+ALTER TABLE public.cl_deliveries ADD CONSTRAINT cl_deliveries_no_overlap
+  EXCLUDE USING gist (feed_id WITH =, daterange(period_start, period_end, '[]') WITH &&)
+  WHERE (status IN ('received','processing','processed','failed'));
 
 CREATE TABLE public.cl_delivery_strata (
   id                 uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -224,7 +230,9 @@ AS $$
 $$;
 
 -- Proximo periodo a entregar: el siguiente al ultimo entregado (received/processing/processed/failed) o, sin
--- entregas, el que contiene el inicio del primer plan activo del conector. NULL si ya no queda plan por cubrir.
+-- entregas, el que contiene el inicio del primer plan activo del conector. Si ese dia cae en un hueco entre planes,
+-- salta al inicio del siguiente plan activo. NULL si ya no queda plan por cubrir. El inicio devuelto es el mismo que
+-- exige cl_delivery_open_core (inicio alineado, o el dia siguiente a lo ya entregado si es posterior).
 -- No rellena huecos anteriores (las entregas que faltan son cosa de alertas, tarea posterior).
 CREATE OR REPLACE FUNCTION public.cl_delivery_next_period(p_feed_id uuid, p_now timestamptz)
  RETURNS jsonb
@@ -235,7 +243,6 @@ AS $$
 DECLARE
   v_feed public.cl_feeds;
   v_first date;
-  v_last  date;
   v_anchor date;
   v_last_end date;
   v_p record;
@@ -244,17 +251,18 @@ DECLARE
 BEGIN
   SELECT f.* INTO v_feed FROM public.cl_feeds f WHERE f.id = p_feed_id;
   IF v_feed.id IS NULL THEN RETURN NULL; END IF;
-  SELECT min(p.start_date), max(p.end_date) INTO v_first, v_last
-    FROM public.cl_plans p
-   WHERE p.feed_id = p_feed_id AND p.carrier_id = v_feed.carrier_id AND p.status = 'active';
-  IF v_first IS NULL THEN RETURN NULL; END IF;
   SELECT max(d.period_end) INTO v_last_end
     FROM public.cl_deliveries d
    WHERE d.feed_id = p_feed_id AND d.status IN ('received','processing','processed','failed');
-  v_anchor := COALESCE(v_last_end + 1, v_first);
-  IF v_anchor > v_last THEN RETURN NULL; END IF;
+  -- Primer dia cubierto por un plan activo a partir del dia siguiente a lo entregado (salta huecos entre planes).
+  SELECT CASE WHEN min(p.start_date) IS NOT NULL THEN GREATEST(min(p.start_date), v_last_end + 1) END INTO v_anchor
+    FROM public.cl_plans p
+   WHERE p.feed_id = p_feed_id AND p.carrier_id = v_feed.carrier_id AND p.status = 'active'
+     AND (v_last_end IS NULL OR p.end_date > v_last_end);
+  IF v_anchor IS NULL THEN RETURN NULL; END IF;
   SELECT * INTO v_p FROM public.cl_delivery_aligned_period(v_feed.emit_days, v_anchor);
-  v_start := GREATEST(v_p.period_start, v_anchor);   -- tras un cambio de calendario, sin solaparse con lo entregado
+  -- Mismo inicio que exige la apertura: alineado, sin solaparse con lo entregado (cambio de calendario).
+  v_start := GREATEST(v_p.period_start, v_last_end + 1);
   v_today := (p_now AT TIME ZONE public.cl_account_date_tz(v_feed.account_id))::date;
   RETURN jsonb_build_object(
     'period_start', v_start,
@@ -440,7 +448,9 @@ END $$;
 
 -- ================================================================ 7. completar (fichero subido)
 -- Idempotente: una entrega que ya no esta pending_upload devuelve su resumen. Sin objeto en el bucket:
--- CL_FILE_NOT_UPLOADED. Mayor que el tope: rejected (CL_FILE_TOO_LARGE). La huella se comprueba al procesar.
+-- CL_FILE_NOT_UPLOADED. Mayor que el tope: rejected (CL_FILE_TOO_LARGE). Periodo ya entregado por otra entrega:
+-- rejected (CL_PERIOD_ALREADY_DELIVERED). La huella se comprueba al procesar.
+-- Bloquea primero el conector (mismo orden que la apertura): completar y abrir/sustituir se serializan.
 CREATE OR REPLACE FUNCTION public.cl_delivery_complete_core(p_feed_id uuid, p_delivery_id uuid, p_source text)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -453,16 +463,16 @@ DECLARE
   v_bytes bigint;
   v_found boolean;
 BEGIN
+  SELECT f.* INTO v_feed FROM public.cl_feeds f WHERE f.id = p_feed_id FOR UPDATE;
   SELECT d.* INTO v_d FROM public.cl_deliveries d
    WHERE d.id = p_delivery_id AND d.feed_id = p_feed_id AND d.source = p_source
    FOR UPDATE;
-  IF v_d.id IS NULL THEN
+  IF v_feed.id IS NULL OR v_d.id IS NULL THEN
     RAISE EXCEPTION 'CL_DELIVERY_NOT_FOUND' USING ERRCODE = '22023';
   END IF;
   IF v_d.status <> 'pending_upload' THEN
     RETURN public.cl_delivery_summary(v_d.id);
   END IF;
-  SELECT f.* INTO v_feed FROM public.cl_feeds f WHERE f.id = p_feed_id;
   IF v_feed.status = 'paused' THEN
     RAISE EXCEPTION 'CL_FEED_PAUSED: the connector is paused' USING ERRCODE = '22023';
   END IF;
@@ -474,7 +484,14 @@ BEGIN
     RAISE EXCEPTION 'CL_FILE_NOT_UPLOADED: upload the file before completing the delivery' USING ERRCODE = '22023';
   END IF;
 
-  IF v_bytes > (public.cl_delivery_limits(v_feed.config)->>'max_file_bytes')::bigint THEN
+  IF EXISTS (SELECT 1 FROM public.cl_deliveries o
+              WHERE o.feed_id = p_feed_id AND o.id <> v_d.id
+                AND o.status IN ('received','processing','processed','failed')
+                AND o.period_start <= v_d.period_end AND o.period_end >= v_d.period_start) THEN
+    UPDATE public.cl_deliveries d SET status = 'rejected', error = 'CL_PERIOD_ALREADY_DELIVERED', file_bytes = v_bytes,
+           finished_at = now()
+     WHERE d.id = v_d.id;
+  ELSIF v_bytes > (public.cl_delivery_limits(v_feed.config)->>'max_file_bytes')::bigint THEN
     UPDATE public.cl_deliveries d SET status = 'rejected', error = 'CL_FILE_TOO_LARGE', file_bytes = v_bytes,
            finished_at = now()
      WHERE d.id = v_d.id;
