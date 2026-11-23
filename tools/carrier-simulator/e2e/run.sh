@@ -1,15 +1,18 @@
 #!/usr/bin/env bash
-# Carrier simulator - automated end-to-end test. LOCAL ONLY: Postgres portable 127.0.0.1:5433, database onems_t,
-# rebuilt from the repo migrations by .superpowers/sdd/runlocal.sh. Never touches the remote project.
+# Carrier simulator (Carrier Link v4) - automated end-to-end test. LOCAL ONLY: Postgres portable 127.0.0.1:5433,
+# database onems_t, rebuilt from the repo migrations by .superpowers/sdd/runlocal.sh. Never touches the remote project.
 #
-#   1. rebuild onems_t; generate the carrier dataset (fixed seed); connector key (hash only in the DB); fixture.sql;
-#   2. emit the demand with cl_emit_due_demands('2026-11-19 06:05+03') (weeks 2026-W45/W46 are due);
-#   3. connector in local mode, row limit 100 (several batches): dry run -> check.py dry;
-#   4. same demand, real batches (ingest + draw + one_db) -> check.py real;
-#   5. replay of batch 01 (same batch_id) -> stored summary, nothing sampled again;
-#   6. a new batch_id for the now fulfilled demand -> HTTP 409 CL_DEMAND_NOT_OPEN.
-# SAVE_EXAMPLES=1 also refreshes tools/carrier-simulator/examples/ from this run (worked example of the manual).
+#   1. rebuild onems_t; generate the carrier dataset (fixed seed); connector key (hash only in the DB); fixture.sql
+#      (connector with deliveries on Monday and Thursday at 03:00, plan 2026-11-02..15 = ISO weeks W45 and W46);
+#   2. first period with a TAMPERED file (sha256 does not match) -> delivery rejected CL_SHA256_MISMATCH, incident
+#      delivery_rejected with a notice for the account and for the carrier;
+#   3. the reference connector delivers every period in calendar order (jsonl, csv, jsonl, csv): GET /config ->
+#      POST /deliveries -> PUT -> complete -> poll; check.py compares every answer with the ground truth and the DB;
+#   4. API answers: replay of the first open (200, existing), same period with another file (409), period not in the
+#      calendar (422), period without plan (422), unknown delivery (404), v3 route (410).
+# SAVE_EXAMPLES=1 also refreshes tools/carrier-simulator/examples/ and docs/carrier-link/ejemplo/ from this run.
 #
+# Needs: Git Bash, python 3, deno (runs the real worker loader locally), the portable Postgres on 127.0.0.1:5433.
 # Usage: bash tools/carrier-simulator/e2e/run.sh
 # If interrupted during step 1: git checkout supabase/migrations/20261119100200_account_access_writes.sql
 set -euo pipefail
@@ -21,6 +24,7 @@ OUT="$SIM/out/e2e"
 PSQL=(/c/Users/fernandezi/pgportable/pgsql/bin/psql.exe -h 127.0.0.1 -p 5433 -U postgres -d onems_t -v ON_ERROR_STOP=1 -q -X -At)
 export PGPASSWORD=postgres
 PY=(python -I)
+winpath() { if command -v cygpath >/dev/null; then cygpath -m "$1"; else echo "$1"; fi; }
 
 die() { echo "ERROR: $*" >&2; exit 1; }
 
@@ -28,53 +32,76 @@ echo "== 1. rebuild onems_t (baseline + migrations) with the local harness"
 bash "$ROOT/.superpowers/sdd/runlocal.sh" cl_masters
 (cd "$ROOT" && git diff --quiet -- supabase/migrations) || die "runlocal.sh left supabase/migrations modified"
 rm -rf "$OUT"; mkdir -p "$OUT"
-"${PY[@]}" "$SIM/sim.py" generate --seed e2e-2026 --from 2026-10-26 --to 2026-11-15 --as-of 2026-11-19T06:00 \
+"${PY[@]}" "$SIM/sim.py" generate --seed e2e-2026 --from 2026-10-26 --to 2026-11-15 --as-of 2026-11-16T03:00 \
   --out "$OUT/dataset"
 read -r HASH PREFIX < <("${PY[@]}" "$SIM/sim.py" keygen --out "$OUT/carrier_key.txt" | tr -d '\r')
 "${PSQL[@]}" -v key_hash="$HASH" -v key_prefix="$PREFIX" -f "$HERE/fixture.sql"
 
-echo "== 2. emit the demand"
-n=$("${PSQL[@]}" -c "SELECT public.cl_emit_due_demands(timestamptz '2026-11-19 06:05:00+03')" | tr -d '\r')
-[ "$n" = 1 ] || die "expected 1 demand, got $n"
-
-cat > "$OUT/config.json" <<'JSON'
+WORKER="$(winpath "$HERE/local_worker.ts")"
+cat > "$OUT/config.json" <<JSON
 {"mode": "local", "key_file": "carrier_key.txt", "seed": "e2e-2026", "dataset_dir": "dataset", "out_dir": "runs",
- "dry_run": true, "max_rows": 100}
+ "formats": ["jsonl", "csv"],
+ "local": {"process_cmd": ["deno", "run", "--quiet", "--allow-read", "--allow-run", "--allow-env", "$WORKER"]}}
 JSON
 
-echo "== 3. dry run"
-"${PY[@]}" "$SIM/sim.py" run --config "$OUT/config.json" --dry-run
-RUN="$(ls -d "$OUT"/runs/*/ | head -1)"
-cp "$OUT/runs/get-demands.json" "$OUT/get-demands.before.json"
-"${PY[@]}" "$HERE/check.py" dry "$RUN" "$OUT/dataset"
+echo "== 2. first period with a tampered file"
+"${PY[@]}" "$SIM/sim.py" deliver --config "$OUT/config.json" --max 1 --tamper
+"${PY[@]}" "$HERE/check.py" tampered "$OUT/runs"
 
-echo "== 4. real batches"
-"${PY[@]}" "$SIM/sim.py" run --config "$OUT/config.json" --real
-"${PY[@]}" "$HERE/check.py" real "$RUN" "$OUT/dataset"
+echo "== 3. every period in calendar order"
+"${PY[@]}" "$SIM/sim.py" deliver --config "$OUT/config.json"
+"${PY[@]}" "$HERE/check.py" deliveries "$OUT/runs" "$OUT/dataset"
 
-echo "== 5. replay of batch 01"
-"${PY[@]}" "$SIM/sim.py" post --config "$OUT/config.json" --real --file "$RUN/batch-01.json" --save "$OUT/replay.json" >/dev/null
-"${PY[@]}" "$HERE/check.py" replay "$RUN" "$OUT/replay.json"
-
-echo "== 6. new batch for the fulfilled demand"
-"${PY[@]}" -c "import json,sys; b=json.load(open(sys.argv[1])); b['batch_id'] += '-late'; json.dump(b, open(sys.argv[2], 'w'))" \
-  "$RUN/batch-01.json" "$OUT/late-batch.json"
-"${PY[@]}" "$SIM/sim.py" post --config "$OUT/config.json" --real --file "$OUT/late-batch.json" --save "$OUT/late.json" >/dev/null \
-  && die "a batch for a closed demand was accepted"
-"${PY[@]}" "$HERE/check.py" expect "$OUT/late.json" 409 CL_DEMAND_NOT_OPEN
+echo "== 4. API answers"
+FIRST="$(ls -d "$OUT"/runs/*_*/ | grep -v tampered | sort | head -1)"
+# API paths without the leading "/" (Git Bash would rewrite "/x" into a Windows path).
+call() { "${PY[@]}" "$SIM/sim.py" call --config "$OUT/config.json" "$@" >/dev/null; }
+call --method POST --path deliveries --body "$FIRST/02-open-request.json" --save "$OUT/replay-open.json"
+"${PY[@]}" "$HERE/check.py" expect "$OUT/replay-open.json" 200 -
+"${PY[@]}" -c "import json,sys; b=json.load(open(sys.argv[1])); b['sha256']='0'*64; json.dump(b, open(sys.argv[2],'w'))" \
+  "$FIRST/02-open-request.json" "$OUT/other-file.json"
+call --method POST --path deliveries --body "$OUT/other-file.json" --save "$OUT/already-delivered.json"
+"${PY[@]}" "$HERE/check.py" expect "$OUT/already-delivered.json" 409 CL_PERIOD_ALREADY_DELIVERED
+"${PY[@]}" -c "import json,sys; b=json.load(open(sys.argv[1])); b.update(period_start='2026-11-16', period_end=sys.argv[3]); json.dump(b, open(sys.argv[2],'w'))" \
+  "$FIRST/02-open-request.json" "$OUT/not-in-calendar.json" 2026-11-17
+call --method POST --path deliveries --body "$OUT/not-in-calendar.json" --save "$OUT/not-in-calendar.resp.json"
+"${PY[@]}" "$HERE/check.py" expect "$OUT/not-in-calendar.resp.json" 422 CL_PERIOD_NOT_IN_CALENDAR
+"${PY[@]}" -c "import json,sys; b=json.load(open(sys.argv[1])); b.update(period_start='2026-11-16', period_end=sys.argv[3]); json.dump(b, open(sys.argv[2],'w'))" \
+  "$FIRST/02-open-request.json" "$OUT/no-plan.json" 2026-11-18
+call --method POST --path deliveries --body "$OUT/no-plan.json" --save "$OUT/no-plan.resp.json"
+"${PY[@]}" "$HERE/check.py" expect "$OUT/no-plan.resp.json" 422 CL_NO_ACTIVE_PLAN
+call --method GET --path deliveries/00000000-0000-4000-8000-000000000000 --save "$OUT/not-found.json"
+"${PY[@]}" "$HERE/check.py" expect "$OUT/not-found.json" 404 CL_DELIVERY_NOT_FOUND
+call --method GET --path demands --save "$OUT/gone.json"
+"${PY[@]}" "$HERE/check.py" expect "$OUT/gone.json" 410 CL_ENDPOINT_GONE
+call --method GET --path config --save "$OUT/config-after.json"
+"${PY[@]}" "$HERE/check.py" expect "$OUT/config-after.json" 200 -
 
 if [ "${SAVE_EXAMPLES:-}" = 1 ]; then
-  EX="$SIM/examples"
-  rm -f "$EX"/*.json; mkdir -p "$EX"
-  last=$(ls "$RUN"/response-*.json | grep -v dry_run | sort | tail -1)
-  cp "$OUT/get-demands.before.json"   "$EX/01-get-demands.json"
-  cp "$RUN/batch-01.json"             "$EX/02-batch-01.json"
-  cp "$RUN/response-01.dry_run.json"  "$EX/03-response-01-dry-run.json"
-  cp "$RUN/response-01.json"          "$EX/04-response-01.json"
-  cp "$last"                          "$EX/05-response-last-batch.json"
-  cp "$OUT/replay.json"               "$EX/06-response-replay-batch-01.json"
-  cp "$OUT/late.json"                 "$EX/07-response-demand-not-open.json"
-  cp "$RUN/manifest.json"             "$EX/08-connector-manifest.json"
-  echo "examples refreshed in $EX"
+  for EX in "$SIM/examples" "$ROOT/docs/carrier-link/ejemplo"; do
+    mkdir -p "$EX"; find "$EX" -maxdepth 1 -type f ! -name .gitattributes -delete   # keeps .gitattributes (byte-exact files)
+    TAMP="$(ls -d "$OUT"/runs/*-tampered/ | head -1)"
+    SECOND="$(ls -d "$OUT"/runs/*_*/ | grep -v tampered | sort | sed -n 2p)"
+    cp "$FIRST/01-get-config.json"          "$EX/01-get-config.json"
+    cp "$FIRST/delivery.jsonl"              "$EX/02-delivery-2026-11-02_2026-11-04.jsonl"
+    cp "$FIRST/manifest.json"               "$EX/02-delivery-2026-11-02_2026-11-04.manifest.json"
+    cp "$FIRST/02-open-request.json"        "$EX/03-open-request.json"
+    cp "$FIRST/03-open-response.json"       "$EX/04-open-response.json"
+    cp "$FIRST/04-upload-response.json"     "$EX/05-upload-response.json"
+    cp "$FIRST/05-complete-response.json"   "$EX/06-complete-response.json"
+    cp "$FIRST/06-status.json"              "$EX/07-status-processed.json"
+    cp "$SECOND/delivery.csv"               "$EX/08-delivery-2026-11-05_2026-11-08.csv"
+    cp "$SECOND/06-status.json"             "$EX/09-status-processed-csv.json"
+    cp "$TAMP/05-complete-response.json"    "$EX/10-tampered-complete-response.json"
+    cp "$TAMP/06-status.json"               "$EX/11-tampered-status-rejected.json"
+    cp "$OUT/replay-open.json"              "$EX/12-replay-open-existing.json"
+    cp "$OUT/already-delivered.json"        "$EX/13-error-already-delivered.json"
+    cp "$OUT/not-in-calendar.resp.json"     "$EX/14-error-not-in-calendar.json"
+    cp "$OUT/no-plan.resp.json"             "$EX/15-error-no-active-plan.json"
+    cp "$OUT/not-found.json"                "$EX/16-error-delivery-not-found.json"
+    cp "$OUT/gone.json"                     "$EX/17-error-v3-route-gone.json"
+    cp "$OUT/config-after.json"             "$EX/18-get-config-after.json"
+  done
+  echo "examples refreshed in $SIM/examples and docs/carrier-link/ejemplo"
 fi
 echo "CARRIER SIMULATOR E2E: PASS"

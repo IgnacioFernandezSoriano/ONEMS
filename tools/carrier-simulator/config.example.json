@@ -5,15 +5,18 @@
   "seed": "sim-2026",
   "dataset_dir": "out/dataset",
   "out_dir": "out/runs",
-  "dry_run": true,
-  "max_rows": 5000,
-  "output_fields": ["tracking_no", "event_ts", "site_code", "event_code", "service", "weight_g"],
+  "formats": ["jsonl", "csv"],
+  "noise": {"unagreed_scans_share": 0.08, "invalid_rows": 2},
+  "pii_fields": [],
+  "poll_seconds": 60,
+  "poll_timeout_seconds": 3600,
   "local": {
     "psql": "C:/Users/fernandezi/pgportable/pgsql/bin/psql.exe",
     "host": "127.0.0.1",
     "port": 5433,
     "dbname": "onems_t",
     "user": "postgres",
-    "password": "postgres"
+    "password": "postgres",
+    "process_cmd": ["deno", "run", "--quiet", "--allow-read", "--allow-run", "--allow-env", "./e2e/local_worker.ts"]
   }
 }

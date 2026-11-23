@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://onems.example/carrier-link/v4/schemas/delivery-response.schema.json",
+  "title": "POST /deliveries/{id}/complete (202/200) and GET /deliveries/{id} (200) response",
+  "type": "object",
+  "required": [
+    "delivery"
+  ],
+  "properties": {
+    "delivery": {
+      "$ref": "delivery.schema.json"
+    }
+  }
+}

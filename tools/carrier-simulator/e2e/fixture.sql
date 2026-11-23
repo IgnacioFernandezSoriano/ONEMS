@@ -8,22 +8,26 @@
 --   * carrier SIMPOST (capture_method both), products SIM-STD and SIM-EXP;
 --   * reading points per post office: <CITY>-PO + ACC (origin, Entry) and <CITY>-PO + DLV (destination, Exit).
 --     Processing centers (<CITY>-MPC), the hub (HUB-NAT) and the OFD event are not points;
---   * connector (active, every day 06:00 account time) with the equivalences of the simulator's field names:
+--   * carrier notification email (carriers master) so carrier-side incidents queue a notice to the carrier;
+--   * connector (active, Carrier Link v4 calendar: deliveries on Monday and Thursday at 03:00 account time, i.e.
+--     periods Thu..Sun and Mon..Wed) with the equivalences of the simulator's field names:
 --     tracking_no -> item_id, service -> product (STD -> SIM-STD, EXP -> SIM-EXP), event_ts -> scan_at
 --     ('DD/MM/YYYY HH24:MI:SS', Africa/Nairobi), site_code -> place_ref, event_code -> mode_ref; extra field weight_g;
 --   * its key (hash only; the key itself stays in the git-ignored out/carrier_key.txt);
 --   * SIM-STD delivery standards for the 6 routes (3 days + 1 day of equivalence);
---   * plan "SIM Standard via SIMPOST" (oversampling 5, close lag 3) with quotas for ISO 2026-W45 and W46,
---     2 or 3 samples per route and week, activated. run.sh then emits the demand with cl_emit_due_demands.
+--   * plan "SIM Standard via SIMPOST" (2026-11-02 .. 2026-11-15, close lag 3) with quotas for ISO 2026-W45 and W46,
+--     2 or 3 samples per route and week, activated;
+--   * public.zz_sim_call(fn, args): calls a function with named arguments like PostgREST (used by e2e/local_worker.ts
+--     to run the real worker loader against this local database). Test database only.
 \set ON_ERROR_STOP on
 BEGIN;
 INSERT INTO public.accounts (id, name, slug, timezone)
 VALUES ('c1517000-0000-4000-8000-000000000001', 'SIMLAND (carrier simulator)', 'SIMLAND', 'Africa/Nairobi');
 INSERT INTO public.regions (id, account_id, name, code)
 VALUES ('c1517000-0000-4000-8000-000000000002', 'c1517000-0000-4000-8000-000000000001', 'All', 'ALL');
-INSERT INTO public.carriers (id, account_id, code, name, capture_method)
+INSERT INTO public.carriers (id, account_id, code, name, capture_method, notification_email)
 VALUES ('c1517000-0000-4000-8000-000000000003', 'c1517000-0000-4000-8000-000000000001', 'SIMPOST', 'SimPost',
-        'both');
+        'both', 'it-team@simpost.example');
 INSERT INTO public.products (id, account_id, carrier_id, code, description, standard_delivery_hours) VALUES
   ('c1517000-0000-4000-8000-000000000011', 'c1517000-0000-4000-8000-000000000001',
    'c1517000-0000-4000-8000-000000000003', 'SIM-STD', 'SIM Standard', 72),
@@ -62,11 +66,12 @@ SELECT 'c1517000-0000-4000-8000-000000000001', 'c1517000-0000-4000-8000-00000000
   FROM public.cities o CROSS JOIN public.cities d
  WHERE o.account_id = 'c1517000-0000-4000-8000-000000000001' AND d.account_id = o.account_id AND o.id <> d.id;
 
--- Connector: active (a demand emitted while 'testing' would accept only dry runs, D2).
+-- Connector: active (in 'testing' the deliveries are checked and counted but create no samples, D2).
 INSERT INTO public.cl_feeds (id, account_id, carrier_id, name, extraction_model, config, status, emit_days, emit_hour)
 VALUES ('c1517000-0000-4000-8000-0000000000f1', 'c1517000-0000-4000-8000-000000000001',
         'c1517000-0000-4000-8000-000000000003', 'SimPost - simulated connector', 'push_api',
-        '{"note": "tools/carrier-simulator (local end-to-end test)"}'::jsonb, 'active', '{1,2,3,4,5,6,7}', 6);
+        '{"note": "tools/carrier-simulator (local end-to-end test)", "max_file_bytes": 52428800}'::jsonb, 'active',
+        '{1,4}', 3);
 INSERT INTO public.cl_field_mappings (account_id, carrier_id, standard_field, carrier_field, format, timezone)
 SELECT 'c1517000-0000-4000-8000-000000000001', 'c1517000-0000-4000-8000-000000000003', m.s, m.c, m.f, m.tz
   FROM (VALUES ('item_id',   'tracking_no', NULL, NULL),
@@ -88,7 +93,7 @@ INSERT INTO public.cl_plans (id, account_id, plan_name, carrier_id, product_id, 
                              close_lag_days, oversampling_factor, feed_id, feed_diagnosis)
 VALUES ('c1517000-0000-4000-8000-0000000000a1', 'c1517000-0000-4000-8000-000000000001', 'SIM Standard via SIMPOST',
         'c1517000-0000-4000-8000-000000000003', 'c1517000-0000-4000-8000-000000000011', 28,
-        DATE '2026-11-02', DATE '2026-11-29', 3, 5, 'c1517000-0000-4000-8000-0000000000f1', false);
+        DATE '2026-11-02', DATE '2026-11-15', 3, 5, 'c1517000-0000-4000-8000-0000000000f1', false);
 COMMIT;
 
 -- Quotas: every ordered pair of the 3 cities (no route inside a city, R23), weeks 45 and 46; 3 samples from Northport,
@@ -101,3 +106,21 @@ SELECT public.cl_plan_set_quotas('c1517000-0000-4000-8000-0000000000a1', (
    WHERE o.account_id = 'c1517000-0000-4000-8000-000000000001' AND d.account_id = o.account_id AND o.id <> d.id)) IS NOT NULL AS quotas_set;
 SELECT public.cl_plan_activate('c1517000-0000-4000-8000-0000000000a1') IS NOT NULL AS activated;
 SELECT status FROM public.cl_plans WHERE id = 'c1517000-0000-4000-8000-0000000000a1';
+
+-- Named-argument call like PostgREST (local test database only; used by e2e/local_worker.ts).
+CREATE OR REPLACE FUNCTION public.zz_sim_call(p_fn text, p_args jsonb) RETURNS jsonb LANGUAGE plpgsql AS $f$
+DECLARE v_sql text; v_res jsonb; a record; v_list text[] := ARRAY[]::text[];
+BEGIN
+  FOR a IN SELECT n.name, format_type(t.oid, NULL) AS typ
+             FROM pg_proc p, unnest(p.proargnames, p.proargtypes::oid[]) WITH ORDINALITY n(name, typ, o)
+             JOIN pg_type t ON t.oid = n.typ
+            WHERE p.oid = (SELECT oid FROM pg_proc WHERE proname = p_fn AND pronamespace = 'public'::regnamespace)
+              AND p_args ? n.name LOOP
+    v_list := v_list || CASE
+      WHEN a.typ = 'jsonb' THEN format('%I => %L::jsonb', a.name, p_args->a.name)
+      WHEN a.typ = 'text[]' THEN format('%I => ARRAY(SELECT jsonb_array_elements_text(%L::jsonb))', a.name, p_args->a.name)
+      ELSE format('%I => %L::%s', a.name, p_args->>a.name, a.typ) END;
+  END LOOP;
+  EXECUTE format('SELECT to_jsonb(public.%I(%s))', p_fn, array_to_string(v_list, ', ')) INTO v_res;
+  RETURN v_res;
+END $f$;

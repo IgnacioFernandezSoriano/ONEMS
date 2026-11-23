@@ -1,11 +1,17 @@
 openapi: 3.1.0
 info:
-  title: ONEMS Carrier Link - API del conector
-  version: "1.0.0"
+  title: ONEMS Carrier Link - API del conector (v4, entrega completa por periodo)
+  version: "4.0.0"
   description: |
-    API servidor a servidor entre el conector de un carrier y ONEMS.
-    Formato de demanda: schema_version 1.1. Ver docs/carrier-link/manual-conexion.es.md.
-    Todos los errores tienen la forma {"success": false, "error": "<CODIGO>[: detalle]"}.
+    API servidor a servidor entre el conector de un carrier y ONEMS. Especificación completa (normativa):
+    docs/carrier-link/manual-conexion.es.md. Esquemas JSON (draft 2020-12): docs/carrier-link/schemas/.
+
+    Flujo de cada entrega: GET /config -> POST /deliveries -> PUT del fichero a la URL firmada (sin clave) ->
+    POST /deliveries/{id}/complete -> GET /deliveries/{id} hasta processed o rejected.
+
+    Todos los errores tienen la forma {"success": false, "error": "<CL_CODIGO>", "message": "<texto fijo>",
+    "detail"?: "<solo validación de la petición>"}. Límite: 30 peticiones por minuto y clave (429 + Retry-After: 60).
+    El PUT del fichero no pasa por esta API: va directo al almacén con la URL firmada.
 servers:
   - url: https://{proyecto}.supabase.co/functions/v1/carrier-link-ingest
     description: Dirección facilitada por el equipo de ONEMS.
@@ -17,197 +23,229 @@ security:
   - apiKeyHeader: []
   - bearerAuth: []
 paths:
-  /demands:
+  /config:
     get:
-      operationId: listOpenDemands
-      summary: Demandas abiertas del conector de la clave
+      operationId: getConnectorConfig
+      summary: Configuración del conector de la clave y próximo periodo a entregar
       description: |
-        Devuelve como máximo 100 demandas en estado open, de la más antigua a la más reciente.
-        Cuenta para el límite de 30 peticiones por clave en 60 s.
+        Calendario, campos y equivalencias, productos, puntos de lectura con su papel, próximo periodo
+        (next_period), última entrega, formatos y límites. El conector DEBE leerla antes de cada entrega.
       responses:
         "200":
-          description: Lista (posiblemente vacía) de demandas abiertas.
+          description: Configuración (schema_version 4.x). Las propiedades desconocidas se ignoran.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/DemandsResponse" }
+              schema: { $ref: "schemas/config-response.schema.json" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/Error" }
         "405": { $ref: "#/components/responses/Error" }
         "429": { $ref: "#/components/responses/RateLimited" }
         "500": { $ref: "#/components/responses/Error" }
-  /batches:
+  /deliveries:
     post:
-      operationId: submitBatch
-      summary: Envía (o ensaya) un lote de lecturas para una demanda
-      parameters:
-        - name: dry_run
-          in: query
-          required: false
-          description: |
-            Solo el valor literal "true" activa el ensayo (no se guarda nada).
-            Cualquier otro valor (1, TRUE, yes...) se trata como envío real.
-          schema: { type: string, enum: ["true"] }
+      operationId: openDelivery
+      summary: Abre la entrega de un periodo y devuelve la URL firmada de subida
+      description: |
+        Declara el periodo, el formato, el tamaño exacto, el sha256 del fichero y los totales de control.
+        Idempotente: el mismo periodo con el mismo sha256 devuelve la entrega ya abierta (200, existing = true) y,
+        si sigue esperando el fichero, una URL nueva. Lista cerrada de claves (otra clave -> 400).
+        Sin compresión: `compression` solo puede faltar, ser null o "none"; una cabecera Content-Encoding distinta
+        de identity -> 400 CL_COMPRESSION_UNSUPPORTED. Cuerpo de como mucho 5 MB.
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "schemas/batch.schema.json" }
+            schema: { $ref: "schemas/delivery-open-request.schema.json" }
+            example:
+              period_start: "2026-11-02"
+              period_end: "2026-11-04"
+              format: jsonl
+              size_bytes: 52581
+              sha256: a39b906da577380d0fd42864fd8d556022927f94db7ac6e00451931e33602095
+              control_totals:
+                - { place_ref: EMR-PO, mode_ref: DLV, product: STD, delivered: 54 }
+                - { place_ref: NPT-PO, mode_ref: DLV, product: STD, delivered: 55 }
+                - { place_ref: SVL-PO, mode_ref: DLV, product: STD, delivered: 54 }
       responses:
+        "201":
+          $ref: "#/components/responses/DeliveryOpened"
         "200":
-          description: |
-            Lote procesado. Ensayo: solo ingest (batch null, dry_run true). Envío real: ingest + sampling + finish.
-            Reenvío de un batch_id ya guardado o lote rechazado por selection_method: solo ingest.
+          $ref: "#/components/responses/DeliveryOpened"
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "405": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "413": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "500": { $ref: "#/components/responses/Error" }
+  /deliveries/{id}/complete:
+    post:
+      operationId: completeDelivery
+      summary: Avisa de que el fichero ya está subido
+      description: |
+        Sin cuerpo. received -> 202 (el proceso empieza en menos de un minuto). Idempotente: si ya está en
+        processing / processed / failed -> 200 con su estado. Si la entrega queda o está rejected, responde el
+        código HTTP de su error (409, 410, 413, 422...) con la entrega en el cuerpo. Sin fichero -> 409
+        CL_FILE_NOT_UPLOADED. Un id ajeno, inexistente o mal formado -> el mismo 404 CL_DELIVERY_NOT_FOUND.
+      parameters:
+        - $ref: "#/components/parameters/DeliveryId"
+      responses:
+        "202":
+          description: Recibida; se procesa en segundo plano.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/BatchResponse" }
-        "400": { $ref: "#/components/responses/ErrorOrFailed" }
+              schema: { $ref: "schemas/delivery-response.schema.json" }
+        "200":
+          description: Ya estaba recibida, procesándose, procesada o fallida (se reintenta sola).
+          content:
+            application/json:
+              schema: { $ref: "schemas/delivery-response.schema.json" }
         "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/ErrorOrFailed" }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
         "405": { $ref: "#/components/responses/Error" }
-        "409": { $ref: "#/components/responses/ErrorOrFailed" }
+        "409": { $ref: "#/components/responses/Error" }
+        "410": { $ref: "#/components/responses/Error" }
         "413": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
         "429": { $ref: "#/components/responses/RateLimited" }
-        "500": { $ref: "#/components/responses/ErrorOrFailed" }
+        "500": { $ref: "#/components/responses/Error" }
+  /deliveries/{id}:
+    get:
+      operationId: getDelivery
+      summary: Estado, fase, recuentos, motivos de rechazo y alertas de una entrega
+      description: |
+        Nunca dice qué envíos se sortearon. Una entrega rejected o failed también se consulta con 200 (el motivo
+        está en delivery.error).
+      parameters:
+        - $ref: "#/components/parameters/DeliveryId"
+      responses:
+        "200":
+          description: La entrega.
+          content:
+            application/json:
+              schema: { $ref: "schemas/delivery-response.schema.json" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/Error" }
+        "405": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "500": { $ref: "#/components/responses/Error" }
+  /demands:
+    get:
+      operationId: v3Demands
+      summary: Retirada (v3). Cualquier método y subruta de /demands responde 410.
+      deprecated: true
+      security: []
+      responses:
+        "410": { $ref: "#/components/responses/Gone" }
+  /batches:
+    post:
+      operationId: v3Batches
+      summary: Retirada (v3). Cualquier método y subruta de /batches responde 410.
+      deprecated: true
+      security: []
+      responses:
+        "410": { $ref: "#/components/responses/Gone" }
 components:
   securitySchemes:
     apiKeyHeader:
       type: apiKey
       in: header
       name: x-api-key
-      description: Clave del conector (onems_ + 48 hex). Tiene precedencia sobre Authorization.
+      description: Clave del conector (la entrega ONEMS una sola vez). Alternativa equivalente a bearerAuth.
     bearerAuth:
       type: http
       scheme: bearer
-      description: La misma clave en Authorization Bearer.
+      description: "La misma clave en Authorization: Bearer <clave>."
+  parameters:
+    DeliveryId:
+      name: id
+      in: path
+      required: true
+      description: delivery_id devuelto por POST /deliveries.
+      schema: { type: string, format: uuid }
   responses:
-    Error:
-      description: Error.
+    DeliveryOpened:
+      description: |
+        201 = entrega nueva; 200 = el mismo periodo con el mismo sha256 ya estaba abierto (existing = true).
+        upload = null si esa entrega ya no espera el fichero. Subir el fichero entero en UN PUT a upload.url con
+        la cabecera Content-Type indicada (sin clave), antes de expires_in_seconds (2 h).
       content:
         application/json:
-          schema: { $ref: "#/components/schemas/Error" }
+          schema: { $ref: "schemas/delivery-open-response.schema.json" }
+          example:
+            delivery:
+              delivery_id: deb62bf0-e332-4e08-b8db-174359c0894a
+              feed_id: c1517000-0000-4000-8000-0000000000f1
+              status: pending_upload
+              is_test: false
+              source: api
+              period_start: "2026-11-02"
+              period_end: "2026-11-04"
+              format: jsonl
+              compression: none
+              file_bytes: null
+              sha256: a39b906da577380d0fd42864fd8d556022927f94db7ac6e00451931e33602095
+              rows_total: null
+              rows_rejected: null
+              shipments_total: null
+              shipments_valid: null
+              shipments_drawn: null
+              rejected_reasons: null
+              error: null
+              created_at: "2026-11-23T17:02:53.796305+00:00"
+              received_at: null
+              finished_at: null
+              processing_started_at: null
+              phase: null
+              bytes_loaded: null
+              rows_loaded: null
+              attempts: 0
+              existing: false
+              max_file_bytes: 52428800
+            upload:
+              url: "https://proyecto.supabase.co/storage/v1/object/upload/sign/cl-deliveries/c1517000-0000-4000-8000-000000000001/c1517000-0000-4000-8000-0000000000f1/deb62bf0-e332-4e08-b8db-174359c0894a.jsonl?token=..."
+              method: PUT
+              headers: { Content-Type: application/x-ndjson }
+              expires_in_seconds: 7200
     Unauthorized:
-      description: Clave ausente, incorrecta, desactivada o caducada.
+      description: Falta la clave, no existe, está inactiva o caducada, o no es una clave de conector.
       content:
         application/json:
-          schema: { $ref: "#/components/schemas/Error" }
+          schema: { $ref: "schemas/error.schema.json" }
+          example: { success: false, error: CL_UNAUTHORIZED, message: Invalid or inactive API key. }
     RateLimited:
-      description: Más de 30 peticiones con la clave en los últimos 60 s.
+      description: Más de 30 peticiones en el último minuto con esta clave. Esperar Retry-After segundos.
+      headers:
+        Retry-After:
+          schema: { type: integer, const: 60 }
       content:
         application/json:
-          schema: { $ref: "#/components/schemas/Error" }
-    ErrorOrFailed:
-      description: Error, o lote guardado con el sorteo interrumpido (failed).
+          schema: { $ref: "schemas/error.schema.json" }
+          example:
+            success: false
+            error: CL_RATE_LIMITED
+            message: "Rate limit exceeded: at most 30 requests per minute."
+    Gone:
+      description: Ruta de la versión 3 (demandas y lotes), retirada.
       content:
         application/json:
-          schema:
-            oneOf:
-              - { $ref: "#/components/schemas/Error" }
-              - { $ref: "#/components/schemas/BatchFailedResponse" }
-  schemas:
-    Demand:
-      $ref: "schemas/demand.schema.json"
-    DemandsResponse:
-      type: object
-      required: [demands]
-      properties:
-        demands:
-          type: array
-          maxItems: 100
-          items: { $ref: "schemas/demand.schema.json" }
+          schema: { $ref: "schemas/error.schema.json" }
+          example:
+            success: false
+            error: CL_ENDPOINT_GONE
+            message: "Carrier Link v4 removed the demand and batch endpoints. Deliver every complete shipment of the period as one file: GET /config, POST /deliveries, POST /deliveries/{id}/complete, GET /deliveries/{id}."
     Error:
-      type: object
-      required: [success, error]
-      properties:
-        success: { const: false }
-        error:
-          type: string
-          description: "Código (CL_... o texto) y, en errores de forma, ': detalle'."
-    IngestStratum:
-      type: object
-      required: [stratum_id, population_size, rows, candidates, candidates_valid, rejected, rows_rejected]
-      properties:
-        stratum_id: { type: string, format: uuid }
-        population_size: { type: integer, minimum: 0 }
-        rows: { type: integer, minimum: 0, description: Filas recibidas. }
-        candidates: { type: integer, minimum: 0, description: Envíos distintos recibidos. }
-        candidates_valid: { type: integer, minimum: 0 }
-        rejected:
-          type: object
-          description: Envíos no válidos por motivo.
-          additionalProperties: { type: integer, minimum: 1 }
-        rows_rejected:
-          type: object
-          description: Lecturas rechazadas por motivo.
-          additionalProperties: { type: integer, minimum: 1 }
-    IngestValidated:
-      type: object
-      required: [batch, status, strata]
-      properties:
-        batch:
-          type: ["string", "null"]
-          format: uuid
-          description: Identificador interno de ONEMS del lote; null en ensayo.
-        status: { const: validated }
-        dry_run: { const: true }
-        strata:
-          type: array
-          items: { $ref: "#/components/schemas/IngestStratum" }
-    IngestRejected:
-      type: object
-      required: [batch, status, reason, expected, strata]
-      properties:
-        batch: { type: ["string", "null"], format: uuid }
-        status: { const: rejected }
-        reason: { const: selection_method }
-        expected: { const: uniform_random_within_stratum }
-        dry_run: { const: true }
-        strata:
-          type: array
-          items:
-            type: object
-            required: [stratum_id]
-            properties:
-              stratum_id: { type: ["string", "null"] }
-              selection_method: { type: ["string", "null"] }
-    Ingest:
-      oneOf:
-        - { $ref: "#/components/schemas/IngestValidated" }
-        - { $ref: "#/components/schemas/IngestRejected" }
-    SamplingRun:
-      type: object
-      required: [batch_id, stratum_id, population_size, candidates_valid, samples_required, samples_selected, selected_item_ids, executed_at]
-      properties:
-        batch_id: { type: string, format: uuid, description: Identificador interno de ONEMS del lote. }
-        stratum_id: { type: string, format: uuid }
-        population_size: { type: integer, minimum: 0 }
-        candidates_valid: { type: integer, minimum: 0 }
-        samples_required: { type: integer, minimum: 0 }
-        samples_selected: { type: integer, minimum: 0 }
-        selected_item_ids: { type: array, items: { type: string } }
-        executed_at: { type: string, format: date-time }
-    Finish:
-      type: object
-      required: [batch_id, status, demand_status, strata_pending]
-      properties:
-        batch_id: { type: string, format: uuid }
-        status: { enum: [sampled, pending] }
-        demand_status: { enum: [open, fulfilled, partial, failed] }
-        strata_pending: { type: array, items: { type: string } }
-    BatchResponse:
-      type: object
-      required: [ingest]
-      properties:
-        ingest: { $ref: "#/components/schemas/Ingest" }
-        sampling: { type: array, items: { $ref: "#/components/schemas/SamplingRun" } }
-        finish: { $ref: "#/components/schemas/Finish" }
-    BatchFailedResponse:
-      type: object
-      required: [ingest, sampling, failed]
-      properties:
-        ingest: { $ref: "#/components/schemas/Ingest" }
-        sampling: { type: array, items: { $ref: "#/components/schemas/SamplingRun" } }
-        failed:
-          type: object
-          required: [stratum_id, code]
-          properties:
-            stratum_id: { type: string, format: uuid }
-            code: { type: string, description: "Código CL_..., o internal si fue un 500." }
+      description: |
+        Error con código CL_* (tabla completa en el manual, §9). En complete, si la entrega está rejected, el
+        cuerpo incluye también `delivery`.
+      content:
+        application/json:
+          schema: { $ref: "schemas/error.schema.json" }
+          example:
+            success: false
+            error: CL_PERIOD_NOT_IN_CALENDAR
+            message: The period does not match the delivery calendar. Use next_period from GET /config.

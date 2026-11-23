@@ -5537,7 +5537,7 @@ cl.connectors.extras.help,Outros campos da transportadora guardados com cada lei
 cl.connectors.extras.empty,Sem campos extra.
 cl.connectors.extras.field,Campo da transportadora
 cl.connectors.keys.title,Chaves do conector
-cl.connectors.keys.help,A transportadora usa uma chave para enviar os seus lotes. Só um superadmin ou o UPU Account Manager podem emitir chaves.
+cl.connectors.keys.help,A transportadora usa uma chave para enviar as suas entregas. Só um superadmin ou o UPU Account Manager podem emitir chaves.
 cl.connectors.keys.invalid,Verifique o nome e a data de validade (deve ser futura).
 cl.connectors.keys.empty,Este conector não tem chaves.
 cl.connectors.keys.name,Nome

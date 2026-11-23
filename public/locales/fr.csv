@@ -5529,7 +5529,7 @@ cl.connectors.extras.help,Autres champs du transporteur conservés avec chaque l
 cl.connectors.extras.empty,Aucun champ supplémentaire.
 cl.connectors.extras.field,Champ du transporteur
 cl.connectors.keys.title,Clés du connecteur
-cl.connectors.keys.help,Le transporteur utilise une clé pour envoyer ses lots. Seul un superadmin ou le UPU Account Manager peut émettre des clés.
+cl.connectors.keys.help,Le transporteur utilise une clé pour envoyer ses livraisons. Seul un superadmin ou le UPU Account Manager peut émettre des clés.
 cl.connectors.keys.invalid,Vérifiez le nom et la date d'expiration (elle doit être future).
 cl.connectors.keys.empty,Ce connecteur n'a pas de clés.
 cl.connectors.keys.name,Nom

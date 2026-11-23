@@ -1,0 +1,33 @@
+{
+ "http_status": 202,
+ "body": {
+  "delivery": {
+   "error": null,
+   "phase": null,
+   "format": "jsonl",
+   "sha256": "a39b906da577380d0fd42864fd8d556022927f94db7ac6e00451931e33602095",
+   "source": "api",
+   "status": "received",
+   "feed_id": "c1517000-0000-4000-8000-0000000000f1",
+   "is_test": false,
+   "attempts": 0,
+   "created_at": "2026-11-23T18:24:00.586138+01:00",
+   "file_bytes": 52581,
+   "period_end": "2026-11-04",
+   "rows_total": null,
+   "compression": "none",
+   "delivery_id": "366f74c6-6e39-43c8-a1a3-3e6f4bc9772c",
+   "finished_at": null,
+   "received_at": "2026-11-23T18:24:01.879647+01:00",
+   "rows_loaded": null,
+   "bytes_loaded": null,
+   "period_start": "2026-11-02",
+   "rows_rejected": null,
+   "shipments_drawn": null,
+   "shipments_total": null,
+   "shipments_valid": null,
+   "rejected_reasons": null,
+   "processing_started_at": null
+  }
+ }
+}

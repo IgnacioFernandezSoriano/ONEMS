@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://onems.example/carrier-link/v4/schemas/delivery-file-row.schema.json",
+  "title": "One record of a delivery file (one JSON Lines line, or one CSV row after the header)",
+  "description": "Property names are the carrier's own field names agreed in ONEMS (GET /config fields[*].field and extra_fields); values are scalars. Any other field is discarded by ONEMS and must not be sent.",
+  "type": "object",
+  "minProperties": 1,
+  "additionalProperties": {
+    "type": [
+      "string",
+      "number",
+      "boolean",
+      "null"
+    ]
+  }
+}

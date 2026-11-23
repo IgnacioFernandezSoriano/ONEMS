@@ -5537,7 +5537,7 @@ cl.connectors.extras.help,Otros campos del transportista que se guardan con cada
 cl.connectors.extras.empty,Sin campos extra.
 cl.connectors.extras.field,Campo del transportista
 cl.connectors.keys.title,Claves del conector
-cl.connectors.keys.help,El transportista usa una clave para enviar sus lotes. Solo un superadmin o el UPU Account Manager pueden emitir claves.
+cl.connectors.keys.help,El transportista usa una clave para enviar sus entregas. Solo un superadmin o el UPU Account Manager pueden emitir claves.
 cl.connectors.keys.invalid,Revisa el nombre y la fecha de caducidad (debe ser futura).
 cl.connectors.keys.empty,Este conector no tiene claves.
 cl.connectors.keys.name,Nombre

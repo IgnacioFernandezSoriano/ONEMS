@@ -256,7 +256,7 @@
     <h2>Qué es Carrier Link</h2>
 <p>Hasta ahora ONEMS mide con envíos de prueba que mueven los panelistas (E2E) y con lecturas RFID en centros postales (diagnóstico). <strong>Carrier Link</strong> añade una tercera fuente: ONEMS toma <strong>al azar</strong> envíos reales ya cerrados de los registros del propio carrier (su lectura de salida y su lectura de llegada) y los usa como muestras.</p>
 <div class="grid">
-  <div class="card"><h4>Muestras al azar</h4><p>El carrier propone muchos envíos y ONEMS hace el sorteo final. El sorteo se puede reproducir ante un auditor.</p></div>
+  <div class="card"><h4>Muestras al azar</h4><p>El carrier manda todos sus envíos completos de cada periodo y ONEMS hace el sorteo. El sorteo se puede reproducir ante un auditor.</p></div>
   <div class="card"><h4>Registros ya cerrados</h4><p>Solo se usan envíos con lectura de inicio y de llegada, porque así se sabe qué ruta (ciudad a ciudad) han hecho.</p></div>
   <div class="card"><h4>Mismos informes</h4><p>No hay informes nuevos: las muestras aparecen en los informes E2E y de diagnóstico de siempre, marcadas con el origen «carrier».</p></div>
 </div>
@@ -329,11 +329,11 @@
   <li>Rellene nombre, producto, fechas y total de muestras, y elija el reparto igual que con panelistas: la misma matriz A/B/C, la estacionalidad y los días laborables. También puede importar las cuotas con un fichero CSV, con las columnas ciudad de origen, ciudad de destino, semana y muestras.</li>
   <li>Pulse <span class="btn">Generar vista previa</span>. ONEMS reparte el total entre las rutas (ciudad a ciudad) y las semanas, y muestra el resultado sin guardar. Si no ha podido repartir todas las muestras, se lo dice.</li>
   <li>Revise la vista previa y pulse <span class="btn">Guardar plan (borrador)</span>. El plan aparece en <strong>Planes generados</strong>, con una columna <strong>Captura</strong> que indica si es de panelistas o de Carrier Link. Un borrador se puede eliminar.</li>
-  <li>Para ponerlo en marcha, pulse <span class="btn primary">Aplicar</span>. Con Carrier Link, <strong>aplicar significa que ONEMS empieza a pedir los envíos al carrier</strong>. El plan pasa a <strong>Planes aplicados</strong>.</li>
+  <li>Para ponerlo en marcha, pulse <span class="btn primary">Aplicar</span>. Con Carrier Link, <strong>aplicar significa que, desde la fecha de inicio del plan, ONEMS espera las entregas del carrier según el calendario del conector</strong>. El plan pasa a <strong>Planes aplicados</strong>.</li>
 </ol>
 <div class="callout warn">Si a alguna ciudad le faltan puntos de lectura de inicio o de fin, ONEMS lo avisa y no deja aplicar el plan hasta que los dé de alta en <strong>Puntos de lectura</strong>. Una ruta sin estándar de entrega se muestrea igual, pero sus muestras entran sin «a tiempo» hasta que se cree el estándar: es solo un aviso.</div>
 <div class="callout info">Tras aplicar, ya no se pueden cambiar el carrier, el producto, el conector, la fecha de inicio ni las cuotas (salvo con el Balanceo de Carga). Las muestras obtenidas no se tocan.</div>
-<div class="callout ok"><strong>Y después:</strong> con el plan aplicado y el conector en Activo, el sistema pide los envíos solo, semana a semana. No hay que hacer nada más.</div>
+<div class="callout ok"><strong>Y después:</strong> con el plan aplicado y el conector en Activo, las entregas llegan solas según el calendario y ONEMS hace el sorteo en cada una. No hay que hacer nada más.</div>
     </section>
 
     <section id="balancing">
@@ -358,12 +358,12 @@
     <h2>Planes de Asignación</h2>
 <p>Pantalla <strong>Planes de Asignación</strong> (menú E2E ▸ Asignación). Al elegir un plan de Carrier Link en el selector, los <strong>registros</strong> del plan son sus <strong>cuotas: una por ruta (ciudad a ciudad) y semana</strong>. Esta vista es de consulta; las cuotas se cambian con el Generador de Asignaciones y el Balanceo de Carga.</p>
 <ul>
-  <li><strong>Tabla:</strong> una fila por cuota, con lo <strong>previsto</strong>, lo <strong>arrastrado</strong> de semanas anteriores, lo <strong>obtenido</strong>, las peticiones hechas al carrier y su estado: Pendiente, Abierta, Cumplida, Arrastrada o Sin cubrir. Se puede filtrar.</li>
+  <li><strong>Tabla:</strong> una fila por cuota, con lo <strong>previsto</strong>, lo <strong>arrastrado</strong> de semanas anteriores, lo <strong>obtenido</strong> y su estado: Pendiente, Abierta, Cumplida, Arrastrada o Sin cubrir. Se puede filtrar. La columna <em>Peticiones</em> es de la versión anterior y con entregas completas queda en 0.</li>
   <li><strong>Matriz:</strong> las rutas en filas y las semanas (o los meses) en columnas. Cada celda muestra lo previsto, lo arrastrado entre paréntesis y, con el plan en marcha, lo obtenido. La matriz enseña todas las cuotas del plan: no aplica los filtros de la tabla.</li>
   <li><strong>Ver muestras:</strong> en cada cuota, un enlace lleva a las muestras obtenidas de esa ruta y semana.</li>
 </ul>
 <h3>Si una cuota no se cubre</h3>
-<p>Si el carrier no tiene suficientes envíos, ONEMS vuelve a pedir lo que falta (hasta 3 veces en la misma semana). Lo que siga faltando se reparte entre las semanas que quedan del mes y, si no caben, entre las de los meses siguientes. Lo que falte al terminar el plan queda sin cubrir y genera un aviso.</p>
+<p>La cuota de cada semana se reparte entre las entregas de esa semana según sus días laborables; lo que una entrega no cubre pasa a las siguientes de la misma semana. La semana se cierra con la entrega que cubre su último día (o, si esa entrega no llega, unos días después con lo que haya). Lo que siga faltando se reparte entre las semanas que quedan del mes y, si no caben, entre las de los meses siguientes. Lo que falte al terminar el plan queda sin cubrir y abre la incidencia <em>Cuota no cubierta</em>.</p>
     </section>
 
     <section id="samples">
@@ -419,35 +419,30 @@
 <p>Los avisos aparecen en <strong>Monitor de capturas</strong>. Estos son los tipos y qué hacer con cada uno.</p>
 <div class="table-wrap"><table>
 <tr><th>Aviso</th><th>Qué significa</th><th>Qué hacer</th></tr>
-<tr><td>Candidatos insuficientes</td><td>El carrier envió menos envíos válidos de los que hacían falta para una ruta y una semana.</td><td>ONEMS suele volver a pedir los que faltan. Si se repite, hable con el carrier.</td></tr>
-<tr><td>Estrato vacío</td><td>El carrier no devolvió ningún envío para una ruta.</td><td>Compruebe que los puntos de inicio y de fin de esas ciudades son correctos y que el carrier tiene tráfico en esa ruta.</td></tr>
-<tr><td>Caída de población</td><td>Los envíos disponibles en una ruta han caído por debajo del 30 % de lo habitual (mediana de las últimas 6 semanas).</td><td>Pregunte al carrier si hubo un corte en sus datos o un cambio real de tráfico.</td></tr>
-<tr><td>Población incoherente</td><td>El carrier indica menos envíos disponibles que los que ha enviado como candidatos.</td><td>Es un error de su extracción de datos: pídale que la revise.</td></tr>
-<tr><td>Distribución sospechosa</td><td>Todas las muestras de un lote (20 o más) llegaron en plazo. Es raro y puede indicar que el carrier no elige al azar.</td><td>Pida al carrier que explique cómo selecciona los envíos y revise los lotes siguientes.</td></tr>
-<tr><td>Lote tardío</td><td>El lote llegó después del plazo previsto.</td><td>Si se repite, revise con el carrier el calendario del conector.</td></tr>
+<tr><td>Candidatos insuficientes</td><td>En una entrega hubo, para una ruta y una semana, menos envíos válidos que muestras necesarias.</td><td>Lo que falta pasa a las entregas siguientes. Si se repite, esa ruta tiene poco tráfico: revise el plan.</td></tr>
+<tr><td>Distribución sospechosa</td><td>Todas las muestras de una ruta y una semana (20 o más) llegaron en plazo. Es raro.</td><td>Coméntelo con el equipo ONEMS y revise las entregas siguientes.</td></tr>
 <tr><td>Producto desconocido</td><td>El carrier envió un producto que ONEMS no tiene en sus equivalencias.</td><td>Añada la equivalencia en <strong>Conectores</strong>, bloque Equivalencias de producto.</td></tr>
 <tr><td>Punto de lectura desconocido</td><td>Llegaron lecturas de un lugar que no está dado de alta como punto de lectura.</td><td>Dé de alta el lugar en <strong>Puntos de lectura</strong> (bloque Lugares sin punto de lectura). Esas lecturas se aprovechan al darlo de alta.</td></tr>
 <tr><td>Posible envío mal encaminado</td><td>Un envío tiene lecturas en más de un punto, o en una ciudad distinta de la pedida.</td><td>Revíselo en <strong>Muestras</strong>. Cuenta igual para la cuota de la ruta.</td></tr>
 <tr><td>Falta el estándar de entrega</td><td>Una ruta no tiene estándar de entrega, así que no se puede saber si sus muestras llegan en plazo.</td><td>Cree el estándar de esa ruta en <strong>E2E: SLA</strong>. Las muestras se recalculan solas.</td></tr>
-<tr><td>Muchas lecturas rechazadas</td><td>Más del 20 % de las lecturas de un lote se han rechazado.</td><td>Revise las equivalencias y los puntos de lectura; un lote de prueba en <strong>Conectores</strong> muestra los motivos.</td></tr>
-<tr><td>Cuota sin cubrir</td><td>Al terminar el plan, una cuota no se ha cubierto del todo.</td><td>Revise los avisos anteriores de esa ruta; si hace falta, amplíe el plan.</td></tr>
-<tr><td>El carrier no respondió</td><td>El conector está activo, pero el carrier no respondió a una petición vencida.</td><td>Compruebe con el carrier que su sistema funciona y revise el calendario y el estado del conector.</td></tr>
+<tr><td>Muchas lecturas rechazadas</td><td>Más del 20 % de los envíos de una entrega no se pudo usar. Abre la incidencia <em>Rechazo alto</em>.</td><td>Mire los motivos en <strong>Conectores</strong>, bloque Entregas. Si son lugares o productos desconocidos, dé de alta lo que falte; si no, hable con el carrier.</td></tr>
+<tr><td>Cuota sin cubrir</td><td>Una semana del plan se cerró sin todas sus muestras y ya no se pudieron pasar a otras semanas. Abre la incidencia <em>Cuota no cubierta</em>.</td><td>Revise los avisos anteriores de esa ruta; si hace falta, ajuste el plan.</td></tr>
 <tr><td>Faltan puntos de inicio o fin</td><td>Faltan puntos de inicio o de fin en alguna ciudad.</td><td>Dé de alta los puntos que faltan en <strong>Puntos de lectura</strong>.</td></tr>
-<tr><td>Zona horaria de la cuenta no válida</td><td>La zona horaria de la cuenta no es válida y ONEMS no sabe a qué hora pedir los datos.</td><td>Corríjala en la cuenta o indique una zona propia en el calendario del conector.</td></tr>
-<tr><td>No se pudo enviar la petición</td><td>ONEMS no pudo enviar la petición al carrier.</td><td>Mire el último error del conector en <strong>Conectores</strong> y revise su configuración.</td></tr>
-<tr><td>Método de selección distinto</td><td>El carrier usó un método de selección distinto del acordado.</td><td>Pídale que use el método acordado y compruébelo con un lote de prueba.</td></tr>
+<tr><td>Zona horaria de la cuenta no válida</td><td>La zona horaria de la cuenta no es válida y ONEMS cuenta los periodos en hora UTC.</td><td>Corríjala en la cuenta o indique una zona propia en el calendario del conector.</td></tr>
 <tr><td>Lector sin ciudad</td><td>Un punto de lectura está en un centro postal que no tiene ciudad.</td><td>Asigne una ciudad al centro postal.</td></tr>
-<tr><td>Lote deshecho tras arrastrar la cuota</td><td>Se deshizo un lote cuando su cuota ya se había repartido entre otras semanas.</td><td>Revise las cuotas del plan: aparecen como arrastradas (a revisar).</td></tr>
+<tr><td>Semana ya cerrada</td><td>Llegaron envíos válidos de una semana que ya estaba cerrada y no se usaron.</td><td>Suele pasar con entregas atrasadas. Si se repite, revise el calendario con el carrier.</td></tr>
+<tr><td>Entrega fallida tras 3 intentos</td><td>ONEMS no pudo procesar una entrega después de tres intentos y la rechazó.</td><td>El carrier debe reenviar ese periodo (lo avisa la incidencia <em>Entrega rechazada</em>). Si se repite, avise al equipo ONEMS.</td></tr>
+<tr><td>Avisos de la versión anterior</td><td>Estrato vacío, Caída de población, Población incoherente, Lote tardío, El carrier no respondió, No se pudo enviar la petición, Método de selección distinto y Lote deshecho tras arrastrar la cuota eran del sistema de peticiones y lotes, ya retirado.</td><td>Solo aparecen en datos antiguos: puede descartarlos.</td></tr>
 </table></div>
     </section>
 
     <section id="faq">
     <h2>Preguntas</h2>
 <details><summary>¿Cuántas muestras puede tener un plan?</summary><div>Un plan puede llegar a unas <span dir="ltr">15.000</span> muestras al año por producto.</div></details>
-<details><summary>¿Puede el carrier elegir qué envíos manda?</summary><div>No. El carrier propone muchos candidatos y ONEMS hace el sorteo final. La semilla del sorteo se fija antes de recibir los candidatos, así que nadie puede elegirla después de verlos.</div></details>
+<details><summary>¿Puede el carrier elegir qué envíos manda?</summary><div>No. En cada periodo manda todos sus envíos completos, sin elegir, y ONEMS hace el sorteo con una semilla que guarda. El carrier nunca sabe qué envíos salieron.</div></details>
 <details><summary>¿Se guardan datos personales?</summary><div>No. Solo se guardan los campos de la lista de campos extra permitidos; el resto se descarta al entrar.</div></details>
 <details><summary>¿Quién puede crear claves de conector?</summary><div>Solo un superadmin o el UPU Account Manager. La clave se muestra una única vez al crearla.</div></details>
-<details><summary>He aplicado el plan y no entran muestras. ¿Por qué?</summary><div>Compruebe que el conector está en Activo (en Pruebas solo admite ensayos) y que el día y la hora del calendario ya han pasado. Después mire <strong>Monitor de capturas</strong>.</div></details>
+<details><summary>He aplicado el plan y no entran muestras. ¿Por qué?</summary><div>Compruebe que el conector está en Activo (en Pruebas las entregas se comprueban pero no crean muestras), que ya ha pasado la hora de entrega del calendario y que no hay incidencias abiertas. Después mire las entregas en <strong>Conectores</strong> o en <strong>Monitor de capturas</strong>.</div></details>
 <details><summary>¿Cómo distingo estas muestras en los informes?</summary><div>Llevan el origen «carrier», distinto del de las muestras de panelistas, y se pueden separar.</div></details>
 <details><summary>¿Tengo que usar Carrier Link con todos los operadores?</summary><div>No. La forma de captura se elige por operador en <strong>Operadores y Productos</strong>: Panelistas, Carrier Link o Ambos. Los operadores que usan solo panelistas siguen funcionando como siempre, y las pantallas de E2E no muestran nada de Carrier Link para ellos.</div></details>
 <details><summary>¿Quién ve cada pantalla?</summary><div>El Account Manager (y el UPU Account Manager) edita planes, puntos, conectores y monitor, y ve las muestras. El Allocation Plan Manager edita planes y ve el resto salvo conectores. El DO Coordinator edita puntos de lectura y ve el resto salvo conectores. Panelist Manager y Materials Supplier no tienen acceso. Una pantalla en solo lectura muestra la etiqueta de solo lectura.</div></details>

@@ -5537,7 +5537,7 @@ cl.connectors.extras.help,Other carrier fields that are kept with each scan. Any
 cl.connectors.extras.empty,No extra fields.
 cl.connectors.extras.field,Carrier field
 cl.connectors.keys.title,Connector keys
-cl.connectors.keys.help,The carrier uses a key to send its batches. Only a superadmin or the UPU Account Manager can issue keys.
+cl.connectors.keys.help,The carrier uses a key to send its deliveries. Only a superadmin or the UPU Account Manager can issue keys.
 cl.connectors.keys.invalid,Check the name and the expiry date (it must be in the future).
 cl.connectors.keys.empty,This connector has no keys.
 cl.connectors.keys.name,Name

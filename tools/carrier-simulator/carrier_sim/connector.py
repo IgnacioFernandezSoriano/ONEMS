@@ -1,165 +1,284 @@
-"""Reference connector logic (no I/O): from a demand and the carrier's scans to the batches ONEMS expects.
+"""Reference connector logic (no I/O): from GET /config and the carrier's scan table to one delivery file.
 
-Per stratum (spec section 4, R4, R23):
-  * population = CLOSED items of the demand's products: a scan at one of the stratum's start points and, as in
-    cl_ingest_batch, the LATEST scan at one of its end points (other than the first start scan) with its LOCAL date
-    inside the period (only scans with a readable timestamp decide);
-  * candidates = min(candidates_requested, population) items drawn uniformly at random (seeded, reproducible);
-  * rows = ALL scans of the candidates at the start/end points of ANY stratum of the demand (any city), or all their
-    scans when include_all_scans is true; only the configured output fields (personal data refused: PII_FIELDS).
-Batches: whole strata packed in demand order, at most max_rows rows and max_bytes bytes per batch. ONEMS accepts each
-stratum only once per demand (CL_STRATUM_ALREADY_DELIVERED), so a stratum is never split; a stratum larger than the
-limit is an error.
+Carrier Link v4 (spec section "v4", R24): for each delivery period the carrier sends ALL the complete shipments of the
+period; ONEMS counts, draws and keeps only the drawn ones. The carrier never samples or preselects.
+
+Normative definition of a complete shipment of the period (with the carrier's own codes, read from GET /config):
+  a shipment of a product of the plan (its product code is one of config.products[].carrier_codes) that
+  (1) has its FINAL arrival event (latest readable scan at a point with role destination/both) with a local date
+      inside [period_start, period_end] (config.date_timezone);
+  (2) has a departure event at a point with role origin/both that is earlier than that arrival (in this period or
+      before);
+  (3) is sent with ALL its scans at the agreed points (config.points, any role), or ALL its scans when
+      config.include_all_scans is true (a plan with diagnosis).
+Never delivered, still in transit or delivered at a non-agreed place = not complete = not in the file.
+
+Rows only carry the fields of the connector (config.fields[*].field + config.extra_fields), never personal data
+(PII_FIELDS, plus any configured pii_fields: the connector refuses to start if the config asks for one of them).
+
+Noise of a real extraction, on purpose and seeded (NOISE): for a share of the shipments, their scans at places that
+are NOT agreed points are also sent (ONEMS rejects those rows as unknown_reading_point), and a few syntactically broken
+records are inserted (rejected as bad_record). The carrier's own data errors come from the dataset (unreadable
+timestamps, corrupt product codes on one scan, misrouted shipments...).
 """
-import datetime as dt
+import csv
 import hashlib
+import io
 import json
 import random
+import re
 
-from . import contract
-
-DEFAULT_OUTPUT_FIELDS = ["tracking_no", "event_ts", "site_code", "event_code", "service", "weight_g"]
+DEFAULT_NOISE = {"unagreed_scans_share": 0.08, "invalid_rows": 2}
 # Personal data the connector must never send (spec R19 / anti-goals), on top of any configured pii_fields.
 PII_FIELDS = frozenset(["recipient_name", "recipient_phone", "recipient_address", "recipient_email",
                         "sender_name", "sender_phone", "sender_address", "sender_email"])
+STANDARD_FIELDS = ("item_id", "product", "scan_at", "place_ref", "mode_ref")
+ORIGIN_ROLES = ("origin", "both")
+DEST_ROLES = ("destination", "both")
+
+# PostgreSQL to_timestamp tokens -> strptime (the subset a scan_at format of ONEMS uses).
+_PG_TOKENS = [("YYYY", "%Y"), ("HH24", "%H"), ("HH12", "%I"), ("MI", "%M"), ("SS", "%S"), ("MM", "%m"),
+              ("DD", "%d"), ("AM", "%p"), ("PM", "%p")]
 
 
 class ConnectorError(Exception):
     pass
 
 
+def pg_format_to_strptime(fmt):
+    """'DD/MM/YYYY HH24:MI:SS' -> '%d/%m/%Y %H:%M:%S'. None = ISO 8601 (handled by parse_ts)."""
+    if not fmt:
+        return None
+    out, i = "", 0
+    while i < len(fmt):
+        for tok, rep in _PG_TOKENS:
+            if fmt.startswith(tok, i):
+                out += rep
+                i += len(tok)
+                break
+        else:
+            out += "%%" if fmt[i] == "%" else fmt[i]
+            i += 1
+    return out
+
+
 def parse_ts(value, fmt):
+    import datetime as dt
+    v = (value or "").strip()
+    if not v:
+        return None
     try:
-        return dt.datetime.strptime((value or "").strip(), fmt)
+        if fmt is None:
+            t = dt.datetime.fromisoformat(v)
+            return t.replace(tzinfo=None) if t.tzinfo is None else None   # offsets: see check_timezones
+        return dt.datetime.strptime(v, fmt)
     except ValueError:
         return None
 
 
-def _point_key(p):
-    place = (p.get("place_ref") or "").strip()
-    mode = p.get("mode_ref")
-    mode = mode.strip() if isinstance(mode, str) and mode.strip() != "" else None
-    return place, mode
-
-
-def matches(scan, points):
-    """points = set of (place, mode); mode None = any event code at that place (ONEMS rule D4)."""
-    place = (scan.get("site_code") or "").strip()
-    if not place:
-        return False
-    code = (scan.get("event_code") or "").strip()
-    return (place, code) in points or (place, None) in points
-
-
-def index_items(scans, fmt):
-    """tracking_no -> list of (scan, parsed datetime or None), in table order."""
+def field_names(config):
+    """{standard field: carrier field} from GET /config (only the mapped ones)."""
+    fields = config.get("fields") or {}
     out = {}
-    for s in scans:
-        tn = s.get("tracking_no")
-        if tn:
-            out.setdefault(tn, []).append((s, parse_ts(s.get("event_ts"), fmt)))
+    for k in STANDARD_FIELDS:
+        f = fields.get(k)
+        if isinstance(f, dict) and isinstance(f.get("field"), str) and f["field"].strip():
+            out[k] = f["field"]
     return out
 
 
-def item_service(entries):
-    """Service of the item: the one on its earliest readable scan (how the carrier's own table would answer)."""
+def output_fields(config, pii_fields=None):
+    """Fields sent in every row: the mapped carrier fields + the allowed extra fields, personal data refused."""
+    names = field_names(config)
+    if not config.get("mapping_complete") or not all(k in names for k in ("item_id", "scan_at", "place_ref")):
+        raise ConnectorError("the connector mapping is incomplete in ONEMS (item_id, scan_at and place_ref are "
+                             "required): ask the regulator")
+    out = []
+    for f in [names[k] for k in STANDARD_FIELDS if k in names] + list(config.get("extra_fields") or []):
+        if f not in out:
+            out.append(f)
+    banned = PII_FIELDS | set(pii_fields or [])
+    bad = sorted(f for f in out if f in banned)
+    if bad:
+        raise ConnectorError("the connector would send personal data, refused: %s" % ", ".join(bad))
+    return out
+
+
+def check_timezones(config):
+    """The simulator has no time zone database (stdlib only on Windows): scan times must be in the zone of the
+    period dates. A real connector converts each scan to config.date_timezone before taking its local date."""
+    scan = (config.get("fields") or {}).get("scan_at") or {}
+    tz = scan.get("timezone") or config.get("date_timezone")
+    if tz != config.get("date_timezone"):
+        raise ConnectorError("simulator limitation: scan_at.timezone %r differs from date_timezone %r"
+                             % (tz, config.get("date_timezone")))
+
+
+def _norm(v):
+    return v.strip() if isinstance(v, str) and v.strip() != "" else None
+
+
+def agreed_points(config):
+    """{'origin': {(place, mode)}, 'destination': {...}, 'all': {...}}; mode None = any event code at that place."""
+    out = {"origin": set(), "destination": set(), "all": set()}
+    for p in config.get("points") or []:
+        key = (_norm(p.get("place_ref")), _norm(p.get("mode_ref")))
+        if key[0] is None:
+            continue
+        out["all"].add(key)
+        if p.get("role") in ORIGIN_ROLES:
+            out["origin"].add(key)
+        if p.get("role") in DEST_ROLES:
+            out["destination"].add(key)
+    return out
+
+
+def at_point(place, mode, points):
+    place = _norm(place)
+    if place is None:
+        return False
+    return (place, _norm(mode)) in points or (place, None) in points
+
+
+def index_items(scans, names, ts_fmt):
+    """item -> [(scan, parsed local datetime or None)], in table order."""
+    out = {}
+    for s in scans:
+        item = _norm(s.get(names["item_id"]))
+        if item:
+            out.setdefault(item, []).append((s, parse_ts(s.get(names["scan_at"]), ts_fmt)))
+    return out
+
+
+def product_codes(config):
+    codes = set()
+    for p in config.get("products") or []:
+        codes.update(c for c in (p.get("carrier_codes") or []) if isinstance(c, str))
+    return codes
+
+
+def item_product(entries, names):
+    """The shipment's product: the one on its earliest readable scan (how the carrier's own table answers)."""
+    if "product" not in names:
+        return None
     readable = [(t, s) for s, t in entries if t is not None]
     if not readable:
         return None
-    return min(readable, key=lambda x: x[0])[1].get("service")
+    return min(readable, key=lambda x: x[0])[1].get(names["product"])
 
 
-def population(items, stratum, products):
-    start = {_point_key(p) for p in stratum["start_points"]}
-    end = {_point_key(p) for p in stratum["end_points"]}
-    p0 = dt.date.fromisoformat(stratum["period"]["start"])
-    p1 = dt.date.fromisoformat(stratum["period"]["end"])
-    pop = []
-    for tn in sorted(items):
-        entries = items[tn]
-        if item_service(entries) not in products:
+def complete_shipments(items, config, period_start, period_end):
+    """[(item, arrival scan)] of the complete shipments whose final arrival is inside the period (definition above)."""
+    names = field_names(config)
+    pts = agreed_points(config)
+    codes = product_codes(config)
+    out = []
+    for item in sorted(items):
+        entries = items[item]
+        if "product" in names and item_product(entries, names) not in codes:
             continue
-        # Same rule as cl_ingest_batch: start = first readable start reading; end = LATEST readable end reading that
-        # is not that same reading (a single scan at a point with both roles is not a shipment). The item is closed
-        # in the period only if that latest end reading's local date is inside the period.
-        starts = [(t, i) for i, (s, t) in enumerate(entries) if t is not None and matches(s, start)]
-        if not starts:
+        place_f, mode_f = names["place_ref"], names.get("mode_ref")
+        arrivals = [(t, i) for i, (s, t) in enumerate(entries)
+                    if t is not None and at_point(s.get(place_f), s.get(mode_f) if mode_f else None, pts["destination"])]
+        if not arrivals:
             continue
-        first_start = min(starts)[1]
-        ends = [t for i, (s, t) in enumerate(entries) if t is not None and matches(s, end) and i != first_start]
-        if ends and p0 <= max(ends).date() <= p1:
-            pop.append(tn)
-    return pop
+        t_arr, i_arr = max(arrivals)
+        if not (period_start <= t_arr.date() <= period_end):
+            continue
+        departs = [t for i, (s, t) in enumerate(entries)
+                   if i != i_arr and t is not None and t < t_arr
+                   and at_point(s.get(place_f), s.get(mode_f) if mode_f else None, pts["origin"])]
+        if departs:
+            out.append((item, entries[i_arr][0]))
+    return out
 
 
-def draw(pop, k, seed, demand_id, stratum_id):
-    rng = random.Random("%s|%s|%s" % (seed, demand_id, stratum_id))
-    return sorted(rng.sample(pop, min(k, len(pop))))
+def _row(scan, fields, extra):
+    row = {}
+    for f in fields:
+        v = scan.get(f)
+        if v == "":
+            v = None
+        if f in extra and isinstance(v, str) and re.match(r"^-?\d{1,15}$", v):
+            v = int(v)
+        row[f] = v
+    return row
 
 
-def check_output_fields(fields, pii_fields=None):
-    banned = PII_FIELDS | set(pii_fields or [])
-    bad = sorted(f for f in fields if f in banned)
-    if bad:
-        raise ConnectorError("output_fields contains personal data, never sent to ONEMS: %s" % ", ".join(bad))
+def build_delivery(scans, config, period_start, period_end, seed, fmt="jsonl", ts_fmt=None, noise=None,
+                   pii_fields=None):
+    """The delivery file of one period: {'bytes', 'sha256', 'size_bytes', 'format', 'control_totals', 'manifest'}."""
+    if fmt not in ("jsonl", "csv"):
+        raise ConnectorError("format must be jsonl or csv")
+    check_timezones(config)
+    fields = output_fields(config, pii_fields)
+    names = field_names(config)
+    if scans and any(f not in scans[0] for f in fields):
+        missing = sorted(f for f in fields if f not in scans[0])
+        raise ConnectorError("ONEMS expects fields the carrier table does not have: %s" % ", ".join(missing))
+    scan_cfg = (config.get("fields") or {}).get("scan_at") or {}
+    ts_fmt = ts_fmt or pg_format_to_strptime(scan_cfg.get("format"))
+    noise = dict(DEFAULT_NOISE, **(noise or {}))
+    extra = set(config.get("extra_fields") or [])
+    pts = agreed_points(config)
+    all_scans = bool(config.get("include_all_scans"))
+    place_f, mode_f = names["place_ref"], names.get("mode_ref")
+
+    items = index_items(scans, names, ts_fmt)
+    shipments = complete_shipments(items, config, period_start, period_end)
+    rng = random.Random("noise|%s|%s|%s" % (seed, period_start, period_end))
+    rows, noisy, totals = [], 0, {}
+    for item, arrival in shipments:
+        with_noise = rng.random() < noise["unagreed_scans_share"]
+        noisy += 1 if with_noise else 0
+        for s, _t in items[item]:
+            agreed = at_point(s.get(place_f), s.get(mode_f) if mode_f else None, pts["all"])
+            if all_scans or agreed or (with_noise and _norm(s.get(place_f))):
+                rows.append(_row(s, fields, extra))
+        # Control total: shipments delivered per arrival point (the scan's own place and event code) and product
+        # (the shipment's product, as in the definition; not the code written on the arrival scan).
+        key = (arrival.get(place_f), arrival.get(mode_f) if mode_f else None, item_product(items[item], names))
+        totals[key] = totals.get(key, 0) + 1
+    # Broken records at seeded positions (never inside the header).
+    invalid = int(noise["invalid_rows"])
+    positions = sorted(rng.randrange(0, len(rows) + 1) for _ in range(invalid)) if invalid > 0 else []
+
+    buf = io.StringIO(newline="")
+    if fmt == "csv":
+        w = csv.writer(buf, lineterminator="\r\n")
+        w.writerow(fields)
+    k = 0
+    for i in range(len(rows) + 1):
+        while k < len(positions) and positions[k] == i:
+            if fmt == "csv":
+                buf.write("BROKEN-RECORD-%d\r\n" % (k + 1))          # wrong number of columns
+            else:
+                buf.write('{"broken record %d"\n' % (k + 1))          # not a JSON object
+            k += 1
+        if i < len(rows):
+            if fmt == "csv":
+                w.writerow(["" if rows[i][f] is None else rows[i][f] for f in fields])
+            else:
+                buf.write(json.dumps(rows[i], ensure_ascii=False, separators=(",", ":")) + "\n")
+    data = buf.getvalue().encode("utf-8")
+    control_totals = [{"place_ref": p, "mode_ref": m, "product": pr, "delivered": n}
+                      for (p, m, pr), n in sorted(totals.items(), key=lambda x: tuple(str(v) for v in x[0]))]
+    for t in control_totals:
+        if t["mode_ref"] is None:
+            del t["mode_ref"]
+        if t["product"] is None:
+            del t["product"]
+    sha = hashlib.sha256(data).hexdigest()
+    manifest = {"period_start": period_start.isoformat(), "period_end": period_end.isoformat(), "format": fmt,
+                "fields": fields, "shipments": len(shipments), "rows": len(rows), "invalid_rows": len(positions),
+                "records": len(rows) + len(positions), "shipments_with_unagreed_scans": noisy,
+                "include_all_scans": all_scans, "size_bytes": len(data), "sha256": sha}
+    return {"bytes": data, "sha256": sha, "size_bytes": len(data), "format": fmt,
+            "control_totals": control_totals, "manifest": manifest}
 
 
-def build_strata(demand, items, seed, output_fields=None, pii_fields=None):
-    """Returns [{stratum_id, population_size, selection_method, rows}, ...] in demand order and a manifest."""
-    fields = output_fields or DEFAULT_OUTPUT_FIELDS
-    check_output_fields(fields, pii_fields)
-    products = set(demand.get("products") or [])
-    all_points = set()
-    for s in demand["strata"]:
-        all_points |= {_point_key(p) for p in s["start_points"] + s["end_points"]}
-    all_scans = bool(demand.get("include_all_scans"))
-    out, manifest = [], []
-    for s in demand["strata"]:
-        pop = population(items, s, products)
-        chosen = draw(pop, s["candidates_requested"], seed, demand["demand_id"], s["stratum_id"])
-        rows = []
-        for tn in chosen:
-            for scan, _t in items[tn]:
-                if all_scans or matches(scan, all_points):
-                    rows.append({f: scan.get(f) for f in fields if f in scan})
-        out.append({"stratum_id": s["stratum_id"], "population_size": len(pop),
-                    "selection_method": contract.SELECTION_METHOD, "rows": rows})
-        manifest.append({"stratum_id": s["stratum_id"], "iso_week": s["period"].get("iso_week"),
-                         "samples_required": s["samples_required"],
-                         "candidates_requested": s["candidates_requested"],
-                         "population_size": len(pop), "candidates": chosen, "rows": len(rows)})
-    return out, manifest
-
-
-def batch_prefix(demand_id, seed):
-    # Stable for (demand, seed): a retry re-sends the same batch_id and ONEMS answers the stored result.
-    return "SIM-%s-%s" % (demand_id[:8], hashlib.sha256(str(seed).encode()).hexdigest()[:6])
-
-
-def pack_batches(demand_id, strata, seed, max_rows=contract.MAX_ROWS, max_bytes=contract.MAX_BODY_BYTES):
-    max_rows = min(max_rows, contract.MAX_ROWS)
-    max_bytes = min(max_bytes, contract.MAX_BODY_BYTES)
-    envelope = 200   # demand_id, batch_id and JSON punctuation
-    groups, cur, cur_rows, cur_bytes = [], [], 0, envelope
-    for s in strata:
-        n = len(s["rows"])
-        size = len(json.dumps(s).encode("utf-8")) + 2
-        if n > max_rows or envelope + size > max_bytes:
-            raise ConnectorError("stratum %s has %d rows / %d bytes (limits %d rows, %d bytes): a stratum cannot be "
-                                 "split across batches" % (s["stratum_id"], n, size, max_rows, max_bytes))
-        if cur and (cur_rows + n > max_rows or cur_bytes + size > max_bytes):
-            groups.append(cur)
-            cur, cur_rows, cur_bytes = [], 0, envelope
-        cur.append(s)
-        cur_rows += n
-        cur_bytes += size
-    if cur:
-        groups.append(cur)
-    prefix = batch_prefix(demand_id, seed)
-    batches = []
-    for i, g in enumerate(groups, 1):
-        b = {"demand_id": demand_id, "batch_id": "%s-%02d" % (prefix, i), "strata": g}
-        if len(json.dumps(b).encode("utf-8")) > max_bytes:
-            raise ConnectorError("batch %s exceeds %d bytes" % (b["batch_id"], max_bytes))
-        batches.append(b)
-    return batches
+def open_request(delivery, period_start, period_end):
+    """Body of POST /deliveries for a built delivery."""
+    return {"period_start": period_start.isoformat(), "period_end": period_end.isoformat(),
+            "format": delivery["format"], "size_bytes": delivery["size_bytes"], "sha256": delivery["sha256"],
+            "control_totals": delivery["control_totals"]}

@@ -256,7 +256,7 @@
     <h2>What Carrier Link is</h2>
 <p>Until now ONEMS has measured with test shipments moved by panelists (E2E) and with RFID readings at postal centers (diagnosis). <strong>Carrier Link</strong> adds a third source: ONEMS takes shipments that are already closed from the carrier’s own records (its departure reading and its arrival reading) <strong>at random</strong> and uses them as samples.</p>
 <div class="grid">
-  <div class="card"><h4>Random samples</h4><p>The carrier proposes many shipments and ONEMS makes the final draw. The draw can be reproduced in front of an auditor.</p></div>
+  <div class="card"><h4>Random samples</h4><p>The carrier sends all its complete shipments of each period and ONEMS makes the draw. The draw can be reproduced in front of an auditor.</p></div>
   <div class="card"><h4>Already-closed records</h4><p>Only shipments with a start reading and an arrival reading are used, because that tells us which route (city to city) they travelled.</p></div>
   <div class="card"><h4>Same reports</h4><p>There are no new reports: the samples appear in the usual E2E and diagnosis reports, marked with the origin “carrier”.</p></div>
 </div>
@@ -329,11 +329,11 @@
   <li>Fill in the name, product, dates and total number of samples, and choose the distribution just as with panelists: the same A/B/C matrix, seasonality and working days. You can also import the quotas from a CSV file, with the columns origin city, destination city, week and samples.</li>
   <li>Press <span class="btn">Generate preview</span>. ONEMS spreads the total across routes (city to city) and weeks, and shows the result without saving it. If it could not place all the samples, it tells you.</li>
   <li>Review the preview and press <span class="btn">Save plan (draft)</span>. The plan appears in <strong>Generated Plans</strong>, with a <strong>Capture</strong> column showing whether it is a panelist plan or a Carrier Link plan. A draft can be deleted.</li>
-  <li>To start it, press <span class="btn primary">Apply</span>. With Carrier Link, <strong>applying means ONEMS starts asking the carrier for the shipments</strong>. The plan moves to <strong>Applied Plans</strong>.</li>
+  <li>To start it, press <span class="btn primary">Apply</span>. With Carrier Link, <strong>applying means that, from the plan start date, ONEMS expects the carrier's deliveries according to the connector calendar</strong>. The plan moves to <strong>Applied Plans</strong>.</li>
 </ol>
 <div class="callout warn">If any city is missing start or end reading points, ONEMS tells you and does not let you apply the plan until you register them in <strong>Reading points</strong>. A route without a delivery standard is still sampled, but its samples enter without “on time” until the standard is created: it is only a notice.</div>
 <div class="callout info">After applying, the carrier, product, connector, start date and quotas can no longer be changed (except with Load Balancing). Samples already obtained are not touched.</div>
-<div class="callout ok"><strong>And then:</strong> with the plan applied and the connector Active, the system asks for shipments by itself, week by week. There is nothing else to do.</div>
+<div class="callout ok"><strong>And then:</strong> with the plan applied and the connector Active, the deliveries arrive by themselves according to the calendar and ONEMS makes the draw in each one. There is nothing else to do.</div>
     </section>
 
     <section id="balancing">
@@ -358,12 +358,12 @@
     <h2>Allocation Plans</h2>
 <p>Screen <strong>Allocation Plans</strong> (menu E2E ▸ Allocation). When you choose a Carrier Link plan in the selector, the plan’s <strong>records</strong> are its <strong>quotas: one per route (city to city) and week</strong>. This view is for consultation; quotas are changed with the Allocation Generator and Load Balancing.</p>
 <ul>
-  <li><strong>Table:</strong> one row per quota, with what is <strong>planned</strong>, what is <strong>carried over</strong> from earlier weeks, what has been <strong>obtained</strong>, the requests made to the carrier and its status: Pending, Open, Fulfilled, Carried over or Unfilled. It can be filtered.</li>
+  <li><strong>Table:</strong> one row per quota, with what is <strong>planned</strong>, what is <strong>carried over</strong> from earlier weeks, what has been <strong>obtained</strong> and its status: Pending, Open, Fulfilled, Carried over or Unfilled. It can be filtered. The <em>Requests</em> column comes from the previous version and stays at 0 with full deliveries.</li>
   <li><strong>Matrix:</strong> routes in rows and weeks (or months) in columns. Each cell shows what is planned, what is carried over in brackets and, once the plan is running, what has been obtained. The matrix shows all the plan’s quotas: it does not apply the table filters.</li>
   <li><strong>View samples:</strong> on each quota, a link takes you to the samples obtained for that route and week.</li>
 </ul>
 <h3>If a quota is not filled</h3>
-<p>If the carrier does not have enough shipments, ONEMS asks again for what is missing (up to 3 times in the same week). Whatever is still missing is spread over the remaining weeks of the month and, if it does not fit, over the following months. What is still missing when the plan ends stays unfilled and raises an alert.</p>
+<p>The quota of each week is shared among the deliveries of that week according to their working days; what one delivery does not cover moves to the next deliveries of the same week. The week is closed with the delivery that covers its last day (or, if that delivery does not arrive, a few days later with whatever there is). Whatever is still missing is spread over the remaining weeks of the month and, if it does not fit, over the following months. What is still missing when the plan ends stays unfilled and opens a <em>Quota not filled</em> incident.</p>
     </section>
 
     <section id="samples">
@@ -419,35 +419,30 @@
 <p>Alerts appear in <strong>Capture monitor</strong>. These are the types and what to do about each one.</p>
 <div class="table-wrap"><table>
 <tr><th>Alert</th><th>What it means</th><th>What to do</th></tr>
-<tr><td>Not enough candidates</td><td>The carrier sent fewer valid shipments than were needed for a route and a week.</td><td>ONEMS usually asks again for the missing ones. If it keeps happening, talk to the carrier.</td></tr>
-<tr><td>Empty stratum</td><td>The carrier returned no shipments at all for a route.</td><td>Check that the start and end points of those cities are correct and that the carrier has traffic on that route.</td></tr>
-<tr><td>Population dropped</td><td>The shipments available on a route fell below 30% of the usual level (median of the last 6 weeks).</td><td>Ask the carrier whether there was a gap in their data or a real change in traffic.</td></tr>
-<tr><td>Incoherent population</td><td>The carrier reports fewer shipments available than the candidates it sent.</td><td>This is an error in their data extraction: ask them to review it.</td></tr>
-<tr><td>Suspicious distribution</td><td>Every sample in a batch (20 or more) arrived on time. This is unusual and may mean the carrier is not choosing at random.</td><td>Ask the carrier to explain how it selects shipments and check the next batches.</td></tr>
-<tr><td>Late batch</td><td>The batch arrived after the expected deadline.</td><td>If it keeps happening, review the connector calendar with the carrier.</td></tr>
+<tr><td>Not enough candidates</td><td>In a delivery, a route and week had fewer valid shipments than the samples needed.</td><td>What is missing moves to the next deliveries. If it keeps happening, the route has little traffic: review the plan.</td></tr>
+<tr><td>Suspicious distribution</td><td>Every sample of a route and week (20 or more) arrived on time. This is unusual.</td><td>Discuss it with the ONEMS team and check the next deliveries.</td></tr>
 <tr><td>Unknown product</td><td>The carrier sent a product that ONEMS has no equivalence for.</td><td>Add the equivalence in <strong>Connectors</strong>, in the Product equivalences block.</td></tr>
 <tr><td>Unknown reading point</td><td>Readings arrived from a place that is not registered as a reading point.</td><td>Register the place in <strong>Reading points</strong> (Places without a reading point block). Those readings are used once the place is registered.</td></tr>
 <tr><td>Possible misrouted shipment</td><td>A shipment has readings at more than one point, or in a city other than the one requested.</td><td>Review it in <strong>Samples</strong>. It still counts towards the route quota.</td></tr>
 <tr><td>Missing delivery standard</td><td>A route has no delivery standard, so it is not possible to tell whether its samples arrive on time.</td><td>Create the standard for that route in <strong>E2E: SLA</strong>. The samples are recalculated automatically.</td></tr>
-<tr><td>Many readings rejected</td><td>More than 20% of the readings in a batch were rejected.</td><td>Check the equivalences and the reading points; a trial batch in <strong>Connectors</strong> shows the reasons.</td></tr>
-<tr><td>Quota not filled</td><td>When the plan ended, a quota had not been completely filled.</td><td>Review the earlier alerts for that route; extend the plan if needed.</td></tr>
-<tr><td>Carrier did not answer</td><td>The connector is active, but the carrier did not answer a request that was due.</td><td>Check with the carrier that its system is running, and review the calendar and the status of the connector.</td></tr>
+<tr><td>Many readings rejected</td><td>More than 20% of the shipments of a delivery could not be used. It opens a <em>High rejection</em> incident.</td><td>See the reasons in <strong>Connectors</strong>, Deliveries block. If they are unknown places or products, register what is missing; otherwise, talk to the carrier.</td></tr>
+<tr><td>Quota not filled</td><td>A week of the plan closed without all its samples and they could no longer be moved to other weeks. It opens a <em>Quota not filled</em> incident.</td><td>Review the earlier alerts for that route; adjust the plan if needed.</td></tr>
 <tr><td>Missing start or end points</td><td>Start or end points are missing in some city.</td><td>Register the missing points in <strong>Reading points</strong>.</td></tr>
-<tr><td>Invalid account time zone</td><td>The account time zone is not valid, so ONEMS does not know what time to ask for the data.</td><td>Correct it in the account or set a time zone of its own in the connector calendar.</td></tr>
-<tr><td>Request could not be sent</td><td>ONEMS could not send the request to the carrier.</td><td>Look at the connector’s last error in <strong>Connectors</strong> and review its configuration.</td></tr>
-<tr><td>Wrong selection method</td><td>The carrier used a selection method different from the agreed one.</td><td>Ask it to use the agreed method and check with a trial batch.</td></tr>
+<tr><td>Invalid account time zone</td><td>The account time zone is not valid, so ONEMS counts the periods in UTC.</td><td>Correct it in the account or set a time zone of its own in the connector calendar.</td></tr>
 <tr><td>Reader without city</td><td>A reading point is in a postal center that has no city.</td><td>Assign a city to the postal center.</td></tr>
-<tr><td>Batch undone after quota carry-over</td><td>A batch was undone after its quota had already been spread over other weeks.</td><td>Review the plan quotas: they appear as carried over (to review).</td></tr>
+<tr><td>Week already closed</td><td>Valid shipments arrived for a week that was already closed and were not used.</td><td>It usually happens with late deliveries. If it keeps happening, review the calendar with the carrier.</td></tr>
+<tr><td>Delivery failed after 3 attempts</td><td>ONEMS could not process a delivery after three attempts and rejected it.</td><td>The carrier must send that period again (the <em>Delivery rejected</em> incident tells it). If it keeps happening, tell the ONEMS team.</td></tr>
+<tr><td>Alerts of the previous version</td><td>Empty stratum, Population dropped, Incoherent population, Late batch, Carrier did not answer, Request could not be sent, Wrong selection method and Batch undone after quota carry-over belonged to the request-and-batch system, now retired.</td><td>They only appear in old data: you can dismiss them.</td></tr>
 </table></div>
     </section>
 
     <section id="faq">
     <h2>Questions</h2>
 <details><summary>How many samples can a plan have?</summary><div>A plan can reach about <span dir="ltr">15,000</span> samples a year per product.</div></details>
-<details><summary>Can the carrier choose which shipments it sends?</summary><div>No. The carrier proposes many candidates and ONEMS makes the final draw. The seed of the draw is fixed before the candidates are received, so nobody can pick it after seeing them.</div></details>
+<details><summary>Can the carrier choose which shipments it sends?</summary><div>No. In each period it sends all its complete shipments, without choosing, and ONEMS makes the draw with a seed it keeps. The carrier never knows which shipments were drawn.</div></details>
 <details><summary>Is personal data stored?</summary><div>No. Only the fields on the allowed extra fields list are kept; everything else is discarded on entry.</div></details>
 <details><summary>Who can create connector keys?</summary><div>Only a superadmin or the UPU Account Manager. The key is shown just once, when it is created.</div></details>
-<details><summary>I applied the plan and no samples are coming in. Why?</summary><div>Check that the connector is Active (in Testing it only accepts trial runs) and that the day and time in the calendar have already passed. Then look at <strong>Capture monitor</strong>.</div></details>
+<details><summary>I applied the plan and no samples are coming in. Why?</summary><div>Check that the connector is Active (in Testing the deliveries are checked but create no samples), that the delivery time in the calendar has already passed and that there are no open incidents. Then look at the deliveries in <strong>Connectors</strong> or in <strong>Capture monitor</strong>.</div></details>
 <details><summary>How do I tell these samples apart in the reports?</summary><div>They carry the origin “carrier”, different from panelist samples, and can be separated.</div></details>
 <details><summary>Do I have to use Carrier Link with every carrier?</summary><div>No. The capture method is chosen per carrier in <strong>Carriers &amp; Products</strong>: Panelists, Carrier Link or Both. Carriers that use panelists only keep working as before, and the E2E screens show nothing about Carrier Link for them.</div></details>
 <details><summary>Who sees each screen?</summary><div>The Account Manager (and the UPU Account Manager) edits plans, points, connectors and the monitor, and sees the samples. The Allocation Plan Manager edits plans and sees the rest except connectors. The DO Coordinator edits reading points and sees the rest except connectors. Panelist Manager and Materials Supplier have no access. A read-only screen shows the read-only label.</div></details>

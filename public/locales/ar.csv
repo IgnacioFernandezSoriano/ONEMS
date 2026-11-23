@@ -5529,7 +5529,7 @@ cl.connectors.extras.help,حقول أخرى لدى شركة النقل تُحف�
 cl.connectors.extras.empty,لا توجد حقول إضافية.
 cl.connectors.extras.field,حقل شركة النقل
 cl.connectors.keys.title,مفاتيح الموصل
-cl.connectors.keys.help,تستخدم شركة النقل مفتاحًا لإرسال دفعاتها. يمكن فقط للمشرف العام أو UPU Account Manager إصدار المفاتيح.
+cl.connectors.keys.help,تستخدم شركة النقل مفتاحًا لإرسال تسليماتها. يمكن فقط للمشرف العام أو UPU Account Manager إصدار المفاتيح.
 cl.connectors.keys.invalid,تحقق من الاسم وتاريخ الانتهاء (يجب أن يكون في المستقبل).
 cl.connectors.keys.empty,لا توجد مفاتيح لهذا الموصل.
 cl.connectors.keys.name,الاسم

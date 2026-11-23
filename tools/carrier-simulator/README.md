@@ -1,14 +1,20 @@
-# Carrier simulado (Carrier Link)
+# Carrier simulado (Carrier Link v4)
 
-Herramienta para probar **toda** la integración de Carrier Link sin un carrier real. Tiene dos piezas:
+Herramienta para probar **toda** la integración de Carrier Link sin un carrier real. Sigue el contrato v4: en cada
+periodo de entrega el carrier manda **todos** los envíos completos del periodo y ONEMS hace el sorteo
+(especificación: [`docs/carrier-link/manual-conexion.es.md`](../../docs/carrier-link/manual-conexion.es.md)).
+
+Tiene dos piezas:
 
 1. **Generador de datos** (`sim.py generate`): crea la "base de datos" de un carrier ficticio, **SIMPOST**, con
    envíos y sus escaneos (admisión, expedición, centro de tratamiento, reparto y entrega), con la hora local y los
-   nombres de campo del propio carrier. Incluye envíos que nunca se entregan, mal encaminados y algunos registros
-   defectuosos, a propósito.
-2. **Conector de referencia** (`sim.py run`): hace lo que tendrá que hacer el equipo técnico de un carrier: lee las
-   demandas abiertas de ONEMS, elige al azar los envíos de cada estrato, arma los lotes, los envía (también en modo
-   de prueba, `dry_run`) y muestra y guarda las respuestas.
+   nombres de campo del propio carrier. Incluye a propósito envíos que nunca se entregan, mal encaminados y
+   registros defectuosos.
+2. **Conector de referencia** (`sim.py deliver`): hace lo que tendrá que hacer el equipo técnico de un carrier, para
+   cada periodo pendiente y en orden: `GET /config` → fichero con todos los envíos completos de `next_period` (JSON
+   Lines o CSV), sha256, tamaño y totales de control → `POST /deliveries` → `PUT` del fichero a la URL firmada →
+   `POST /deliveries/{id}/complete` → consulta `GET /deliveries/{id}` hasta `processed` o `rejected`. Muestra y
+   guarda cada petición y respuesta.
 
 Solo usa la librería estándar de Python 3 (no instala nada). Se ejecuta siempre con `python -I`.
 
@@ -16,17 +22,18 @@ Solo usa la librería estándar de Python 3 (no instala nada). Se ejecuta siempr
 
 | Ruta | Qué es |
 |---|---|
-| `sim.py` | Programa principal (subcomandos `generate`, `keygen`, `run`, `post`). |
+| `sim.py` | Programa principal (subcomandos `generate`, `keygen`, `deliver`, `build`, `call`, `status`). |
 | `carrier_sim/dataset.py` | Generador de la base de datos del carrier (con semilla: mismo resultado siempre). |
-| `carrier_sim/connector.py` | Lógica del conector: población, sorteo, filas y reparto en lotes. |
+| `carrier_sim/connector.py` | Lógica del conector: definición de «envío completo», filas, ruido, fichero, sha256, totales de control. |
 | `carrier_sim/transport.py` | Cómo habla con ONEMS: modo `local` (Postgres local) y modo `dev` (HTTP). |
-| `carrier_sim/contract.py` | Copia en Python de los límites y comprobaciones de `supabase/functions/carrier-link-ingest/lib.ts`. |
+| `carrier_sim/contract.py` | Copia en Python de `supabase/functions/carrier-link-ingest/lib.ts` (rutas, límites, validación, tabla de errores). Una prueba lee `lib.ts` y falla si se desincronizan. |
 | `network.json` | La red del carrier: ciudades, oficinas, centros, servicios, tiempos y porcentaje de cada anomalía. |
 | `config.example.json` | Ejemplo de configuración del conector. |
 | `tests/test_simulator.py` | Pruebas unitarias (sin base de datos). |
-| `e2e/` | Prueba de principio a fin contra el Postgres local (`run.sh`, `fixture.sql`, `check.py`). |
-| `examples/` | Ejemplo completo (demanda, lote y respuestas) que reutiliza el manual de conexión. |
-| `out/` | Todo lo generado (datos, claves, lotes, respuestas). Ignorado por git. |
+| `tests/test_docs.py` | Comprueba los esquemas JSON, el OpenAPI y el ejemplo de `docs/carrier-link/`. |
+| `e2e/` | Prueba de principio a fin contra el Postgres local (`run.sh`, `fixture.sql`, `check.py`, `local_worker.ts`). |
+| `examples/` | Ejemplo completo (configuración, ficheros, peticiones y respuestas); la misma copia está en `docs/carrier-link/ejemplo/`. |
+| `out/` | Todo lo generado (datos, claves, ficheros, respuestas). Ignorado por git. |
 
 ## Cómo se ejecuta
 
@@ -35,26 +42,31 @@ Desde la raíz del repositorio (Git Bash):
 ```bash
 # 1. Pruebas unitarias (no tocan ninguna base de datos)
 python -I tools/carrier-simulator/tests/test_simulator.py
+python -I tools/carrier-simulator/tests/test_docs.py
 
-# 2. Prueba completa en local (reconstruye la base local onems_t, ~1-2 minutos)
+# 2. Prueba completa en local (reconstruye la base local onems_t, unos 3-4 minutos)
 bash tools/carrier-simulator/e2e/run.sh
-#    SAVE_EXAMPLES=1 bash tools/carrier-simulator/e2e/run.sh   -> además renueva examples/
+#    SAVE_EXAMPLES=1 bash tools/carrier-simulator/e2e/run.sh   -> además renueva examples/ y docs/carrier-link/ejemplo/
 ```
 
-Antes, el Postgres portable tiene que estar arrancado en `127.0.0.1:5433`
-(`supabase/tests/run_tests.sh` indica el comando si no lo está).
+Antes, el Postgres portable tiene que estar arrancado en `127.0.0.1:5433` (`supabase/tests/run_tests.sh` indica el
+comando si no lo está). La prueba completa necesita también `deno` (ejecuta el worker real en local).
 
-Uso suelto de cada pieza:
+Uso suelto de cada pieza (desde `tools/carrier-simulator`):
 
 ```bash
-cd tools/carrier-simulator
-# Base de datos del carrier: admisiones del 26/10 al 15/11, "foto" tomada el 19/11 a las 06:00 (hora del carrier)
-python -I sim.py generate --seed sim-2026 --from 2026-10-26 --to 2026-11-15 --as-of 2026-11-19T06:00 --out out/dataset
-# Conector: lee las demandas y manda los lotes en modo prueba (dry_run) o de verdad (--real)
-python -I sim.py run --config out/config.json --dry-run
-python -I sim.py run --config out/config.json --real
-# Reenviar un lote ya guardado (por ejemplo para ver que repetir el mismo batch_id no carga dos veces)
-python -I sim.py post --config out/config.json --real --file out/runs/<demand_id>/batch-01.json
+# Base de datos del carrier: admisiones del 26/10 al 15/11, "foto" tomada el 16/11 a las 03:00 (hora del carrier)
+python -I sim.py generate --seed sim-2026 --from 2026-10-26 --to 2026-11-15 --as-of 2026-11-16T03:00 --out out/dataset
+# Conector: entrega todos los periodos pendientes (o como mucho N con --max)
+python -I sim.py deliver --config config.example.json
+python -I sim.py deliver --config config.example.json --max 1 --format csv
+# Entrega con el fichero alterado (mismo tamaño, otro sha256): debe acabar rechazada CL_SHA256_MISMATCH
+python -I sim.py deliver --config config.example.json --max 1 --tamper
+# Sin red: el fichero de un periodo a partir de una respuesta de GET /config guardada
+python -I sim.py build --config-json examples/01-get-config.json --dataset out/dataset --from 2026-11-02 --to 2026-11-04 --out out/build
+# Una llamada suelta (pruebas negativas) y el estado de una entrega
+python -I sim.py call --config config.example.json --method GET --path demands
+python -I sim.py status --config config.example.json --delivery <delivery_id> --wait
 ```
 
 ## Configuración del conector
@@ -66,33 +78,65 @@ Fichero JSON (ver `config.example.json`). Las rutas relativas se leen desde la c
 | `mode` | `local` (Postgres local) o `dev` (Edge Function de onems-dev por HTTP). |
 | `base_url` | Solo `dev`: `https://<ref>.supabase.co/functions/v1/carrier-link-ingest`. |
 | `key_file` | Fichero con la clave del conector (la que ONEMS muestra una sola vez). Nunca se escribe en otro sitio. |
-| `seed` | Semilla del sorteo del conector. Misma semilla y misma demanda = mismos envíos y mismos `batch_id`. |
+| `seed` | Semilla del ruido de cada fichero (qué envíos llevan lecturas de más y dónde van los registros rotos). |
 | `dataset_dir` | Carpeta con `scans.csv` (la base de datos del carrier). |
-| `out_dir` | Dónde se guardan demandas, lotes, respuestas y el manifiesto de cada ejecución. |
-| `dry_run` | `true` = solo valida, no guarda nada en ONEMS. Se puede forzar con `--dry-run` o `--real`. |
-| `max_rows` | Máximo de filas por lote (como mucho 5.000, el límite de ONEMS). Con un valor bajo salen varios lotes. |
-| `output_fields` | Campos que se envían de cada lectura. Por defecto, sin datos personales. |
-| `pii_fields` | Opcional: más campos personales prohibidos. El conector se niega a arrancar si `output_fields` incluye uno de ellos o de la lista fija (`recipient_name`, `recipient_phone`, `recipient_address`, `sender_email`…). |
-| `local` | Solo `local`: ruta de `psql` y conexión (`127.0.0.1`, puerto 5433, base `onems_t`). |
+| `out_dir` | Dónde se guarda cada entrega: `<inicio>_<fin>[-tampered]/`. |
+| `formats` | Formatos que se alternan entre periodos (`["jsonl"]`, `["csv"]` o los dos). `--format` lo fuerza. |
+| `noise` | `unagreed_scans_share`: parte de los envíos que lleva también lecturas en lugares que no son puntos acordados (ONEMS las rechaza como `unknown_reading_point`); `invalid_rows`: registros rotos por fichero (`bad_record`). `{"unagreed_scans_share": 0, "invalid_rows": 0}` = fichero limpio. |
+| `pii_fields` | Opcional: más campos personales prohibidos. El conector se niega a arrancar si la configuración de ONEMS pide uno de ellos o de la lista fija (`recipient_name`, `recipient_phone`, `recipient_address`, `sender_email`…). |
+| `poll_seconds`, `poll_timeout_seconds` | Solo `dev`: cada cuánto consulta el estado (mínimo 30 s, por defecto 60) y hasta cuándo. |
+| `local` | Solo `local`: ruta de `psql`, conexión (`127.0.0.1`, puerto 5433, base `onems_t`) y `process_cmd` (ver abajo). |
+
+## Qué hace el conector en cada periodo
+
+1. Lee `GET /config`: calendario, `next_period`, nombres de campo, productos con sus códigos, puntos con su papel,
+   `include_all_scans` y `extra_fields`. Si `next_period` es `null` o no es `deliverable`, termina.
+2. Calcula los **envíos completos** del periodo con la definición normativa (manual, §5): producto del plan; la
+   lectura de llegada **más reciente** en un punto de llegada tiene fecha local dentro del periodo; hay una lectura
+   en un punto de salida **anterior** a esa llegada. Los que no llegan, los que llegan a un lugar no acordado y los
+   que tienen la llegada registrada antes de la salida no entran.
+3. Escribe todas las lecturas de esos envíos en los puntos acordados (o todas, con `include_all_scans`), solo con
+   los campos de la configuración, más el ruido configurado. CSV con cabecera y CRLF; JSON Lines con LF.
+4. Calcula sha256, tamaño y totales de control (envíos por lugar y modo de la llegada y producto del envío).
+5. Abre la entrega, sube el fichero en un PUT (sin clave), completa y consulta el estado hasta el final.
+
+En `out_dir/<inicio>_<fin>/` quedan `01-get-config.json`, `delivery.jsonl|csv`, `manifest.json`,
+`02-open-request.json`, `03-open-response.json`, `04-upload-response.json`, `05-complete-response.json` y
+`06-status.json` (cada respuesta como `{"http_status", "body"}`).
 
 ## Qué hace cada modo
 
-**Modo `local`** (para pruebas automáticas). No hay servidor HTTP: el conector llama, contra el Postgres local, a
-las **mismas funciones SQL que la Edge Function y en el mismo orden**, cada una en su propia transacción:
-`api_key_resolve` (la clave da el conector) → demandas abiertas de ese conector (`GET /demands`) → para cada lote:
-comprobaciones del sobre (tamaño, filas, campos obligatorios), estado del conector (pausado / en pruebas),
-`cl_ingest_batch`, y si el lote es real y queda `validated`: `cl_sample_stratum` por cada estrato del resumen y
-`cl_finish_batch`. Los errores `CL_*` de la base se convierten en el mismo código HTTP que daría la Edge Function.
-Lo único que no se imita es el límite de peticiones por minuto y el registro de uso de la clave.
+**Modo `local`** (para pruebas automáticas). No hay servidor HTTP: `transport.LocalTransport` es una copia en Python
+de `supabase/functions/carrier-link-ingest/handler.ts` que, contra el Postgres local, hace las mismas comprobaciones
+de ruta, método y cuerpo y llama a **las mismas funciones SQL en el mismo orden**, cada una en su transacción y con
+el rol `service_role`: `api_key_resolve` → `cl_connector_config` | `cl_delivery_open` | `cl_delivery_complete` |
+`cl_delivery_status`. Los errores `CL_*` se convierten en el mismo código HTTP que daría la Edge Function.
+Lo que se sustituye (documentado):
+
+- **Almacén de ficheros**: la URL de subida es `local://cl-deliveries/<ruta>`; el "PUT" guarda el fichero en
+  `out_dir/storage/<ruta>` y registra el objeto en `storage.objects` (con su tamaño), como hace Supabase Storage. Un
+  segundo PUT de la misma ruta responde `409` (sin sobrescribir).
+- **Proceso en segundo plano** (pg_cron + Edge Function `carrier-link-worker`): antes de cada consulta de estado se
+  ejecuta `local.process_cmd`, normalmente `deno run ... e2e/local_worker.ts`, que usa el **cargador real del
+  worker** (`supabase/functions/carrier-link-worker/loader.ts`) contra la base local y después
+  `CALL public.cl_delivery_process_run()`. Necesita la función de prueba `public.zz_sim_call` que crea
+  `e2e/fixture.sql` (solo en la base local).
+- No se imitan el límite de peticiones por minuto ni el registro de uso de la clave.
+
 Solo acepta un Postgres en `127.0.0.1`/`localhost`.
 
 **Modo `dev`** (contra onems-dev, `sehbnpgzqljrsqimwyuz`). Llama por HTTP a la Edge Function `carrier-link-ingest`
-con la cabecera `x-api-key`: `GET .../demands` y `POST .../batches` (con `?dry_run=true` en modo prueba).
-**Está construido pero no se ha ejecutado.** Necesita una clave de conector emitida en ONEMS y la confirmación del
-responsable: el programa se niega a llamar a un servidor que no sea local si no se define antes
-`CONFIRM_REMOTE=<ref del proyecto>` (por ejemplo `CONFIRM_REMOTE=sehbnpgzqljrsqimwyuz`), exige `https` y no sigue
-redirecciones (así la clave nunca viaja a otra dirección). Recomendación: empezar
-siempre con `dry_run: true` y el conector en estado *testing* en ONEMS.
+con la cabecera `x-api-key` y sube el fichero con un PUT a la URL firmada (sin la clave). **Está construido pero no
+se ha ejecutado.** Necesita las migraciones de Carrier Link v4 y las Edge Functions desplegadas, una clave de
+conector emitida en ONEMS y la confirmación del responsable: el programa se niega a llamar a un servidor que no sea
+local si no se define antes `CONFIRM_REMOTE=<ref del proyecto>` (por ejemplo
+`CONFIRM_REMOTE=sehbnpgzqljrsqimwyuz`), exige `https`, no sigue redirecciones y solo sube a una URL `https` del
+mismo servidor (así la clave y el token nunca viajan a otra dirección). Recomendación: empezar siempre con el
+conector en estado *Pruebas* en ONEMS (las entregas se comprueban y cuentan pero no crean muestras).
+
+Limitación conocida: el simulador no tiene base de datos de zonas horarias (solo librería estándar en Windows), así
+que exige que la zona de las horas de lectura sea la de las fechas de los periodos (`date_timezone`). Un conector
+real convierte cada hora a esa zona antes de tomar su fecha.
 
 ## La base de datos del carrier (`out/dataset/`)
 
@@ -108,77 +152,47 @@ siempre con `dry_run: true` y el conector en estado *testing* en ONEMS.
 | `weight_g` | `1425` | campo adicional permitido |
 | `recipient_name`, `recipient_phone` | | datos personales: están en la base del carrier, el conector **no** los envía |
 
-`items.json` es la "verdad" de cada envío (origen, destino, anomalía). Solo la usan las pruebas; el conector no la lee.
+`items.json` es la "verdad" de cada envío (origen, destino, anomalía). Solo la usan las pruebas; el conector no la
+lee.
 
 Red (`network.json`): ciudades Northport (NPT), Southvale (SVL), Eastmere (EMR) y Ridgefield (RDF); en cada una una
 oficina (`<CIUDAD>-PO`) y un centro de tratamiento (`<CIUDAD>-MPC`), más un centro nacional (`HUB-NAT`). En ONEMS
-(`e2e/fixture.sql`) solo están dadas de alta las oficinas de NPT, SVL y EMR, con dos puntos de lectura cada una:
-admisión `ACC` (inicio) y entrega `DLV` (fin). RDF, los centros y el reparto `OFD` no son puntos, a propósito.
+(`e2e/fixture.sql`) solo están dadas de alta las oficinas de NPT, SVL y EMR, con dos puntos cada una: admisión `ACC`
+(salida) y entrega `DLV` (llegada). RDF, los centros y el reparto `OFD` no son puntos, a propósito.
 
-Anomalías que genera (porcentajes en `network.json`):
+Anomalías (porcentajes en `network.json`) y qué pasa con cada una en v4:
 
-| Anomalía | Qué pasa en el carrier | Qué hace ONEMS con ella |
+| Anomalía | Qué pasa en el carrier | En el fichero / en ONEMS |
 |---|---|---|
-| `undelivered` | No llega a entregarse. | No es un envío cerrado: el conector no lo cuenta (R23). |
-| `misrouted_corrected` | Va a otra ciudad, se escanea como entregado allí por error y luego se entrega en la buena. | Muestra válida; si sale elegida, `possible_misrouting`. |
-| `misrouted_lost` | Se entrega en otra ciudad. | Cuenta para la ruta real (otra ciudad de destino). |
-| `clock_error` | El reloj del lector de entrega está mal: la entrega es anterior a la admisión. | Candidato rechazado `start_after_end`. |
-| `bad_service` | La lectura de entrega trae un código de servicio corrupto (`XX9`). | Candidato rechazado `unknown_product` (y esa lectura). |
-| `bad_timestamp` | Una lectura duplicada de admisión con la fecha ilegible. | Esa lectura se rechaza `bad_timestamp`; el envío sigue siendo válido. |
-| `missing_site` | El escaneo de reparto no tiene lugar. | Solo llega si se piden todas las lecturas (`include_all_scans`). |
-
-## Qué hace el conector con cada demanda
-
-Por cada estrato de la demanda:
-
-1. **Población**: envíos del producto pedido (el servicio de su primera lectura legible está en `products`) con una
-   lectura en algún punto de inicio y cuya **última** lectura en un punto de fin (distinta de esa lectura de inicio)
-   tiene la **fecha local dentro del periodo**: la misma regla que aplica ONEMS al validar. Si un envío tiene una
-   entrega dentro del periodo y otra posterior fuera, no cuenta.
-   Solo cuentan las lecturas con hora legible. Un punto sin modo (`mode_ref` vacío) vale para cualquier evento de ese lugar.
-2. **Sorteo**: elige al azar, con la misma probabilidad para todos, `candidates_requested` envíos de la población
-   (o todos si hay menos). El sorteo depende de la semilla, la demanda y el estrato: es repetible.
-3. **Filas**: devuelve **todas** las lecturas de los elegidos en los puntos de inicio o de fin de **cualquier**
-   estrato de la demanda (de cualquier ciudad), o todas sus lecturas si la demanda trae `include_all_scans: true`.
-   Solo los campos de `output_fields`.
-4. **Lote**: `population_size`, `selection_method: "uniform_random_within_stratum"` y las filas.
-
-Los estratos se meten enteros en lotes de como mucho `max_rows` filas (y 5 MB). Un estrato nunca se parte en dos
-lotes: ONEMS acepta cada estrato una sola vez por demanda. El `batch_id` es
-`SIM-<8 primeros de la demanda>-<huella de la semilla>-<nº>`: reintentar el mismo lote devuelve el resultado guardado.
-
-En `out_dir/<demand_id>/` quedan `demand.json`, `batch-NN.json`, `response-NN[.dry_run].json` y
-`manifest[.dry_run].json` (población, candidatos y lote de cada estrato).
+| `undelivered` | No llega a entregarse. | No es un envío completo: no va en el fichero. |
+| `misrouted_corrected` | Se escanea como entregado en otra ciudad por error y luego se entrega en la buena. | Va en el periodo de la última entrega; ruta correcta. |
+| `misrouted_lost` | Se entrega en otra ciudad. | Si esa ciudad es punto acordado, cuenta para esa otra ruta; si es RDF, no es completo. |
+| `clock_error` | El reloj del lector de entrega está mal: la entrega es anterior a la admisión. | No es completo (la salida no es anterior a la llegada): no va. |
+| `bad_service` | La lectura de entrega trae un código de servicio corrupto (`XX9`). | Va (su producto es `STD`); ONEMS rechaza esa lectura y el envío (`unknown_product`) y avisa. |
+| `bad_timestamp` | Una lectura duplicada de admisión con la fecha ilegible. | Va; esa lectura se rechaza `bad_timestamp`, el envío sigue siendo válido. |
+| `missing_site` | El escaneo de reparto no tiene lugar. | Solo va si se piden todas las lecturas (`include_all_scans`). |
 
 ## La prueba de principio a fin (`e2e/run.sh`)
 
 1. Reconstruye la base local `onems_t` (baseline + migraciones) con `.superpowers/sdd/runlocal.sh`.
 2. Genera los datos (semilla fija `e2e-2026`), crea una clave de conector (en la base solo queda su huella) y carga
-   `fixture.sql`: cuenta SIMLAND, carrier SIMPOST (captura `both`), puntos, conector activo con sus equivalencias,
-   estándares de entrega y un plan con cuotas de las semanas 2026-W45 y W46 para las 6 rutas (28 muestras).
-3. Emite la demanda (`cl_emit_due_demands` a las 06:05 del 19/11).
-4. Conector en prueba (`dry_run`, 100 filas por lote → 4 lotes) y `check.py dry`.
-5. Los mismos lotes de verdad y `check.py real`: muestras, filas en `one_db`, demanda `fulfilled`, sin alertas inesperadas.
-6. Repite el lote 01: devuelve el mismo resumen y no sortea otra vez.
-7. Un lote nuevo para la demanda ya cumplida: `409 CL_DEMAND_NOT_OPEN`.
+   `fixture.sql`: cuenta SIMLAND, carrier SIMPOST (con correo de avisos), puntos, conector activo con calendario
+   **lunes y jueves a las 03:00** y sus equivalencias, estándares de entrega y un plan del 2 al 15 de noviembre con
+   cuotas de las semanas 2026-W45 y W46 para las 6 rutas (28 muestras).
+3. Primer periodo con el fichero **alterado** (`--tamper`) → `rejected` `CL_SHA256_MISMATCH`, incidencia *Entrega
+   rechazada* con aviso a la cuenta y al carrier (`check.py tampered`).
+4. El conector entrega los 4 periodos en orden (JSON Lines y CSV alternos) y `check.py deliveries` comprueba cada
+   uno contra la verdad y la base: estado `processed`; `rows_total` = registros del fichero; `shipments_total` =
+   envíos enviados = suma de los totales de control (guardados tal cual); motivos de rechazo explicados por el ruido
+   y las anomalías (y en el número exacto); ningún envío repetido entre periodos ni sin entregar; sorteados =
+   muestras = filas de `one_db`; nunca más que la cuota ni que la población; zona de recepción vacía; las dos semanas
+   cumplidas (28/28); la incidencia del paso 3 cerrada sola.
+5. Respuestas de la API: repetir la apertura del primer periodo (`200`, `existing`), el mismo periodo con otro
+   fichero (`409`), un periodo fuera del calendario (`422`), otro sin plan (`422`), una entrega inexistente (`404`),
+   la ruta v3 `/demands` (`410`).
 
-`check.py` compara cada respuesta con la verdad de `items.json`: los únicos rechazos permitidos son los provocados
-a propósito (`start_after_end`, `unknown_product`, `bad_timestamp`, y `already_sampled` solo para un envío elegido en
-dos estratos). Cualquier otro rechazo (`unknown_reading_point`, `missing_field`, `no_start`, `end_out_of_period`…)
-hace fallar la prueba.
+## Ejemplo para el manual (`examples/` y `docs/carrier-link/ejemplo/`)
 
-## Ejemplo para el manual (`examples/`)
-
-Salida real de una ejecución de la prueba local (`SAVE_EXAMPLES=1`). En cada respuesta, `http_status` es el código
-HTTP y `body` es exactamente lo que devuelve la API.
-
-| Fichero | Qué es |
-|---|---|
-| `01-get-demands.json` | Respuesta de `GET /demands`: una demanda con 12 estratos. |
-| `02-batch-01.json` | Primer lote que envía el conector (3 estratos). |
-| `03-response-01-dry-run.json` | Respuesta a ese lote con `?dry_run=true` (solo validación). |
-| `04-response-01.json` | Respuesta al mismo lote de verdad: validación, sorteo de cada estrato y cierre del lote. |
-| `05-response-last-batch.json` | Respuesta al último lote: la demanda queda `fulfilled`. |
-| `06-response-replay-batch-01.json` | Repetición del lote 01 con el mismo `batch_id`: el resumen guardado. |
-| `07-response-demand-not-open.json` | Lote nuevo para una demanda ya cerrada: `409 CL_DEMAND_NOT_OPEN`. |
-| `08-connector-manifest.json` | Lo que calculó el conector: población, candidatos y lote de cada estrato. |
+Salida real de la prueba local con `SAVE_EXAMPLES=1`. Cada respuesta es `{"http_status", "body"}` con `body`
+exactamente lo que devuelve la API. Los `delivery_id` y las horas cambian en cada ejecución; los ficheros, sha256 y
+recuentos no. La lista de ficheros y su explicación está en el manual, §17.
