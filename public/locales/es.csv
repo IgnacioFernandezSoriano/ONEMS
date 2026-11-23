@@ -5835,3 +5835,5 @@ cl.balancing.routes,Rutas
 cl.balancing.total,Total
 cl.balancing.stddev,Desv. típica
 cl.balancing.cell_title,Esperado: {expected}; no movible: {locked}
+menu.cl_incidents,Incidencias de Carrier Link
+cl.error.cl_incident_closed,Esta incidencia ya está resuelta y no se puede cambiar.

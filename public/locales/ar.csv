@@ -5827,3 +5827,5 @@ cl.balancing.routes,المسارات
 cl.balancing.total,الإجمالي
 cl.balancing.stddev,الانحراف المعياري
 cl.balancing.cell_title,المتوقع: {expected}؛ غير قابل للنقل: {locked}
+menu.cl_incidents,حوادث Carrier Link
+cl.error.cl_incident_closed,تم حل هذه الحادثة بالفعل ولا يمكن تغييرها.

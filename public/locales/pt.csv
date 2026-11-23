@@ -5835,3 +5835,5 @@ cl.balancing.routes,Rotas
 cl.balancing.total,Total
 cl.balancing.stddev,Desvio padrão
 cl.balancing.cell_title,Esperado: {expected}; não movível: {locked}
+menu.cl_incidents,Incidentes do Carrier Link
+cl.error.cl_incident_closed,Este incidente já está resolvido e não pode ser alterado.

@@ -5827,3 +5827,5 @@ cl.balancing.routes,Routes
 cl.balancing.total,Total
 cl.balancing.stddev,Écart type
 cl.balancing.cell_title,Attendu : {expected} ; non déplaçable : {locked}
+menu.cl_incidents,Incidents Carrier Link
+cl.error.cl_incident_closed,Cet incident est déjà résolu et ne peut plus être modifié.

@@ -1,5 +1,5 @@
 // Catálogo de opciones de menú y mapeo ruta -> opción para roles y derechos por cuenta.
-// Las 33 claves coinciden con public.access_option (migración 20261119100000_account_access.sql).
+// Las 34 claves coinciden con public.access_option (migración 20261119100000_account_access.sql).
 
 import { isCarrierLinkEnabled } from './featureFlags'
 
@@ -12,7 +12,7 @@ export type AccessOption =
   | 'route_analysis' | 'segment_analysis' | 'epcis_api' | 'rfid_events_db'
   | 'reported_incidents' | 'panelist_availability' | 'receipts'
   | 'users' | 'account_working_days' | 'help_center'
-  | 'cl_plans' | 'cl_samples' | 'cl_reading_points' | 'cl_connectors' | 'cl_monitor'
+  | 'cl_plans' | 'cl_samples' | 'cl_reading_points' | 'cl_connectors' | 'cl_monitor' | 'cl_incidents'
 
 export type AccessLevel = 'edit' | 'view'
 
@@ -42,6 +42,8 @@ export const ACCESS_OPTIONS: { key: AccessOption; group: string; labelKey: strin
   { key: 'cl_reading_points', group: 'carrier_link', labelKey: 'menu.cl_reading_points' },
   { key: 'cl_connectors', group: 'carrier_link', labelKey: 'menu.cl_connectors' },
   { key: 'cl_monitor', group: 'carrier_link', labelKey: 'menu.cl_monitor' },
+  // Solo concedida en DEMO2 (no está en access_template). Pantalla y ruta: tarea 5.
+  { key: 'cl_incidents', group: 'carrier_link', labelKey: 'menu.cl_incidents' },
   { key: 'postal_centers', group: 'rfid_setup', labelKey: 'menu.postal_centers' },
   { key: 'readers_management', group: 'rfid_setup', labelKey: 'menu.readers_management' },
   { key: 'segment_sla', group: 'rfid_setup', labelKey: 'menu.segment_sla' },

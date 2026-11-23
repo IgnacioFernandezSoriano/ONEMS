@@ -5835,3 +5835,5 @@ cl.balancing.routes,Routes
 cl.balancing.total,Total
 cl.balancing.stddev,Std. dev.
 cl.balancing.cell_title,Expected: {expected}; cannot be moved: {locked}
+menu.cl_incidents,Carrier Link incidents
+cl.error.cl_incident_closed,This incident is already resolved and cannot be changed.

@@ -175,9 +175,10 @@ BEGIN
 END $$;
 
 -- ================================================================ 6. mantenimiento (cl_housekeeping), fix ronda 1
--- Conector H semanal (lunes) con un plan vencido (05/10-18/10, margen 7 dias) y un plan futuro.
+-- Conector H semanal (lunes) con un plan vencido (05/10-18/10, margen 7 dias) y un plan futuro. En prueba ('testing'):
+-- asi la tarea 8 (D27, semanas vencidas con falta) no lo toca y aqui solo se ve lo de la tarea 3 (D27 en cl_incidents).
 INSERT INTO public.cl_feeds (id, account_id, carrier_id, name, status, emit_days, emit_hour) VALUES
-  ('f0000000-0000-0000-0000-0000000000d3','a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000001','Feed H','active','{1}',3);
+  ('f0000000-0000-0000-0000-0000000000d3','a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000001','Feed H','testing','{1}',3);
 INSERT INTO public.cl_plans (id, account_id, plan_name, carrier_id, product_id, total_samples, start_date, end_date, status, feed_id) VALUES
   ('90000000-0000-0000-0000-0000000000d3','a0000000-0000-0000-0000-000000000001','PH','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',5,'2026-10-05','2026-10-18','active','f0000000-0000-0000-0000-0000000000d3'),
   ('90000000-0000-0000-0000-0000000000d4','a0000000-0000-0000-0000-000000000001','PF','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',5,'2026-12-07','2026-12-20','active','f0000000-0000-0000-0000-0000000000d3');
