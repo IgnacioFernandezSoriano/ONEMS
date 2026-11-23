@@ -1,5 +1,6 @@
 """Checks the connector runs of e2e/run.sh against the dataset's ground truth and the local DB (onems_t).
 
+  python -I check.py testing    RUNS_TEST_DIR
   python -I check.py tampered   RUNS_DIR
   python -I check.py deliveries RUNS_DIR DATASET_DIR
   python -I check.py expect     RESPONSE_FILE HTTP_STATUS CL_CODE|-
@@ -31,7 +32,10 @@ ROW_REASONS = {"bad_record", "unknown_reading_point", "bad_timestamp", "unknown_
 # delivered by mistake in another registered city and then re-delivered keeps a valid route; clock_error shipments
 # (arrival recorded before the departure) are not complete by the normative definition, so they are never sent.
 SHIPMENT_REASONS = {"unknown_product"}
-PSQL = [os.environ.get("PSQL", "C:/Users/fernandezi/pgportable/pgsql/bin/psql.exe"), "-h", "127.0.0.1", "-p", "5433",
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from carrier_sim.transport import default_psql  # noqa: E402
+
+PSQL = [default_psql(), "-h", "127.0.0.1", "-p", "5433",
         "-U", "postgres", "-d", "onems_t", "-X", "-q", "-A", "-t", "-v", "ON_ERROR_STOP=1"]
 
 fails = []
@@ -83,6 +87,29 @@ def read_file_items(path, fmt, item_field="tracking_no"):
 
 def period_dirs(runs):
     return sorted(os.path.join(runs, d) for d in os.listdir(runs) if "_" in d and not d.endswith("-tampered"))
+
+
+def check_testing(runs):
+    """Two test deliveries of the same period: both accepted and processed, is_test, nothing drawn, period free."""
+    ids = []
+    for name in ("1-jsonl", "2-csv"):
+        d = os.path.join(runs, name)
+        op = load(os.path.join(d, "03-open-response.json"))
+        ok(op["http_status"] == 201 and op["body"]["delivery"]["is_test"] is True, "%s: test delivery opened (201)" % name)
+        dl = load(os.path.join(d, "06-status.json"))["body"]["delivery"]
+        ok(dl["status"] == "processed" and dl["is_test"] and dl["shipments_drawn"] == 0,
+           "%s: processed, is_test, 0 drawn" % name)
+        ok(dl["shipments_total"] == load(os.path.join(d, "manifest.json"))["shipments"], "%s: shipments counted" % name)
+        ids.append(dl["delivery_id"])
+    ok(ids[0] != ids[1], "two different test deliveries of the same period")
+    ok(sql("SELECT count(*) FROM public.cl_samples WHERE delivery_id IN ('%s', '%s')" % tuple(ids)) == "0",
+       "test deliveries create no samples")
+    ok(sql("SELECT count(*) FROM public.cl_incidents") == "0", "test deliveries open no incident")
+    cfg = json.loads(sql("SELECT public.cl_connector_config('%s')" % FEED))
+    ok((cfg.get("next_period") or {}).get("period_start") == "2026-11-02",
+       "next_period still 2026-11-02 after the test deliveries (%s)" % cfg.get("next_period"))
+    ok(sql("SELECT coalesce(sum(samples_obtained), 0) FROM public.cl_plan_quotas WHERE plan_id = '%s'" % PLAN) == "0",
+       "quotas untouched")
 
 
 def check_tampered(runs):
@@ -195,7 +222,9 @@ def check_expect(path, status, code):
 
 def main(argv):
     mode = argv[0]
-    if mode == "tampered":
+    if mode == "testing":
+        check_testing(argv[1])
+    elif mode == "tampered":
         check_tampered(argv[1])
     elif mode == "deliveries":
         check_deliveries(argv[1], argv[2])

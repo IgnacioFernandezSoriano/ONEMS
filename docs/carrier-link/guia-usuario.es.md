@@ -78,12 +78,15 @@ Se hace una sola vez por carrier, en este orden:
    **Pruebas**.
 4. **Clave.** El superadmin o el UPU Account Manager crea la clave y la entrega al carrier. Se ve una sola vez.
 5. **Pruebas con el carrier.** Con el conector en Pruebas, el carrier hace entregas de verdad: ONEMS las comprueba y
-   las cuenta como si fueran reales, pero **no crea muestras ni abre incidencias**. En Conectores ▸ Entregas se ven
-   sus recuentos y motivos de rechazo.
+   las cuenta como si fueran reales, pero **no crea muestras, ni avisos, ni incidencias**. En Conectores ▸ Entregas
+   se ven sus recuentos y motivos de rechazo (los lugares y productos desconocidos aparecen ahí, no como avisos).
+   Las entregas de prueba **no gastan periodos**: el carrier puede repetir el mismo periodo las veces que haga falta.
+   Para poder probar hace falta un plan ya aplicado que cubra esos días.
 6. **Estándares y equivalencia.** En **E2E: SLA**, compruebe que cada ruta tiene su estándar de entrega. Rellene, si
    procede, *Tiempo equiv. primer tramo* y *Tiempo equiv. último tramo*.
 7. **Activar.** Cuando las pruebas salen bien, pase el conector de Pruebas a **Activo**. Desde entonces cada entrega
-   crea muestras.
+   crea muestras. Los días que se usaron para probar no se pierden: el carrier los vuelve a entregar, ya de verdad,
+   empezando por el primero pendiente.
 
 ## El plan
 
@@ -173,14 +176,14 @@ y **cerrar a mano**.
 
 **Quién recibe los correos:** los **Account Managers** y **DO Coordinators** de la cuenta, siempre. El **carrier**,
 en su correo de avisos de Operadores y Productos, solo para los problemas que son suyos (no recibida, rechazada,
-muchos envíos rechazados). Los correos van en el idioma de la cuenta y solo llevan el conector, los periodos y
+rechazo alto). Los correos van en el idioma de la cuenta y solo llevan el conector, los periodos y
 recuentos; nunca datos de envíos.
 
 | Incidencia | Qué significa | Aviso al carrier | Se cierra sola | Qué hacer |
 |---|---|---|---|---|
 | **Entrega no recibida** | Pasó la hora de entrega más el margen y el periodo no llegó. Cada periodo más que no llega se añade a la misma incidencia y manda un correo nuevo. | Sí | Cuando llega una entrega (de cualquier periodo) | Contacte con el carrier. Si el carrier mandó el fichero por otra vía, súbalo a mano. |
 | **Entrega rechazada** | El fichero de un periodo no sirvió (no es el anunciado, formato o tamaño erróneos) o el proceso falló 3 veces. | Sí | Cuando ese periodo tiene una entrega procesada | El carrier debe corregir y reenviar el periodo. Mire el motivo en Conectores ▸ Entregas. |
-| **Muchos envíos rechazados** | Más del 20 % de los envíos de una entrega no se pudo usar. | Sí | Con la siguiente entrega por debajo del 20 % | Revise los motivos de rechazo; si son lugares o productos desconocidos, dé de alta lo que falte; si son del carrier, hable con él. |
+| **Rechazo alto** | Más del 20 % de los envíos de una entrega no se pudo usar. | Sí | Con la siguiente entrega por debajo del 20 % | Revise los motivos de rechazo; si son lugares o productos desconocidos, dé de alta lo que falte; si son del carrier, hable con él. |
 | **Productos o lugares desconocidos** | Llegaron productos o lugares que ONEMS no tiene dados de alta. | No | Cuando están todos dados de alta | Dé de alta la equivalencia de producto (Conectores) o el punto de lectura (Puntos de lectura). Si el lugar no interesa, puede cerrarla a mano. |
 | **Cuota no cubierta** | Una semana del plan terminó sin todas sus muestras y ya no se pudieron pasar a otras semanas. | No | No: solo a mano | Revise si el carrier tiene tráfico suficiente en esa ruta; si hace falta, ajuste el plan. |
 
@@ -205,12 +208,13 @@ el carrier mide 2 días y el último tramo es 1 día; el informe cuenta 3 días.
 |---|---|---|
 | Punto de lectura desconocido | Llegaron lecturas de un lugar que no está dado de alta. | Dé de alta el lugar en Puntos de lectura (bloque «Lugares sin punto de lectura») si interesa. |
 | Producto desconocido | El carrier usa un código de producto que ONEMS no reconoce. | Añada la equivalencia de producto en Conectores. |
-| Muchas lecturas rechazadas | Más del 20 % de los envíos de una entrega no sirvió. | Ver la incidencia *Muchos envíos rechazados*. |
+| Muchas lecturas rechazadas | Más del 20 % de los envíos de una entrega no sirvió. | Ver la incidencia *Rechazo alto*. |
 | Candidatos insuficientes | En una ruta y semana hubo menos envíos válidos que muestras necesarias en esa entrega. | Lo que falta pasa a las entregas siguientes. Si se repite, la ruta tiene poco tráfico. |
 | Posible envío mal encaminado | Una muestra pasó por una ciudad distinta de su origen y su destino. | Revísela en Muestras. Cuenta igual para la cuota. |
 | Distribución sospechosa | Todas las muestras de una ruta y semana (20 o más) llegaron a tiempo. | Es raro; coméntelo con el equipo ONEMS. |
 | Falta el estándar de entrega | La ruta no tiene estándar, así que no se sabe si llegó a tiempo. | Cree el estándar en E2E: SLA. Las muestras se recalculan solas. |
 | Lector sin ciudad | Un punto de lectura está en un centro postal sin ciudad. | Asigne una ciudad al centro postal. |
+| Semana ya cerrada | Llegaron envíos válidos de una semana que ya estaba cerrada y no se usaron. | Suele pasar con entregas atrasadas. Si se repite, revise el calendario con el carrier. |
 | Entrega rechazada tras 3 fallos | El proceso de una entrega falló tres veces. | Ver la incidencia *Entrega rechazada*; si se repite, avise al equipo ONEMS. |
 
 ## Preguntas frecuentes

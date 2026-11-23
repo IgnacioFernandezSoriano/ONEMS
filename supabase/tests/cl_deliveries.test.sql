@@ -508,8 +508,9 @@ BEGIN
   c := public.cl_connector_config('f0000000-0000-0000-0000-0000000000a4', '2026-11-26 10:00+03');
   PERFORM pg_temp.ok(c->'calendar'->>'frequency' = 'daily' AND c->'connector'->>'status' = 'testing'
                      AND NOT (c->>'include_all_scans')::boolean, 'diario');
-  PERFORM pg_temp.ok(c->'next_period'->>'period_start' = '2026-11-25' AND c->'next_period'->>'period_end' = '2026-11-25',
-                     'diario: siguiente al ultimo entregado: ' || (c->'next_period')::text);
+  -- Las entregas de prueba (24/11 procesada, 23/11 recibida) no consumen periodos: sigue el primero del plan.
+  PERFORM pg_temp.ok(c->'next_period'->>'period_start' = '2026-11-02' AND c->'next_period'->>'period_end' = '2026-11-02',
+                     'diario en prueba: las entregas de prueba no cuentan: ' || (c->'next_period')::text);
   c := public.cl_connector_config('f0000000-0000-0000-0000-0000000000b2', '2026-11-03 10:00+00');
   PERFORM pg_temp.ok(c->'calendar'->>'frequency' = 'weekly' AND c->'calendar'->>'timezone' = 'UTC' AND c->>'date_timezone' = 'UTC',
                      'semanal en UTC');
@@ -630,5 +631,69 @@ BEGIN
                      'anon sin funciones');
 END $$;
 RESET ROLE;
+
+
+-- Entregas de prueba (conector en Pruebas): no consumen el periodo. Se pueden repetir, no cuentan para next_period ni
+-- para el solape (restriccion EXCLUDE parcial WHERE NOT is_test) y una entrega real posterior del mismo periodo se
+-- acepta. Siguen exigiendo un plan activo.
+DO $$
+DECLARE
+  t  text := 'f0000000-0000-0000-0000-0000000000a4';
+  v_now text := '2026-11-26 10:00+03';
+  j1 jsonb; j2 jsonb; j3 jsonb; j jsonb; c jsonb; e text;
+BEGIN
+  UPDATE public.cl_feeds SET status = 'testing' WHERE id = t::uuid;
+  j1 := pg_temp.op(t, '2026-11-02', '2026-11-02', pg_temp.sha(90), v_now);
+  PERFORM pg_temp.ok((j1->>'is_test')::boolean AND j1->>'status' = 'pending_upload', 'prueba 1 abierta');
+  PERFORM pg_temp.put(j1->>'file_path', 10);
+  j := public.cl_delivery_complete_core(t::uuid, (j1->>'delivery_id')::uuid, 'api');
+  PERFORM pg_temp.ok(j->>'status' = 'received', 'prueba 1 recibida: ' || j::text);
+  -- Misma prueba con el mismo fichero: idempotente.
+  j := pg_temp.op(t, '2026-11-02', '2026-11-02', pg_temp.sha(90), v_now);
+  PERFORM pg_temp.ok((j->>'existing')::boolean AND j->>'delivery_id' = j1->>'delivery_id', 'prueba idempotente');
+  -- Segunda prueba del mismo periodo con otro fichero: aceptada (no 409), y se completa sin rechazo por solape.
+  j2 := pg_temp.op(t, '2026-11-02', '2026-11-02', pg_temp.sha(91), v_now);
+  PERFORM pg_temp.ok((j2->>'is_test')::boolean AND NOT (j2->>'existing')::boolean
+                     AND j2->>'delivery_id' <> j1->>'delivery_id', 'segunda prueba del mismo periodo aceptada');
+  PERFORM pg_temp.put(j2->>'file_path', 10);
+  j := public.cl_delivery_complete_core(t::uuid, (j2->>'delivery_id')::uuid, 'api');
+  PERFORM pg_temp.ok(j->>'status' = 'received', 'segunda prueba recibida (sin solape): ' || j::text);
+  PERFORM pg_temp.ok((SELECT status FROM public.cl_deliveries WHERE id = (j1->>'delivery_id')::uuid) = 'received',
+                     'la primera prueba no se sustituye');
+  -- next_period sigue proponiendo el periodo.
+  c := public.cl_connector_config(t::uuid, v_now::timestamptz);
+  PERFORM pg_temp.ok(c->'next_period'->>'period_start' = '2026-11-02', 'tras las pruebas sigue el 02/11: ' || (c->'next_period')::text);
+  -- Una prueba en un periodo fuera del calendario o sin plan sigue fallando.
+  e := pg_temp.raises(pg_temp.op_sql(t, '2026-12-05', '2026-12-05', pg_temp.sha(92), '2026-12-10 10:00+03'));
+  PERFORM pg_temp.ok(e LIKE '22023:CL_NO_ACTIVE_PLAN%', 'prueba sin plan: ' || coalesce(e, 'ok'));
+
+  -- Paso a Activo: la entrega real del mismo periodo (incluso con el mismo fichero que una prueba) es otra entrega.
+  UPDATE public.cl_feeds SET status = 'active' WHERE id = t::uuid;
+  j3 := pg_temp.op(t, '2026-11-02', '2026-11-02', pg_temp.sha(90), v_now);
+  PERFORM pg_temp.ok(NOT (j3->>'is_test')::boolean AND NOT (j3->>'existing')::boolean
+                     AND j3->>'delivery_id' NOT IN (j1->>'delivery_id', j2->>'delivery_id'), 'real aceptada tras pruebas');
+  PERFORM pg_temp.put(j3->>'file_path', 10);
+  j := public.cl_delivery_complete_core(t::uuid, (j3->>'delivery_id')::uuid, 'api');
+  PERFORM pg_temp.ok(j->>'status' = 'received', 'real recibida: ' || j::text);
+  c := public.cl_connector_config(t::uuid, v_now::timestamptz);
+  PERFORM pg_temp.ok(c->'next_period'->>'period_start' = '2026-11-03', 'tras la real, el 03/11: ' || (c->'next_period')::text);
+  -- Ahora el periodo real si esta consumido: otra real del 02/11 -> 409; una de prueba seguiria aceptandose.
+  e := pg_temp.raises(pg_temp.op_sql(t, '2026-11-02', '2026-11-02', pg_temp.sha(93), v_now));
+  PERFORM pg_temp.ok(e LIKE 'P0001:CL_PERIOD_ALREADY_DELIVERED%', 'segunda real: ' || coalesce(e, 'ok'));
+  -- La restriccion EXCLUDE ignora las de prueba y vigila las reales.
+  e := pg_temp.raises(format('UPDATE public.cl_deliveries SET status = ''received'', received_at = now()'
+                             ' WHERE id = %L', (pg_temp.op(t, '2026-11-03', '2026-11-03', pg_temp.sha(94), v_now))->>'delivery_id'));
+  PERFORM pg_temp.ok(e IS NULL, 'real del 03/11 sin solape: ' || coalesce(e, 'ok'));
+  INSERT INTO public.cl_deliveries (account_id, feed_id, period_start, period_end, source, is_test, format, compression,
+                                    file_path, sha256, status, received_at)
+  VALUES ('a0000000-0000-0000-0000-000000000001', t::uuid, '2026-11-03', '2026-11-03', 'api', true, 'jsonl', 'none',
+          'x/t/overlap-test.jsonl', pg_temp.sha(95), 'received', now());
+  e := pg_temp.raises(format('INSERT INTO public.cl_deliveries (account_id, feed_id, period_start, period_end, source,'
+         ' is_test, format, compression, file_path, sha256, status, received_at) VALUES (%L, %L, ''2026-11-03'','
+         ' ''2026-11-03'', ''api'', false, ''jsonl'', ''none'', ''x/t/overlap-real.jsonl'', %L, ''received'', now())',
+         'a0000000-0000-0000-0000-000000000001', t, pg_temp.sha(96)));
+  PERFORM pg_temp.ok(e LIKE '23P01:%', 'dos reales solapadas -> 23P01: ' || coalesce(e, 'ok'));
+  UPDATE public.cl_feeds SET status = 'testing' WHERE id = t::uuid;
+END $$;
 
 ROLLBACK;

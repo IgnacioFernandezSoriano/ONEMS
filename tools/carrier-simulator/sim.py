@@ -138,6 +138,41 @@ def tampered_copy(path):
     return out
 
 
+def api(t, cfg, method, path, body=None):
+    """One API call with the retries of CL-REQ-019 (network error, 429 with Retry-After, 5xx; bounded)."""
+    local = cfg["mode"] == "local"
+    return transport.with_retries(lambda: t.request(method, path, body), lambda: t.last_retry_after,
+                                  max_retries=int(cfg.get("max_retries", 5)),
+                                  sleep=(lambda _s: None) if local else time.sleep)
+
+
+def open_and_upload(t, cfg, run_dir, body, src, attempt):
+    """POST /deliveries then the single PUT. A failed PUT (or an expired URL) is solved by opening again with the
+    same body: same delivery, fresh URL (manual §12.2). Returns (delivery_id, ok)."""
+    status, resp = api(t, cfg, "POST", "/deliveries", body)
+    name = "03-open-response.json" if attempt == 0 else "03-open-response.retry%d.json" % attempt
+    save_json(os.path.join(run_dir, name), {"http_status": status, "body": resp})
+    show("POST /deliveries", status, resp, 600)
+    if status not in (200, 201):
+        return None, False
+    did = resp["delivery"]["delivery_id"]
+    if not resp.get("upload"):
+        print("no upload URL: the delivery is already %s" % resp["delivery"].get("status"))
+        return did, True
+    try:
+        status, up = t.upload(resp["upload"], src)
+    except transport.NetworkError as e:
+        status, up = None, {"network_error": str(e)}
+    name = "04-upload-response.json" if attempt == 0 else "04-upload-response.retry%d.json" % attempt
+    save_json(os.path.join(run_dir, name), {"http_status": status, "body": up})
+    show("PUT <upload url>", status, up)
+    if status == 200 or transport.already_uploaded(status, up):
+        if status != 200:
+            print("  the file is already there (Storage duplicate): go on with complete")
+        return did, True
+    return did, False
+
+
 def poll(t, cfg, delivery_id, wait=True):
     """GET /deliveries/{id} until a final status (local mode: one server 'minute' (tick) before each poll)."""
     interval = 0 if cfg["mode"] == "local" else max(30.0, float(cfg.get("poll_seconds", 60)))   # CL-REQ-018
@@ -145,7 +180,7 @@ def poll(t, cfg, delivery_id, wait=True):
     last = None
     while True:
         t.tick()
-        status, body = t.request("GET", "/deliveries/%s" % delivery_id)
+        status, body = api(t, cfg, "GET", "/deliveries/%s" % delivery_id)
         d = (body or {}).get("delivery") or {}
         now = (status, d.get("status"), d.get("phase"))
         if now != last:
@@ -170,7 +205,7 @@ def cmd_deliver(a):
     formats = [a.format] if a.format else (cfg.get("formats") or ["jsonl"])
     done, rc = 0, 0
     while done < a.max:
-        status, config = t.request("GET", "/config")
+        status, config = api(t, cfg, "GET", "/config")
         if status != 200:
             show("GET /config", status, config)
             return 1
@@ -196,26 +231,25 @@ def cmd_deliver(a):
         print("period %s..%s: %d complete shipments, %d rows (+%d broken), %s, %d bytes, sha256 %s"
               % (p0, p1, m["shipments"], m["rows"], m["invalid_rows"], fmt, m["size_bytes"], m["sha256"]))
 
-        status, resp = t.request("POST", "/deliveries", body)
-        save_json(os.path.join(run_dir, "03-open-response.json"), {"http_status": status, "body": resp})
-        show("POST /deliveries", status, resp, 600)
-        if status not in (200, 201):
-            return 1
-        did = resp["delivery"]["delivery_id"]
-        if resp.get("upload"):
-            src = tampered_copy(path) if a.tamper else path
-            status, up = t.upload(resp["upload"], src)
-            save_json(os.path.join(run_dir, "04-upload-response.json"), {"http_status": status, "body": up})
-            show("PUT <upload url>", status, up)
-            if status not in (200, 409):
+        src = tampered_copy(path) if a.tamper else path
+        reopen = int(cfg.get("max_reopen", 2))
+        for attempt in range(reopen + 1):
+            did, uploaded = open_and_upload(t, cfg, run_dir, body, src, attempt)
+            if did is None:
                 return 1
-        else:
-            print("no upload URL: the delivery is already %s" % resp["delivery"].get("status"))
-
-        status, resp = t.request("POST", "/deliveries/%s/complete" % did)
-        save_json(os.path.join(run_dir, "05-complete-response.json"), {"http_status": status, "body": resp})
-        show("POST /deliveries/%s/complete" % did, status, resp, 600)
-        if status >= 500:
+            if not uploaded:
+                if attempt < reopen:
+                    print("  upload failed: open again for a fresh URL")
+                    continue
+                return 1
+            status, resp = api(t, cfg, "POST", "/deliveries/%s/complete" % did)
+            save_json(os.path.join(run_dir, "05-complete-response.json"), {"http_status": status, "body": resp})
+            show("POST /deliveries/%s/complete" % did, status, resp, 600)
+            if status == 409 and (resp or {}).get("error") == "CL_FILE_NOT_UPLOADED" and attempt < reopen:
+                print("  the file is not there: open again and upload")
+                continue
+            break
+        if status >= 500 or (status == 409 and (resp or {}).get("error") == "CL_FILE_NOT_UPLOADED"):
             return 1
         status, resp = poll(t, cfg, did, wait=not a.no_wait)
         save_json(os.path.join(run_dir, "06-status.json"), {"http_status": status, "body": resp})

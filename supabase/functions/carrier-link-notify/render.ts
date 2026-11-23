@@ -43,7 +43,7 @@ const T: Record<Lang, Texts> = {
   en: {
     title: {
       missing_delivery: 'Delivery not received', delivery_rejected: 'Delivery rejected',
-      high_rejection: 'Many shipments rejected', unknown_data: 'Unknown points or products',
+      high_rejection: 'High rejection', unknown_data: 'Unknown points or products',
       quota_unfilled: 'Weekly quota not met',
     },
     body: {
@@ -60,7 +60,7 @@ const T: Record<Lang, Texts> = {
   es: {
     title: {
       missing_delivery: 'Entrega no recibida', delivery_rejected: 'Entrega rechazada',
-      high_rejection: 'Muchos envíos rechazados', unknown_data: 'Puntos o productos desconocidos',
+      high_rejection: 'Rechazo alto', unknown_data: 'Puntos o productos desconocidos',
       quota_unfilled: 'Cuota semanal no cubierta',
     },
     body: {
@@ -77,7 +77,7 @@ const T: Record<Lang, Texts> = {
   fr: {
     title: {
       missing_delivery: 'Livraison non reçue', delivery_rejected: 'Livraison rejetée',
-      high_rejection: 'Nombreux envois rejetés', unknown_data: 'Points ou produits inconnus',
+      high_rejection: 'Rejet élevé', unknown_data: 'Points ou produits inconnus',
       quota_unfilled: 'Quota hebdomadaire non atteint',
     },
     body: {
@@ -94,7 +94,7 @@ const T: Record<Lang, Texts> = {
   ar: {
     title: {
       missing_delivery: 'لم يتم استلام التسليم', delivery_rejected: 'تم رفض التسليم',
-      high_rejection: 'رفض عدد كبير من الشحنات', unknown_data: 'نقاط أو منتجات غير معروفة',
+      high_rejection: 'نسبة رفض مرتفعة', unknown_data: 'نقاط أو منتجات غير معروفة',
       quota_unfilled: 'لم تكتمل الحصة الأسبوعية',
     },
     body: {
@@ -111,7 +111,7 @@ const T: Record<Lang, Texts> = {
   pt: {
     title: {
       missing_delivery: 'Entrega não recebida', delivery_rejected: 'Entrega rejeitada',
-      high_rejection: 'Muitos envios rejeitados', unknown_data: 'Pontos ou produtos desconhecidos',
+      high_rejection: 'Rejeição elevada', unknown_data: 'Pontos ou produtos desconhecidos',
       quota_unfilled: 'Quota semanal não cumprida',
     },
     body: {

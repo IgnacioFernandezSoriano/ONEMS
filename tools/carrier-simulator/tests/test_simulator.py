@@ -328,6 +328,25 @@ class BuildDeliveryTest(unittest.TestCase):
         with self.assertRaises(connector.ConnectorError):
             build(cfg=cfg)
 
+    def test_empty_period(self):
+        d = build(rows=[])
+        self.assertEqual(d["bytes"], b"\n")                    # size_bytes >= 1: one blank line, no record
+        self.assertEqual(d["size_bytes"], 1)
+        self.assertEqual(d["control_totals"], [])
+        self.assertTrue(contract.validate_open_request(connector.open_request(d, D(2026, 11, 9), D(2026, 11, 11)))[0])
+        c = build(rows=[], fmt="csv")
+        self.assertEqual(c["bytes"], b"tracking_no,service,event_ts,site_code,event_code,weight_g\r\n")
+
+    def test_iso_offset_refused_loudly(self):
+        cfg = config()
+        cfg["fields"]["scan_at"]["format"] = None
+        rows = [scan("I1", "2026-11-10T09:00:00", "NPT-PO", "ACC"), scan("I1", "2026-11-11T10:00:00", "SVL-PO", "DLV")]
+        self.assertEqual(jsonl_records(build(rows, cfg)["bytes"])[0]["tracking_no"], "I1")
+        rows.append(scan("I2", "2026-11-10T09:00:00+03:00", "NPT-PO", "ACC"))
+        with self.assertRaises(connector.ConnectorError):
+            build(rows, cfg)
+        self.assertIsNone(connector.parse_ts("not a date", None))
+
     def test_pg_format(self):
         self.assertEqual(connector.pg_format_to_strptime("DD/MM/YYYY HH24:MI:SS"), FMT)
         self.assertEqual(connector.pg_format_to_strptime("YYYY-MM-DD HH24:MI"), "%Y-%m-%d %H:%M")
@@ -461,6 +480,59 @@ class DevTransportTest(unittest.TestCase):
         self.assertEqual(t.request("OPTIONS", "/config"), (204, None))
         with self.assertRaises(transport.TransportError):
             t.upload({"url": "https://x.supabase.co/storage/v1/object/upload/sign/x"}, __file__)
+
+
+class RetryAndUploadTest(unittest.TestCase):
+    def run_seq(self, answers, retry_after=None, max_retries=5):
+        seq, waits = list(answers), []
+
+        def call():
+            x = seq.pop(0)
+            if isinstance(x, Exception):
+                raise x
+            return x
+        out = transport.with_retries(call, lambda: retry_after, max_retries=max_retries, sleep=waits.append,
+                                     log=lambda *_: None)
+        return out, waits, seq
+
+    def test_429_waits_retry_after(self):
+        out, waits, _ = self.run_seq([(429, {}), (200, {"ok": 1})], retry_after=17)
+        self.assertEqual(out, (200, {"ok": 1}))
+        self.assertEqual(waits, [17])
+
+    def test_5xx_and_network_backoff_bounded(self):
+        out, waits, left = self.run_seq([(500, {}), transport.NetworkError("x"), (503, {}), (201, {})])
+        self.assertEqual(out[0], 201)
+        self.assertEqual(waits, [30, 60, 120])
+        out, waits, left = self.run_seq([(500, {})] * 10, max_retries=3)
+        self.assertEqual(out[0], 500)
+        self.assertEqual(len(waits), 3)
+        self.assertEqual(len(left), 6)
+        with self.assertRaises(transport.NetworkError):
+            self.run_seq([transport.NetworkError("down")] * 3, max_retries=2)
+
+    def test_client_errors_not_retried(self):
+        out, waits, left = self.run_seq([(409, {"error": "CL_PERIOD_ALREADY_DELIVERED"}), (200, {})])
+        self.assertEqual(out[0], 409)
+        self.assertEqual(waits, [])
+
+    def test_already_uploaded(self):
+        self.assertTrue(transport.already_uploaded(409, {}))
+        self.assertTrue(transport.already_uploaded(400, {"statusCode": "409", "error": "Duplicate"}))
+        self.assertTrue(transport.already_uploaded(400, {"statusCode": 409}))
+        self.assertFalse(transport.already_uploaded(400, {"statusCode": "400"}))
+        self.assertFalse(transport.already_uploaded(200, {}))
+        self.assertFalse(transport.already_uploaded(403, None))
+
+    def test_loopback_upload_host_is_pinned(self):
+        t = transport.DevTransport("http://127.0.0.1:9/functions/v1/carrier-link-ingest", "k")
+        with self.assertRaises(transport.TransportError):
+            t.upload({"url": "http://evil.example/x"}, __file__)
+
+    def test_network_error_is_raised_as_such(self):
+        t = transport.DevTransport("http://127.0.0.1:9/functions/v1/carrier-link-ingest", "k", timeout=2)
+        with self.assertRaises(transport.NetworkError):
+            t.request("GET", "/config")
 
 
 if __name__ == "__main__":

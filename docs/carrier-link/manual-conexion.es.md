@@ -225,7 +225,8 @@ ONEMS calcula el periodo que toca entregar y lo publica en `GET /config`:
 Cálculo (normativo):
 
 1. Se toma el día siguiente al último periodo ya entregado (entregas en estado `received`, `processing`,
-   `processed` o `failed`; las `rejected` no cuentan). Sin entregas, el primer día del primer plan activo.
+   `processed` o `failed`; las `rejected` y las **de prueba** (§15.1) no cuentan). Sin entregas, el primer día
+   del primer plan activo.
 2. Si ese día no lo cubre ningún plan activo, se salta al inicio del siguiente plan activo.
 3. El periodo es el del calendario que contiene ese día. Su inicio nunca es anterior al día siguiente a lo ya
    entregado (importa si el calendario cambia a mitad de periodo).
@@ -249,7 +250,8 @@ de un producto del plan que cumple las tres condiciones:
    un punto con papel `destination` o `both`— tiene fecha local (`date_timezone`) entre `period_start` y
    `period_end`, ambos incluidos.
 2. **Salida anterior.** Tiene una lectura en un punto con papel `origin` o `both`, **anterior** a esa llegada (del
-   mismo periodo o de cualquier fecha anterior) y distinta de ella.
+   mismo periodo o de cualquier fecha anterior) y distinta de ella. (ONEMS también acepta una salida con la misma
+   hora exacta que la llegada si son lecturas distintas; el carrier PUEDE incluir esos envíos.)
 3. **Con todas sus lecturas.** Se envía con **todas** sus lecturas en los puntos acordados (cualquier papel,
    incluidas las de `intermediate`) o, si `include_all_scans` es `true` (el plan tiene diagnóstico), con
    **todas** sus lecturas.
@@ -444,8 +446,9 @@ Cada entrega declara, en `control_totals`, cuántos envíos completos del ficher
 4. **Abrir la entrega.** `POST /deliveries` con `period_start`, `period_end`, `format`, `size_bytes`, `sha256` y
    `control_totals`. Respuesta `201` con `delivery.delivery_id` y `upload` (o `200` si ya estaba abierta, §12.1).
 5. **Subir el fichero.** Un único `PUT` a `upload.url`, con cuerpo = los bytes del fichero, cabecera
-   `Content-Type` = `upload.headers.Content-Type` y **sin** la clave. Respuesta `200`. Un `409` (el objeto ya
-   existe) significa que ya se subió: seguir al paso 6. Si falla o caduca la URL: volver al paso 4 con el mismo
+   `Content-Type` = `upload.headers.Content-Type` y **sin** la clave. Respuesta `200`. Si el fichero ya estaba
+   subido, el almacén responde `409`, o `400` con `"statusCode": "409"` en el cuerpo (según la versión): las dos
+   significan «ya subido» y se sigue al paso 6. Si falla o caduca la URL: volver al paso 4 con el mismo
    cuerpo (misma entrega, URL nueva).
 6. **Completar.** `POST /deliveries/{id}/complete` (sin cuerpo). `202`: recibida; ONEMS empieza a procesarla en
    menos de un minuto. `409 CL_FILE_NOT_UPLOADED`: el fichero no está; volver al paso 5.
@@ -458,7 +461,12 @@ Notas:
 - Abrir otra vez el **mismo periodo con otro fichero** mientras la primera entrega espera el fichero la anula
   (`rejected` `CL_SUPERSEDED`): vale la última.
 - Una entrega abierta y no completada en 7 días se rechaza (`CL_UPLOAD_EXPIRED`) y el periodo sigue pendiente.
-- El conector de referencia (`python -I tools/carrier-simulator/sim.py deliver`) hace exactamente estos pasos.
+- El conector de referencia (`python -I tools/carrier-simulator/sim.py deliver`) hace exactamente estos pasos,
+  con los reintentos de §12 (`Retry-After` en `429`, espera creciente y acotada en errores de red y `5xx`, nueva
+  apertura si la subida falla o si `complete` responde `CL_FILE_NOT_UPLOADED`).
+- **Periodo sin envíos**: se entrega igual, con `control_totals: []`. Como `size_bytes` debe ser al menos 1, el
+  fichero es un CSV con solo la cabecera o un JSON Lines con una sola línea en blanco (ONEMS ignora las líneas en
+  blanco). Nunca un fichero de 0 bytes.
 
 ---
 
@@ -510,8 +518,9 @@ Petición (lista cerrada de claves; otra clave → `400`):
 | `compression` | `"none"` \| `null` | no | Cualquier otro valor → `CL_COMPRESSION_UNSUPPORTED` |
 | `control_totals` | lista | sí (puede ser `[]`) | §7 |
 
-Comprobaciones, en este orden: cuerpo y campos (`400`); conector existente y no pausado (`404` / `403`);
-idempotencia (mismo periodo y sha256 → `200` con `existing: true`); periodo cerrado (`422
+Comprobaciones, en este orden: cuerpo y campos (`400`); tamaño declarado frente a `limits.max_file_bytes`
+(`413 CL_FILE_TOO_LARGE`, antes que todo lo demás); conector existente y no pausado (`404` / `403`); idempotencia
+(mismo periodo, mismo sha256 y misma clase —prueba o real— → `200` con `existing: true`); periodo cerrado (`422
 CL_PERIOD_NOT_CLOSED`); sin solape con un periodo ya entregado (`409 CL_PERIOD_ALREADY_DELIVERED`); periodo del
 calendario (`422 CL_PERIOD_NOT_IN_CALENDAR`); un plan activo lo cubre (`422 CL_NO_ACTIVE_PLAN`).
 
@@ -527,8 +536,8 @@ completar).
 
 ### 9.3. `POST /deliveries/{id}/complete`
 
-Sin cuerpo. Respuestas: `202` (`received`); `200` (ya `processing`, `processed` o `failed`); `409
-CL_FILE_NOT_UPLOADED`; si la entrega queda o estaba `rejected`, el código HTTP de su error (por ejemplo `409
+Sin cuerpo. Respuestas: `202` (`received`, también si se repite mientras sigue `received`); `200` (ya
+`processing`, `processed` o `failed`); `409 CL_FILE_NOT_UPLOADED`; `403 CL_FEED_PAUSED` (conector pausado); si la entrega queda o estaba `rejected`, el código HTTP de su error (por ejemplo `409
 CL_SUPERSEDED`, `410 CL_UPLOAD_EXPIRED`, `413 CL_FILE_TOO_LARGE`, `422 CL_SHA256_MISMATCH`) con la entrega en el
 cuerpo. Un `id` ajeno, inexistente o mal formado responde siempre igual: `404 CL_DELIVERY_NOT_FOUND`.
 
@@ -559,7 +568,8 @@ pending_upload --complete--> received --> processing --> processed
 | `failed` | Error temporal de ONEMS; se reintenta sola (hasta 3 intentos, cada uno al menos 5 minutos después del anterior) | no | Esperar |
 | `rejected` | Rechazada (`error` dice por qué) | **sí** | Corregir y reenviar el periodo (§12.3) |
 
-Una entrega cuenta como **entregada** (para `next_period` y para los solapes) en `received`, `processing`,
+Una entrega **real** (no de prueba, §15.1) cuenta como **entregada** (para `next_period` y para los solapes) en
+`received`, `processing`,
 `processed` y `failed`.
 
 ### 10.2. Fases (`delivery.phase`) y avance
@@ -629,9 +639,12 @@ Recuentos al terminar: `rows_total`, `rows_rejected`, `shipments_total` (envíos
 | 429 | `CL_RATE_LIMITED` | Más de 30 peticiones en un minuto (cabecera `Retry-After: 60`) | Esperar y reintentar |
 | 500 | `CL_INTERNAL` | Error interno | Reintentar con espera creciente |
 
-Los códigos de rechazo (`413`/`422` de la parte final de la tabla, más `CL_SUPERSEDED`,
-`CL_PERIOD_ALREADY_DELIVERED` y `CL_UPLOAD_EXPIRED`) llegan como respuesta HTTP solo en `complete`; después se leen
-en `delivery.error` con `GET /deliveries/{id}` (`200`).
+`CL_FILE_TOO_LARGE` y `CL_PERIOD_ALREADY_DELIVERED` los devuelve ya `POST /deliveries` (§9.2) y también
+`complete`, si la entrega queda rechazada al completarla. Los demás códigos de rechazo del fichero
+(`CL_SHA256_MISMATCH`, `CL_TOO_MANY_ROWS`, `CL_RECORD_TOO_LONG`, `CL_MAPPING_INCOMPLETE`, `CL_BAD_ENCODING`,
+`CL_BAD_CSV_HEADER`, `CL_FILE_MISSING`, `CL_RETRIES_EXHAUSTED`), `CL_SUPERSEDED` y `CL_UPLOAD_EXPIRED` llegan como
+respuesta HTTP solo en `complete` (si la entrega ya está rechazada en ese momento); en cualquier caso se leen en
+`delivery.error` con `GET /deliveries/{id}` (`200`).
 
 Errores **temporales** que solo aparecen en `delivery.error` de una entrega `failed` (ONEMS reintenta solo):
 `CL_STORAGE_ERROR`, `CL_STORAGE_SHORT_READ`, `CL_FILE_SIZE_UNKNOWN`, `CL_WORKER_ERROR`, `CL_WORKER_LOST`,
@@ -688,9 +701,11 @@ explicar:
 
 ### 12.1. Idempotencia
 
-- `POST /deliveries` con el **mismo periodo y el mismo sha256** que una entrega no rechazada devuelve esa entrega
-  (`200`, `existing: true`), sin crear otra. Si aún espera el fichero, trae una URL de subida nueva.
-- `POST /deliveries/{id}/complete` repetido devuelve el estado actual (`200`).
+- `POST /deliveries` con el **mismo periodo y el mismo sha256** que una entrega no rechazada de la misma clase
+  (prueba o real) devuelve esa entrega (`200`, `existing: true`), sin crear otra. Si aún espera el fichero, trae una
+  URL de subida nueva. Una entrega real con el mismo fichero que una de prueba es una entrega nueva.
+- `POST /deliveries/{id}/complete` repetido devuelve el estado actual: `202` mientras siga `received`, `200` en
+  `processing`, `processed` o `failed`.
 - `GET` no cambia nada.
 
 Por eso, ante un error de red o un `5xx`, el conector DEBE repetir la misma llamada con el mismo contenido
@@ -698,7 +713,8 @@ Por eso, ante un error de red o un `5xx`, el conector DEBE repetir la misma llam
 
 ### 12.2. Subida fallida o URL caducada
 
-Repetir `POST /deliveries` con el mismo cuerpo: misma entrega, URL nueva. Si el PUT responde `409` (el fichero ya
+Repetir `POST /deliveries` con el mismo cuerpo: misma entrega, URL nueva. Si el PUT responde `409`, o `400` con
+`"statusCode": "409"` en el cuerpo (el fichero ya
 está), continuar con `complete`.
 
 ### 12.3. Reenviar un periodo rechazado
@@ -741,7 +757,7 @@ los periodos y recuentos; nunca datos de envíos.
 |---|---|---|---|
 | **Entrega no recibida** | Pasa `due_at` + margen (6 h por defecto) sin entrega del periodo. Cada periodo que siga sin llegar mientras la incidencia esté abierta genera un nuevo aviso. | Sola, en cuanto se recibe una entrega | Entregar los periodos pendientes en orden |
 | **Entrega rechazada** | Una entrega queda `rejected` por el fichero (huella, tamaño, filas, codificación, cabecera CSV, equivalencias) o por agotar los reintentos | Sola, cuando ese periodo tiene una entrega procesada | Corregir y reenviar (§12.3) |
-| **Muchos envíos rechazados** | Más del 20 % de los envíos de una entrega rechazados | Sola, con la siguiente entrega por debajo del umbral | Revisar `rejected_reasons` y la extracción (§5) |
+| **Rechazo alto** | Más del 20 % de los envíos de una entrega rechazados | Sola, con la siguiente entrega por debajo del umbral | Revisar `rejected_reasons` y la extracción (§5) |
 
 Los avisos no esperan respuesta. Para dudas, el contacto acordado con el equipo de ONEMS.
 
@@ -752,9 +768,20 @@ Los avisos no esperan respuesta. Para dudas, el contacto acordado con el equipo 
 ### 15.1. Modo pruebas
 
 Un conector nuevo empieza en **Pruebas** (`connector.status = "testing"`). La API, los ficheros y el proceso son
-exactamente los mismos, pero las entregas se marcan `is_test: true`: se comprueban y cuentan, **no crean muestras**,
-no generan alertas ni incidencias y no avisan. Sirven para certificar el conector. Cuando las pruebas pasan, ONEMS
-lo cambia a **Activo**; desde entonces cada entrega crea muestras. Un conector **Pausado** no acepta entregas
+exactamente los mismos, pero las entregas se marcan `is_test: true`:
+
+- se comprueban y cuentan (recuentos y motivos de rechazo en `GET /deliveries/{id}`), pero **no crean muestras**,
+  **no generan alertas** (los productos y lugares desconocidos solo se ven como recuentos de motivos), no abren
+  incidencias y no avisan;
+- **no consumen el periodo**: no cuentan para `next_period` ni para los solapes, así que el mismo periodo se puede
+  entregar en prueba tantas veces como haga falta (con el mismo fichero, `POST /deliveries` devuelve la misma entrega
+  de prueba; con otro fichero, abre otra) y, al pasar a Activo, ese periodo se entrega de nuevo como real y da sus
+  muestras;
+- siguen exigiendo un periodo cerrado y del calendario (alineado con las entregas reales) y **un plan activo** que lo
+  cubra (`422 CL_NO_ACTIVE_PLAN` si no): para certificar, ONEMS aplica el plan (o un plan de prueba) antes.
+
+Cuando las pruebas pasan, ONEMS lo cambia a **Activo**; desde entonces cada entrega crea muestras y `next_period`
+propone el primer periodo real pendiente, aunque ya se hubiera probado. Un conector **Pausado** no acepta entregas
 (`403 CL_FEED_PAUSED`).
 
 ### 15.2. Pruebas de conformidad
@@ -770,7 +797,7 @@ Se ejecutan con el conector en Pruebas. El carrier guarda las peticiones y respu
 | CT-05 | Revisión de la entrega: `shipments_total` = envíos del fichero = suma de `control_totals` | Coinciden | 009, 015 |
 | CT-06 | Revisión de motivos: sin `end_out_of_period`, `no_start` ni `no_end` salvo los explicados por datos reales | Explicados por escrito | 009–011 |
 | CT-07 | Repetir el `POST /deliveries` de CT-03 | `200`, `existing: true`, `upload: null` | 012 (§12.1) |
-| CT-08 | Abrir el periodo de CT-03 con otro sha256 | `409 CL_PERIOD_ALREADY_DELIVERED` | 020 |
+| CT-08 | Abrir el periodo de CT-03 con otro sha256 (en Pruebas) | `201`, otra entrega de prueba; `next_period` sigue siendo el mismo periodo (las pruebas no lo consumen). Con el conector Activo, el mismo caso tras una entrega real daría `409 CL_PERIOD_ALREADY_DELIVERED` (ejemplo 13) | 007, 020 |
 | CT-09 | Abrir un periodo que no es el del calendario | `422 CL_PERIOD_NOT_IN_CALENDAR` | 007 |
 | CT-10 | Abrir el periodo en curso (sin cerrar) | `422 CL_PERIOD_NOT_CLOSED` | 007 |
 | CT-11 | `POST /deliveries` con `compression: "gzip"` y con una clave extra en el cuerpo | `400 CL_COMPRESSION_UNSUPPORTED` / `400 CL_BAD_REQUEST` | 013 |
@@ -807,8 +834,12 @@ Se ejecutan con el conector en Pruebas. El carrier guarda las peticiones y respu
 
 **ONEMS**
 
-- [ ] Revisión de las entregas de prueba (motivos de rechazo, alertas, puntos y productos desconocidos).
-- [ ] Plan activo y conector pasado a **Activo**; primera entrega real seguida hasta `processed`.
+- [ ] Plan aplicado (activo) que cubra los periodos de prueba: sin él, las entregas de prueba responden
+      `422 CL_NO_ACTIVE_PLAN`.
+- [ ] Revisión de las entregas de prueba: recuentos y motivos de rechazo (`unknown_reading_point`,
+      `unknown_product`…). En Pruebas no se crean alertas: los desconocidos se ven solo en los motivos.
+- [ ] Conector pasado a **Activo**. Los periodos probados no se pierden: `next_period` vuelve a proponer el primero
+      pendiente y el carrier lo entrega como real. Primera entrega real seguida hasta `processed`.
 
 ---
 
@@ -878,6 +909,8 @@ calendario más frecuente.
 `phase`, `bytes_loaded` y `rows_loaded`.
 
 **¿Puedo saber qué envíos se eligieron?** No (§13).
+
+**¿Las entregas de prueba gastan periodos?** No (§15.1): al pasar a Activo se entregan de nuevo como reales.
 
 **¿Hay un entorno de pruebas?** El modo Pruebas del conector (§15.1). Además, el simulador
 `tools/carrier-simulator/` incluye un conector de referencia en Python.

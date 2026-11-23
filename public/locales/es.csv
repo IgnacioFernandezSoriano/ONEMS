@@ -5720,7 +5720,6 @@ cl.records.view_matrix,Matriz
 cl.records.planned,Previsto
 cl.records.carried_in,Arrastrado
 cl.records.obtained,Obtenido
-cl.records.demands,Peticiones
 cl.records.view_samples,Ver muestras
 cl.records.page_total,Total (esta página)
 cl.records.empty,No hay registros con estos filtros.

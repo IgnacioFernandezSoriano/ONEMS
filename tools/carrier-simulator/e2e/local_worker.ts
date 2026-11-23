@@ -10,7 +10,9 @@
 // the local test database only).
 import { DEFAULTS, runOnce, type WorkerIo } from '../../../supabase/functions/carrier-link-worker/loader.ts'
 
-const PSQL = Deno.env.get('SIM_PSQL') ?? 'C:/Users/fernandezi/pgportable/pgsql/bin/psql.exe'
+// psql: $PSQL, else the portable Postgres under the user's home (the local test setup).
+const HOME = Deno.env.get('USERPROFILE') ?? Deno.env.get('HOME') ?? '.'
+const PSQL = Deno.env.get('PSQL') ?? `${HOME}/pgportable/pgsql/bin/psql.exe`
 const DB = Deno.env.get('SIM_DB') ?? 'onems_t'
 const CONN = ['-h', '127.0.0.1', '-p', '5433', '-U', 'postgres', '-d', DB, '-v', 'ON_ERROR_STOP=1', '-X', '-q', '-At']
 

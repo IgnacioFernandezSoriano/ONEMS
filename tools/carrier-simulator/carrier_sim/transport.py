@@ -12,7 +12,8 @@ LocalTransport the local Postgres only (127.0.0.1:5433, onems_t) through psql. A
                cl_delivery_status. Documented local stubs:
                  * the signed upload URL is local://cl-deliveries/<path>; the "PUT" writes the file under
                    <work_dir>/storage/<path> and registers the object in storage.objects (bucket cl-deliveries, with
-                   metadata.size), as Supabase Storage does; a second PUT of the same path answers 409 (no upsert);
+                   metadata.size), as Supabase Storage does; a second PUT of the same path answers HTTP 400 with
+                   statusCode "409" in the body (no upsert; some Storage versions answer HTTP 409 instead);
                  * processing (pg_cron + the carrier-link-worker Edge Function) is emulated by tick(): it runs
                    local.process_cmd (e2e/local_worker.ts: the REAL worker loader against the local DB, then
                    CALL cl_delivery_process_run) before each status poll;
@@ -21,7 +22,9 @@ LocalTransport the local Postgres only (127.0.0.1:5433, onems_t) through psql. A
 import json
 import os
 import re
+import shutil
 import subprocess
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -34,6 +37,47 @@ LOCAL_UPLOAD_PREFIX = "local://%s/" % contract.BUCKET
 
 class TransportError(Exception):
     pass
+
+
+class NetworkError(TransportError):
+    """No HTTP answer (connection refused, timeout, DNS...): the same call may be retried."""
+
+
+def default_psql():
+    """psql of the local tests: $PSQL, else the portable Postgres under the user's home, else psql on the PATH."""
+    if os.environ.get("PSQL"):
+        return os.environ["PSQL"]
+    portable = os.path.join(os.path.expanduser("~"), "pgportable", "pgsql", "bin", "psql.exe")
+    return portable if os.path.exists(portable) else (shutil.which("psql") or "psql")
+
+
+def already_uploaded(status, body):
+    """Supabase Storage answers a second PUT of the same object with 409, or with HTTP 400 and statusCode "409" in
+    the body (depending on the Storage version): both mean the file is already there -> go on with complete."""
+    if status == 409:
+        return True
+    return status == 400 and isinstance(body, dict) and str(body.get("statusCode")) == "409"
+
+
+def with_retries(call, retry_after=lambda: None, max_retries=5, sleep=time.sleep, log=print, base=30, cap=480):
+    """CL-REQ-019: repeats call() (-> (status, body)) on a network error, 429 or 5xx, at most max_retries times.
+    429: waits Retry-After (60 s if absent); otherwise exponential backoff base*2^n capped at cap seconds."""
+    attempt = 0
+    while True:
+        try:
+            status, body = call()
+            err = None
+        except NetworkError as e:
+            status, body, err = None, None, e
+        retryable = err is not None or status == 429 or (status is not None and status >= 500)
+        if not retryable or attempt >= max_retries:
+            if err is not None:
+                raise err
+            return status, body
+        wait = (retry_after() or 60) if status == 429 else min(base * 2 ** attempt, cap)
+        log("  %s: retry %d/%d in %ss" % (err or "HTTP %s" % status, attempt + 1, max_retries, wait))
+        sleep(wait)
+        attempt += 1
 
 
 def read_key(path):
@@ -67,6 +111,7 @@ _OPENER = urllib.request.build_opener(_NoRedirect)
 
 class DevTransport:
     def __init__(self, base_url, key, timeout=120, upload_timeout=7200):
+        self.last_retry_after = None
         self.base = base_url.rstrip("/")
         self.key = key
         self.timeout = timeout
@@ -83,11 +128,16 @@ class DevTransport:
                                      % ref)
 
     def _open(self, req, timeout):
+        self.last_retry_after = None
         try:
             with _OPENER.open(req, timeout=timeout) as r:
                 return r.status, _json(r.read())
         except urllib.error.HTTPError as e:
+            ra = e.headers.get("Retry-After") if e.headers else None
+            self.last_retry_after = int(ra) if ra and ra.strip().isdigit() else None
             return e.code, _json(e.read())
+        except (urllib.error.URLError, OSError) as e:      # no HTTP answer at all
+            raise NetworkError("network error: %s" % getattr(e, "reason", e))
 
     def request(self, method, path, body=None, headers=None):
         data = None
@@ -101,8 +151,10 @@ class DevTransport:
     def upload(self, upload, path):
         """One PUT of the whole file to the signed URL (streamed from disk, never the API key)."""
         url = urllib.parse.urlparse(upload["url"])
-        if self.remote and (url.scheme != "https" or url.hostname != self.host):
-            raise TransportError("upload URL refused: it must be https on %s" % self.host)
+        # The upload URL must stay on the project host (and be https when the host is remote).
+        if url.hostname != self.host or (self.remote and url.scheme != "https"):
+            raise TransportError("upload URL refused: it must be %s on %s"
+                                 % ("https" if self.remote else "http(s)", self.host))
         size = os.path.getsize(path)
         headers = dict(upload.get("headers") or {})
         headers["Content-Length"] = str(size)
@@ -123,7 +175,8 @@ class SqlError(Exception):
 
 class LocalTransport:
     def __init__(self, local, key, work_dir):
-        self.psql = local.get("psql", "C:/Users/fernandezi/pgportable/pgsql/bin/psql.exe")
+        self.last_retry_after = None
+        self.psql = local.get("psql") or default_psql()
         self.host = local.get("host", "127.0.0.1")
         if self.host not in LOOPBACK:
             raise TransportError("local mode only talks to a loopback Postgres, not %s" % self.host)
@@ -181,7 +234,11 @@ class LocalTransport:
         if method != contract.ROUTE_METHOD[route["kind"]]:
             return _fail("CL_METHOD_NOT_ALLOWED")
         try:
-            feed = self._feed()
+            try:
+                feed = self._feed()
+            except SqlError as e:              # api_key_resolve failed: same mapping as any other database error
+                mapped = contract.sql_error_to_http(e.sqlstate, e.message)
+                return _fail(mapped[1] if mapped else "CL_INTERNAL")
             if not feed:
                 return _fail("CL_UNAUTHORIZED")
             if route["kind"] == "config":
@@ -244,8 +301,8 @@ class LocalTransport:
             data = f.read()
         exists = self._sql("SELECT count(*) FROM storage.objects WHERE bucket_id = :'b' AND name = :'n';",
                            {"b": contract.BUCKET, "n": name}, role=None)
-        if exists != "0":
-            return 409, {"statusCode": "409", "error": "Duplicate", "message": "The resource already exists"}
+        if exists != "0":   # what Supabase Storage answers to a second PUT of the same object (no upsert)
+            return 400, {"statusCode": "409", "error": "Duplicate", "message": "The resource already exists"}
         dest = os.path.join(self.storage_dir, *name.split("/"))
         os.makedirs(os.path.dirname(dest), exist_ok=True)
         with open(dest, "wb") as f:

@@ -67,7 +67,7 @@ export interface QuotaFilters {
 export const EMPTY_QUOTA_FILTERS: QuotaFilters = { origin: '', destination: '', week: '', status: '' }
 
 export const QUOTA_COLUMNS =
-  'id, origin_city_id, destination_city_id, iso_year, iso_week, period_start, period_end, samples_planned, samples_carried_in, samples_obtained, demands_count, status'
+  'id, origin_city_id, destination_city_id, iso_year, iso_week, period_start, period_end, samples_planned, samples_carried_in, samples_obtained, status'
 
 /** Orden estable de la tabla: semana, ruta e id (para que las páginas no se solapen). */
 export const QUOTA_ORDER = ['iso_year', 'iso_week', 'origin_city_id', 'destination_city_id', 'id'] as const
@@ -100,7 +100,6 @@ export interface QuotaRecord {
   planned: number
   carried_in: number
   obtained: number
-  demands: number
   status: string
 }
 
@@ -116,20 +115,18 @@ export function toQuotaRecord(r: Record<string, any>): QuotaRecord {
     planned: r.samples_planned ?? 0,
     carried_in: r.samples_carried_in ?? 0,
     obtained: r.samples_obtained ?? 0,
-    demands: r.demands_count ?? 0,
     status: r.status,
   }
 }
 
-export function quotaTotals(rows: QuotaRecord[]): { planned: number; carried_in: number; obtained: number; demands: number } {
+export function quotaTotals(rows: QuotaRecord[]): { planned: number; carried_in: number; obtained: number } {
   return rows.reduce(
     (a, r) => ({
       planned: a.planned + r.planned,
       carried_in: a.carried_in + r.carried_in,
       obtained: a.obtained + r.obtained,
-      demands: a.demands + r.demands,
     }),
-    { planned: 0, carried_in: 0, obtained: 0, demands: 0 },
+    { planned: 0, carried_in: 0, obtained: 0 },
   )
 }
 
@@ -139,7 +136,6 @@ export interface QuotaFilterTotals {
   planned: number
   carried_in: number
   obtained: number
-  demands: number
 }
 
 /** Parámetros de cl_plan_quota_totals con los mismos filtros que la tabla (vacíos o no válidos = sin filtro). */
@@ -165,7 +161,6 @@ export function toQuotaFilterTotals(data: unknown): QuotaFilterTotals | null {
     planned: n(row.planned),
     carried_in: n(row.carried),
     obtained: n(row.obtained),
-    demands: n(row.demands),
   }
 }
 

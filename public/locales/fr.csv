@@ -5712,7 +5712,6 @@ cl.records.view_matrix,Matrice
 cl.records.planned,Prévu
 cl.records.carried_in,Reporté
 cl.records.obtained,Obtenu
-cl.records.demands,Demandes
 cl.records.view_samples,Voir les échantillons
 cl.records.page_total,Total (cette page)
 cl.records.empty,Aucun enregistrement ne correspond à ces filtres.

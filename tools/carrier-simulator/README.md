@@ -50,7 +50,8 @@ bash tools/carrier-simulator/e2e/run.sh
 ```
 
 Antes, el Postgres portable tiene que estar arrancado en `127.0.0.1:5433` (`supabase/tests/run_tests.sh` indica el
-comando si no lo está). La prueba completa necesita también `deno` (ejecuta el worker real en local).
+comando si no lo está). La prueba completa necesita también `deno` (ejecuta el worker real en local). El `psql` se
+toma de la variable `PSQL` o, si no está, de `~/pgportable/pgsql/bin/psql.exe`.
 
 Uso suelto de cada pieza (desde `tools/carrier-simulator`):
 
@@ -85,7 +86,8 @@ Fichero JSON (ver `config.example.json`). Las rutas relativas se leen desde la c
 | `noise` | `unagreed_scans_share`: parte de los envíos que lleva también lecturas en lugares que no son puntos acordados (ONEMS las rechaza como `unknown_reading_point`); `invalid_rows`: registros rotos por fichero (`bad_record`). `{"unagreed_scans_share": 0, "invalid_rows": 0}` = fichero limpio. |
 | `pii_fields` | Opcional: más campos personales prohibidos. El conector se niega a arrancar si la configuración de ONEMS pide uno de ellos o de la lista fija (`recipient_name`, `recipient_phone`, `recipient_address`, `sender_email`…). |
 | `poll_seconds`, `poll_timeout_seconds` | Solo `dev`: cada cuánto consulta el estado (mínimo 30 s, por defecto 60) y hasta cuándo. |
-| `local` | Solo `local`: ruta de `psql`, conexión (`127.0.0.1`, puerto 5433, base `onems_t`) y `process_cmd` (ver abajo). |
+| `max_retries`, `max_reopen` | Reintentos de cada llamada ante error de red, `429` (espera `Retry-After`) o `5xx` (espera creciente de 30 s a 8 min), por defecto 5; y cuántas veces vuelve a abrir la entrega para tener otra URL si la subida falla o `complete` dice `CL_FILE_NOT_UPLOADED`, por defecto 2. |
+| `local` | Solo `local`: `psql` (si falta: variable `PSQL`, o el Postgres portable en `~/pgportable`, o `psql` del PATH), conexión (`127.0.0.1`, puerto 5433, base `onems_t`) y `process_cmd` (ver abajo). |
 
 ## Qué hace el conector en cada periodo
 
@@ -97,8 +99,14 @@ Fichero JSON (ver `config.example.json`). Las rutas relativas se leen desde la c
    que tienen la llegada registrada antes de la salida no entran.
 3. Escribe todas las lecturas de esos envíos en los puntos acordados (o todas, con `include_all_scans`), solo con
    los campos de la configuración, más el ruido configurado. CSV con cabecera y CRLF; JSON Lines con LF.
-4. Calcula sha256, tamaño y totales de control (envíos por lugar y modo de la llegada y producto del envío).
-5. Abre la entrega, sube el fichero en un PUT (sin clave), completa y consulta el estado hasta el final.
+4. Calcula sha256, tamaño y totales de control (envíos por lugar y modo de la llegada y producto del envío). Un
+   periodo sin envíos da un CSV con solo la cabecera o un JSON Lines con una línea en blanco (nunca 0 bytes).
+5. Abre la entrega, sube el fichero en un PUT (sin clave), completa y consulta el estado hasta el final. Un PUT
+   repetido que el almacén contesta como duplicado (`409`, o `400` con `"statusCode": "409"`) cuenta como subido.
+   Reintenta cada llamada ante error de red, `429` o `5xx` (acotado) y vuelve a abrir la entrega si la subida falla.
+
+Una hora ISO con desplazamiento (`2026-11-10T09:00:00+03:00`) se rechaza con un error claro: sin base de zonas
+horarias el simulador no puede pasarla a fecha local, y no la descarta en silencio.
 
 En `out_dir/<inicio>_<fin>/` quedan `01-get-config.json`, `delivery.jsonl|csv`, `manifest.json`,
 `02-open-request.json`, `03-open-response.json`, `04-upload-response.json`, `05-complete-response.json` y
@@ -115,7 +123,8 @@ Lo que se sustituye (documentado):
 
 - **Almacén de ficheros**: la URL de subida es `local://cl-deliveries/<ruta>`; el "PUT" guarda el fichero en
   `out_dir/storage/<ruta>` y registra el objeto en `storage.objects` (con su tamaño), como hace Supabase Storage. Un
-  segundo PUT de la misma ruta responde `409` (sin sobrescribir).
+  segundo PUT de la misma ruta responde `400` con `"statusCode": "409"` (sin sobrescribir), como algunas versiones de
+  Storage.
 - **Proceso en segundo plano** (pg_cron + Edge Function `carrier-link-worker`): antes de cada consulta de estado se
   ejecuta `local.process_cmd`, normalmente `deno run ... e2e/local_worker.ts`, que usa el **cargador real del
   worker** (`supabase/functions/carrier-link-worker/loader.ts`) contra la base local y después
@@ -179,15 +188,18 @@ Anomalías (porcentajes en `network.json`) y qué pasa con cada una en v4:
    `fixture.sql`: cuenta SIMLAND, carrier SIMPOST (con correo de avisos), puntos, conector activo con calendario
    **lunes y jueves a las 03:00** y sus equivalencias, estándares de entrega y un plan del 2 al 15 de noviembre con
    cuotas de las semanas 2026-W45 y W46 para las 6 rutas (28 muestras).
-3. Primer periodo con el fichero **alterado** (`--tamper`) → `rejected` `CL_SHA256_MISMATCH`, incidencia *Entrega
+3. Conector en **Pruebas**: dos entregas de prueba del primer periodo (JSON Lines y CSV) se procesan, no crean
+   muestras ni incidencias y no gastan el periodo (`next_period` sigue en el 2 de noviembre); después pasa a Activo
+   (`check.py testing`).
+4. Primer periodo con el fichero **alterado** (`--tamper`) → `rejected` `CL_SHA256_MISMATCH`, incidencia *Entrega
    rechazada* con aviso a la cuenta y al carrier (`check.py tampered`).
-4. El conector entrega los 4 periodos en orden (JSON Lines y CSV alternos) y `check.py deliveries` comprueba cada
+5. El conector entrega los 4 periodos en orden (JSON Lines y CSV alternos) y `check.py deliveries` comprueba cada
    uno contra la verdad y la base: estado `processed`; `rows_total` = registros del fichero; `shipments_total` =
    envíos enviados = suma de los totales de control (guardados tal cual); motivos de rechazo explicados por el ruido
    y las anomalías (y en el número exacto); ningún envío repetido entre periodos ni sin entregar; sorteados =
    muestras = filas de `one_db`; nunca más que la cuota ni que la población; zona de recepción vacía; las dos semanas
    cumplidas (28/28); la incidencia del paso 3 cerrada sola.
-5. Respuestas de la API: repetir la apertura del primer periodo (`200`, `existing`), el mismo periodo con otro
+6. Respuestas de la API: repetir la apertura del primer periodo (`200`, `existing`), el mismo periodo con otro
    fichero (`409`), un periodo fuera del calendario (`422`), otro sin plan (`422`), una entrega inexistente (`404`),
    la ruta v3 `/demands` (`410`).
 

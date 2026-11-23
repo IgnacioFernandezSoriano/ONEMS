@@ -13,7 +13,7 @@
       ]
      },
      "severity": "medium",
-     "created_at": "2026-11-23T18:24:12.754134+01:00"
+     "created_at": "2026-11-23T18:44:28.538483+01:00"
     },
     {
      "type": "unknown_reading_point",
@@ -62,7 +62,7 @@
       ]
      },
      "severity": "medium",
-     "created_at": "2026-11-23T18:24:12.754134+01:00"
+     "created_at": "2026-11-23T18:44:28.538483+01:00"
     }
    ],
    "format": "csv",
@@ -72,14 +72,14 @@
    "feed_id": "c1517000-0000-4000-8000-0000000000f1",
    "is_test": false,
    "attempts": 1,
-   "created_at": "2026-11-23T18:24:07.958188+01:00",
+   "created_at": "2026-11-23T18:44:24.180318+01:00",
    "file_bytes": 27405,
    "period_end": "2026-11-08",
    "rows_total": 503,
    "compression": "none",
-   "delivery_id": "ede7cbf6-424b-4bdd-8661-bd0dc93094a3",
-   "finished_at": "2026-11-23T18:24:12.769768+01:00",
-   "received_at": "2026-11-23T18:24:09.133475+01:00",
+   "delivery_id": "beed34b8-d70e-4db7-84c9-d55a62ba9734",
+   "finished_at": "2026-11-23T18:44:28.560213+01:00",
+   "received_at": "2026-11-23T18:44:25.297868+01:00",
    "rows_loaded": 503,
    "bytes_loaded": 27405,
    "period_start": "2026-11-05",
@@ -98,7 +98,7 @@
      "unknown_product": 9
     }
    },
-   "processing_started_at": "2026-11-23T18:24:09.795449+01:00"
+   "processing_started_at": "2026-11-23T18:44:25.84574+01:00"
   }
  }
 }

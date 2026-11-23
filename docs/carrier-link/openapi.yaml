@@ -47,8 +47,10 @@ paths:
       summary: Abre la entrega de un periodo y devuelve la URL firmada de subida
       description: |
         Declara el periodo, el formato, el tamaño exacto, el sha256 del fichero y los totales de control.
-        Idempotente: el mismo periodo con el mismo sha256 devuelve la entrega ya abierta (200, existing = true) y,
-        si sigue esperando el fichero, una URL nueva. Lista cerrada de claves (otra clave -> 400).
+        Idempotente: el mismo periodo con el mismo sha256 (y la misma clase, prueba o real) devuelve la entrega ya
+        abierta (200, existing = true) y, si sigue esperando el fichero, una URL nueva. Con el conector en Pruebas
+        la entrega es de prueba: no consume el periodo y se puede repetir. El PUT repetido de un fichero ya subido
+        responde 409, o 400 con statusCode "409" en el cuerpo: ambos significan "ya subido". Lista cerrada de claves (otra clave -> 400).
         Sin compresión: `compression` solo puede faltar, ser null o "none"; una cabecera Content-Encoding distinta
         de identity -> 400 CL_COMPRESSION_UNSUPPORTED. Cuerpo de como mucho 5 MB.
       requestBody:
@@ -86,15 +88,16 @@ paths:
       operationId: completeDelivery
       summary: Avisa de que el fichero ya está subido
       description: |
-        Sin cuerpo. received -> 202 (el proceso empieza en menos de un minuto). Idempotente: si ya está en
-        processing / processed / failed -> 200 con su estado. Si la entrega queda o está rejected, responde el
+        Sin cuerpo. received -> 202 (el proceso empieza en menos de un minuto; un complete repetido mientras sigue
+        received también responde 202). Idempotente: si ya está en processing / processed / failed -> 200 con su
+        estado. Conector pausado -> 403 CL_FEED_PAUSED. Si la entrega queda o está rejected, responde el
         código HTTP de su error (409, 410, 413, 422...) con la entrega en el cuerpo. Sin fichero -> 409
         CL_FILE_NOT_UPLOADED. Un id ajeno, inexistente o mal formado -> el mismo 404 CL_DELIVERY_NOT_FOUND.
       parameters:
         - $ref: "#/components/parameters/DeliveryId"
       responses:
         "202":
-          description: Recibida; se procesa en segundo plano.
+          description: Recibida (también al repetir complete mientras sigue received); se procesa en segundo plano.
           content:
             application/json:
               schema: { $ref: "schemas/delivery-response.schema.json" }
@@ -240,7 +243,7 @@ components:
             message: "Carrier Link v4 removed the demand and batch endpoints. Deliver every complete shipment of the period as one file: GET /config, POST /deliveries, POST /deliveries/{id}/complete, GET /deliveries/{id}."
     Error:
       description: |
-        Error con código CL_* (tabla completa en el manual, §9). En complete, si la entrega está rejected, el
+        Error con código CL_* (tabla completa en el manual, §11.2). En complete, si la entrega está rejected, el
         cuerpo incluye también `delivery`.
       content:
         application/json:

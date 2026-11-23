@@ -37,9 +37,11 @@
     "format": {
       "enum": [
         "jsonl",
-        "csv"
+        "csv",
+        null
       ],
-      "default": "jsonl"
+      "default": "jsonl",
+      "description": "Optional; null or absent = jsonl."
     },
     "compression": {
       "enum": [

@@ -63,17 +63,24 @@ def pg_format_to_strptime(fmt):
 
 
 def parse_ts(value, fmt):
+    """Local naive datetime of a scan, or None if unreadable (ONEMS rejects it as bad_timestamp too).
+    An ISO 8601 time WITH an offset cannot be turned into a local date without a time zone database (stdlib only):
+    the simulator refuses it loudly instead of silently dropping the shipment (a real connector converts it to
+    date_timezone)."""
     import datetime as dt
     v = (value or "").strip()
     if not v:
         return None
     try:
-        if fmt is None:
-            t = dt.datetime.fromisoformat(v)
-            return t.replace(tzinfo=None) if t.tzinfo is None else None   # offsets: see check_timezones
-        return dt.datetime.strptime(v, fmt)
+        if fmt is not None:
+            return dt.datetime.strptime(v, fmt)
+        t = dt.datetime.fromisoformat(v)
     except ValueError:
         return None
+    if t.tzinfo is not None:
+        raise ConnectorError("simulator limitation: scan time %r has an offset; the carrier table must hold local "
+                             "times without offset (scan_at.timezone)" % v)
+    return t
 
 
 def field_names(config):
@@ -261,6 +268,10 @@ def build_delivery(scans, config, period_start, period_end, seed, fmt="jsonl", t
             else:
                 buf.write(json.dumps(rows[i], ensure_ascii=False, separators=(",", ":")) + "\n")
     data = buf.getvalue().encode("utf-8")
+    if not data:
+        # Empty JSON Lines period: size_bytes must be >= 1, so the file is one blank line (ONEMS skips blank lines;
+        # a CSV always has at least its header). Manual, FAQ "periodo sin envios".
+        data = b"\n"
     control_totals = [{"place_ref": p, "mode_ref": m, "product": pr, "delivered": n}
                       for (p, m, pr), n in sorted(totals.items(), key=lambda x: tuple(str(v) for v in x[0]))]
     for t in control_totals:

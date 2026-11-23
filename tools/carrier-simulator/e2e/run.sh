@@ -4,6 +4,8 @@
 #
 #   1. rebuild onems_t; generate the carrier dataset (fixed seed); connector key (hash only in the DB); fixture.sql
 #      (connector with deliveries on Monday and Thursday at 03:00, plan 2026-11-02..15 = ISO weeks W45 and W46);
+#  1b. connector in Testing: two test deliveries of the first period (JSONL and CSV) are both processed, create no
+#      samples and do not consume the period (next_period still 2026-11-02); then the connector goes Active;
 #   2. first period with a TAMPERED file (sha256 does not match) -> delivery rejected CL_SHA256_MISMATCH, incident
 #      delivery_rejected with a notice for the account and for the carrier;
 #   3. the reference connector delivers every period in calendar order (jsonl, csv, jsonl, csv): GET /config ->
@@ -21,7 +23,9 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SIM="$(cd "$HERE/.." && pwd)"
 ROOT="$(cd "$SIM/../.." && pwd)"
 OUT="$SIM/out/e2e"
-PSQL=(/c/Users/fernandezi/pgportable/pgsql/bin/psql.exe -h 127.0.0.1 -p 5433 -U postgres -d onems_t -v ON_ERROR_STOP=1 -q -X -At)
+# psql: $PSQL, else the portable Postgres under the user's home (same default as the Python and Deno parts).
+export PSQL="${PSQL:-$(cygpath -m "$HOME" 2>/dev/null || echo "$HOME")/pgportable/pgsql/bin/psql.exe}"
+PSQL_CMD=("$PSQL" -h 127.0.0.1 -p 5433 -U postgres -d onems_t -v ON_ERROR_STOP=1 -q -X -At)
 export PGPASSWORD=postgres
 PY=(python -I)
 winpath() { if command -v cygpath >/dev/null; then cygpath -m "$1"; else echo "$1"; fi; }
@@ -30,12 +34,13 @@ die() { echo "ERROR: $*" >&2; exit 1; }
 
 echo "== 1. rebuild onems_t (baseline + migrations) with the local harness"
 bash "$ROOT/.superpowers/sdd/runlocal.sh" cl_masters
-(cd "$ROOT" && git diff --quiet -- supabase/migrations) || die "runlocal.sh left supabase/migrations modified"
+(cd "$ROOT" && git diff --quiet -- supabase/migrations/20261119100200_account_access_writes.sql) \
+  || die "runlocal.sh left 20261119100200_account_access_writes.sql modified"
 rm -rf "$OUT"; mkdir -p "$OUT"
 "${PY[@]}" "$SIM/sim.py" generate --seed e2e-2026 --from 2026-10-26 --to 2026-11-15 --as-of 2026-11-16T03:00 \
   --out "$OUT/dataset"
 read -r HASH PREFIX < <("${PY[@]}" "$SIM/sim.py" keygen --out "$OUT/carrier_key.txt" | tr -d '\r')
-"${PSQL[@]}" -v key_hash="$HASH" -v key_prefix="$PREFIX" -f "$HERE/fixture.sql"
+"${PSQL_CMD[@]}" -v key_hash="$HASH" -v key_prefix="$PREFIX" -f "$HERE/fixture.sql"
 
 WORKER="$(winpath "$HERE/local_worker.ts")"
 cat > "$OUT/config.json" <<JSON
@@ -43,6 +48,16 @@ cat > "$OUT/config.json" <<JSON
  "formats": ["jsonl", "csv"],
  "local": {"process_cmd": ["deno", "run", "--quiet", "--allow-read", "--allow-run", "--allow-env", "$WORKER"]}}
 JSON
+
+echo "== 1b. connector in Testing: two test deliveries of the first period (JSON Lines, then CSV)"
+sed 's/"out_dir": "runs"/"out_dir": "runs-test"/' "$OUT/config.json" > "$OUT/config-test.json"
+"${PSQL_CMD[@]}" -c "UPDATE public.cl_feeds SET status = 'testing' WHERE id = 'c1517000-0000-4000-8000-0000000000f1'" >/dev/null
+"${PY[@]}" "$SIM/sim.py" deliver --config "$OUT/config-test.json" --max 1 --format jsonl
+mv "$OUT/runs-test/2026-11-02_2026-11-04" "$OUT/runs-test/1-jsonl"
+"${PY[@]}" "$SIM/sim.py" deliver --config "$OUT/config-test.json" --max 1 --format csv
+mv "$OUT/runs-test/2026-11-02_2026-11-04" "$OUT/runs-test/2-csv"
+"${PY[@]}" "$HERE/check.py" testing "$OUT/runs-test"
+"${PSQL_CMD[@]}" -c "UPDATE public.cl_feeds SET status = 'active' WHERE id = 'c1517000-0000-4000-8000-0000000000f1'" >/dev/null
 
 echo "== 2. first period with a tampered file"
 "${PY[@]}" "$SIM/sim.py" deliver --config "$OUT/config.json" --max 1 --tamper

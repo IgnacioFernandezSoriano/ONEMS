@@ -11,7 +11,6 @@
   "poll_seconds": 60,
   "poll_timeout_seconds": 3600,
   "local": {
-    "psql": "C:/Users/fernandezi/pgportable/pgsql/bin/psql.exe",
     "host": "127.0.0.1",
     "port": 5433,
     "dbname": "onems_t",

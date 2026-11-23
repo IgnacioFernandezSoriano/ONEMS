@@ -5712,7 +5712,6 @@ cl.records.view_matrix,مصفوفة
 cl.records.planned,المخطط
 cl.records.carried_in,المُرحَّل
 cl.records.obtained,المُحصَّل
-cl.records.demands,الطلبات
 cl.records.view_samples,عرض العينات
 cl.records.page_total,الإجمالي (هذه الصفحة)
 cl.records.empty,لا توجد سجلات تطابق هذه المرشحات.

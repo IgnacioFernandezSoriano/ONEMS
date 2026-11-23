@@ -64,18 +64,20 @@ CREATE INDEX cl_deliveries_account_idx ON public.cl_deliveries (account_id);
 CREATE INDEX cl_deliveries_feed_period_idx ON public.cl_deliveries (feed_id, period_end);
 CREATE INDEX cl_deliveries_created_by_idx ON public.cl_deliveries (created_by);
 -- Idempotencia: el mismo fichero para el mismo periodo es una sola entrega (salvo si se rechazo: se puede reintentar).
-CREATE UNIQUE INDEX cl_deliveries_idem_uidx ON public.cl_deliveries (feed_id, period_start, period_end, sha256)
+-- Las de prueba (is_test) van aparte: una entrega real con el mismo fichero que una de prueba es otra entrega.
+CREATE UNIQUE INDEX cl_deliveries_idem_uidx ON public.cl_deliveries (feed_id, period_start, period_end, sha256, is_test)
   WHERE status <> 'rejected';
 -- R25: la zona de paso contiene como maximo una entrega -> una sola entrega 'processing' en toda la base.
 CREATE UNIQUE INDEX cl_deliveries_one_processing_uidx ON public.cl_deliveries ((true)) WHERE status = 'processing';
 -- Cola del proceso en segundo plano.
 CREATE INDEX cl_deliveries_queue_idx ON public.cl_deliveries (received_at) WHERE status IN ('received','failed');
--- Un periodo se entrega una sola vez: dos entregas "entregadas" (received/processing/processed/failed) del mismo
--- conector no pueden solaparse en fechas (garantia en la base, ademas de los bloqueos de las funciones).
+-- Un periodo se entrega una sola vez: dos entregas reales "entregadas" (received/processing/processed/failed) del mismo
+-- conector no pueden solaparse en fechas (garantia en la base, ademas de los bloqueos de las funciones). Las entregas
+-- de prueba (is_test) no consumen periodos: se pueden repetir y no cuentan para el calendario ni para next_period.
 CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA extensions;
 ALTER TABLE public.cl_deliveries ADD CONSTRAINT cl_deliveries_no_overlap
   EXCLUDE USING gist (feed_id WITH =, daterange(period_start, period_end, '[]') WITH &&)
-  WHERE (status IN ('received','processing','processed','failed'));
+  WHERE (status IN ('received','processing','processed','failed') AND NOT is_test);
 
 CREATE TABLE public.cl_delivery_strata (
   id                 uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -253,7 +255,8 @@ BEGIN
   IF v_feed.id IS NULL THEN RETURN NULL; END IF;
   SELECT max(d.period_end) INTO v_last_end
     FROM public.cl_deliveries d
-   WHERE d.feed_id = p_feed_id AND d.status IN ('received','processing','processed','failed');
+   WHERE d.feed_id = p_feed_id AND d.status IN ('received','processing','processed','failed')
+     AND NOT d.is_test;   -- las entregas de prueba no consumen periodos
   -- Primer dia cubierto por un plan activo a partir del dia siguiente a lo entregado (salta huecos entre planes).
   SELECT CASE WHEN min(p.start_date) IS NOT NULL THEN GREATEST(min(p.start_date), v_last_end + 1) END INTO v_anchor
     FROM public.cl_plans p
@@ -331,6 +334,7 @@ DECLARE
   v_al     record;
   v_expect date;
   v_other  public.cl_deliveries;
+  v_test   boolean;
 BEGIN
   IF p_feed_id IS NULL OR p_period_start IS NULL OR p_period_end IS NULL OR p_sha256 IS NULL THEN
     RAISE EXCEPTION 'CL_BAD_REQUEST: period_start, period_end and sha256 are required' USING ERRCODE = '22023';
@@ -381,11 +385,14 @@ BEGIN
     RAISE EXCEPTION 'CL_FEED_PAUSED: the connector is paused' USING ERRCODE = '22023';
   END IF;
   v_limits := public.cl_delivery_limits(v_feed.config);
+  -- Conector en pruebas: entrega de prueba. No consume el periodo (ni solape ni calendario la tienen en cuenta), se
+  -- puede repetir y nunca crea muestras. Sigue exigiendo un plan activo que cubra el periodo.
+  v_test := v_feed.status = 'testing';
 
-  -- Idempotencia.
+  -- Idempotencia (mismo periodo, mismo fichero, misma clase prueba/real).
   SELECT d.* INTO v_other FROM public.cl_deliveries d
    WHERE d.feed_id = p_feed_id AND d.period_start = p_period_start AND d.period_end = p_period_end
-     AND d.sha256 = v_sha AND d.status <> 'rejected';
+     AND d.sha256 = v_sha AND d.status <> 'rejected' AND d.is_test = v_test;
   IF v_other.id IS NOT NULL THEN
     RETURN public.cl_delivery_summary(v_other.id)
            || jsonb_build_object('existing', true, 'max_file_bytes', v_limits->'max_file_bytes');
@@ -399,9 +406,10 @@ BEGIN
 
   SELECT d.* INTO v_other FROM public.cl_deliveries d
    WHERE d.feed_id = p_feed_id AND d.status IN ('received','processing','processed','failed')
+     AND NOT d.is_test
      AND d.period_start <= p_period_end AND d.period_end >= p_period_start
    ORDER BY d.period_start LIMIT 1;
-  IF v_other.id IS NOT NULL THEN
+  IF v_other.id IS NOT NULL AND NOT v_test THEN
     RAISE EXCEPTION 'CL_PERIOD_ALREADY_DELIVERED: % to % overlaps delivery % (% to %, %)', p_period_start, p_period_end,
       v_other.id, v_other.period_start, v_other.period_end, v_other.status USING ERRCODE = 'P0001';
   END IF;
@@ -415,7 +423,7 @@ BEGIN
   SELECT * INTO v_al FROM public.cl_delivery_aligned_period(v_feed.emit_days, p_period_end);
   SELECT GREATEST(v_al.period_start, max(d.period_end) + 1) INTO v_expect
     FROM public.cl_deliveries d
-   WHERE d.feed_id = p_feed_id AND d.status IN ('received','processing','processed','failed')
+   WHERE d.feed_id = p_feed_id AND d.status IN ('received','processing','processed','failed') AND NOT d.is_test
      AND d.period_end >= v_al.period_start AND d.period_end < p_period_end;
   v_expect := COALESCE(v_expect, v_al.period_start);
   IF p_period_start <> v_expect THEN
@@ -431,14 +439,14 @@ BEGIN
   END IF;
 
   UPDATE public.cl_deliveries d SET status = 'rejected', error = 'CL_SUPERSEDED', finished_at = now()
-   WHERE d.feed_id = p_feed_id AND d.status = 'pending_upload'
+   WHERE d.feed_id = p_feed_id AND d.status = 'pending_upload' AND d.is_test = v_test
      AND d.period_start <= p_period_end AND d.period_end >= p_period_start;
 
   v_id := gen_random_uuid();
   INSERT INTO public.cl_deliveries (id, account_id, feed_id, period_start, period_end, source, created_by, is_test,
                                     format, compression, file_path, sha256, control_totals)
   VALUES (v_id, v_feed.account_id, p_feed_id, p_period_start, p_period_end, p_source, p_user,
-          v_feed.status = 'testing', p_format, p_compression,
+          v_test, p_format, p_compression,
           v_feed.account_id || '/' || p_feed_id || '/' || v_id || '.' || p_format
             || CASE WHEN p_compression = 'gzip' THEN '.gz' ELSE '' END,
           v_sha, p_control_totals);
@@ -484,8 +492,9 @@ BEGIN
     RAISE EXCEPTION 'CL_FILE_NOT_UPLOADED: upload the file before completing the delivery' USING ERRCODE = '22023';
   END IF;
 
-  IF EXISTS (SELECT 1 FROM public.cl_deliveries o
-              WHERE o.feed_id = p_feed_id AND o.id <> v_d.id
+  IF NOT v_d.is_test   -- una entrega de prueba no consume el periodo
+     AND EXISTS (SELECT 1 FROM public.cl_deliveries o
+              WHERE o.feed_id = p_feed_id AND o.id <> v_d.id AND NOT o.is_test
                 AND o.status IN ('received','processing','processed','failed')
                 AND o.period_start <= v_d.period_end AND o.period_end >= v_d.period_start) THEN
     UPDATE public.cl_deliveries d SET status = 'rejected', error = 'CL_PERIOD_ALREADY_DELIVERED', file_bytes = v_bytes,

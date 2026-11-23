@@ -12,12 +12,12 @@
    "is_test": false,
    "attempts": 0,
    "existing": false,
-   "created_at": "2026-11-23T18:24:00.586138+01:00",
+   "created_at": "2026-11-23T18:44:17.212716+01:00",
    "file_bytes": null,
    "period_end": "2026-11-04",
    "rows_total": null,
    "compression": "none",
-   "delivery_id": "366f74c6-6e39-43c8-a1a3-3e6f4bc9772c",
+   "delivery_id": "722953ef-50ce-432a-9939-94398237824e",
    "finished_at": null,
    "received_at": null,
    "rows_loaded": null,
@@ -32,7 +32,7 @@
    "processing_started_at": null
   },
   "upload": {
-   "url": "local://cl-deliveries/c1517000-0000-4000-8000-000000000001/c1517000-0000-4000-8000-0000000000f1/366f74c6-6e39-43c8-a1a3-3e6f4bc9772c.jsonl",
+   "url": "local://cl-deliveries/c1517000-0000-4000-8000-000000000001/c1517000-0000-4000-8000-0000000000f1/722953ef-50ce-432a-9939-94398237824e.jsonl",
    "method": "PUT",
    "headers": {
     "Content-Type": "application/x-ndjson"
