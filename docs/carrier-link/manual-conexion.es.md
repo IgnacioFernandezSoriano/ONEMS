@@ -564,7 +564,7 @@ anterior a los dos puntos), no contra el texto.
 | `401` | — (`Invalid or inactive API key`) | Falta la clave, es incorrecta, está desactivada o caducada. | Revisar la cabecera; pedir clave nueva si caducó. |
 | `403` | `CL_FEED_PAUSED` | El conector está pausado en ONEMS: no se aceptan lotes (ni ensayos). | Esperar a que ONEMS lo reactive. |
 | `403` | `CL_FEED_TESTING_DRY_RUN_ONLY` | El conector está en pruebas: solo se aceptan ensayos (`?dry_run=true`). | Usar `dry_run` hasta el paso a producción (§10). |
-| `403` | `CL_DEMAND_TESTING_DRY_RUN_ONLY` | La demanda se emitió con el conector en pruebas: es de prueba para siempre y solo admite ensayos. | Ensayar; esperar a la primera demanda real. |
+| `403` | `CL_DEMAND_TESTING_DRY_RUN_ONLY` | La demanda se emitió con el conector en pruebas: mientras siga abierta solo admite ensayos (al activar el conector se cierra, §10.2). | Ensayar; esperar a la primera demanda real. |
 | `403` | `CL_FORBIDDEN` | Operación no permitida para esta clave. | Avisar a ONEMS. |
 | `404` | — (`Not found`) | Ruta desconocida. | Usar `/demands` o `/batches`. |
 | `405` | — (`Method not allowed`) | Método equivocado (p. ej. `POST /demands`). | `GET /demands`, `POST /batches`. |
@@ -701,8 +701,8 @@ nada**: ni lote, ni muestras, ni avisos. Se puede repetir cuantas veces haga fal
 | **Pausado** (`paused`) | Sí (no se emiten demandas nuevas) | No (`403 CL_FEED_PAUSED`) | No (`403 CL_FEED_PAUSED`) |
 
 - Mientras el conector está en pruebas, ONEMS emite **demandas de prueba** según el calendario, iguales a las
-  reales, para que el conector se pueda ensayar con datos verdaderos. Una demanda de prueba **solo admite
-  ensayos, para siempre** (`403 CL_DEMAND_TESTING_DRY_RUN_ONLY`), aunque el conector se active después.
+  reales, para que el conector se pueda ensayar con datos verdaderos. Mientras una demanda de prueba sigue
+  abierta **solo admite ensayos** (`403 CL_DEMAND_TESTING_DRY_RUN_ONLY`).
 - Al **activar** el conector, ONEMS cierra (como `failed`) las demandas de prueba que siguieran abiertas:
   desaparecen de `GET /demands` y cualquier lote para ellas, **también un ensayo**, recibe
   `409 CL_DEMAND_NOT_OPEN` (salvo el reenvío de un `batch_id` ya guardado, que devuelve su resumen). El
