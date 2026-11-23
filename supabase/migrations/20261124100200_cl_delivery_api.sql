@@ -183,7 +183,8 @@ BEGIN
                             WHEN 'rejected_ratio' THEN jsonb_build_object('rejected', a.details->'rejected',
                                                      'shipments', a.details->'shipments', 'ratio', a.details->'ratio')
                             WHEN 'delivery_retries_exhausted' THEN jsonb_build_object(
-                                                     'last_error', a.details->'last_error', 'attempts', a.details->'attempts')
+                                                     'last_error', to_jsonb(public.cl_delivery_safe_error(a.details->>'last_error')),
+                                                     'attempts', a.details->'attempts')
                             ELSE '{}'::jsonb END)
              ORDER BY a.created_at, a.alert_type)
         FROM public.cl_alerts a
@@ -204,3 +205,133 @@ BEGIN
   END IF;
 END $$;
 DROP FUNCTION IF EXISTS public.cl_emit_due_demands(timestamptz);
+
+-- ================================================================ 5. mantenimiento sin demandas (cl_housekeeping)
+-- Sustituye las tareas de cl_emit_due_demands que no eran emitir demandas (revision tarea 3, Important 1):
+--   a) cuotas pending vencidas (period_end + close_lag_days <= hoy local) sin nada que pedir (planificado + arrastrado
+--      - obtenido <= 0): se liquidan por el mismo camino que el paso finish de la tarea 2 (pending -> open ->
+--      cl_settle_quota, que con falta <= 0 la deja fulfilled). Solo se toman cuotas 'pending': lo ya liquidado por una
+--      entrega (o por una ejecucion anterior) no se vuelve a tocar.
+--   b) alerta invalid_timezone (zona de la cuenta invalida y conector sin zona propia): una sola mientras no se descarte.
+--   c) cierre de planes active -> closed tras end_date + close_lag_days sin cuotas pending/open.
+-- Bloqueo como el sorteo y la liquidacion de la tarea 2: candado 'cl_sample:<cuenta>:<carrier>' y cuotas por id.
+-- Un plan que falla deja la alerta housekeeping_failed (solo SQLSTATE) y no para a los demas.
+-- GANCHO tarea 8: la liquidacion de semanas vencidas CON falta (> 0) que ninguna entrega cubrio (3 dias tras el fin de
+-- la semana) va en este mismo bucle, en el punto marcado "TAREA 8"; no crear otro job.
+CREATE OR REPLACE FUNCTION public.cl_housekeeping(p_now timestamptz DEFAULT now())
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path = public, extensions
+AS $$
+DECLARE
+  r           record;
+  v_today     date;
+  v_qid       uuid;
+  v_settled   integer := 0;
+  v_closed    integer := 0;
+  v_tz_alerts integer := 0;
+BEGIN
+  PERFORM pg_advisory_xact_lock(hashtext('cl_housekeeping'));
+
+  FOR r IN SELECT p.id, p.account_id, p.carrier_id, p.feed_id, p.close_lag_days, f.emit_timezone, a.timezone AS account_tz
+             FROM public.cl_plans p
+             JOIN public.accounts a ON a.id = p.account_id
+             LEFT JOIN public.cl_feeds f ON f.id = p.feed_id
+            WHERE p.status = 'active'
+            ORDER BY p.created_at, p.id
+  LOOP
+    BEGIN
+      -- b) zona horaria invalida (una alerta mientras no se descarte).
+      IF r.emit_timezone IS NULL AND r.account_tz IS NOT NULL AND NOT public.cl_is_valid_timezone(r.account_tz)
+         AND NOT EXISTS (SELECT 1 FROM public.cl_alerts x WHERE x.plan_id = r.id AND x.alert_type = 'invalid_timezone'
+                                                          AND x.status <> 'dismissed') THEN
+        PERFORM public.cl_raise_alert(r.id, NULL, 'invalid_timezone', 'medium',
+                                      jsonb_build_object('account_timezone', r.account_tz, 'used', 'UTC'));
+        v_tz_alerts := v_tz_alerts + 1;
+      END IF;
+
+      v_today := (p_now AT TIME ZONE public.cl_effective_tz(r.account_id, r.feed_id))::date;
+
+      -- a) semanas vencidas sin nada que pedir.
+      PERFORM pg_advisory_xact_lock(hashtext('cl_sample:' || r.account_id::text || ':' || r.carrier_id::text));
+      FOR v_qid IN SELECT q.id FROM public.cl_plan_quotas q
+                    WHERE q.plan_id = r.id AND q.status = 'pending'
+                      AND q.period_end + r.close_lag_days <= v_today
+                      AND q.samples_planned + q.samples_carried_in - q.samples_obtained <= 0
+                    ORDER BY q.id
+                      FOR UPDATE
+      LOOP
+        UPDATE public.cl_plan_quotas q SET status = 'open' WHERE q.id = v_qid AND q.status = 'pending';
+        PERFORM public.cl_settle_quota(v_qid);
+        v_settled := v_settled + 1;
+      END LOOP;
+
+      -- TAREA 8: aqui, semanas vencidas con falta > 0 sin entrega que las cubra (3 dias tras el fin de la semana).
+    EXCEPTION WHEN OTHERS THEN
+      PERFORM public.cl_raise_alert(r.id, NULL, 'housekeeping_failed', 'high', jsonb_build_object('sqlstate', SQLSTATE));
+    END;
+  END LOOP;
+
+  -- c) cierre de planes (tambien los que no tienen conector: usan la zona de la cuenta).
+  UPDATE public.cl_plans p SET status = 'closed'
+   WHERE p.status = 'active'
+     AND p.end_date + p.close_lag_days < (p_now AT TIME ZONE public.cl_effective_tz(p.account_id, p.feed_id))::date
+     AND NOT EXISTS (SELECT 1 FROM public.cl_plan_quotas q WHERE q.plan_id = p.id AND q.status IN ('pending','open'));
+  GET DIAGNOSTICS v_closed = ROW_COUNT;
+
+  RETURN jsonb_build_object('quotas_settled', v_settled, 'plans_closed', v_closed, 'timezone_alerts', v_tz_alerts);
+END $$;
+REVOKE ALL ON FUNCTION public.cl_housekeeping(timestamptz) FROM PUBLIC, anon, authenticated, service_role;
+
+-- pg_cron (como postgres), cada hora; idempotente.
+DO $$
+BEGIN
+  IF to_regclass('cron.job') IS NOT NULL THEN
+    IF EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'cl-housekeeping') THEN
+      PERFORM cron.unschedule('cl-housekeeping');
+    END IF;
+    PERFORM cron.schedule('cl-housekeeping', '20 * * * *', 'SELECT public.cl_housekeeping();');
+  END IF;
+END $$;
+
+-- ================================================================ 6. el campo error solo lleva codigos CL_
+-- Revision tarea 3: delivery.error (y last_error de las alertas, que sale de progress.final_error) llega al
+-- transportista. Solo puede ser un codigo CL_ con, como mucho, un SQLSTATE (p. ej. 'CL_PROCESSING_ERROR 22P02').
+-- Nunca SQLERRM ni valores de filas. Hoy ningun camino guarda texto libre; esto lo garantiza:
+--   - cl_delivery_mark_abort (punto unico de final_error) sustituye cualquier otra cosa por CL_PROCESSING_ERROR;
+--   - CHECK en cl_deliveries.error;
+--   - cl_delivery_status filtra last_error con la misma funcion.
+CREATE OR REPLACE FUNCTION public.cl_delivery_safe_error(p_error text)
+ RETURNS text
+ LANGUAGE sql
+ IMMUTABLE
+ SET search_path = public, extensions
+AS $$
+  SELECT CASE WHEN p_error IS NULL THEN NULL
+              WHEN p_error ~ '^CL_[A-Z0-9_]{1,60}( [0-9A-Z]{5})?$' THEN p_error
+              ELSE 'CL_PROCESSING_ERROR' END
+$$;
+REVOKE ALL ON FUNCTION public.cl_delivery_safe_error(text) FROM PUBLIC, anon, authenticated, service_role;
+
+ALTER TABLE public.cl_deliveries
+  ADD CONSTRAINT cl_deliveries_error_code_only CHECK (error IS NULL OR error ~ '^CL_[A-Z0-9_]{1,60}( [0-9A-Z]{5})?$');
+
+-- Copia de 20261124100100 con un unico cambio: final_error = cl_delivery_safe_error(p_error).
+CREATE OR REPLACE FUNCTION public.cl_delivery_mark_abort(p_delivery_id uuid, p_status text, p_error text)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path = public, extensions
+AS $$
+BEGIN
+  IF p_status NOT IN ('failed','rejected') THEN
+    RAISE EXCEPTION 'CL_BAD_REQUEST: abort status must be failed or rejected' USING ERRCODE = '22023';
+  END IF;
+  UPDATE public.cl_deliveries d
+     SET progress = d.progress || jsonb_build_object('phase', 'abort', 'final_status', p_status,
+                                                     'final_error', public.cl_delivery_safe_error(p_error),
+                                                     'lease_token', NULL, 'lease_until', NULL)
+   WHERE d.id = p_delivery_id AND d.status = 'processing';
+END $$;
+REVOKE ALL ON FUNCTION public.cl_delivery_mark_abort(uuid, text, text) FROM PUBLIC, anon, authenticated, service_role;

@@ -323,7 +323,7 @@ BEGIN
   PERFORM pg_temp.ok(e LIKE '22023:CL_DELIVERY_IMMUTABLE%', 'sha256 inmutable: ' || coalesce(e, 'ok'));
   e := pg_temp.raises(format('UPDATE public.cl_deliveries SET period_end = ''2026-11-21'' WHERE id = %L', v_id2));
   PERFORM pg_temp.ok(e LIKE '22023:CL_DELIVERY_IMMUTABLE%', 'periodo inmutable: ' || coalesce(e, 'ok'));
-  UPDATE public.cl_deliveries SET status = 'failed', error = 'x' WHERE id = v_id2;
+  UPDATE public.cl_deliveries SET status = 'failed', error = 'CL_WORKER_ERROR' WHERE id = v_id2;
   UPDATE public.cl_deliveries SET status = 'processing' WHERE id = v_id2;     -- reanudar
   UPDATE public.cl_deliveries SET status = 'processed', finished_at = now() WHERE id = v_id2;
   e := pg_temp.raises(format('UPDATE public.cl_deliveries SET status = ''failed'' WHERE id = %L', v_id2));
