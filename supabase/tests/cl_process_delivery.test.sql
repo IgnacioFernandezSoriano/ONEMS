@@ -233,6 +233,8 @@ BEGIN
   PERFORM pg_temp.ok(public.cl_delivery_worker_claim('token-test-2')->>'action' = 'busy', 'otro worker: busy');
   PERFORM pg_temp.ok(public.cl_delivery_worker_claim('token-test-2', 120, now() + interval '10 minutes')->>'action' = 'load',
                      'arriendo caducado: lo toma otro');
+  PERFORM pg_temp.ok((SELECT (progress->>'attempts')::int FROM public.cl_deliveries WHERE id = v_id) = 2,
+                     'tomar un arriendo caducado de otro worker cuenta como intento');
   e := pg_temp.raises(format($q$SELECT public.cl_delivery_load_rows(%L, 'token-test-1', 0, '[]', '{"offset":0,"rows":0,"sha_offset":0}')$q$, v_id));
   PERFORM pg_temp.ok(e LIKE '%CL_LEASE_LOST%', 'arriendo perdido: ' || COALESCE(e, 'null'));
   e := pg_temp.raises(format($q$SELECT public.cl_delivery_load_rows(%L, 'token-test-2', 5, '[]', '{"offset":5,"rows":0,"sha_offset":0}')$q$, v_id));
@@ -553,7 +555,8 @@ BEGIN
   PERFORM pg_temp.ok(public.cl_delivery_worker_claim('token-test-6')->>'action' = 'idle', 'espera antes de reintentar');
   PERFORM pg_temp.ok((public.cl_delivery_worker_claim('token-test-6', 120, now() + interval '10 minutes')->>'action') = 'load',
                      'reintento');
-  PERFORM pg_temp.ok((SELECT (progress->>'attempts')::int FROM public.cl_deliveries WHERE id = v_id) = 2, 'intento 2');
+  PERFORM pg_temp.ok((SELECT (progress->>'attempts')::int FROM public.cl_deliveries WHERE id = v_id) = 3,
+                     'intento 3 (la toma tras la caida en la carga tambien conto)');
   PERFORM pg_temp.load(v_rows, 5, 'token-test-6');
   PERFORM pg_temp.run();
   SELECT * INTO d FROM public.cl_deliveries WHERE id = v_id;
@@ -604,6 +607,161 @@ BEGIN
   PERFORM pg_temp.ok(public.cl_delivery_kick_worker() = false, 'sin Vault no llama');
   PERFORM pg_temp.ok((SELECT status = 'rejected' AND error = 'CL_UPLOAD_EXPIRED' FROM public.cl_deliveries WHERE id = v_old),
                      'subida caducada');
+END $$;
+
+-- ================================================================ 10. orden por conector y cuota ya liquidada (fix 1)
+-- D1 (10-16/11) falla con sus estratos ya escritos; D2 (17-23/11) llega despues. D2 no se toma mientras D1 siga
+-- reintentable. Si la cuota de D1 ya estaba liquidada cuando se reintenta, no se pasa nada a ella (skipped_settled).
+INSERT INTO public.cl_feeds (id, account_id, carrier_id, name, status, emit_days, emit_hour) VALUES
+  ('f0000000-0000-0000-0000-0000000000a4','a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000001','Feed F4','active','{2}',3),
+  ('f0000000-0000-0000-0000-0000000000a5','a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000001','Feed F5','active','{2}',3);
+INSERT INTO public.cl_plans (id, account_id, plan_name, carrier_id, product_id, total_samples, start_date, end_date, status, feed_id) VALUES
+  ('90000000-0000-0000-0000-0000000000a4','a0000000-0000-0000-0000-000000000001','P4','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',9,'2026-11-02','2026-11-29','active','f0000000-0000-0000-0000-0000000000a4'),
+  ('90000000-0000-0000-0000-0000000000a5','a0000000-0000-0000-0000-000000000001','P5','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',3,'2026-11-02','2026-11-29','active','f0000000-0000-0000-0000-0000000000a5');
+INSERT INTO public.cl_plan_quotas (id, account_id, plan_id, origin_city_id, destination_city_id, iso_year, iso_week, period_start, period_end, samples_planned) VALUES
+  ('91000000-0000-0000-0000-0000000000d6','a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-0000000000a4','c1000000-0000-0000-0000-000000000001','c2000000-0000-0000-0000-000000000002',2026,46,'2026-11-09','2026-11-15',5),
+  ('91000000-0000-0000-0000-0000000000d7','a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-0000000000a4','c1000000-0000-0000-0000-000000000001','c2000000-0000-0000-0000-000000000002',2026,47,'2026-11-16','2026-11-22',4),
+  ('91000000-0000-0000-0000-0000000000c6','a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-0000000000a5','c1000000-0000-0000-0000-000000000001','c2000000-0000-0000-0000-000000000002',2026,46,'2026-11-09','2026-11-15',3);
+
+-- p_n envios NBO (salida p_from) -> MBA (llegada p_to).
+CREATE OR REPLACE FUNCTION pg_temp.ship(p_prefix text, p_n int, p_from text, p_to text) RETURNS jsonb LANGUAGE sql AS $$
+  SELECT jsonb_agg(x ORDER BY (x->>'n')::int) FROM (
+    SELECT pg_temp.r(2 * g - 1, p_prefix || g, p_from, 'NBO', 'ADM') AS x FROM generate_series(1, p_n) g
+    UNION ALL SELECT pg_temp.r(2 * g, p_prefix || g, p_to, 'MBA') FROM generate_series(1, p_n) g) y
+$$;
+-- Pasos hasta que la entrega en proceso llegue a la fase p_phase.
+CREATE OR REPLACE FUNCTION pg_temp.run_until(p_phase text, p_chunk int DEFAULT 100000) RETURNS void LANGUAGE plpgsql AS $$
+DECLARE i int := 0;
+BEGIN
+  WHILE (SELECT progress->>'phase' FROM public.cl_deliveries WHERE status = 'processing') IS DISTINCT FROM p_phase LOOP
+    PERFORM public.cl_process_delivery(NULL, p_chunk);
+    i := i + 1;
+    IF i > 200 THEN RAISE EXCEPTION 'FAIL: no llega a %', p_phase; END IF;
+  END LOOP;
+END $$;
+
+DO $$
+DECLARE
+  d1 uuid := 'de000000-0000-0000-0000-000000000050'; d2 uuid := 'de000000-0000-0000-0000-000000000051';
+  r1 jsonb := pg_temp.ship('L', 8, '2026-11-10 09:00', '2026-11-12 09:00');
+  r2 jsonb := pg_temp.ship('M', 6, '2026-11-17 09:00', '2026-11-19 09:00');
+  c jsonb; d public.cl_deliveries;
+BEGIN
+  PERFORM pg_temp.mk(d1::text, 'f0000000-0000-0000-0000-0000000000a4', '2026-11-10', '2026-11-16', r1);
+  PERFORM pg_temp.load(r1, 1000, 'token-ord-01');
+  PERFORM pg_temp.run_until('draw');
+  PERFORM pg_temp.ok((SELECT quota_for_delivery FROM public.cl_delivery_strata WHERE delivery_id = d1
+                        AND quota_id = '91000000-0000-0000-0000-0000000000d6') = 5, 'estratos de D1 escritos');
+  PERFORM public.cl_process_delivery_failed('40P01', 'deadlock');
+  PERFORM pg_temp.run();
+  PERFORM pg_temp.ok((SELECT status FROM public.cl_deliveries WHERE id = d1) = 'failed', 'D1 failed');
+  -- D2 (periodo posterior) llega: no se toma mientras D1 sea reintentable (ni antes de los 5 min ni despues).
+  PERFORM pg_temp.mk(d2::text, 'f0000000-0000-0000-0000-0000000000a4', '2026-11-17', '2026-11-23', r2);
+  PERFORM pg_temp.ok(public.cl_delivery_worker_claim('token-ord-02')->>'action' = 'idle', 'D2 espera a D1');
+  PERFORM pg_temp.ok((SELECT status FROM public.cl_deliveries WHERE id = d2) = 'received', 'D2 sigue recibida');
+  -- La cuota W46 queda liquidada por otra via antes del reintento (defensa).
+  UPDATE public.cl_plan_quotas SET status = 'fulfilled', samples_obtained = 5 WHERE id = '91000000-0000-0000-0000-0000000000d6';
+  c := public.cl_delivery_worker_claim('token-ord-03', 120, now() + interval '10 minutes');
+  PERFORM pg_temp.ok(c->>'action' = 'load' AND (c->>'delivery_id')::uuid = d1, 'el reintento de D1 va antes que D2: ' || c::text);
+  PERFORM pg_temp.load(r1, 1000, 'token-ord-03');
+  PERFORM pg_temp.run();
+  SELECT * INTO d FROM public.cl_deliveries WHERE id = d1;
+  PERFORM pg_temp.ok(d.status = 'processed' AND d.shipments_drawn = 0, 'D1 procesada sin pasar nada: ' || d.status);
+  PERFORM pg_temp.ok(NOT EXISTS (SELECT 1 FROM public.cl_samples WHERE delivery_id = d1), 'D1 sin muestras');
+  PERFORM pg_temp.ok((SELECT samples_obtained = 5 AND status = 'fulfilled' FROM public.cl_plan_quotas
+                       WHERE id = '91000000-0000-0000-0000-0000000000d6'), 'cuota liquidada sin sobrellenar');
+  PERFORM pg_temp.ok((SELECT skipped_settled = 5 AND selected = 0 FROM public.cl_delivery_strata WHERE delivery_id = d1
+                        AND quota_id = '91000000-0000-0000-0000-0000000000d6'), 'skipped_settled registrado');
+  PERFORM pg_temp.ok(EXISTS (SELECT 1 FROM public.cl_alerts WHERE delivery_id = d1 AND alert_type = 'quota_already_settled'),
+                     'alerta quota_already_settled');
+  -- Ahora D2.
+  PERFORM pg_temp.load(r2, 1000, 'token-ord-04');
+  PERFORM pg_temp.run();
+  PERFORM pg_temp.ok((SELECT status = 'processed' AND shipments_drawn = 4 FROM public.cl_deliveries WHERE id = d2), 'D2 despues');
+  PERFORM pg_temp.ok((SELECT samples_obtained = 4 AND status = 'fulfilled' FROM public.cl_plan_quotas
+                       WHERE id = '91000000-0000-0000-0000-0000000000d7'), 'W47 de D2 cumplida');
+END $$;
+
+-- ================================================================ 11. intentos agotados: deshacer y rechazar (fix 2)
+DO $$
+DECLARE
+  e1 uuid := 'de000000-0000-0000-0000-000000000060';
+  g1 uuid := 'de000000-0000-0000-0000-000000000061';
+  r1 jsonb := pg_temp.ship('N', 6, '2026-11-10 09:00', '2026-11-12 09:00');
+  j jsonb; v_new uuid; d public.cl_deliveries; v text; i int := 0;
+BEGIN
+  PERFORM pg_temp.mk(e1::text, 'f0000000-0000-0000-0000-0000000000a5', '2026-11-10', '2026-11-16', r1);
+  -- Intento 1: falla con 1 muestra ya pasada.
+  PERFORM pg_temp.load(r1, 1000, 'token-exh-01');
+  LOOP
+    v := public.cl_process_delivery(NULL, 200); i := i + 1;
+    EXIT WHEN (SELECT count(*) FROM public.cl_samples WHERE delivery_id = e1) = 1;
+    PERFORM pg_temp.ok(i < 100, 'llega a transfer');
+  END LOOP;
+  PERFORM public.cl_process_delivery_failed('57014', 'canceling statement');
+  PERFORM pg_temp.run();
+  PERFORM pg_temp.ok((SELECT status = 'failed' AND (progress->>'attempts')::int = 1 FROM public.cl_deliveries WHERE id = e1), 'intento 1 failed');
+  -- Intento 2: falla en la carga (Storage).
+  PERFORM pg_temp.ok(public.cl_delivery_worker_claim('token-exh-02', 120, now() + interval '10 minutes')->>'action' = 'load', 'intento 2');
+  PERFORM public.cl_delivery_load_fail(e1, 'token-exh-02', 'CL_STORAGE_ERROR', false);
+  PERFORM pg_temp.run();
+  PERFORM pg_temp.ok((SELECT status = 'failed' AND (progress->>'attempts')::int = 2 FROM public.cl_deliveries WHERE id = e1), 'intento 2 failed');
+  -- Intento 3: falla con 2 muestras activas -> fallo terminal.
+  PERFORM pg_temp.ok(public.cl_delivery_worker_claim('token-exh-03', 120, now() + interval '10 minutes')->>'action' = 'load', 'intento 3');
+  PERFORM pg_temp.load(r1, 1000, 'token-exh-03');
+  i := 0;
+  LOOP
+    v := public.cl_process_delivery(NULL, 200); i := i + 1;
+    EXIT WHEN (SELECT count(*) FROM public.cl_samples WHERE delivery_id = e1 AND status = 'active') = 2;
+    PERFORM pg_temp.ok(i < 100, 'llega a transfer (3)');
+  END LOOP;
+  PERFORM pg_temp.ok((SELECT samples_obtained FROM public.cl_plan_quotas WHERE id = '91000000-0000-0000-0000-0000000000c6') = 2,
+                     'dos muestras contadas antes del fallo');
+  PERFORM public.cl_process_delivery_failed('57014', 'canceling statement');
+  PERFORM pg_temp.run();
+  SELECT * INTO d FROM public.cl_deliveries WHERE id = e1;
+  PERFORM pg_temp.ok(d.status = 'rejected' AND d.error = 'CL_RETRIES_EXHAUSTED' AND d.progress->>'phase' = 'rejected',
+                     'terminal: rejected ' || d.status || ' ' || COALESCE(d.error, ''));
+  PERFORM pg_temp.ok(pg_temp.staging(e1) = 0, 'terminal: zona de paso vacia');
+  PERFORM pg_temp.ok(NOT EXISTS (SELECT 1 FROM public.cl_samples WHERE delivery_id = e1 AND status = 'active')
+                     AND (SELECT count(*) FROM public.cl_samples WHERE delivery_id = e1 AND status = 'voided') = 2,
+                     'muestras de la entrega anuladas');
+  PERFORM pg_temp.ok(NOT EXISTS (SELECT 1 FROM public.one_db o JOIN public.cl_samples s ON s.id = o.cl_sample_id
+                                  WHERE s.delivery_id = e1), 'one_db de la entrega borrado');
+  PERFORM pg_temp.ok((SELECT samples_obtained = 0 AND status = 'pending' FROM public.cl_plan_quotas
+                       WHERE id = '91000000-0000-0000-0000-0000000000c6'), 'cuota descontada y sin liquidar');
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_alerts WHERE alert_type = 'delivery_retries_exhausted' AND delivery_id = e1
+                        AND plan_id = '90000000-0000-0000-0000-0000000000a5' AND details->>'last_error' = 'CL_PROCESSING_ERROR 57014'
+                        AND (details->>'samples_voided')::int = 2) = 1, 'alerta delivery_retries_exhausted');
+  -- El periodo queda libre: se vuelve a abrir (mismo fichero) y se procesa.
+  j := public.cl_delivery_open_core('f0000000-0000-0000-0000-0000000000a5', '2026-11-10', '2026-11-16',
+                                    encode(sha256(convert_to(r1::text, 'UTF8')), 'hex'), '[]', 'jsonl', 'none', 'api', NULL,
+                                    '2026-11-20 12:00+03');
+  PERFORM pg_temp.ok((j->>'existing')::boolean = false AND (j->>'delivery_id')::uuid <> e1, 'reabre el periodo: ' || j::text);
+  v_new := (j->>'delivery_id')::uuid;
+  INSERT INTO storage.objects (bucket_id, name, metadata)
+  VALUES ('cl-deliveries', j->>'file_path', jsonb_build_object('size', octet_length(r1::text)));
+  PERFORM pg_temp.ok(public.cl_delivery_complete_core('f0000000-0000-0000-0000-0000000000a5', v_new, 'api')->>'status' = 'received', 'reenvio recibido');
+  PERFORM pg_temp.load(r1, 1000, 'token-exh-04');
+  PERFORM pg_temp.run();
+  PERFORM pg_temp.ok((SELECT status = 'processed' AND shipments_drawn = 3 FROM public.cl_deliveries WHERE id = v_new), 'reenvio procesado');
+  PERFORM pg_temp.ok((SELECT samples_obtained = 3 AND status = 'fulfilled' FROM public.cl_plan_quotas
+                       WHERE id = '91000000-0000-0000-0000-0000000000c6'), 'cuota cumplida por el reenvio');
+
+  -- Worker que se cae siempre en la carga: cada toma de un arriendo caducado de otro worker cuenta; la cuarta rechaza.
+  PERFORM pg_temp.mk(g1::text, 'f0000000-0000-0000-0000-0000000000a5', '2026-11-17', '2026-11-23',
+                     pg_temp.ship('Q', 2, '2026-11-17 09:00', '2026-11-19 09:00'));
+  PERFORM pg_temp.ok(public.cl_delivery_worker_claim('token-crash-1')->>'action' = 'load', 'toma 1');
+  PERFORM pg_temp.ok(public.cl_delivery_worker_claim('token-crash-2', 120, now() + interval '10 minutes')->>'action' = 'load', 'toma 2');
+  PERFORM pg_temp.ok(public.cl_delivery_worker_claim('token-crash-2', 120, now() + interval '15 minutes')->>'action' = 'load', 'mismo worker');
+  PERFORM pg_temp.ok((SELECT (progress->>'attempts')::int FROM public.cl_deliveries WHERE id = g1) = 2, 'el mismo worker no cuenta');
+  PERFORM pg_temp.ok(public.cl_delivery_worker_claim('token-crash-3', 120, now() + interval '20 minutes')->>'action' = 'load', 'toma 3');
+  PERFORM pg_temp.ok((SELECT (progress->>'attempts')::int FROM public.cl_deliveries WHERE id = g1) = 3, 'tres intentos');
+  PERFORM pg_temp.ok(public.cl_delivery_worker_claim('token-crash-4', 120, now() + interval '30 minutes')->>'action' = 'sql', 'toma 4: abort');
+  PERFORM pg_temp.run();
+  PERFORM pg_temp.ok((SELECT status = 'rejected' AND error = 'CL_RETRIES_EXHAUSTED' FROM public.cl_deliveries WHERE id = g1),
+                     'worker que se cae: rechazada, no bloquea');
+  PERFORM pg_temp.ok(public.cl_delivery_worker_claim('token-crash-5')->>'action' = 'idle', 'la base queda libre');
 END $$;
 
 ROLLBACK;

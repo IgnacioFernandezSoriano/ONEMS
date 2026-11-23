@@ -44,11 +44,14 @@ CREATE UNLOGGED TABLE public.cl_delivery_items (
   quota_id        uuid,
   reason          text,                  -- NULL = envio completo y valido (entra en la poblacion de su estrato)
   drawn           boolean NOT NULL DEFAULT false,
+  skipped_settled boolean NOT NULL DEFAULT false,   -- elegido pero su cuota ya estaba liquidada: no se pasa
   sample_id       uuid,
   PRIMARY KEY (delivery_id, item_id)
 );
 CREATE INDEX cl_delivery_items_quota_idx ON public.cl_delivery_items (delivery_id, quota_id) WHERE reason IS NULL;
 ALTER TABLE public.cl_delivery_items ENABLE ROW LEVEL SECURITY;
+-- Elegidos que no se pasaron porque su cuota ya estaba liquidada (fulfilled / carried / unfilled): traza del sorteo.
+ALTER TABLE public.cl_delivery_strata ADD COLUMN skipped_settled integer NOT NULL DEFAULT 0 CHECK (skipped_settled >= 0);
 REVOKE ALL ON public.cl_delivery_items FROM PUBLIC, anon, authenticated, service_role;
 
 -- ================================================================ 2. guarda de estados (de 20261124100000) + M1
@@ -232,12 +235,18 @@ BEGIN
 
   SELECT d.id INTO v_id FROM public.cl_deliveries d WHERE d.status = 'processing';
   IF v_id IS NULL THEN
+    -- Por conector, estrictamente en orden de periodo: no se toma una entrega mientras otra anterior del mismo
+    -- conector siga recibida, en proceso o fallida (reintentable). Asi un reintento nunca llega despues de que una
+    -- entrega posterior haya liquidado la semana.
     SELECT d.id INTO v_id FROM public.cl_deliveries d
-     WHERE d.status = 'received'
-        OR (d.status = 'failed' AND COALESCE((d.progress->>'attempts')::integer, 0) < 3
-            AND COALESCE(d.finished_at, d.received_at) < p_now - interval '5 minutes'
-            AND d.file_deleted_at IS NULL)
-     ORDER BY (d.status = 'failed'), d.received_at, d.id
+     WHERE (d.status = 'received'
+            OR (d.status = 'failed' AND COALESCE((d.progress->>'attempts')::integer, 0) < 3
+                AND COALESCE(d.finished_at, d.received_at) < p_now - interval '5 minutes'
+                AND d.file_deleted_at IS NULL))
+       AND NOT EXISTS (SELECT 1 FROM public.cl_deliveries e
+                        WHERE e.feed_id = d.feed_id AND e.id <> d.id AND e.period_start < d.period_start
+                          AND e.status IN ('received','processing','failed'))
+     ORDER BY d.received_at, d.id
      LIMIT 1;
     IF v_id IS NULL THEN RETURN jsonb_build_object('action', 'idle'); END IF;
   END IF;
@@ -269,6 +278,19 @@ BEGIN
         AND (v_d.progress->>'lease_until')::timestamptz > p_now THEN
     RETURN jsonb_build_object('action', 'busy', 'delivery_id', v_d.id);
   ELSE
+    -- Toma de un arriendo caducado de OTRO worker (el anterior murio): cuenta como un intento. Agotados los 3, la
+    -- entrega pasa a abort/failed y la limpieza la rechaza (CL_RETRIES_EXHAUSTED): un worker que se cae siempre en
+    -- el mismo fichero no bloquea la base.
+    IF v_d.progress->>'lease_token' IS NOT NULL AND v_d.progress->>'lease_token' IS DISTINCT FROM p_token THEN
+      UPDATE public.cl_deliveries d
+         SET progress = d.progress || jsonb_build_object('attempts', COALESCE((d.progress->>'attempts')::integer, 0) + 1)
+       WHERE d.id = v_d.id
+      RETURNING d.* INTO v_d;
+      IF (v_d.progress->>'attempts')::integer > 3 THEN
+        PERFORM public.cl_delivery_mark_abort(v_d.id, 'failed', 'CL_WORKER_LOST');
+        RETURN jsonb_build_object('action', 'sql', 'delivery_id', v_d.id, 'phase', 'abort');
+      END IF;
+    END IF;
     UPDATE public.cl_deliveries d
        SET progress = d.progress
                       || jsonb_build_object('lease_token', p_token, 'lease_until', p_now + v_lease)
@@ -846,8 +868,21 @@ BEGIN
                    WHERE i.delivery_id = p_d.id AND i.drawn AND i.sample_id IS NULL)
    ORDER BY q.id FOR UPDATE;
 
+  -- Defensa: un elegido cuya cuota ya no esta pending/open (liquidada por otra via) no se pasa; queda contado en
+  -- cl_delivery_strata.skipped_settled (y alerta quota_already_settled en finish). Un elegido que ya tiene muestra de
+  -- esta entrega (intento anterior) se enlaza abajo, no se salta.
+  UPDATE public.cl_delivery_items i SET skipped_settled = true
+   WHERE i.delivery_id = p_d.id AND i.drawn AND i.sample_id IS NULL AND NOT i.skipped_settled
+     AND EXISTS (SELECT 1 FROM public.cl_plan_quotas q WHERE q.id = i.quota_id AND q.status NOT IN ('pending','open'))
+     AND NOT EXISTS (SELECT 1 FROM public.cl_samples sm
+                      WHERE sm.delivery_id = p_d.id AND sm.item_id = i.item_id AND sm.status = 'active');
+  UPDATE public.cl_delivery_strata s SET skipped_settled = x.n
+    FROM (SELECT i.quota_id, count(*)::integer AS n FROM public.cl_delivery_items i
+           WHERE i.delivery_id = p_d.id AND i.skipped_settled GROUP BY i.quota_id) x
+   WHERE s.delivery_id = p_d.id AND s.quota_id = x.quota_id AND s.skipped_settled IS DISTINCT FROM x.n;
+
   FOR v_it IN SELECT i.* FROM public.cl_delivery_items i
-               WHERE i.delivery_id = p_d.id AND i.drawn AND i.sample_id IS NULL
+               WHERE i.delivery_id = p_d.id AND i.drawn AND i.sample_id IS NULL AND NOT i.skipped_settled
                ORDER BY i.quota_id, i.item_id COLLATE "C"
                LIMIT GREATEST(p_chunk, 1)
   LOOP
@@ -905,7 +940,7 @@ BEGIN
   END LOOP;
 
   SELECT EXISTS (SELECT 1 FROM public.cl_delivery_items i
-                  WHERE i.delivery_id = p_d.id AND i.drawn AND i.sample_id IS NULL) INTO v_left;
+                  WHERE i.delivery_id = p_d.id AND i.drawn AND i.sample_id IS NULL AND NOT i.skipped_settled) INTO v_left;
   UPDATE public.cl_deliveries d
      SET progress = d.progress || jsonb_build_object('phase', CASE WHEN v_left THEN 'transfer' ELSE 'finish' END)
    WHERE d.id = p_d.id;
@@ -938,7 +973,7 @@ BEGIN
            WHERE i.delivery_id = p_d.id AND i.drawn AND i.sample_id IS NOT NULL GROUP BY i.quota_id) x
    WHERE s.delivery_id = p_d.id AND s.quota_id = x.quota_id AND s.selected IS DISTINCT FROM x.n;
 
-  SELECT count(*), count(*) FILTER (WHERE i.reason IS NULL), count(*) FILTER (WHERE i.drawn),
+  SELECT count(*), count(*) FILTER (WHERE i.reason IS NULL), count(*) FILTER (WHERE i.drawn AND NOT i.skipped_settled),
          count(*) FILTER (WHERE i.reason = 'already_sampled')
     INTO v_tot, v_valid, v_drawn, v_used
     FROM public.cl_delivery_items i WHERE i.delivery_id = p_d.id;
@@ -977,10 +1012,14 @@ BEGIN
                                           WHERE i.delivery_id = p_d.id AND i.reason = 'reader_without_city'
                                             AND x.rid IS NOT NULL)));
     END IF;
-    FOR v_st IN SELECT s.quota_id, s.population, s.quota_for_delivery, s.selected, q.plan_id
+    FOR v_st IN SELECT s.quota_id, s.population, s.quota_for_delivery, s.selected, s.skipped_settled, q.plan_id, q.status
                   FROM public.cl_delivery_strata s JOIN public.cl_plan_quotas q ON q.id = s.quota_id
                  WHERE s.delivery_id = p_d.id ORDER BY s.quota_id
     LOOP
+      IF v_st.skipped_settled > 0 THEN
+        PERFORM public.cl_delivery_alert(p_d.id, v_st.plan_id, v_st.quota_id, 'quota_already_settled', 'high',
+          jsonb_build_object('skipped', v_st.skipped_settled, 'quota_status', v_st.status));
+      END IF;
       IF v_st.population < v_st.quota_for_delivery THEN
         PERFORM public.cl_delivery_alert(p_d.id, v_st.plan_id, v_st.quota_id, 'insufficient_candidates', 'medium',
           jsonb_build_object('population', v_st.population, 'quota_for_delivery', v_st.quota_for_delivery));
@@ -1024,8 +1063,57 @@ BEGIN
   RETURN 'finish';
 END $$;
 
+-- 6.7a Deshacer lo que paso una entrega (como cl_undo_batch): borra sus filas de one_db, anula (voided) sus muestras
+-- activas (cl_sample_scans quedan con la muestra anulada, igual que al deshacer un lote), descuenta samples_obtained de
+-- sus cuotas y cierra (dismissed) sus alertas abiertas y las missing_standard que nombran una muestra suya. Mismo
+-- candado que el sorteo (cuenta + carrier) y cuotas bloqueadas por id. Devuelve las muestras anuladas.
+CREATE OR REPLACE FUNCTION public.cl_delivery_undo_samples(p_d public.cl_deliveries)
+ RETURNS integer
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path = public, extensions
+AS $$
+DECLARE
+  v_carrier uuid := (SELECT f.carrier_id FROM public.cl_feeds f WHERE f.id = p_d.feed_id);
+  v_n integer;
+BEGIN
+  PERFORM pg_advisory_xact_lock(hashtext('cl_sample:' || p_d.account_id::text || ':' || v_carrier::text));
+  PERFORM 1 FROM public.cl_plan_quotas q
+   WHERE q.id IN (SELECT s.quota_id FROM public.cl_samples s WHERE s.delivery_id = p_d.id AND s.status = 'active')
+   ORDER BY q.id FOR UPDATE;
+
+  UPDATE public.cl_alerts a
+     SET status = 'dismissed',
+         details = COALESCE(a.details, '{}'::jsonb) || jsonb_build_object('dismissed_by_undo_delivery', p_d.id)
+   WHERE a.status = 'open' AND a.account_id = p_d.account_id
+     AND (a.delivery_id = p_d.id
+          OR (a.alert_type = 'missing_standard'
+              AND a.details->>'first_sample_id' IN (SELECT s.id::text FROM public.cl_samples s
+                                                     WHERE s.delivery_id = p_d.id AND s.status = 'active')));
+
+  DELETE FROM public.one_db o
+   USING public.cl_samples s
+   WHERE o.cl_sample_id = s.id AND s.delivery_id = p_d.id AND s.status = 'active';
+
+  WITH v AS (
+    UPDATE public.cl_samples SET status = 'voided'
+     WHERE delivery_id = p_d.id AND status = 'active'
+    RETURNING quota_id
+  ), u AS (
+    UPDATE public.cl_plan_quotas q SET samples_obtained = GREATEST(q.samples_obtained - c.n, 0)
+      FROM (SELECT v.quota_id, count(*)::integer AS n FROM v WHERE v.quota_id IS NOT NULL GROUP BY v.quota_id) c
+     WHERE q.id = c.quota_id
+    RETURNING q.id
+  )
+  SELECT (SELECT count(*) FROM v)::integer INTO v_n;
+  RETURN v_n;
+END $$;
+
 -- 6.7 cleanup: vacia la zona de paso de la entrega (TRUNCATE si no hay filas de otra entrega, lo normal por R25; si no,
 -- DELETE de hasta p_chunk filas por paso) y la deja en su estado final (processed / failed / rejected).
+-- Fallo con los intentos agotados (attempts >= 3): fallo terminal. Se deshace lo que paso la entrega
+-- (cl_delivery_undo_samples), queda rejected con CL_RETRIES_EXHAUSTED (el periodo queda libre para reenviarlo y deja
+-- de bloquear las entregas posteriores del conector) y alerta delivery_retries_exhausted por plan activo.
 CREATE OR REPLACE FUNCTION public.cl_delivery_phase_cleanup(p_d public.cl_deliveries, p_chunk integer)
  RETURNS text
  LANGUAGE plpgsql
@@ -1034,7 +1122,11 @@ CREATE OR REPLACE FUNCTION public.cl_delivery_phase_cleanup(p_d public.cl_delive
 AS $$
 DECLARE
   v_status text := COALESCE(p_d.progress->>'final_status', 'failed');
+  v_error  text := COALESCE(p_d.progress->>'final_error', 'CL_PROCESSING_ERROR');
   v_left   boolean;
+  v_voided integer;
+  v_plan   uuid;
+  v_alerted boolean := false;
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM public.cl_delivery_rows r WHERE r.delivery_id < p_d.id)
      AND NOT EXISTS (SELECT 1 FROM public.cl_delivery_rows r WHERE r.delivery_id > p_d.id)
@@ -1055,9 +1147,34 @@ BEGIN
     IF v_left THEN RETURN 'cleanup'; END IF;
   END IF;
 
+  IF v_status = 'failed' AND COALESCE((p_d.progress->>'attempts')::integer, 0) >= 3 THEN
+    v_voided := public.cl_delivery_undo_samples(p_d);
+    FOR v_plan IN SELECT p.id FROM public.cl_plans p
+                   WHERE p.feed_id = p_d.feed_id AND p.status = 'active'
+                     AND p.start_date <= p_d.period_end AND p.end_date >= p_d.period_start
+                   ORDER BY p.id
+    LOOP
+      PERFORM public.cl_raise_alert(v_plan, NULL, 'delivery_retries_exhausted', 'high',
+        jsonb_build_object('delivery_id', p_d.id, 'period_start', p_d.period_start, 'period_end', p_d.period_end,
+                           'last_error', v_error, 'attempts', (p_d.progress->>'attempts')::integer,
+                           'samples_voided', v_voided));
+      v_alerted := true;
+    END LOOP;
+    -- Traza de la entrega en la alerta (cl_raise_alert no la guarda).
+    UPDATE public.cl_alerts a SET delivery_id = p_d.id
+     WHERE a.account_id = p_d.account_id AND a.alert_type = 'delivery_retries_exhausted' AND a.delivery_id IS NULL
+       AND a.details->>'delivery_id' = p_d.id::text;
+    IF NOT v_alerted THEN
+      PERFORM public.cl_delivery_alert(p_d.id, NULL, NULL, 'delivery_retries_exhausted', 'high',
+        jsonb_build_object('last_error', v_error, 'samples_voided', v_voided));
+    END IF;
+    v_status := 'rejected';
+    v_error := 'CL_RETRIES_EXHAUSTED';
+  END IF;
+
   UPDATE public.cl_deliveries d
      SET status = v_status,
-         error = CASE WHEN v_status = 'processed' THEN NULL ELSE COALESCE(d.progress->>'final_error', 'CL_PROCESSING_ERROR') END,
+         error = CASE WHEN v_status = 'processed' THEN NULL ELSE v_error END,
          finished_at = now(),
          progress = (d.progress - 'cursor' - 'cursor_item' - 'lease_token' - 'lease_until')
                     || jsonb_build_object('phase', CASE WHEN v_status = 'processed' THEN 'done' ELSE v_status END,
@@ -1343,6 +1460,7 @@ REVOKE ALL ON FUNCTION public.cl_delivery_phase_draw(public.cl_deliveries) FROM 
 REVOKE ALL ON FUNCTION public.cl_delivery_phase_transfer(public.cl_deliveries, public.cl_feeds, integer) FROM PUBLIC, anon, authenticated, service_role;
 REVOKE ALL ON FUNCTION public.cl_delivery_phase_finish(public.cl_deliveries, public.cl_feeds) FROM PUBLIC, anon, authenticated, service_role;
 REVOKE ALL ON FUNCTION public.cl_delivery_phase_cleanup(public.cl_deliveries, integer) FROM PUBLIC, anon, authenticated, service_role;
+REVOKE ALL ON FUNCTION public.cl_delivery_undo_samples(public.cl_deliveries) FROM PUBLIC, anon, authenticated, service_role;
 REVOKE ALL ON FUNCTION public.cl_process_delivery(uuid, integer) FROM PUBLIC, anon, authenticated, service_role;
 REVOKE ALL ON FUNCTION public.cl_process_delivery_failed(text, text) FROM PUBLIC, anon, authenticated, service_role;
 REVOKE ALL ON PROCEDURE public.cl_delivery_process_run(integer, integer) FROM PUBLIC, anon, authenticated, service_role;
