@@ -98,7 +98,7 @@ Glosario rápido de campos:
    ONEMS                                          CONECTOR DEL CARRIER
    ─────                                          ────────────────────
    1. Emite demandas según el calendario
-      del conector (p. ej. cada lunes 03:15)
+      del conector (p. ej. cada lunes, 03:00)
                                      ◀── GET  /demands ───  2. Pide las demandas abiertas
       { "demands": [ ... ] }         ─────────────────────▶
                                                             3. Para cada estrato:
@@ -114,8 +114,8 @@ Glosario rápido de campos:
 
 ### 3.2. Paso a paso
 
-1. **Programar la consulta.** Ejecutar el conector cada día (o en los días del calendario, §5.1) **después**
-   de la hora de emisión. Por ejemplo, si ONEMS emite a las 06:00, consultar a partir de las 06:30.
+1. **Programar la consulta.** Ejecutar el conector en los días del calendario (§5.1), **a partir de la hora
+   siguiente** a la de emisión. Por ejemplo, si el calendario dice 06:00, consultar a partir de las 07:00.
 2. **Leer las demandas abiertas** con `GET /demands` (§5). Si la lista está vacía, no hay nada que hacer.
 3. **Por cada demanda y cada estrato**:
    1. Calcular la **población**: los envíos cerrados del producto que cumplen la regla de §6.1.
@@ -123,8 +123,9 @@ Glosario rápido de campos:
       población es menor).
    3. Reunir **todas** las lecturas de esos candidatos en los puntos de inicio o de fin de **cualquier**
       estrato de la demanda (o todas sus lecturas, si la demanda trae `include_all_scans: true`).
-4. **Construir los lotes** (§7): un estrato va entero en un único lote; un lote puede llevar varios estratos;
-   como máximo 5.000 lecturas y 5 MB por lote.
+4. **Construir los lotes** (§7): un estrato va entero en un único lote (no se puede partir); un lote puede
+   llevar varios estratos; como máximo 5.000 lecturas y 5 MB por lote. Si un solo estrato no cabe en esos
+   límites, avise al equipo de ONEMS.
 5. **Recomendado: ensayar** cada lote con `?dry_run=true` y revisar la respuesta.
 6. **Enviar los lotes** de verdad con `POST /batches`. Guardar cada `batch_id` y cada respuesta.
 7. **Si un envío falla** por red, `429` o `5xx`, **reintentar el mismo lote con el mismo `batch_id`**: ONEMS no
@@ -183,13 +184,17 @@ En el `POST` hay que enviar además `Content-Type: application/json`.
 
 | Límite | Valor | Qué pasa si se supera |
 |---|---|---|
-| Peticiones por minuto y clave (contando `GET` y `POST`) | **30** | `429` — esperar y reintentar |
+| Peticiones por clave en cualquier ventana de 60 segundos (ventana móvil) | **30** | `429` — esperar y reintentar |
 | Tamaño máximo del cuerpo de un lote | **5 MB** (5.242.880 bytes) | `413 CL_BODY_TOO_LARGE` |
 | Lecturas (filas) por lote, sumando todos sus estratos | **5.000** | `413 CL_TOO_MANY_ROWS` |
 | Demandas devueltas por `GET /demands` | **100** (las más antiguas primero) | las siguientes aparecen al cerrarse las anteriores |
 | Longitud de `batch_id` | **200** caracteres | `400 CL_BAD_PAYLOAD` |
 | Longitud de identificador de envío, lugar o modo | **200** caracteres | esa lectura se rechaza (`bad_value`) |
 | Longitud del valor de un campo adicional | **500** caracteres (solo texto, número o booleano) | ese campo no se guarda |
+
+Para el límite de peticiones cuentan **todas** las peticiones con una clave válida (`GET` y `POST`, también
+las que acaban en error `4xx`), salvo las que reciben `429`. Las peticiones con clave inválida (`401`) no
+cuentan.
 
 ---
 
@@ -200,10 +205,12 @@ En el `POST` hay que enviar además `Content-Type: application/json`.
 - Cada conector tiene en ONEMS un **calendario de emisión**: unos días de la semana y una hora, en una zona
   horaria (la del conector o, si no tiene, la de la cuenta del regulador). Por defecto: **lunes a las 03:00**.
   El calendario se acuerda con el carrier para no cargar sus sistemas en horas punta.
-- ONEMS comprueba el calendario **una vez por hora, en el minuto 15**. Por eso una demanda de las 06:00 aparece
-  hacia las 06:15 (hora local del calendario).
+- Las demandas aparecen **unos minutos después** de la hora del calendario (ONEMS las prepara con un proceso
+  periódico). Recomendación: consultar a partir de la **hora siguiente** a la de emisión.
 - Una semana entra en una demanda cuando ha terminado y ha pasado además un **plazo de cierre** (por defecto
   7 días), para dar tiempo a que los envíos de esa semana lleguen a destino.
+- Una demanda agrupa **todas** las semanas y rutas que ya han pasado su plazo de cierre y aún necesitan
+  muestras. Las rutas cuyas ciudades aún no tienen puntos de inicio o de fin dados de alta no aparecen.
 - Cada demanda trae su propio calendario (`schedule`) a título informativo.
 
 ### 5.2. Petición
@@ -275,11 +282,17 @@ Detalles:
 - **`start_points` / `end_points`** pueden tener varios puntos; basta con una lectura en cualquiera de ellos.
 - **`mode_ref` puede ser `null`**: el punto es "cualquier evento en ese lugar". Una lectura en ese lugar vale
   con cualquier tipo de evento… salvo que el mismo lugar tenga también dado de alta un punto con ese tipo de
-  evento concreto: entonces la lectura pertenece a ese punto concreto (el más específico gana).
+  evento concreto: entonces la lectura pertenece a ese punto concreto (el más específico gana). ONEMS aplica
+  esta regla con **todos** los puntos de lectura del carrier dados de alta, no solo con los que aparecen en la
+  demanda. Para reproducirla exactamente, el conector necesita la **lista completa de puntos**, que ONEMS
+  entrega al configurar la conexión (§8.4) y actualiza cuando cambia; sin ella, la población contada por el
+  conector puede no coincidir con la de ONEMS.
 - **`candidates_requested`** es mayor que `samples_required` a propósito (por defecto 5 veces): ONEMS descarta
   candidatos no válidos o ya usados y luego sortea entre los que quedan.
 - Un mismo `stratum_id` puede volver a aparecer en una **demanda posterior** (otro `demand_id`) si faltaron
   muestras de esa semana; en ese caso `samples_required` pide solo lo que falta (§5.4).
+- `samples_required` puede ser mayor que lo previsto para esa semana: incluye las muestras que faltaron en
+  semanas anteriores de la misma ruta y que ONEMS ha pasado a esta (§5.4).
 
 ### 5.4. Estados y caducidad de una demanda
 
@@ -294,8 +307,12 @@ Detalles:
 - **Caducidad: 7 días.** Si una demanda sigue abierta 7 días después de emitirse, ONEMS la da por fallida, la
   retira y avisa al equipo de ONEMS. Los lotes de esa demanda que aún no se hubieran procesado del todo
   tampoco se procesan ya.
-- Si faltan muestras de un estrato (porque la población era pequeña o hubo muchos candidatos no válidos),
-  ONEMS puede volver a pedirlo en una demanda nueva, **hasta 3 demandas por estrato** en total.
+- Si faltan muestras de un estrato, ONEMS lo **vuelve a pedir** en una demanda nueva solo cuando todavía hay
+  envíos que no ha visto: la población declarada era mayor que los candidatos recibidos, o la demanda caducó
+  sin respuesta. Cada semana de una ruta se pide como mucho tres veces (sin contar las demandas de prueba,
+  §10.2).
+- En los demás casos, lo que falta **se pasa a las semanas siguientes de la misma ruta**: por eso una semana
+  posterior puede pedir más muestras de las previstas.
 
 ---
 
@@ -308,7 +325,10 @@ Esta es la parte más importante: si el conector selecciona de otra forma, la me
 Un envío forma parte de la población del estrato si cumple **todo** lo siguiente, considerando solo lecturas
 con fecha y hora legibles:
 
-1. **Es del producto**: su código de producto es uno de `products`.
+1. **Es del producto**: **todas** sus lecturas de inicio y de fin llevan uno de los códigos de `products`.
+   ONEMS valida el producto lectura a lectura: si una sola lectura del envío trae un código sin equivalencia,
+   el envío se rechaza (`unknown_product`); si una lectura válida es de otro producto, se rechaza
+   (`product_mismatch`).
 2. **Tiene lectura de inicio**: al menos una lectura en uno de los `start_points` del estrato. La lectura de
    inicio es la **primera** (la más antigua) de ellas.
 3. **Tiene lectura de fin**: al menos una lectura en uno de los `end_points` del estrato **distinta de la
@@ -347,12 +367,16 @@ Consecuencias:
 ### 6.3. Qué lecturas enviar de cada candidato
 
 - Con `include_all_scans: false` (lo normal): **todas** las lecturas del candidato que estén en un punto de
-  inicio o de fin de **cualquier** estrato de la demanda, **de cualquier ciudad**, no solo las de su estrato.
-  Así ONEMS detecta envíos mal encaminados (por ejemplo, una lectura de entrega en otra ciudad).
+  inicio o de fin de **cualquier** estrato de la demanda, **de cualquier ciudad** de la demanda, no solo las
+  de su estrato. Así ONEMS detecta envíos mal encaminados (por ejemplo, una lectura de entrega en otra
+  ciudad). El conector solo conoce los puntos que trae la demanda, así que esta detección cubre las ciudades
+  que aparecen en sus estratos; ONEMS marca un posible mal encaminado con cualquiera de los puntos que tiene
+  dados de alta.
 - Con `include_all_scans: true`: **todas** las lecturas del candidato, estén donde estén (también las de
-  centros de tratamiento y reparto). Se usa cuando el regulador quiere además un diagnóstico de la red. Las
-  lecturas en lugares que no son puntos de lectura dados de alta aparecerán en la respuesta como
-  `unknown_reading_point`: es lo esperado en este modo y no invalida el envío.
+  centros de tratamiento y reparto). Está pensado para el diagnóstico de la red, que llegará en una **fase
+  posterior**. Hoy, las lecturas en lugares que no son puntos de lectura dados de alta aparecen en la
+  respuesta como `unknown_reading_point` (y ONEMS recibe un aviso): es lo esperado en este modo y no invalida
+  el envío.
 - Incluir también las lecturas duplicadas o con datos dudosos; ONEMS las valida una a una.
 - Una fila por lectura; cada fila lleva sus propios campos (identificador, fecha y hora, lugar, tipo de
   evento, producto…), aunque se repitan entre filas del mismo envío.
@@ -381,6 +405,9 @@ Content-Type: application/json
 ```
 
 Para ensayar sin guardar nada: `POST .../batches?dry_run=true` (§10).
+
+> **Atención:** solo el valor literal `dry_run=true` (en minúsculas) es un ensayo. Cualquier otro valor
+> (`dry_run=1`, `dry_run=TRUE`, `dry_run=yes`…) se trata hoy como un **envío real** y el lote se carga.
 
 ### 7.2. El lote, campo a campo
 
@@ -419,7 +446,8 @@ Ejemplo (ilustrativo, recortado: un estrato y 4 de sus 20 filas; completo en [`e
 ### 7.3. Varios lotes por demanda
 
 - Una demanda puede entregarse en **varios lotes** (por ejemplo, para no pasar de 5.000 filas o 5 MB).
-- **Cada estrato se entrega una sola vez** por demanda y **entero en un único lote**: no lo parta en dos. Si
+- **Cada estrato se entrega una sola vez** por demanda y **entero en un único lote**: no se puede partir en
+  dos. Si un solo estrato pasa de 5.000 filas o 5 MB, avise al equipo de ONEMS. Si
   un lote trae un estrato ya entregado en otro lote de la misma demanda, se rechaza el lote entero
   (`400 CL_STRATUM_ALREADY_DELIVERED`).
 - Un lote puede llevar tantos estratos como quepan en los límites.
@@ -430,7 +458,10 @@ Ejemplo (ilustrativo, recortado: un estrato y 4 de sus 20 filas; completo en [`e
 
 - El `batch_id` identifica el lote **dentro de la demanda**. Si ONEMS recibe otra vez un lote con un
   `batch_id` que ya tiene guardado para esa demanda, **no lo vuelve a cargar**: devuelve el resumen guardado
-  de la primera vez, aunque la demanda ya esté cerrada.
+  de la primera vez, aunque la demanda ya esté cerrada **y aunque el contenido nuevo sea distinto**: el
+  contenido nuevo se ignora sin aviso. Un `batch_id` ya usado no sirve para corregir un lote.
+- Excepciones: con el conector **pausado**, también el reenvío recibe `403 CL_FEED_PAUSED`; con el conector
+  **en pruebas**, un reenvío real (sin `dry_run`) recibe `403 CL_FEED_TESTING_DRY_RUN_ONLY`.
 - Por eso, ante cualquier duda (corte de red, tiempo agotado, `429`, `5xx`), **reenvíe el mismo lote con el
   mismo `batch_id`**. Nunca genere un `batch_id` nuevo para el mismo contenido: sería un lote distinto y,
   si sus estratos ya se entregaron, se rechazaría.
@@ -447,6 +478,9 @@ ONEMS traduce cada fila del carrier a sus campos estándar. El carrier no tiene 
 tiene que **decirnos** cómo son sus datos. Esto se acuerda antes de empezar y lo configura el equipo de ONEMS.
 
 ### 8.1. Campos de cada lectura
+
+Los nombres de campo distinguen mayúsculas y minúsculas y tienen que coincidir **exactamente** con los
+acordados (`tracking_no` no es `Tracking_No`); un campo con otro nombre se trata como si no viniera.
 
 | Campo estándar de ONEMS | ¿Obligatorio? | Qué nos tiene que decir el carrier | Ejemplo SIMPOST |
 |---|---|---|---|
@@ -465,9 +499,12 @@ tiene que **decirnos** cómo son sus datos. Esto se acuerda antes de empezar y l
 - **Formato**: patrón con la sintaxis de PostgreSQL `to_timestamp` (por ejemplo `DD/MM/YYYY HH24:MI:SS`,
   `YYYY-MM-DD HH24:MI:SS`). Si no se indica formato, ONEMS acepta fechas ISO 8601
   (`2026-11-03T16:37:35+03:00`, `2026-11-03 16:37:35`).
-- **Zona horaria**: nombre IANA (`Africa/Nairobi`, `Europe/Madrid`…) en la que están las horas **sin
-  desfase**. Si el valor ya trae desfase (`+03:00`, `Z`), se usa ese desfase. Si no se indica zona, se usa la
-  del regulador.
+- **Zona horaria**: nombre IANA (`Africa/Nairobi`, `Europe/Madrid`…) en la que están las horas. Si no se
+  indica zona, se usa la del regulador.
+- **Desfase dentro del valor** (`+03:00`, `Z`):
+  - sin formato acordado (ISO 8601): si el valor trae desfase, se usa ese desfase; si no, la zona configurada;
+  - con formato acordado: el desfase solo se lee si el patrón lo incluye (`TZH:TZM`, por ejemplo
+    `YYYY-MM-DD HH24:MI:SS TZH:TZM`); si el patrón no lo incluye, se aplica siempre la zona configurada.
 - Una hora ilegible (por ejemplo `31/11/2026 25:61:00`) rechaza solo esa lectura (`bad_timestamp`).
 
 ### 8.3. Valores: productos
@@ -481,7 +518,9 @@ carrier.
 
 Lista de los lugares del carrier (código `place_ref` y en qué oficina o centro está, es decir, en qué ciudad) y
 de los códigos de evento (`mode_ref`) que marcan el **inicio** (admisión, depósito…) y el **fin** (entrega,
-llegada a la oficina de destino…). ONEMS da de alta un punto de lectura por cada combinación útil. Una lectura
+llegada a la oficina de destino…). ONEMS da de alta un punto de lectura por cada combinación útil y entrega
+al carrier la **lista completa de puntos** dados de alta (lugar, tipo de evento, ciudad y papel de inicio o
+fin), que el conector necesita para aplicar la regla del punto más específico (§5.3). Una lectura
 en un lugar o evento no dado de alta se rechaza como `unknown_reading_point` y ONEMS recibe un aviso para
 revisarlo.
 
@@ -519,7 +558,8 @@ anterior a los dos puntos), no contra el texto.
 | `400` | `CL_UNKNOWN_STRATUM` | Algún `stratum_id` no es de esa demanda. | Usar los `stratum_id` de la demanda tal cual. |
 | `400` | `CL_STRATUM_ALREADY_DELIVERED` | Algún estrato ya se entregó en otro lote de esa demanda. Se rechaza el lote entero. | Quitar ese estrato; no partir estratos entre lotes. |
 | `400` | `CL_MAPPING_INCOMPLETE` | ONEMS aún no tiene configuradas las equivalencias obligatorias (§8.1). | Avisar al equipo de ONEMS. |
-| `400` | `CL_FEED_CARRIER_MISMATCH` | Error de configuración en ONEMS (conector y plan de carriers distintos). | Avisar al equipo de ONEMS. |
+| `400` | `CL_FEED_CARRIER_MISMATCH` | Error de configuración interna de ONEMS para este conector. | Avisar al equipo de ONEMS. |
+| `400` | `CL_BATCH_NOT_VALIDATED` | El lote guardado ya no se puede procesar (por ejemplo, su demanda caducó mientras se procesaba). Puede llegar como código de `failed` (§9.3). | No reintentar. Avisar a ONEMS. |
 | `400` | `CL_BAD_REQUEST` | Otra petición no válida. | Revisar el lote; si persiste, avisar a ONEMS. |
 | `401` | — (`Invalid or inactive API key`) | Falta la clave, es incorrecta, está desactivada o caducada. | Revisar la cabecera; pedir clave nueva si caducó. |
 | `403` | `CL_FEED_PAUSED` | El conector está pausado en ONEMS: no se aceptan lotes (ni ensayos). | Esperar a que ONEMS lo reactive. |
@@ -533,6 +573,9 @@ anterior a los dos puntos), no contra el texto.
 | `413` | `CL_TOO_MANY_ROWS` | El lote pasa de 5.000 filas. | Repartir los estratos en más lotes. |
 | `429` | — (`Rate limit exceeded…`) | Más de 30 peticiones en el último minuto con esta clave. | Esperar un minuto y reintentar el mismo lote. |
 | `500` | — (`Internal server error` / `internal`) | Error inesperado en ONEMS. | Reintentar más tarde **con el mismo `batch_id`**; si persiste, avisar. |
+
+**Regla general:** cualquier otro código `CL_…` que no esté en esta tabla: no reintentar y avisar al equipo de
+ONEMS con el `demand_id`, el `batch_id` y la respuesta.
 
 Los errores de forma del lote (`400`, `413`) se detectan antes de guardar nada: el lote no queda registrado
 y, una vez corregido, se puede enviar con el mismo `batch_id`.
@@ -576,6 +619,14 @@ y, una vez corregido, se puede enviar con el mismo `batch_id`.
 }
 ```
 
+Notas sobre el resumen:
+
+- `ingest.batch`, `sampling[].batch_id` y `finish.batch_id` son **identificadores internos de ONEMS** del lote
+  guardado, no el `batch_id` del conector. Guárdelos solo para hablar con ONEMS.
+- `sampling[].candidates_valid` puede ser **menor** que `ingest.strata[].candidates_valid`: en el sorteo ONEMS
+  descarta además los envíos que ya salieron elegidos en otro estrato del mismo lote y los que se leyeron en un
+  punto sin ciudad asignada (error de configuración de ONEMS, que recibe un aviso).
+
 **Motivos por envío** (`rejected`): el envío no entra en el sorteo.
 
 | Motivo | Significado |
@@ -615,7 +666,9 @@ en un lote **con un `batch_id` nuevo** (reenviar el mismo devolvería otra vez e
 
 - **Reenvío de un lote ya procesado** (mismo `batch_id`): `200` con solo `ingest`, que es el resumen guardado
   de la primera vez (su `status` es el de la validación inicial). No hay `sampling` ni `finish`: no se sortea
-  otra vez.
+  otra vez. Si el contenido enviado ahora es distinto, **se ignora sin aviso**. Con el conector pausado el
+  reenvío recibe `403 CL_FEED_PAUSED`, y con el conector en pruebas un reenvío real recibe
+  `403 CL_FEED_TESTING_DRY_RUN_ONLY`.
 - **Sorteo cortado a medias**: el código HTTP del fallo y un cuerpo con lo hecho hasta entonces:
   `{ "ingest": {...}, "sampling": [ ...estratos ya sorteados... ], "failed": { "stratum_id": "…", "code": "CL_DEMAND_NOT_OPEN" } }`
   (con `"code": "internal"` si fue un `500`). El lote está guardado: reenviar el mismo `batch_id` completa los
@@ -630,6 +683,9 @@ en un lote **con un `batch_id` nuevo** (reenviar el mismo devolvería otra vez e
 `POST .../batches?dry_run=true` hace **todas** las comprobaciones (forma, equivalencias, puntos, motivos de
 rechazo) y devuelve el mismo resumen `ingest` con `"batch": null` y `"dry_run": true`, pero **no guarda
 nada**: ni lote, ni muestras, ni avisos. Se puede repetir cuantas veces haga falta.
+
+> **Atención:** solo `?dry_run=true` literal (en minúsculas) es un ensayo. Con cualquier otro valor
+> (`1`, `TRUE`, `yes`…) el lote se carga **de verdad**.
 
 - Un ensayo no cuenta como entrega: después se puede enviar el mismo lote de verdad (incluso con el mismo
   `batch_id`).
@@ -647,8 +703,11 @@ nada**: ni lote, ni muestras, ni avisos. Se puede repetir cuantas veces haga fal
 - Mientras el conector está en pruebas, ONEMS emite **demandas de prueba** según el calendario, iguales a las
   reales, para que el conector se pueda ensayar con datos verdaderos. Una demanda de prueba **solo admite
   ensayos, para siempre** (`403 CL_DEMAND_TESTING_DRY_RUN_ONLY`), aunque el conector se active después.
-- Al **activar** el conector, ONEMS cierra las demandas de prueba que siguieran abiertas (desaparecen de
-  `GET /demands`) y en el siguiente hueco del calendario emite la primera **demanda real**.
+- Al **activar** el conector, ONEMS cierra (como `failed`) las demandas de prueba que siguieran abiertas:
+  desaparecen de `GET /demands` y cualquier lote para ellas, **también un ensayo**, recibe
+  `409 CL_DEMAND_NOT_OPEN` (salvo el reenvío de un `batch_id` ya guardado, que devuelve su resumen). El
+  `403 CL_DEMAND_TESTING_DRY_RUN_ONLY` solo aparece mientras la demanda de prueba sigue abierta. En el
+  siguiente hueco del calendario ONEMS emite la primera **demanda real**.
 
 ### 10.3. Lista de comprobación para el paso a producción
 
@@ -659,8 +718,10 @@ Antes de pedir a ONEMS que active el conector:
 - [ ] La clave se guarda como secreto y se envía en `x-api-key` (o `Authorization: Bearer`).
 - [ ] El conector lee `GET /demands` después de la hora de emisión y respeta el límite de 30 peticiones por
       minuto.
-- [ ] La población se calcula con la regla exacta de §6.1 (última lectura de fin, fecha local dentro del
-      periodo) y se informa en `population_size`.
+- [ ] El conector tiene la lista completa de puntos de lectura que entrega ONEMS (§8.4).
+- [ ] La población se calcula con la regla exacta de §6.1 (producto en todas las lecturas de inicio y fin,
+      última lectura de fin, fecha local dentro del periodo) y se informa en `population_size`.
+- [ ] Los ensayos usan exactamente `?dry_run=true`.
 - [ ] El sorteo es uniforme dentro de cada estrato y `selection_method` es `uniform_random_within_stratum`.
 - [ ] Se envían todas las lecturas de los candidatos en los puntos de inicio y fin de cualquier estrato de la
       demanda (o todas, con `include_all_scans`).
@@ -681,6 +742,10 @@ Antes de pedir a ONEMS que active el conector:
 
 Ejecución real del conector de referencia contra un carrier simulado (SIMPOST). Los identificadores son
 ilustrativos. Los ficheros completos están en [`ejemplo/`](ejemplo/).
+
+> En los ficheros de respuesta (`03` a `07`), cada respuesta va envuelta, solo para ilustrarla, en
+> `{ "http_status": <código HTTP>, "body": <cuerpo> }`. La API **no** devuelve ese envoltorio: devuelve el código
+> HTTP en la cabecera de estado y, como cuerpo, exactamente lo que hay dentro de `body`.
 
 **Configuración acordada (§8)**: `item_id` = `tracking_no`; `scan_at` = `event_ts`, formato
 `DD/MM/YYYY HH24:MI:SS`, zona `Africa/Nairobi`; `place_ref` = `site_code`; `mode_ref` = `event_code`;
@@ -775,8 +840,10 @@ Porque hasta la lectura de fin no se sabe a qué ruta pertenece el envío ni cu�
 llegan no se ven por esta vía; el regulador lo sabe y lo acepta.
 
 **Un envío se escaneó como entregado en una ciudad equivocada y luego en la buena. ¿Qué lecturas enviamos?**
-Todas las de inicio y fin, de cualquier ciudad (§6.3). ONEMS toma la última lectura de fin del estrato y marca
-el envío como posible mal encaminado.
+Todas las que estén en puntos de inicio o de fin de la demanda, de cualquiera de sus ciudades (§6.3). ONEMS
+toma la última lectura de fin del estrato y marca el envío como posible mal encaminado. Si la ciudad
+equivocada no aparece en ningún estrato de la demanda, el conector no conoce sus puntos y esa lectura no
+llegará; no pasa nada, el envío sigue siendo válido.
 
 **¿Qué zona horaria usamos?**
 Las suyas, tal como estén en sus sistemas: díganos cuál es (§8.2). Para decidir si un envío cae en el periodo,
@@ -786,14 +853,15 @@ use la fecha local del regulador (normalmente la misma del país).
 Sí, con el **mismo `batch_id`**. Si ya había llegado, ONEMS devuelve el resultado guardado sin duplicar nada.
 
 **Hemos recibido `409 CL_DEMAND_NOT_OPEN`.**
-La demanda ya se cerró (cumplida o caducada a los 7 días) o no es de su conector. No reintente; vuelva a leer
-`GET /demands`.
+La demanda ya se cerró (cumplida, caducada a los 7 días, o era de prueba y el conector se activó) o no es de
+su conector. No reintente; vuelva a leer `GET /demands`.
 
 **¿Podemos probar sin afectar a los datos reales?**
 Sí: `?dry_run=true` y el estado "en pruebas" del conector (§10).
 
 **¿Cuántas veces podemos consultar?**
-Hasta 30 peticiones por minuto por clave. Una consulta al día después de la hora de emisión es suficiente.
+Hasta 30 peticiones por clave en cualquier ventana de 60 segundos. Una consulta en cada día del calendario,
+a partir de la hora siguiente a la de emisión, es suficiente.
 
 **¿ONEMS se conecta a nuestros sistemas?**
 No. Es su conector el que llama a ONEMS, siempre por HTTPS.
