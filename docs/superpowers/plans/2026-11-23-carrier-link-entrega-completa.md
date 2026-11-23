@@ -21,7 +21,6 @@
 - A delivery spanning two ISO weeks (e.g. Sat–Mon) → each shipment counted in the stratum of its arrival week; quotas of both weeks handled.
 - Staging never keeps rows after processing (also after a failure mid-way: resumable then emptied).
 - Large file (e.g. 2 M rows) → processed in chunks without hitting timeouts; memory bounded.
-- Witness shipment delivered in the period but absent → alert; present with a very different time → alert.
 
 ### Task 1: Delivery intake model (DB)
 New migration: `cl_deliveries` (account, feed, period_start, period_end, file path, content sha256, declared control totals jsonb, status received|processing|processed|failed|rejected, counts, timings, error), `cl_delivery_strata` (delivery, stratum quota id, population, selected, quota_for_delivery, seed), UNLOGGED staging `cl_delivery_rows` (delivery_id + standardized columns + raw allowed extras), private storage bucket `cl-deliveries` with per-account path and storage RLS (connector key via Edge Function only; humans with cl_connectors edit for manual upload). Config function `cl_connector_config(p_feed_id)` (products with carrier codes, points with role/city, field mappings needed, calendar, next period to deliver, limits). Tests.
@@ -32,14 +31,14 @@ New migration: `cl_deliveries` (account, feed, period_start, period_end, file pa
 ### Task 3: Edge Function contract
 Replace demand/candidate endpoints with: `GET /config`; `POST /deliveries` {period_start, period_end, sha256, control_totals, format} → returns delivery id + signed upload URL (size cap configurable, default e.g. 500 MB); `POST /deliveries/{id}/complete` → queues processing; `GET /deliveries/{id}` → status and summary (counts, rejected reasons, drawn count, alerts). Keep x-api-key/Bearer auth, carrier_feed scope, rate limit. Remove old routes (no carriers connected yet) — keep a 410 Gone with a clear message.
 
-### Task 4: Audits
-(a) Witnesses: panelist shipments that travel with that carrier carry an RFID tag with their own number and follow the panelist procedure; to match them with the carrier's records ONEMS needs the carrier tracking number of each witness → add `carrier_tracking_no` to the panelist shipment record (column only; capture in the panelist bot is a separate n8n task, DEV first) and an audit that, per delivery, flags witnesses delivered in the period that are missing or whose carrier times differ from the panelist/RFID times beyond a tolerance. (b) Distribution: compare carrier transit distribution vs panelists on the same route/week (e.g. percentile gap / KS test with minimum n), alert when the slow tail is missing. (c) Control totals: declared vs received per arrival point. (d) Volume anomaly vs median of recent deliveries. Alerts in cl_alerts with plain-language texts.
+### Task 4: Audits — DEFERRED (owner 23/11: "De momento no implementaremos la auditoría")
+Only store the declared control totals with each delivery (no comparison logic, no witness, no distribution test, no alerts). To be designed later.
 
 ### Task 5: Screens
-Conectores: deliveries list per connector (period, status, counts, drawn, alerts), manual upload of a delivery file (same pipeline), calendar shows delivery frequency (daily…weekly). Monitor: deliveries and audits instead of demands/batches. Remove demand/candidate UI that no longer applies. Help + i18n.
+Conectores: deliveries list per connector (period, status, counts, drawn, alerts), manual upload of a delivery file (same pipeline), calendar shows delivery frequency (daily…weekly). Monitor: deliveries instead of demands/batches. Remove demand/candidate UI that no longer applies. Help + i18n.
 
 ### Task 6: Simulator, technical spec, user guide
-Simulator: full-delivery mode (period files with all complete shipments + control totals; witnesses; a "cheating" mode that drops slow shipments to prove the audits). Technical spec (docs/carrier-link/manual-conexion.es.md + openapi.yaml + schemas): new contract, normative definition of "envío completo" with a sample query, file formats, control totals, upload flow, statuses, errors, conformance tests. User guide updated. Republish both Claude Docs.
+Simulator: full-delivery mode (period files with all complete shipments + control totals; witnesses). Technical spec (docs/carrier-link/manual-conexion.es.md + openapi.yaml + schemas): new contract, normative definition of "envío completo" with a sample query, file formats, control totals, upload flow, statuses, errors, conformance tests. User guide updated. Republish both Claude Docs.
 
 ### Task 7: Diagnosis (phase 4)
 Design study task-d-design.md (option A) adapted: scans of drawn shipments (all scans if the plan has diagnosis) go to rfid_events_raw with source marker; owner answers pending.
