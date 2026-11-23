@@ -251,3 +251,23 @@ Cada fase se despliega a `onems-dev` con confirmación explícita.
 - Primer carrier y cómo entregaría los datos (decide la fase 3).
 - Qué significa el origen **RFID** en E2E; hasta entonces no existe ese valor.
 - Si un envío mal encaminado debe compensarse con otra muestra (R15: "ya veremos").
+
+---
+
+## v4 (23/11/2026) — Entrega completa por periodo, sorteo 100 % ONEMS
+
+**Decisiones del responsable (no reabrir):**
+- R24. El carrier NO sortea ni preselecciona. En cada entrega envía **todos los envíos completos** del periodo de entrega; ONEMS cuenta la población, sortea y se queda solo con lo elegido. Motivo: el carrier podría escoger los mejores.
+- R25. La zona de recepción se **vacía tras procesar** cada entrega: la base solo contiene como máximo una entrega. De lo recibido solo se conserva una huella, los recuentos por ruta y la lista de elegidos (auditoría).
+- R26. **Frecuencia de entrega** por conector, de diaria a semanal (calendario del conector: días + hora local). Es independiente del periodo estadístico, que sigue siendo la semana (plan, cuotas, informes).
+- R27. Se mantiene el modelo **push** (el carrier nos envía); la integridad se vigila con **auditorías de ONEMS**: envíos testigo (panelistas que viajan por ese carrier), comparación de distribución de tiempos con panelistas en la misma ruta, totales de control por entrega frente a lo declarado, auditorías por sorpresa. El acceso directo a la base del carrier queda como opción adicional, no como norma.
+- R28. Volúmenes aún desconocidos: diseñar para entregas diarias o semanales de tamaño variable, con topes configurables y alertas de volumen anómalo.
+
+**Definición normativa de "envío completo del periodo"** (con los códigos del carrier): envío del producto del plan que (1) tiene su evento de llegada final en un punto de llegada acordado con fecha local dentro del periodo de entrega; (2) tiene un evento de salida en un punto de salida acordado anterior a la llegada (de ese periodo o anterior); (3) se envía con todas sus lecturas en los puntos acordados (y todas las intermedias si el plan tiene diagnóstico). La entrega lleva además totales de control (envíos entregados del producto por punto de llegada en el periodo).
+
+**Diseño (decisiones de diseño, revisables):**
+- D19. La entrega llega como **fichero comprimido** (JSON Lines o CSV con los nombres del carrier) a un almacén de ficheros (Supabase Storage, bucket privado por cuenta), mediante URL de subida firmada que obtiene el conector con su clave (o subida manual desde Conectores). Nada pasa por los límites de 8 s / 5.000 filas de la API.
+- D20. Un **proceso en segundo plano** (pg_cron, rol sin límite de tiempo, por lotes de filas) vuelca el fichero a una tabla de paso **UNLOGGED**, aplica equivalencias y validaciones existentes, calcula la población por estrato (ruta × semana ISO de la llegada), sortea con semilla registrada (md5(semilla‖item)), pasa los elegidos a `cl_samples`/`one_db` (y sus lecturas a diagnóstico si aplica), registra la auditoría y hace TRUNCATE de la tabla de paso; el fichero se borra tras N días (configurable) conservando su hash.
+- D21. **Cuota por entrega**: la cuota semanal de cada ruta se reparte entre las entregas de esa semana en proporción a sus días laborables; el déficit pasa a las entregas siguientes (reutiliza el arrastre existente).
+- D22. Las **demandas** dejan de ser una petición de candidatos: el conector consulta una configuración (`GET /config`: productos, puntos con su papel, campos, calendario, periodo a entregar) y entrega según su calendario. Las entregas tardías o ausentes generan alerta.
+- D23. **Auditorías automáticas**: (a) testigos — si un envío de panelista que viaja por ese carrier (requiere conocer su número de seguimiento del carrier) se entregó en el periodo y no aparece, alerta; (b) distribución — tiempos del carrier frente a panelistas de la misma ruta/semana (prueba estadística), alerta si la cola lenta falta; (c) totales de control — recibidos vs declarados; (d) volumen anómalo frente a la mediana.
