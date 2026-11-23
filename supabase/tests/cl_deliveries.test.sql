@@ -20,13 +20,13 @@ BEGIN EXECUTE p_sql; RETURN NULL; EXCEPTION WHEN OTHERS THEN RETURN SQLSTATE || 
 -- Apertura con reloj fijo (nucleo; las envolturas usan now()).
 CREATE OR REPLACE FUNCTION pg_temp.op(p_feed text, p_start text, p_end text, p_sha text, p_now text,
                                       p_totals jsonb DEFAULT '[]'::jsonb, p_format text DEFAULT 'jsonl',
-                                      p_comp text DEFAULT 'gzip') RETURNS jsonb LANGUAGE sql AS $$
+                                      p_comp text DEFAULT 'none') RETURNS jsonb LANGUAGE sql AS $$
   SELECT public.cl_delivery_open_core(p_feed::uuid, p_start::date, p_end::date, p_sha, p_totals, p_format, p_comp,
                                       'api', NULL, p_now::timestamptz)
 $$;
 CREATE OR REPLACE FUNCTION pg_temp.op_sql(p_feed text, p_start text, p_end text, p_sha text, p_now text,
                                           p_totals text DEFAULT '[]', p_format text DEFAULT 'jsonl',
-                                          p_comp text DEFAULT 'gzip') RETURNS text LANGUAGE sql AS $$
+                                          p_comp text DEFAULT 'none') RETURNS text LANGUAGE sql AS $$
   SELECT format('SELECT pg_temp.op(%L, %L, %L, %L, %L, %L::jsonb, %L, %L)', p_feed, p_start, p_end, p_sha, p_now,
                 p_totals, p_format, p_comp)
 $$;
@@ -179,7 +179,7 @@ END $$;
 DO $$
 DECLARE f text;
 BEGIN
-  FOREACH f IN ARRAY ARRAY['public.cl_delivery_open(uuid,date,date,text,jsonb,text,text)',
+  FOREACH f IN ARRAY ARRAY['public.cl_delivery_open(uuid,date,date,text,jsonb,text,bigint)',
                            'public.cl_delivery_complete(uuid,uuid)',
                            'public.cl_connector_config(uuid,timestamptz)'] LOOP
     PERFORM pg_temp.ok((SELECT prosecdef FROM pg_proc WHERE oid = f::regprocedure), f || ' SECURITY DEFINER');
@@ -188,7 +188,7 @@ BEGIN
     PERFORM pg_temp.ok(NOT has_function_privilege('authenticated', f, 'EXECUTE')
                    AND NOT has_function_privilege('anon', f, 'EXECUTE'), f || ' solo service_role');
   END LOOP;
-  FOREACH f IN ARRAY ARRAY['public.cl_manual_delivery_open(uuid,date,date,text,jsonb,text,text)',
+  FOREACH f IN ARRAY ARRAY['public.cl_manual_delivery_open(uuid,date,date,text,jsonb,text)',
                            'public.cl_manual_delivery_complete(uuid,uuid)',
                            'public.cl_delivery_can_upload(text)', 'public.cl_delivery_can_read(text)'] LOOP
     PERFORM pg_temp.ok((SELECT prosecdef FROM pg_proc WHERE oid = f::regprocedure), f || ' SECURITY DEFINER');
@@ -276,7 +276,7 @@ BEGIN
                   '[{"place_ref":"MBA","mode_ref":null,"product":"EXP","delivered":42}]');
   v_id := (j->>'delivery_id')::uuid;
   PERFORM pg_temp.ok(j->>'status' = 'pending_upload' AND (j->>'existing')::boolean = false, 'abierta: ' || j::text);
-  PERFORM pg_temp.ok(j->>'file_path' = 'a0000000-0000-0000-0000-000000000001/' || a1 || '/' || v_id || '.jsonl.gz', 'ruta por cuenta');
+  PERFORM pg_temp.ok(j->>'file_path' = 'a0000000-0000-0000-0000-000000000001/' || a1 || '/' || v_id || '.jsonl', 'ruta por cuenta');
   PERFORM pg_temp.ok(j->>'sha256' = pg_temp.sha(1), 'sha256 en minusculas');
   PERFORM pg_temp.ok((j->>'max_file_bytes')::bigint = 524288000 AND NOT (j->>'is_test')::boolean, 'tope y no prueba');
   PERFORM pg_temp.ok((SELECT control_totals->0->>'delivered' = '42' AND source = 'api' FROM public.cl_deliveries WHERE id = v_id),
@@ -494,7 +494,7 @@ BEGIN
   PERFORM pg_temp.ok(c->'last_delivery'->>'period_end' = '2026-11-25', 'ultima entrega: ' || (c->'last_delivery')::text);
   PERFORM pg_temp.ok(c->'limits' = '{"max_file_bytes":524288000,"max_rows":5000000,"file_retention_days":30,"max_control_totals":10000}'::jsonb,
                      'topes: ' || (c->'limits')::text);
-  PERFORM pg_temp.ok(c->'formats' = '{"format":["jsonl","csv"],"compression":["gzip","none"]}'::jsonb, 'formatos');
+  PERFORM pg_temp.ok(c->'formats' = '{"format":["jsonl","csv"],"compression":["none"]}'::jsonb, 'formatos');
   -- Ninguna clave de datos personales en todo el documento.
   FOR k IN WITH RECURSIVE t(v) AS (SELECT c UNION ALL
              SELECT x.value FROM t, LATERAL (SELECT value FROM jsonb_each(CASE WHEN jsonb_typeof(t.v) = 'object' THEN t.v ELSE '{}' END)
@@ -557,9 +557,9 @@ BEGIN
   PERFORM pg_temp.ok(e LIKE '42501:%', 'cl_connector_config cerrada a la web: ' || coalesce(e, 'ok'));
 
   -- Subida manual en el conector diario M (reloj real: anteayer, fecha local de la cuenta).
-  j := public.cl_manual_delivery_open(m::uuid, v_day, v_day, pg_temp.sha(40), '[]', 'csv', 'gzip');
+  j := public.cl_manual_delivery_open(m::uuid, v_day, v_day, pg_temp.sha(40), '[]', 'csv');
   v_path := j->>'file_path';
-  PERFORM pg_temp.ok(j->>'status' = 'pending_upload' AND j->>'source' = 'manual' AND v_path LIKE '%.csv.gz', 'apertura manual: ' || j::text);
+  PERFORM pg_temp.ok(j->>'status' = 'pending_upload' AND j->>'source' = 'manual' AND v_path LIKE '%.csv', 'apertura manual: ' || j::text);
   PERFORM pg_temp.ok((SELECT created_by = '93000000-0000-0000-0000-000000000093' FROM public.cl_deliveries
                        WHERE id = (j->>'delivery_id')::uuid), 'created_by');
   -- Storage: sube a la ruta de su entrega manual; no a otra ruta, ni a la de una entrega por API.

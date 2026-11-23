@@ -1,6 +1,7 @@
 -- Carrier Link fase 1, tarea 6: emision de demandas.
 \set ON_ERROR_STOP on
 SET client_min_messages = error;
+\ir fixtures/cl_v3_demand_emitter.sql
 
 CREATE OR REPLACE FUNCTION pg_temp.ok(p_cond boolean, p_msg text) RETURNS void LANGUAGE plpgsql AS $$
 BEGIN IF p_cond IS NOT TRUE THEN RAISE EXCEPTION 'FAIL: %', p_msg; END IF; END $$;
@@ -48,8 +49,8 @@ BEGIN
   PERFORM pg_temp.ok(NOT has_function_privilege('authenticated','public.cl_emit_due_demands(timestamptz)','EXECUTE'), 'authenticated no ejecuta emit');
   PERFORM pg_temp.ok(NOT has_function_privilege('anon','public.cl_emit_due_demands(timestamptz)','EXECUTE'), 'anon no ejecuta emit');
   PERFORM pg_temp.ok(NOT has_function_privilege('authenticated','public.cl_build_demand(uuid,uuid[])','EXECUTE'), 'authenticated no ejecuta build');
-  PERFORM pg_temp.ok(EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'cl-emit-demands' AND schedule = '15 * * * *'
-     AND command = 'SELECT public.cl_emit_due_demands();'), 'job cron cl-emit-demands');
+  -- v4 (20261124100200): el job cl-emit-demands esta retirado; la funcion la pone el fixture.
+  PERFORM pg_temp.ok(NOT EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'cl-emit-demands'), 'job cron cl-emit-demands retirado');
 END $$;
 
 -- 2. Calendario y vencimiento. Cuota W47 vence (period_end + 7) el 2026-11-29 hora local.
@@ -253,3 +254,4 @@ RESET ROLE;
 
 \echo cl_demands: OK
 ROLLBACK;
+DROP FUNCTION public.cl_emit_due_demands(timestamptz);

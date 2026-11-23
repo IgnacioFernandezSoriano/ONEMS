@@ -5425,6 +5425,7 @@ cl.error.cl_delivery_not_found,لم يتم العثور على التسليم.
 cl.error.cl_delivery_not_loading,لم يعد التسليم قيد التحميل.
 cl.error.cl_feed_not_found,لم يتم العثور على الموصل.
 cl.error.cl_file_not_uploaded,ارفع الملف قبل إكمال التسليم.
+cl.error.cl_file_too_large,حجم الملف أكبر مما يسمح به الموصل.
 cl.error.cl_lease_lost,تولّت عملية أخرى هذا التسليم.
 cl.error.cl_no_active_plan,لا توجد خطة نشطة لهذا الموصل تغطي هذه الفترة.
 cl.error.cl_period_already_delivered,تم تسليم هذه الفترة بالفعل.

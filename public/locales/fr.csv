@@ -5425,6 +5425,7 @@ cl.error.cl_delivery_not_found,Livraison introuvable.
 cl.error.cl_delivery_not_loading,La livraison n'est plus en cours de chargement.
 cl.error.cl_feed_not_found,Connecteur introuvable.
 cl.error.cl_file_not_uploaded,Téléversez le fichier avant de terminer la livraison.
+cl.error.cl_file_too_large,Le fichier dépasse la taille admise par le connecteur.
 cl.error.cl_lease_lost,Un autre processus a pris en charge cette livraison.
 cl.error.cl_no_active_plan,Aucun plan actif de ce connecteur ne couvre cette période.
 cl.error.cl_period_already_delivered,Cette période a déjà été livrée.

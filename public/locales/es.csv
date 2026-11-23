@@ -5433,6 +5433,7 @@ cl.error.cl_delivery_not_found,No se encuentra la entrega.
 cl.error.cl_delivery_not_loading,La entrega ya no se está cargando.
 cl.error.cl_feed_not_found,No se encuentra el conector.
 cl.error.cl_file_not_uploaded,Sube el archivo antes de completar la entrega.
+cl.error.cl_file_too_large,El archivo supera el tamaño que admite el conector.
 cl.error.cl_lease_lost,Otro proceso ha tomado esta entrega.
 cl.error.cl_no_active_plan,Ningún plan activo de este conector cubre este periodo.
 cl.error.cl_period_already_delivered,Este periodo ya se ha entregado.

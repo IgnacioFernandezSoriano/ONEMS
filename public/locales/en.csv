@@ -5433,6 +5433,7 @@ cl.error.cl_delivery_not_found,Delivery not found.
 cl.error.cl_delivery_not_loading,The delivery is no longer being loaded.
 cl.error.cl_feed_not_found,Connector not found.
 cl.error.cl_file_not_uploaded,Upload the file before completing the delivery.
+cl.error.cl_file_too_large,The file is larger than the connector allows.
 cl.error.cl_lease_lost,Another process took over this delivery.
 cl.error.cl_no_active_plan,No active plan of this connector covers this period.
 cl.error.cl_period_already_delivered,This period has already been delivered.

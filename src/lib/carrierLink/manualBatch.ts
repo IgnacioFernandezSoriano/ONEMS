@@ -1,7 +1,7 @@
 import { clErrorKey } from './clErrors'
 import { parseDryRunResult, type ConnectorStatus, type DryRunSummary } from './connectorConfig'
 
-/** Mismos topes que la Edge Function carrier-link-ingest (MAX_BODY_BYTES, MAX_ROWS). */
+/** Topes de la carga manual por lotes v3 (los mismos que tenia la API de lotes v3, retirada en v4). */
 export const MANUAL_MAX_BYTES = 5 * 1024 * 1024
 export const MANUAL_MAX_ROWS = 5000
 
