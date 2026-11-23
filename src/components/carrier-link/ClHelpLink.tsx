@@ -3,7 +3,7 @@ import { useTranslation } from '@/hooks/useTranslation'
 import { helpDocUrl } from '@/lib/helpDocs'
 import { isCarrierLinkEnabled } from '@/lib/featureFlags'
 
-export type ClHelpSection = 'generator' | 'balancing' | 'records' | 'samples' | 'reading-points' | 'connectors' | 'monitor'
+export type ClHelpSection = 'generator' | 'balancing' | 'records' | 'samples' | 'reading-points' | 'connectors' | 'monitor' | 'incidents'
 
 /**
  * Enlace «Ayuda» junto al título de las pantallas con Carrier Link; abre su apartado de la ayuda en otra pestaña.

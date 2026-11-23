@@ -2,6 +2,14 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useLatestRequest } from '@/lib/latestRequest'
 import type { ConnectorStatus, StandardField } from '@/lib/carrierLink/connectorConfig'
+import {
+  CONTENT_TYPE_BY_FORMAT,
+  parseFeedCalendar,
+  withGraceHours,
+  type ClFeedCalendar,
+  type DeliveryFormat,
+  type ManualDeliveryApi,
+} from '@/lib/carrierLink/deliveryView'
 
 export interface ClFeed {
   id: string
@@ -15,6 +23,8 @@ export interface ClFeed {
   last_batch_at: string | null
   last_error: string | null
   created_at: string
+  /** Topes del fichero y margen de no recibido (missing_grace_hours). */
+  config: Record<string, unknown> | null
 }
 
 export interface ClFeedForm {
@@ -75,7 +85,7 @@ export type ClConnectorResult = { success: true } | { success: false; error: ClD
 const LIST_LIMIT = 500
 
 const FEED_COLUMNS =
-  'id, carrier_id, name, extraction_model, status, emit_days, emit_hour, emit_timezone, last_batch_at, last_error, created_at'
+  'id, carrier_id, name, extraction_model, status, emit_days, emit_hour, emit_timezone, last_batch_at, last_error, created_at, config'
 
 /** Configuración de conectores de Carrier Link de una cuenta. Los mapeos son por cuenta + carrier (no por conector). */
 export function useClConnectors(accountId: string | null) {
@@ -289,24 +299,52 @@ export function useClConnectors(accountId: string | null) {
     return run(supabase.rpc('api_key_deactivate', { p_key_id: id }))
   }
 
-  /** Ensayo de un lote: valida y resume sin escribir nada. */
-  const dryRun = async (feedId: string, payload: unknown): Promise<unknown> => {
-    const { data, error: e } = await supabase.rpc('cl_dry_run_batch', { p_feed_id: feedId, p_payload: payload })
-    if (e) throw e
-    return data
+  /**
+   * Cambia el margen de "no recibido" (config.missing_grace_hours) sin tocar las demas claves del config. Se parte del
+   * config cargado; la escritura va por id + cuenta.
+   */
+  const saveGraceHours = async (feedId: string, hours: number): Promise<ClConnectorResult> => {
+    if (!accountId) return noAccount
+    const current = feeds.find((f) => f.id === feedId)
+    if (!current) return noAccount
+    return run(
+      supabase
+        .from('cl_feeds')
+        .update({ config: withGraceHours(current.config, hours) })
+        .eq('id', feedId)
+        .eq('account_id', accountId),
+    )
   }
 
-  const callRpc = async (fn: string, args: Record<string, unknown>): Promise<unknown> => {
-    const { data, error: e } = await supabase.rpc(fn, args)
-    if (e) throw e
-    return data
-  }
-
-  /** Carga manual de un lote real (mismos pasos que la API del conector): entrada, sorteo por estrato y cierre. */
-  const manualIngest = (feedId: string, payload: unknown) => callRpc('cl_manual_ingest', { p_feed_id: feedId, p_payload: payload })
-  const manualSample = (feedId: string, batchId: string, stratumId: string) =>
-    callRpc('cl_manual_sample', { p_feed_id: feedId, p_batch_id: batchId, p_stratum_id: stratumId })
-  const manualFinish = (feedId: string, batchId: string) => callRpc('cl_manual_finish', { p_feed_id: feedId, p_batch_id: batchId })
+  /**
+   * Subida manual de una entrega (mismo camino que la API del conector): abrir con la huella, subir el fichero con la
+   * sesion del usuario a la ruta que decide la base (sin reemplazar) y completar. Ver runManualDelivery.
+   */
+  const manualDeliveryApi = (feedId: string, file: Blob): ManualDeliveryApi => ({
+    open: async ({ periodStart, periodEnd, sha256, format }) => {
+      const { data, error: e } = await supabase.rpc('cl_manual_delivery_open', {
+        p_feed_id: feedId,
+        p_period_start: periodStart,
+        p_period_end: periodEnd,
+        p_sha256: sha256,
+        p_control_totals: [],
+        p_format: format,
+      })
+      if (e) throw e
+      return data
+    },
+    upload: async (path: string, format: DeliveryFormat) => {
+      const { error: e } = await supabase.storage
+        .from('cl-deliveries')
+        .upload(path, file, { contentType: CONTENT_TYPE_BY_FORMAT[format], upsert: false })
+      return { error: e ? { message: e.message, statusCode: (e as { statusCode?: string | number }).statusCode } : null }
+    },
+    complete: async (deliveryId: string) => {
+      const { data, error: e } = await supabase.rpc('cl_manual_delivery_complete', { p_feed_id: feedId, p_delivery_id: deliveryId })
+      if (e) throw e
+      return data
+    },
+  })
 
   return {
     feeds,
@@ -327,9 +365,28 @@ export function useClConnectors(accountId: string | null) {
     removeExtraField,
     issueKey,
     deactivateKey,
-    dryRun,
-    manualIngest,
-    manualSample,
-    manualFinish,
+    saveGraceHours,
+    manualDeliveryApi,
   }
+}
+
+/** Calendario de entregas de un conector (frecuencia, proximo periodo, margen). `version` fuerza la recarga. */
+export function useClFeedCalendar(feedId: string | null, version: unknown) {
+  const beginLoad = useLatestRequest()
+  const [calendar, setCalendar] = useState<ClFeedCalendar | null>(null)
+  const [error, setError] = useState<ClDbError | null>(null)
+  useEffect(() => {
+    const isStale = beginLoad()
+    if (!feedId) {
+      setCalendar(null)
+      setError(null)
+      return
+    }
+    void supabase.rpc('cl_feed_delivery_calendar', { p_feed_id: feedId }).then(({ data, error: e }) => {
+      if (isStale()) return
+      setError(e ?? null)
+      setCalendar(e ? null : parseFeedCalendar(data))
+    })
+  }, [feedId, version, beginLoad])
+  return { calendar, error }
 }

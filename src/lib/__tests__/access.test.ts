@@ -36,9 +36,11 @@ describe('access', () => {
       '/carrier-link/reading-points': 'cl_reading_points',
       '/carrier-link/connectors': 'cl_connectors',
       '/carrier-link/monitor': 'cl_monitor',
+      '/carrier-link/incidents': 'cl_incidents',
     }
     for (const [path, opt] of Object.entries(rutas)) expect(routeAccess(path)).toBe(opt)
     expect(OPTION_ROUTE.cl_monitor).toBe('/carrier-link/monitor')
+    expect(OPTION_ROUTE.cl_incidents).toBe('/carrier-link/incidents')
     expect(OPTION_ROUTE.cl_plans).toBe('/allocation-plan-generator')
   })
 

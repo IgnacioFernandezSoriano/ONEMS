@@ -236,12 +236,13 @@
       <a href="#records">Allocation Plans</a>
       <a href="#samples">Samples</a>
       <a href="#monitor">Capture monitor</a>
+      <a href="#incidents">Incidents</a>
       <h3>Reference</h3>
       <a href="#equivalence">The equivalence time</a>
       <a href="#alerts">What each alert means</a>
       <a href="#faq">Questions</a>
     </nav>
-    <div class="side-foot">Updated on 20 November 2026</div>
+    <div class="side-foot">Updated on 23 November 2026</div>
   </aside>
 
   <main class="main">
@@ -268,15 +269,15 @@
     <section id="order">
     <h2>The order of work</h2>
 <ol class="steps">
-  <li><strong>Capture method.</strong> In <strong>Carriers &amp; Products</strong>, choose each carrier’s <strong>Capture method</strong>: Panelists, Carrier Link or Both. Reading points and connectors are only offered for carriers set to Carrier Link or Both.</li>
+  <li><strong>Capture method.</strong> In <strong>Carriers &amp; Products</strong>, choose each carrier’s <strong>Capture method</strong>: Panelists, Carrier Link or Both. There you can also enter the carrier’s <strong>Carrier Link notification email</strong> (optional).</li>
   <li><strong>Reading points.</strong> In <strong>Reading points</strong> (menu E2E ▸ Setup ▸ Carrier Link), register the carrier places where each shipment is read and say in which city routes start or end. Each city needs at least one start point and one end point.</li>
-  <li><strong>Connector.</strong> In <strong>Connectors</strong> (same submenu), create the carrier’s connector: its field and product equivalences, the request calendar and the key. Test it with a trial batch.</li>
+  <li><strong>Connector.</strong> In <strong>Connectors</strong> (same submenu), create the carrier’s connector: its field and product equivalences, the delivery calendar and the key. While it is in Testing, deliveries are checked and counted but create no samples.</li>
   <li><strong>Delivery standard.</strong> In <strong>E2E: SLA</strong>, check that every route has its standard and, if you want to compare with panelists, the equivalence time (see <a href="#equivalence">The equivalence time</a>).</li>
   <li><strong>Generate and apply the plan.</strong> In <strong>Allocation Generator</strong>, choose the carrier with the Carrier Link capture method, generate the preview, save the plan and press <span class="btn primary">Apply</span>.</li>
-  <li><strong>Activate the connector.</strong> When everything is ready, move the connector from Testing to Active. Until then it only accepts trial runs and no sample is created.</li>
-  <li><strong>Monitoring.</strong> To spread the load better use <strong>Load Balancing</strong>; to see the quotas, <strong>Allocation Plans</strong>; in <strong>Capture monitor</strong> follow the requests, batches and alerts, and in <strong>Samples</strong> review the samples as they come in (menu Database ▸ Carrier Link).</li>
+  <li><strong>Activate the connector.</strong> When everything is ready, move the connector from Testing to Active. From then on each delivery creates samples.</li>
+  <li><strong>Monitoring.</strong> In <strong>Capture monitor</strong> follow the deliveries and alerts, in <strong>Incidents</strong> the problems that need attention, and in <strong>Samples</strong> the samples as they come in (menu Database ▸ Carrier Link).</li>
 </ol>
-<div class="callout ok"><strong>And then:</strong> ONEMS asks the carrier for shipments on the days and at the time set in the connector calendar, makes the draw and puts the samples into the E2E reports. You only need to deal with the alerts.</div>
+<div class="callout ok"><strong>And then:</strong> on each delivery day the carrier sends one file with all the shipments of the period. ONEMS checks it, counts it, makes its own draw and puts the samples into the E2E reports. If a delivery does not arrive or is rejected, ONEMS opens an incident and notifies by email.</div>
     </section>
 
     <section id="reading-points">
@@ -297,7 +298,8 @@
 <p>Screen <strong>Connectors</strong>. The connector is the channel through which the carrier delivers its data to ONEMS. There are one or more per carrier.</p>
 <h3>What is configured</h3>
 <ul>
-  <li><strong>Calendar:</strong> the days of the week and the time at which ONEMS may ask for data, so as not to disturb the carrier’s database. If you leave the time zone empty, the account’s is used.</li>
+  <li><strong>Delivery calendar:</strong> the days on which the carrier delivers a file, and the approximate time. Each delivery covers the days since the previous delivery day: daily = the day before; weekly = the previous 7 days; several a week = the days in between. The screen shows the frequency, the <strong>next period</strong> to deliver and the last delivery.</li>
+  <li><strong>Margin before “not received”:</strong> hours after the expected time before ONEMS opens a <em>Delivery not received</em> incident (6 by default, 0 to 168).</li>
   <li><strong>Field equivalences:</strong> which carrier field holds each piece of data (shipment identifier, product, reading date and time, place and mode). While any is missing, ONEMS cannot read the data.</li>
   <li><strong>Product equivalences:</strong> which ONEMS product each carrier product value corresponds to.</li>
   <li><strong>Allowed extra fields:</strong> other carrier fields that are kept with each reading. Any other field is discarded on entry, so that no personal data is stored.</li>
@@ -305,15 +307,17 @@
 <h3>Connector statuses</h3>
 <div class="table-wrap"><table>
 <tr><th>Status</th><th>What happens</th></tr>
-<tr><td><span class="badge b-yellow">Testing</span></td><td>It only accepts trial batches: they are checked as if real, but nothing is saved and no sample is created.</td></tr>
-<tr><td><span class="badge b-green">Active</span></td><td>It receives real batches and creates samples. Activating it closes any requests that were opened during testing.</td></tr>
-<tr><td><span class="badge b-gray">Paused</span></td><td>It receives no batches and no requests are sent until it is resumed.</td></tr>
+<tr><td><span class="badge b-yellow">Testing</span></td><td>Deliveries are checked and counted as if real, but no sample is created.</td></tr>
+<tr><td><span class="badge b-green">Active</span></td><td>Each delivery creates samples for the active plans.</td></tr>
+<tr><td><span class="badge b-gray">Paused</span></td><td>No delivery is accepted and missing deliveries are not reported until it is resumed.</td></tr>
 </table></div>
 <h3>The carrier key</h3>
-<p>The carrier uses a key to send its batches. <strong>Only a superadmin or the UPU Account Manager can create keys.</strong> Press <span class="btn">New key</span>, give it a name and, if you wish, an expiry date.</p>
+<p>The carrier uses a key to send its deliveries. <strong>Only a superadmin or the UPU Account Manager can create keys.</strong> Press <span class="btn">New key</span>, give it a name and, if you wish, an expiry date.</p>
 <div class="callout warn"><strong>The key is shown only once.</strong> Copy it and give it to the carrier through a secure channel: afterwards ONEMS keeps only a prefix to recognise it. If it is lost, create another and deactivate the old one.</div>
-<h3>Testing a batch</h3>
-<p>In <strong>Test a batch (trial run)</strong> upload a batch file from the carrier. ONEMS tells you whether it would accept it and, if not, why. Nothing is saved.</p>
+<h3>Deliveries</h3>
+<p>The <strong>Deliveries</strong> block lists the connector’s deliveries, newest first: period, status (Waiting for the file, Received, Processing, Processed, Failed or Rejected), the step it is on while it is processed, rows read, valid shipments, rejected rows and shipments, samples drawn and alerts. Open a row to see the rejection reasons, the error and the dates. A <em>Failed</em> delivery is retried automatically up to 3 times.</p>
+<h3>Uploading a delivery by hand</h3>
+<p>For carriers that send the file by other means: choose the period (the next one is proposed), choose a <strong>JSON Lines (.jsonl)</strong> or <strong>CSV</strong> file without compression, and press <span class="btn primary">Upload delivery</span>. ONEMS calculates the file fingerprint in the browser, uploads it and processes it exactly like a delivery by API. A period is delivered only once.</p>
     </section>
 
     <section id="generator">
@@ -378,12 +382,25 @@
     <h2>Capture monitor</h2>
 <p>Screen <strong>Capture monitor</strong>. Here you follow what happens with data capture.</p>
 <ul>
-  <li><strong>Requests to the carrier:</strong> open, fulfilled, partial or failed (including trial ones).</li>
-  <li><strong>Batches received:</strong> each batch with its status (Received, Validated, Sampled, Rejected, Undone or Expired), the number of shipments, the rejected ones and the chosen ones.</li>
+  <li><strong>Unresolved incidents:</strong> how many there are of each type. Press a box to open them in <a href="#incidents">Incidents</a>.</li>
+  <li><strong>Deliveries:</strong> the deliveries of all connectors, filtered by connector, status and period, with the same columns and details as in Connectors.</li>
   <li><strong>Alerts:</strong> with their severity (low, medium or high). You can filter only the open ones and mark them with <span class="btn">Mark as seen</span> or <span class="btn">Dismiss</span>. What each one means is in <a href="#alerts">What each alert means</a>.</li>
 </ul>
-<h3>Undoing a batch</h3>
-<p>If a batch is wrong, press <span class="btn">Undo</span> on its row and confirm. The samples chosen in that batch are removed from the E2E reports and the affected quotas are recalculated. ONEMS tells you how many quotas went back to pending and which ones, having already been carried over, need reviewing.</p>
+    </section>
+
+    <section id="incidents">
+    <h2>Incidents</h2>
+<p>Screen <strong>Incidents</strong> (menu Database ▸ Carrier Link). It lists the problems with carrier deliveries that need attention. ONEMS opens them on its own, notifies by email the account’s Account Managers and coordinators (and the carrier, for its own problems, if it has a notification email in <strong>Carriers &amp; Products</strong>) and closes most of them on its own when the problem is fixed.</p>
+<div class="table-wrap"><table>
+<tr><th>Incident</th><th>When it opens</th><th>When it closes</th></tr>
+<tr><td>Delivery not received</td><td>A period was not delivered by the expected time plus the margin.</td><td>On its own when a delivery is received.</td></tr>
+<tr><td>Delivery rejected</td><td>The file of a period was rejected (wrong fingerprint, wrong format, too large...).</td><td>On its own when each period has a processed delivery.</td></tr>
+<tr><td>High rejection</td><td>More than 20% of the shipments of a delivery could not be used.</td><td>On its own with the next delivery without high rejection.</td></tr>
+<tr><td>Unknown products or places</td><td>The carrier sent products or places that ONEMS does not know.</td><td>On its own when all are registered.</td></tr>
+<tr><td>Quota not filled</td><td>A week of the plan ended without enough samples.</td><td>Only by hand.</td></tr>
+</table></div>
+<p>Open a row to see its periods, the notices sent (only how many and their status, never the addresses), who is responsible and the note. With edit rights you can change the status (Open or In progress), assign a person of the account, write a note and press <span class="btn">Close by hand</span>; the confirmation appears next to the row. The list shows whether an incident was <strong>closed by hand</strong> or <strong>closed automatically</strong>.</p>
+<div class="callout warn">Closing a <em>Delivery not received</em> incident by hand marks its periods as reviewed: they are not notified again, even if the delivery never arrives.</div>
     </section>
 
     <section id="equivalence">

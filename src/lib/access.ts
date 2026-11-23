@@ -119,6 +119,7 @@ export const ROUTE_OPTION: Record<string, AccessOption | 'superadmin' | 'open'> 
   '/carrier-link/reading-points': 'cl_reading_points',
   '/carrier-link/connectors': 'cl_connectors',
   '/carrier-link/monitor': 'cl_monitor',
+  '/carrier-link/incidents': 'cl_incidents',
 }
 
 /** Ruta de entrada de cada opción (para elegir la primera pantalla permitida). */
@@ -144,6 +145,7 @@ export const OPTION_ROUTE: Partial<Record<AccessOption, string>> = {
   cl_reading_points: '/carrier-link/reading-points',
   cl_connectors: '/carrier-link/connectors',
   cl_monitor: '/carrier-link/monitor',
+  cl_incidents: '/carrier-link/incidents',
   readers_management: '/readers-management',
   segment_sla: '/slas-configuration',
   route_analysis: '/diagnosis/route-path-analysis',

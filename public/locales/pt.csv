@@ -5449,7 +5449,7 @@ cl.reading_points.help,Gira os pontos da transportadora onde as leituras são ca
 cl.connectors.title,Conectores
 cl.connectors.help,Configure como os dados de leitura da transportadora chegam ao ONEMS.
 cl.monitor.title,Monitor de captura
-cl.monitor.help,Acompanhe o estado da captura de dados das transportadoras.
+cl.monitor.help,"Acompanhe as entregas recebidas das transportadoras, como foram processadas, os incidentes abertos e os alertas."
 cl.reading_points.carrier,Transportadora
 cl.reading_points.add,Adicionar ponto de leitura
 cl.reading_points.edit,Editar ponto de leitura
@@ -5487,15 +5487,14 @@ cl.connectors.edit,Editar conector
 cl.connectors.empty,Esta transportadora ainda não tem conector.
 cl.connectors.name,Nome
 cl.connectors.extraction_model,Modelo de extração
-cl.connectors.emit_days,Dias de pedido
+cl.connectors.emit_days,Dias de entrega
 cl.connectors.emit_hour,Hora
 cl.connectors.emit_timezone,Fuso horário
 cl.connectors.account_timezone,(fuso da conta)
-cl.connectors.calendar_hint,Os pedidos à transportadora são enviados nestes dias a esta hora. Deixe o fuso vazio para usar o da conta (ex. Europe/Madrid).
+cl.connectors.calendar_hint,"A transportadora entrega um ficheiro nestes dias, por volta desta hora. Cada entrega cobre os dias desde o dia de entrega anterior (diária: o dia anterior; semanal: os 7 dias anteriores). Deixe o fuso vazio para usar o da conta (ex. Europe/Madrid)."
 cl.connectors.calendar,Calendário
-cl.connectors.last_batch,Último lote
 cl.connectors.last_error,Último erro
-cl.connectors.testing_hint,Em testes o conector só aceita ensaios; não são criadas amostras.
+cl.connectors.testing_hint,"Em testes, as entregas são verificadas e contadas como se fossem reais, mas não são criadas amostras."
 cl.connectors.mapping_incomplete,As equivalências de campos estão incompletas: ainda não é possível ler os dados da transportadora.
 cl.connectors.status.testing,Testes
 cl.connectors.status.active,Ativo
@@ -5503,9 +5502,9 @@ cl.connectors.status.paused,Pausado
 cl.connectors.set_status.testing,Voltar a testes
 cl.connectors.set_status.active,Ativar
 cl.connectors.set_status.paused,Pausar
-cl.connectors.status_confirm.testing,O conector voltará a aceitar apenas ensaios.
-cl.connectors.status_confirm.active,O conector receberá lotes reais e criará amostras. Os pedidos abertos em testes serão fechados.
-cl.connectors.status_confirm.paused,O conector deixará de receber lotes e não serão enviados pedidos até ser retomado.
+cl.connectors.status_confirm.testing,As novas entregas serão apenas verificadas e contadas: não serão criadas amostras.
+cl.connectors.status_confirm.active,As novas entregas criarão amostras para os planos ativos.
+cl.connectors.status_confirm.paused,O conector não aceitará entregas até ser retomado. Enquanto estiver em pausa não se avisam as entregas em falta.
 cl.connectors.delete_title,Eliminar conector
 cl.connectors.delete_confirm,Eliminar o conector {name}?
 cl.connectors.error.name_required,Introduza um nome para o conector.
@@ -5551,50 +5550,6 @@ cl.connectors.keys.inactive,Desativada
 cl.connectors.keys.deactivate_confirm,Desativar esta chave? A transportadora deixará de a poder usar.
 cl.connectors.keys.new,Nova chave
 cl.connectors.keys.issue,Emitir chave
-cl.connectors.dry_run.title,Testar lote (ensaio)
-cl.connectors.dry_run.help,Carregue um ficheiro de lote em formato JSON. É verificado como se fosse real mas nada é guardado.
-cl.connectors.dry_run.choose,Escolher ficheiro JSON
-cl.connectors.dry_run.running,A verificar...
-cl.connectors.dry_run.bad_json,O ficheiro não é um JSON válido.
-cl.connectors.dry_run.replayed,Este lote (mesmo batch_id) já tinha sido carregado de verdade: mostra-se o resumo guardado.
-cl.connectors.dry_run.validated,O lote seria aceite. Resultado por estrato:
-cl.connectors.dry_run.rejected,O lote seria rejeitado.
-cl.connectors.dry_run.bad_method,O método de seleção não é o esperado ({expected}).
-cl.connectors.dry_run.stratum,Estrato
-cl.connectors.dry_run.rows,Leituras
-cl.connectors.dry_run.candidates,Candidatos
-cl.connectors.dry_run.valid,Válidos
-cl.connectors.dry_run.rejected_by_reason,Rejeitados por motivo
-cl.connectors.dry_run.rows_rejected,Leituras rejeitadas
-cl.connectors.manual.title,Carregar lote
-cl.connectors.manual.help,"Para transportadoras que enviam ficheiros em vez de usar a API. Carregue o lote em formato JSON: primeiro é verificado e, depois da sua confirmação, é carregado de verdade e as amostras são sorteadas, tal como se chegasse pela API."
-cl.connectors.manual.choose,Escolher ficheiro do lote (JSON)
-cl.connectors.manual.only_active_testing,"O conector está em teste: use ""Testar lote"". Os lotes reais podem ser carregados quando estiver ativo."
-cl.connectors.manual.only_active_paused,O conector está em pausa: reative-o para carregar lotes.
-cl.connectors.manual.confirm_text,Este lote será carregado de verdade: as suas leituras são guardadas e as amostras de cada estrato são sorteadas. Não se pode repetir (voltar a carregar o mesmo lote só mostra o seu resultado). Continuar?
-cl.connectors.manual.confirm,Carregar lote
-cl.connectors.manual.not_loadable,Este lote seria rejeitado: corrija o ficheiro antes de o carregar.
-cl.connectors.manual.ingesting,A carregar o lote...
-cl.connectors.manual.sampling,A sortear amostras: estrato {done} de {total}
-cl.connectors.manual.rejected,O lote foi rejeitado e fica registado como rejeitado.
-cl.connectors.manual.already_loaded,Este lote já tinha sido carregado e sorteado: nada foi alterado.
-cl.connectors.manual.do_not_leave,Não feche nem recarregue esta página até a carga terminar.
-cl.connectors.manual.failed_finish,"Todos os estratos foram sorteados, mas o fecho do lote falhou: {error}"
-cl.connectors.manual.stored_undone,"Este lote já tinha sido carregado e depois foi anulado: nada foi alterado. Para o voltar a carregar, envie-o com outro batch_id."
-cl.connectors.manual.stored_expired,"Este lote já tinha sido carregado, mas o seu pedido caducou antes de terminar o sorteio: nada foi alterado."
-cl.connectors.manual.stored_other,Este lote já tinha sido carregado (estado: {status}): nada foi alterado.
-cl.connectors.manual.required,Amostras pedidas
-cl.connectors.manual.selected,Amostras escolhidas
-cl.connectors.manual.failed,O sorteio parou no estrato {n} de {total}: {error}
-cl.connectors.manual.failed_resume,O lote e os estratos já sorteados ficam guardados. Tente de novo (ou volte a carregar o mesmo ficheiro) para continuar onde parou.
-cl.connectors.manual.retry,Tentar de novo
-cl.connectors.manual.done,Lote carregado: {selected} amostras escolhidas de {required} pedidas.
-cl.connectors.manual.demand,Estado do pedido: {status}
-cl.connectors.manual.strata_pending,Faltam sortear {count} estratos deste lote.
-cl.connectors.manual.demand_status.open,aberto (faltam estratos que chegarão noutro lote)
-cl.connectors.manual.demand_status.fulfilled,cumprido
-cl.connectors.manual.demand_status.partial,parcial (menos amostras do que as pedidas)
-cl.connectors.manual.demand_status.failed,falhado
 cl.reason.already_sampled,Já amostrado
 cl.reason.bad_timestamp,Data ou hora incorreta
 cl.reason.bad_value,Valor incorreto
@@ -5671,32 +5626,6 @@ cl.samples.no_scans,Esta amostra não tem leituras.
 cl.samples.role.start,Leitura de início
 cl.samples.role.end,Leitura de fim
 cl.samples.role.intermediate,Leitura intermédia
-cl.monitor.plan,Plano
-cl.monitor.all_plans,Todos os planos
-cl.monitor.demands,Pedidos ao transportador (incluindo os de teste)
-cl.monitor.demand.open,Abertos
-cl.monitor.demand.fulfilled,Cumpridos
-cl.monitor.demand.partial,Parciais
-cl.monitor.demand.failed,Falhados
-cl.monitor.batches,Lotes recebidos
-cl.monitor.batches_empty,Ainda não há lotes.
-cl.monitor.col.date,Recebido
-cl.monitor.col.status,Estado
-cl.monitor.col.shipments,Envios
-cl.monitor.col.rejected,Rejeitados
-cl.monitor.col.selected,Selecionados
-cl.monitor.batch.received,Recebido
-cl.monitor.batch.validated,Validado
-cl.monitor.batch.sampled,Amostrado
-cl.monitor.batch.rejected,Rejeitado
-cl.monitor.batch.undone,Desfeito
-cl.monitor.batch.expired,Expirado
-cl.monitor.undo,Desfazer
-cl.monitor.undo_title,Desfazer este lote?
-cl.monitor.undo_effect,As amostras selecionadas deste lote serão removidas dos relatórios E2E e as quotas afetadas serão recalculadas.
-cl.monitor.undo_confirm,"Sim, desfazer o lote"
-cl.monitor.undo_cancel,Cancelar
-cl.monitor.undo_done,Lote desfeito. Quotas de volta a pendente: {pending}; transitadas (a rever): {carried}; mantidas abertas por outro pedido: {kept}.
 cl.monitor.alerts,Alertas
 cl.monitor.alerts_empty,Não há alertas.
 cl.monitor.alert_filter_open,Só abertos
@@ -5837,3 +5766,172 @@ cl.balancing.stddev,Desvio padrão
 cl.balancing.cell_title,Esperado: {expected}; não movível: {locked}
 menu.cl_incidents,Incidentes do Carrier Link
 cl.error.cl_incident_closed,Este incidente já está resolvido e não pode ser alterado.
+cl.connectors.frequency.daily,Entrega diária
+cl.connectors.frequency.weekly,Entrega semanal
+cl.connectors.frequency.several_per_week,Várias entregas por semana
+cl.connectors.per_week,{count} por semana
+cl.connectors.next_period,Próxima entrega: {period} (esperada por volta de {due}).
+cl.connectors.next_period_now,Próxima entrega: {period}. O período está fechado: já pode ser entregue (esperada por volta de {due}).
+cl.connectors.no_next_period,Não há nenhuma entrega pendente: nenhum plano ativo usa este conector.
+cl.connectors.last_delivery,Última entrega: {period}
+cl.connectors.grace.label,Margem antes de considerar uma entrega não recebida
+cl.connectors.grace.hours,{count} h
+cl.connectors.grace.help,"Horas depois da hora de entrega esperada. Passada essa margem, o ONEMS abre um incidente «Entrega não recebida» e avisa a conta (e a transportadora, se tiver e-mail de avisos)."
+cl.connectors.grace.invalid,Escreva um número inteiro de horas entre 0 e 168.
+cl.deliveries.title,Entregas
+cl.deliveries.help,"Cada entrega é um ficheiro com todos os envios de um período. O ONEMS verifica-o, conta-o e sorteia as suas próprias amostras em segundo plano."
+cl.deliveries.empty,Ainda não há entregas.
+cl.deliveries.col.period,Período
+cl.deliveries.col.status,Estado
+cl.deliveries.col.rows,Linhas
+cl.deliveries.col.valid,Envios válidos
+cl.deliveries.col.rejected,Rejeitados (linhas / envios)
+cl.deliveries.col.drawn,Sorteados
+cl.deliveries.col.alerts,Alertas
+cl.deliveries.details,Detalhe
+cl.deliveries.source.api,Por API
+cl.deliveries.source.manual,Carregada à mão
+cl.deliveries.test,teste
+cl.deliveries.retrying,Será repetida automaticamente (tentativa {attempts} de 3).
+cl.deliveries.rejected_hint,"As linhas rejeitadas são leituras que não se puderam ler; os envios rejeitados, os que não se puderam usar (sem leitura de início ou de fim, etc.). Abra uma linha para ver os motivos."
+cl.deliveries.error,Motivo
+cl.deliveries.rows_rejected_by_reason,Linhas rejeitadas por motivo
+cl.deliveries.shipments_rejected_by_reason,Envios rejeitados por motivo
+cl.deliveries.shipments_total,Envios no ficheiro
+cl.deliveries.file,Ficheiro
+cl.deliveries.created_at,Aberta
+cl.deliveries.received_at,Recebida
+cl.deliveries.finished_at,Terminada
+cl.deliveries.attempts,Tentativas
+cl.delivery.status.pending_upload,À espera do ficheiro
+cl.delivery.status.received,Recebida
+cl.delivery.status.processing,Em processamento
+cl.delivery.status.processed,Processada
+cl.delivery.status.failed,Falhou (vai repetir)
+cl.delivery.status.rejected,Rejeitada
+cl.delivery.status.unknown,Estado desconhecido
+cl.delivery.phase.load,A ler o ficheiro
+cl.delivery.phase.resolve,A verificar as leituras
+cl.delivery.phase.items,A montar os envios
+cl.delivery.phase.strata,A contar por rota e semana
+cl.delivery.phase.draw,A sortear as amostras
+cl.delivery.phase.transfer,A guardar as amostras
+cl.delivery.phase.finish,A fechar a entrega
+cl.delivery.phase.cleanup,A limpar
+cl.deliveries.upload.title,Carregar uma entrega à mão
+cl.deliveries.upload.help,"Para transportadoras que enviam o ficheiro por outra via. Escolha o período e um ficheiro JSON Lines (.jsonl) ou CSV, sem compressão. Passa exatamente pelas mesmas verificações que uma entrega por API."
+cl.deliveries.upload.paused,O conector está em pausa: retome-o para carregar entregas.
+cl.deliveries.upload.testing,"O conector está em testes: a entrega será verificada e contada, mas não serão criadas amostras."
+cl.deliveries.upload.period_start,Período de
+cl.deliveries.upload.period_end,até
+cl.deliveries.upload.choose,Escolher ficheiro
+cl.deliveries.upload.send,Carregar entrega
+cl.deliveries.upload.confirm,O ficheiro será entregue para o período {period}. Um período é entregue uma única vez: depois de recebido não pode ser substituído. Continuar?
+cl.deliveries.upload.do_not_leave,Não feche nem recarregue esta página até o carregamento terminar.
+cl.deliveries.upload.hashing,A calcular a impressão digital do ficheiro... {percent}%
+cl.deliveries.upload.step.opening,A abrir a entrega...
+cl.deliveries.upload.step.uploading,A carregar o ficheiro...
+cl.deliveries.upload.step.completing,A marcar a entrega como recebida...
+cl.deliveries.upload.received,Entrega recebida. É processada em segundo plano: acompanhe-a na lista abaixo.
+cl.deliveries.upload.rejected,A entrega foi rejeitada.
+cl.deliveries.upload.existing,Este mesmo ficheiro já tinha sido entregue para este período (estado: {status}). Nada foi alterado.
+cl.deliveries.upload.period_required,Escolha as datas de início e de fim do período.
+cl.deliveries.upload.period_order,O período termina antes de começar.
+cl.deliveries.upload.period_too_long,Uma entrega cobre no máximo 7 dias.
+cl.deliveries.upload.file_required,Escolha o ficheiro a entregar.
+cl.deliveries.upload.bad_extension,O ficheiro deve ser JSON Lines (.jsonl) ou CSV (.csv).
+cl.deliveries.upload.empty_file,O ficheiro está vazio.
+cl.monitor.deliveries,Entregas
+cl.monitor.all_connectors,Todos os conectores
+cl.monitor.all_statuses,Todos os estados
+cl.monitor.period_from,Período de
+cl.monitor.period_to,até
+cl.monitor.incidents,Incidentes por resolver: {count}
+cl.monitor.incidents_open_all,Abrir Incidentes
+cl.alert.quota_already_settled,Semana já fechada
+cl.alert.delivery_retries_exhausted,Entrega falhada após 3 tentativas
+cl.alert.detail.quota_already_settled,{skipped} envios chegaram depois de fechar a semana e não foram usados.
+cl.alert.detail.retries_exhausted,A entrega foi rejeitada. Amostras retiradas: {voided}.
+cl.reason.bad_record,Linha ilegível
+cl.reason.reader_without_city,Ponto de leitura sem cidade
+cl.reason.no_stratum,Rota ou semana fora do plano
+cl.error.cl_bad_csv_header,O cabeçalho do CSV não tem as colunas configuradas.
+cl.error.cl_bad_encoding,O ficheiro não é texto UTF-8 válido.
+cl.error.cl_bad_sha_state,Erro interno ao verificar a impressão digital do ficheiro; será repetido.
+cl.error.cl_compression_unsupported,Não são aceites ficheiros comprimidos: envie o ficheiro sem compressão.
+cl.error.cl_file_missing,O ficheiro não foi encontrado no armazenamento.
+cl.error.cl_file_size_unknown,Não foi possível ler o tamanho do ficheiro; será repetido.
+cl.error.cl_processing_error,Erro inesperado ao processar; será repetido.
+cl.error.cl_record_too_long,Uma linha do ficheiro é demasiado longa.
+cl.error.cl_retries_exhausted,O processamento falhou 3 vezes: a entrega foi rejeitada.
+cl.error.cl_sha256_mismatch,O ficheiro não coincide com a impressão digital (SHA-256) declarada ao abrir a entrega.
+cl.error.cl_staging_lost,Os dados intermédios perderam-se; serão recarregados a partir do ficheiro.
+cl.error.cl_stopped,O processamento foi interrompido.
+cl.error.cl_storage_error,Não foi possível ler o ficheiro do armazenamento; será repetido.
+cl.error.cl_storage_short_read,O ficheiro foi lido de forma incompleta; será repetido.
+cl.error.cl_superseded,Substituída por outro ficheiro do mesmo período antes de ser carregada.
+cl.error.cl_upload_expired,O ficheiro não foi carregado a tempo.
+cl.error.cl_worker_error,O processo em segundo plano falhou; será repetido.
+cl.error.cl_worker_lost,O processo em segundo plano deixou de responder; será repetido.
+cl.carrier.notification_email,E-mail de avisos do Carrier Link
+cl.carrier.notification_email_help,Um só endereço. A transportadora é avisada aqui de entregas não recebidas ou rejeitadas e de rejeição elevada. Deixe vazio para não a avisar.
+cl.carrier.notification_email_invalid,Escreva um só endereço de e-mail válido.
+cl.incidents.title,Incidentes do Carrier Link
+cl.incidents.help,"Problemas com as entregas das transportadoras que requerem atenção. O ONEMS abre-os, avisa por e-mail e fecha-os sozinho quando o problema se resolve; também se podem fechar à mão."
+cl.incidents.empty,Não há incidentes.
+cl.incidents.type.missing_delivery,Entrega não recebida
+cl.incidents.type.delivery_rejected,Entrega rejeitada
+cl.incidents.type.high_rejection,Rejeição elevada
+cl.incidents.type.unknown_data,Produtos ou locais desconhecidos
+cl.incidents.type.quota_unfilled,Quota não preenchida
+cl.incidents.type.unknown,Outro
+cl.incidents.explain.missing_delivery,A transportadora não entregou estes períodos à hora esperada mais a margem. Fecha-se sozinho quando chega uma entrega.
+cl.incidents.explain.delivery_rejected,O ficheiro destes períodos foi rejeitado (ver o motivo). Fecha-se sozinho quando cada período tem uma entrega processada.
+cl.incidents.explain.high_rejection,Mais de 20 % dos envios de uma entrega não se puderam usar. Fecha-se sozinho com a entrega seguinte sem rejeição elevada.
+cl.incidents.explain.unknown_data,A transportadora enviou produtos ou locais que o ONEMS não conhece. Registe-os em Conectores (equivalências de produto) ou em Pontos de leitura; fecha-se sozinho quando estiverem todos registados.
+cl.incidents.explain.quota_unfilled,"Uma semana do plano terminou sem amostras suficientes. Só se fecha à mão, depois de revista."
+cl.incidents.status.open,Aberto
+cl.incidents.status.in_progress,Em curso
+cl.incidents.status.resolved,Resolvido
+cl.incidents.status.unknown,Desconhecido
+cl.incidents.closed.manual,Fechado à mão
+cl.incidents.closed.auto,Fechado automaticamente
+cl.incidents.filter.status,Estado
+cl.incidents.filter.type,Tipo
+cl.incidents.filter.all_types,Todos os tipos
+cl.incidents.filter.status.unresolved,Por resolver
+cl.incidents.filter.status.open,Abertos
+cl.incidents.filter.status.in_progress,Em curso
+cl.incidents.filter.status.resolved,Resolvidos
+cl.incidents.filter.status.all,Todos
+cl.incidents.col.type,Incidente
+cl.incidents.col.status,Estado
+cl.incidents.col.periods,Períodos
+cl.incidents.col.assignee,Responsável
+cl.incidents.col.updated,Última alteração
+cl.incidents.unassigned,Ninguém
+cl.incidents.opened_at,Aberto em {date}
+cl.incidents.plan,Plano: {plan}
+cl.incidents.periods,Períodos ({count})
+cl.incidents.detected_at,detetado em {date}
+cl.incidents.detail.rejected_error,Motivo: {error}
+cl.incidents.detail.high_rejection,{rejected} de {shipments} envios rejeitados ({percent} %)
+cl.incidents.detail.unknown_data,produtos novos: {products}; locais novos: {points}
+cl.incidents.detail.quota_unfilled,faltam {missing} amostras
+cl.incidents.unknown_products,Produtos desconhecidos: {values}
+cl.incidents.unknown_points,Locais desconhecidos (local / modo): {values}
+cl.incidents.notices,Avisos enviados por e-mail
+cl.incidents.no_notices,Ainda não há avisos.
+cl.incidents.recipient.account,Conta (Account Managers e coordenadores)
+cl.incidents.recipient.carrier,Transportadora
+cl.incidents.notice_counts,"enviados {sent}, pendentes {pending}, falhados {failed}, não enviados {skipped}"
+cl.incidents.carrier_without_email,A transportadora não é avisada: a sua ficha em Carriers não tem e-mail de avisos do Carrier Link.
+cl.incidents.note,Nota
+cl.incidents.note_too_long,A nota pode ter no máximo 4000 caracteres.
+cl.incidents.saved,Guardado
+cl.incidents.close,Fechar à mão
+cl.incidents.close_title,Fechar este incidente?
+cl.incidents.close_effect.missing,"Os seus períodos contam como revistos: não voltarão a ser avisados, mesmo que a entrega nunca chegue."
+cl.incidents.close_effect.other,"Os avisos pendentes são cancelados. Se o problema voltar a ocorrer, o ONEMS abre um incidente novo."
+cl.incidents.close_note,Nota (opcional)
+cl.incidents.close_confirm,"Sim, fechar incidente"

@@ -236,12 +236,13 @@
       <a href="#records">Planos de alocação</a>
       <a href="#samples">Amostras</a>
       <a href="#monitor">Monitor de capturas</a>
+      <a href="#incidents">Incidentes</a>
       <h3>Referência</h3>
       <a href="#equivalence">O tempo de equivalência</a>
       <a href="#alerts">O que significa cada alerta</a>
       <a href="#faq">Perguntas</a>
     </nav>
-    <div class="side-foot">Atualizado em 20 de novembro de 2026</div>
+    <div class="side-foot">Atualizado em 23 de novembro de 2026</div>
   </aside>
 
   <main class="main">
@@ -268,15 +269,15 @@
     <section id="order">
     <h2>A ordem de trabalho</h2>
 <ol class="steps">
-  <li><strong>Forma de captura.</strong> Em <strong>Transportadoras e produtos</strong>, escolha para cada transportadora a sua <strong>Forma de captura</strong>: Painelistas, Carrier Link ou Ambos. Os pontos de leitura e os conectores só são oferecidos para transportadoras com Carrier Link ou Ambos.</li>
-  <li><strong>Pontos de leitura.</strong> Em <strong>Pontos de leitura</strong> (menu E2E ▸ Configuração ▸ Carrier Link), registe os locais do transportador onde cada envio é lido e indique em que cidade as rotas começam ou terminam. Cada cidade precisa de pelo menos um ponto de início e um de fim.</li>
-  <li><strong>Conector.</strong> Em <strong>Conectores</strong> (mesmo submenu), crie o conector do transportador: as suas equivalências de campos e de produto, o calendário de pedidos e a chave. Teste-o com um lote de ensaio.</li>
-  <li><strong>Padrão de entrega.</strong> Em <strong>E2E: SLA</strong>, confirme que cada rota tem o seu padrão e, se quiser comparar com os painelistas, o tempo de equivalência (veja <a href="#equivalence">O tempo de equivalência</a>).</li>
-  <li><strong>Gerar e aplicar o plano.</strong> Em <strong>Gerador de alocação</strong>, escolha a transportadora com a forma de captura Carrier Link, gere a pré-visualização, guarde o plano e prima <span class="btn primary">Aplicar</span>.</li>
-  <li><strong>Ativar o conector.</strong> Quando tudo estiver pronto, passe o conector de Testes a Ativo. Até lá só admite ensaios e não se cria nenhuma amostra.</li>
-  <li><strong>Acompanhamento.</strong> Para repartir melhor a carga, use <strong>Balanceamento de carga</strong>; para ver as quotas, <strong>Planos de alocação</strong>; em <strong>Monitor de capturas</strong> veja os pedidos, os lotes e os alertas e, em <strong>Amostras</strong>, reveja as amostras que vão entrando (menu Base de dados ▸ Carrier Link).</li>
+  <li><strong>Forma de captura.</strong> Em <strong>Operadores e Produtos</strong>, escolha para cada operador a sua <strong>Forma de captura</strong>: Painelistas, Carrier Link ou Ambos. Aí também pode indicar o <strong>e-mail de avisos do Carrier Link</strong> da transportadora (opcional).</li>
+  <li><strong>Pontos de leitura.</strong> Em <strong>Pontos de leitura</strong> (menu E2E ▸ Configuração ▸ Carrier Link), registe os locais da transportadora onde cada envio é lido e diga em que cidade começam ou terminam as rotas. Cada cidade precisa de pelo menos um ponto de início e um de fim.</li>
+  <li><strong>Conector.</strong> Em <strong>Conectores</strong> (mesmo submenu), crie o conector da transportadora: as equivalências de campos e de produto, o calendário de entregas e a chave. Enquanto estiver em Testes, as entregas são verificadas e contadas mas não criam amostras.</li>
+  <li><strong>Padrão de entrega.</strong> Em <strong>E2E: SLA</strong>, verifique que cada rota tem o seu padrão e, se quiser comparar com os painelistas, o tempo de equivalência (ver <a href="#equivalence">O tempo de equivalência</a>).</li>
+  <li><strong>Gerar e aplicar o plano.</strong> Em <strong>Gerador de Alocações</strong>, escolha o operador com a forma de captura Carrier Link, gere a pré-visualização, guarde o plano e carregue em <span class="btn primary">Aplicar</span>.</li>
+  <li><strong>Ativar o conector.</strong> Quando tudo estiver pronto, passe o conector de Testes a Ativo. A partir daí cada entrega cria amostras.</li>
+  <li><strong>Acompanhamento.</strong> Em <strong>Monitor de capturas</strong> acompanhe as entregas e os alertas, em <strong>Incidentes</strong> os problemas que requerem atenção, e em <strong>Amostras</strong> as amostras à medida que entram (menu Base de Dados ▸ Carrier Link).</li>
 </ol>
-<div class="callout ok"><strong>E depois:</strong> o ONEMS pede os envios ao transportador nos dias e à hora do calendário do conector, faz o sorteio e coloca as amostras nos relatórios E2E. Só tem de tratar os alertas.</div>
+<div class="callout ok"><strong>E depois:</strong> em cada dia de entrega a transportadora envia um ficheiro com todos os envios do período. O ONEMS verifica-o, conta-o, faz o seu próprio sorteio e coloca as amostras nos relatórios E2E. Se uma entrega não chega ou é rejeitada, o ONEMS abre um incidente e avisa por e-mail.</div>
     </section>
 
     <section id="reading-points">
@@ -294,26 +295,29 @@
 
     <section id="connectors">
     <h2>Conectores</h2>
-<p>Ecrã <strong>Conectores</strong>. O conector é o canal por onde o transportador entrega os seus dados ao ONEMS. Há um ou vários por transportador.</p>
+<p>Ecrã <strong>Conectores</strong>. O conector é o canal pelo qual a transportadora entrega os seus dados ao ONEMS. Há um ou vários por transportadora.</p>
 <h3>O que se configura</h3>
 <ul>
-  <li><strong>Calendário:</strong> os dias da semana e a hora a que o ONEMS pode pedir dados, para não incomodar a base de dados do transportador. Se deixar o fuso horário vazio, usa-se o da conta.</li>
-  <li><strong>Equivalências de campos:</strong> que campo do transportador contém cada dado (identificador do envio, produto, data e hora de leitura, local e modo). Enquanto faltar algum, o ONEMS não consegue ler os dados.</li>
-  <li><strong>Equivalências de produto:</strong> a que produto do ONEMS corresponde cada valor de produto do transportador.</li>
-  <li><strong>Campos extra permitidos:</strong> outros campos do transportador que se guardam com cada leitura. Qualquer outro campo é descartado à entrada, para não guardar dados pessoais.</li>
+  <li><strong>Calendário de entregas:</strong> os dias em que a transportadora entrega um ficheiro e a hora aproximada. Cada entrega cobre os dias desde o dia de entrega anterior: diária = o dia anterior; semanal = os 7 dias anteriores; várias por semana = os dias intermédios. O ecrã mostra a frequência, o <strong>próximo período</strong> a entregar e a última entrega.</li>
+  <li><strong>Margem antes de «não recebida»:</strong> horas depois da hora esperada antes de o ONEMS abrir um incidente <em>Entrega não recebida</em> (6 por omissão, de 0 a 168).</li>
+  <li><strong>Equivalências de campos:</strong> que campo da transportadora contém cada dado (identificador do envio, produto, data e hora de leitura, local e modo). Enquanto faltar algum, o ONEMS não consegue ler os dados.</li>
+  <li><strong>Equivalências de produto:</strong> a que produto do ONEMS corresponde cada valor de produto da transportadora.</li>
+  <li><strong>Campos extra permitidos:</strong> outros campos da transportadora guardados com cada leitura. Qualquer outro campo é descartado à entrada, para não guardar dados pessoais.</li>
 </ul>
 <h3>Estados do conector</h3>
 <div class="table-wrap"><table>
 <tr><th>Estado</th><th>O que acontece</th></tr>
-<tr><td><span class="badge b-yellow">Testes</span></td><td>Só admite lotes de ensaio: verificam-se como se fossem reais, mas não se guarda nada e não se cria nenhuma amostra.</td></tr>
-<tr><td><span class="badge b-green">Ativo</span></td><td>Recebe lotes reais e cria amostras. Ao ativá-lo fecham-se os pedidos que tivessem ficado abertos em testes.</td></tr>
-<tr><td><span class="badge b-gray">Pausado</span></td><td>Não recebe lotes nem se enviam pedidos até ser retomado.</td></tr>
+<tr><td><span class="badge b-yellow">Testes</span></td><td>As entregas são verificadas e contadas como se fossem reais, mas não é criada nenhuma amostra.</td></tr>
+<tr><td><span class="badge b-green">Ativo</span></td><td>Cada entrega cria amostras para os planos ativos.</td></tr>
+<tr><td><span class="badge b-gray">Em pausa</span></td><td>Não se aceita nenhuma entrega nem se avisam as que faltam até ser retomado.</td></tr>
 </table></div>
-<h3>A chave do transportador</h3>
-<p>O transportador usa uma chave para enviar os seus lotes. <strong>Só um superadmin ou o UPU Account Manager podem criar chaves.</strong> Prima <span class="btn">Nova chave</span>, dê-lhe um nome e, se quiser, uma data de validade.</p>
-<div class="callout warn"><strong>A chave mostra-se uma única vez.</strong> Copie-a e entregue-a ao transportador por um canal seguro: depois o ONEMS só guarda um prefixo para a reconhecer. Se se perder, crie outra e desative a anterior.</div>
-<h3>Testar um lote</h3>
-<p>Em <strong>Testar lote (ensaio)</strong> carregue um ficheiro de lote do transportador. O ONEMS indica se o aceitaria e, se não, porquê. Não se guarda nada.</p>
+<h3>A chave da transportadora</h3>
+<p>A transportadora usa uma chave para enviar as suas entregas. <strong>Só um superadmin ou o UPU Account Manager podem criar chaves.</strong> Carregue em <span class="btn">Nova chave</span>, dê-lhe um nome e, se quiser, uma data de expiração.</p>
+<div class="callout warn"><strong>A chave é mostrada uma única vez.</strong> Copie-a e entregue-a à transportadora por um canal seguro: depois o ONEMS só guarda um prefixo para a reconhecer. Se se perder, crie outra e desative a antiga.</div>
+<h3>Entregas</h3>
+<p>O bloco <strong>Entregas</strong> lista as entregas do conector, da mais recente para a mais antiga: período, estado (À espera do ficheiro, Recebida, Em processamento, Processada, Falhou ou Rejeitada), o passo em que está durante o processamento, linhas lidas, envios válidos, linhas e envios rejeitados, amostras sorteadas e alertas. Abra uma linha para ver os motivos de rejeição, o erro e as datas. Uma entrega que <em>Falhou</em> é repetida automaticamente até 3 vezes.</p>
+<h3>Carregar uma entrega à mão</h3>
+<p>Para transportadoras que enviam o ficheiro por outra via: escolha o período (é proposto o seguinte), escolha um ficheiro <strong>JSON Lines (.jsonl)</strong> ou <strong>CSV</strong> sem compressão e carregue em <span class="btn primary">Carregar entrega</span>. O ONEMS calcula a impressão digital do ficheiro no navegador, carrega-o e processa-o exatamente como uma entrega por API. Um período é entregue uma única vez.</p>
     </section>
 
     <section id="generator">
@@ -378,12 +382,25 @@
     <h2>Monitor de capturas</h2>
 <p>Ecrã <strong>Monitor de capturas</strong>. Aqui acompanha-se o que acontece com a captura de dados.</p>
 <ul>
-  <li><strong>Pedidos ao transportador:</strong> abertos, cumpridos, parciais ou falhados (incluindo os de teste).</li>
-  <li><strong>Lotes recebidos:</strong> cada lote com o seu estado (Recebido, Validado, Amostrado, Rejeitado, Desfeito ou Expirado), o número de envios, os rejeitados e os escolhidos.</li>
-  <li><strong>Alertas:</strong> com a sua gravidade (baixa, média ou alta). Pode filtrar só os abertos e marcá-los com <span class="btn">Marcar como visto</span> ou <span class="btn">Descartar</span>. O que significa cada um está em <a href="#alerts">O que significa cada alerta</a>.</li>
+  <li><strong>Incidentes por resolver:</strong> quantos há de cada tipo. Carregue numa caixa para os abrir em <a href="#incidents">Incidentes</a>.</li>
+  <li><strong>Entregas:</strong> as entregas de todos os conectores, com filtros por conector, estado e período, com as mesmas colunas e detalhe que em Conectores.</li>
+  <li><strong>Alertas:</strong> com a sua gravidade (baixa, média ou alta). Pode filtrar só os abertos e marcá-los com <span class="btn">Marcar como visto</span> ou <span class="btn">Descartar</span>. O significado de cada um está em <a href="#alerts">O que significa cada alerta</a>.</li>
 </ul>
-<h3>Desfazer um lote</h3>
-<p>Se um lote estiver errado, prima <span class="btn">Desfazer</span> na sua linha e confirme. As amostras escolhidas nesse lote saem dos relatórios E2E e as quotas afetadas são recalculadas. O ONEMS indica quantas quotas voltaram a pendente e quais, por já terem sido transitadas, é preciso rever.</p>
+    </section>
+
+    <section id="incidents">
+    <h2>Incidentes</h2>
+<p>Ecrã <strong>Incidentes</strong> (menu Base de Dados ▸ Carrier Link). Lista os problemas com as entregas das transportadoras que requerem atenção. O ONEMS abre-os sozinho, avisa por e-mail os Account Managers e coordenadores da conta (e a transportadora, para os seus próprios problemas, se tiver e-mail de avisos em <strong>Operadores e Produtos</strong>) e fecha sozinho a maioria quando o problema se resolve.</p>
+<div class="table-wrap"><table>
+<tr><th>Incidente</th><th>Quando abre</th><th>Quando fecha</th></tr>
+<tr><td>Entrega não recebida</td><td>Um período não foi entregue à hora esperada mais a margem.</td><td>Sozinho, quando chega uma entrega.</td></tr>
+<tr><td>Entrega rejeitada</td><td>O ficheiro de um período foi rejeitado (impressão digital diferente, formato errado, demasiado grande...).</td><td>Sozinho, quando cada período tem uma entrega processada.</td></tr>
+<tr><td>Rejeição elevada</td><td>Mais de 20 % dos envios de uma entrega não se puderam usar.</td><td>Sozinho, com a entrega seguinte sem rejeição elevada.</td></tr>
+<tr><td>Produtos ou locais desconhecidos</td><td>A transportadora enviou produtos ou locais que o ONEMS não conhece.</td><td>Sozinho, quando estiverem todos registados.</td></tr>
+<tr><td>Quota não preenchida</td><td>Uma semana do plano terminou sem amostras suficientes.</td><td>Só à mão.</td></tr>
+</table></div>
+<p>Abra uma linha para ver os seus períodos, os avisos enviados (só quantos e o seu estado, nunca os endereços), o responsável e a nota. Com direito de edição pode mudar o estado (Aberto ou Em curso), atribuir uma pessoa da conta, escrever uma nota e carregar em <span class="btn">Fechar à mão</span>; a confirmação aparece junto à linha. A lista indica se um incidente foi <strong>fechado à mão</strong> ou <strong>fechado automaticamente</strong>.</p>
+<div class="callout warn">Fechar à mão um incidente <em>Entrega não recebida</em> dá os seus períodos como revistos: não voltam a ser avisados, mesmo que a entrega nunca chegue.</div>
     </section>
 
     <section id="equivalence">

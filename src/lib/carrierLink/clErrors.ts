@@ -49,7 +49,7 @@ export const CL_ERROR_CODES = [
 /** Clave i18n del mensaje para un error de Supabase/RPC de Carrier Link. */
 export function clErrorKey(err: { message?: string; code?: string } | null): string {
   if (!err) return 'cl.error.generic'
-  const m = /CL_[A-Z_]+/.exec(err.message ?? '')
+  const m = /CL_[A-Z0-9_]+/.exec(err.message ?? '')
   if (m) return `cl.error.${m[0].toLowerCase()}`
   if (err.code === '42501') return 'cl.error.forbidden'
   return 'cl.error.generic'
