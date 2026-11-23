@@ -1,0 +1,19 @@
+{
+  "mode": "local",
+  "base_url": "https://sehbnpgzqljrsqimwyuz.supabase.co/functions/v1/carrier-link-ingest",
+  "key_file": "out/carrier_key.txt",
+  "seed": "sim-2026",
+  "dataset_dir": "out/dataset",
+  "out_dir": "out/runs",
+  "dry_run": true,
+  "max_rows": 5000,
+  "output_fields": ["tracking_no", "event_ts", "site_code", "event_code", "service", "weight_g"],
+  "local": {
+    "psql": "C:/Users/fernandezi/pgportable/pgsql/bin/psql.exe",
+    "host": "127.0.0.1",
+    "port": 5433,
+    "dbname": "onems_t",
+    "user": "postgres",
+    "password": "postgres"
+  }
+}

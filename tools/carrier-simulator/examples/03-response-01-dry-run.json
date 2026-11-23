@@ -1,0 +1,46 @@
+{
+ "http_status": 200,
+ "body": {
+  "ingest": {
+   "batch": null,
+   "status": "validated",
+   "strata": [
+    {
+     "rows": 20,
+     "rejected": {
+      "start_after_end": 1
+     },
+     "candidates": 10,
+     "stratum_id": "0004551b-71cb-4c48-b658-ae65533cb1ff",
+     "rows_rejected": {},
+     "population_size": 53,
+     "candidates_valid": 9
+    },
+    {
+     "rows": 20,
+     "rejected": {},
+     "candidates": 10,
+     "stratum_id": "615738ca-1bf6-4ecb-89e5-0de0cbf2e5c0",
+     "rows_rejected": {},
+     "population_size": 40,
+     "candidates_valid": 10
+    },
+    {
+     "rows": 31,
+     "rejected": {
+      "unknown_product": 1
+     },
+     "candidates": 15,
+     "stratum_id": "78a12add-8677-404f-9b28-ea5d317af4a3",
+     "rows_rejected": {
+      "bad_timestamp": 1,
+      "unknown_product": 1
+     },
+     "population_size": 99,
+     "candidates_valid": 14
+    }
+   ],
+   "dry_run": true
+  }
+ }
+}
