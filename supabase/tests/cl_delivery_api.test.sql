@@ -285,5 +285,81 @@ BEGIN
                      AND public.cl_delivery_safe_error(NULL) IS NULL, 'cl_delivery_safe_error');
 END $$;
 
+-- ================================================================ 8. mantenimiento con entregas en vuelo (fix ronda 2)
+-- Conectores H2 y H3 semanales con un plan vencido (05/10-11/10, margen 7) y su cuota W41 (1 muestra). Cada uno con
+-- una entrega de ese periodo en vuelo (processing / failed) que ya transfirio su muestra (samples_obtained = 1, sin finish).
+INSERT INTO public.cl_feeds (id, account_id, carrier_id, name, status, emit_days, emit_hour) VALUES
+  ('f0000000-0000-0000-0000-0000000000d5','a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000001','Feed H2','active','{1}',3),
+  ('f0000000-0000-0000-0000-0000000000d6','a0000000-0000-0000-0000-000000000001','ca000000-0000-0000-0000-000000000001','Feed H3','active','{1}',3);
+INSERT INTO public.cl_plans (id, account_id, plan_name, carrier_id, product_id, total_samples, start_date, end_date, status, feed_id) VALUES
+  ('90000000-0000-0000-0000-0000000000d5','a0000000-0000-0000-0000-000000000001','P8','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',1,'2026-10-05','2026-10-11','active','f0000000-0000-0000-0000-0000000000d5'),
+  ('90000000-0000-0000-0000-0000000000d6','a0000000-0000-0000-0000-000000000001','P9','ca000000-0000-0000-0000-000000000001','cb000000-0000-0000-0000-000000000001',1,'2026-10-05','2026-10-11','active','f0000000-0000-0000-0000-0000000000d6');
+INSERT INTO public.cl_plan_quotas (id, account_id, plan_id, origin_city_id, destination_city_id, iso_year, iso_week, period_start, period_end, samples_planned, samples_obtained) VALUES
+  ('91000000-0000-0000-0000-0000000000d5','a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-0000000000d5','c1000000-0000-0000-0000-000000000001','c2000000-0000-0000-0000-000000000002',2026,41,'2026-10-05','2026-10-11',1,1),
+  ('91000000-0000-0000-0000-0000000000d6','a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-0000000000d6','c1000000-0000-0000-0000-000000000001','c2000000-0000-0000-0000-000000000002',2026,41,'2026-10-05','2026-10-11',1,1);
+INSERT INTO public.cl_deliveries (id, account_id, feed_id, period_start, period_end, source, format, compression, file_path, sha256, status, received_at) VALUES
+  ('de000000-0000-0000-0000-0000000000d5','a0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-0000000000d5','2026-10-05','2026-10-11','api','jsonl','none','t/d5.jsonl',pg_temp.sha(85),'received',now()),
+  ('de000000-0000-0000-0000-0000000000d6','a0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-0000000000d6','2026-10-05','2026-10-11','api','jsonl','none','t/d6.jsonl',pg_temp.sha(86),'received',now());
+-- Una sola entrega 'processing' en toda la base: H2 en processing, H3 failed (se reintenta) tras transferir.
+UPDATE public.cl_deliveries SET status = 'processing', processing_started_at = now(),
+       progress = jsonb_build_object('phase', 'transfer', 'attempts', 1)
+ WHERE id = 'de000000-0000-0000-0000-0000000000d5';
+UPDATE public.cl_deliveries SET status = 'failed', error = 'CL_WORKER_ERROR', finished_at = now(),
+       progress = jsonb_build_object('phase', 'failed', 'attempts', 3)
+ WHERE id = 'de000000-0000-0000-0000-0000000000d6';
+INSERT INTO public.cl_samples (account_id, plan_id, quota_id, carrier_id, item_id, delivery_id) VALUES
+  ('a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-0000000000d5','91000000-0000-0000-0000-0000000000d5','ca000000-0000-0000-0000-000000000001','IT-D5','de000000-0000-0000-0000-0000000000d5'),
+  ('a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-0000000000d6','91000000-0000-0000-0000-0000000000d6','ca000000-0000-0000-0000-000000000001','IT-D6','de000000-0000-0000-0000-0000000000d6');
+
+DO $$
+DECLARE
+  v_now constant timestamptz := '2026-11-23 10:00+03';
+  h jsonb; i int; r text;
+BEGIN
+  -- En vuelo: ni se liquida la cuota ni se cierra el plan (aunque samples_obtained ya cubre el objetivo).
+  h := public.cl_housekeeping(v_now);
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_plan_quotas WHERE id IN ('91000000-0000-0000-0000-0000000000d5',
+                        '91000000-0000-0000-0000-0000000000d6') AND status = 'pending') = 2, 'en vuelo: cuotas sin liquidar');
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_plans WHERE id IN ('90000000-0000-0000-0000-0000000000d5',
+                        '90000000-0000-0000-0000-0000000000d6') AND status = 'active') = 2, 'en vuelo: planes sin cerrar');
+  PERFORM pg_temp.ok((h->>'feeds_skipped')::int >= 2, 'conectores saltados: ' || h::text);
+
+  -- A (H2): la entrega termina bien -> la siguiente pasada liquida la semana y cierra el plan.
+  UPDATE public.cl_deliveries SET status = 'processed', finished_at = now(), progress = progress || '{"phase":"done"}'
+   WHERE id = 'de000000-0000-0000-0000-0000000000d5';
+  h := public.cl_housekeeping(v_now);
+  PERFORM pg_temp.ok((SELECT status FROM public.cl_plan_quotas WHERE id = '91000000-0000-0000-0000-0000000000d5') = 'fulfilled'
+                     AND (SELECT status FROM public.cl_plans WHERE id = '90000000-0000-0000-0000-0000000000d5') = 'closed',
+                     'tras terminar: liquidada y cerrado: ' || h::text);
+  PERFORM pg_temp.ok((SELECT status FROM public.cl_plan_quotas WHERE id = '91000000-0000-0000-0000-0000000000d6') = 'pending',
+                     'H3 sigue en vuelo');
+
+  -- B (H3): la cuota se liquida por otro camino y despues la entrega agota sus intentos y se deshace.
+  UPDATE public.cl_plan_quotas SET status = 'fulfilled' WHERE id = '91000000-0000-0000-0000-0000000000d6';
+  -- Reintento (failed -> processing) que vuelve a fallar con los intentos agotados.
+  UPDATE public.cl_deliveries
+     SET status = 'processing', processing_started_at = now(),
+         progress = progress || '{"phase":"abort","final_status":"failed","final_error":"CL_WORKER_ERROR"}'
+   WHERE id = 'de000000-0000-0000-0000-0000000000d6';
+  FOR i IN 1..5 LOOP
+    EXIT WHEN (SELECT status FROM public.cl_deliveries WHERE id = 'de000000-0000-0000-0000-0000000000d6') <> 'processing';
+    r := public.cl_process_delivery('de000000-0000-0000-0000-0000000000d6')::text;
+  END LOOP;
+  PERFORM pg_temp.ok((SELECT status = 'rejected' AND error = 'CL_RETRIES_EXHAUSTED' FROM public.cl_deliveries
+                       WHERE id = 'de000000-0000-0000-0000-0000000000d6'), 'fallo terminal');
+  PERFORM pg_temp.ok((SELECT samples_obtained FROM public.cl_plan_quotas WHERE id = '91000000-0000-0000-0000-0000000000d6') = 0,
+                     'muestra deshecha');
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_alerts WHERE quota_id = '91000000-0000-0000-0000-0000000000d6'
+                        AND alert_type = 'quota_short_after_undo' AND details->>'missing' = '1') = 1,
+                     'alerta quota_short_after_undo en la cuota ya liquidada');
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_alerts WHERE plan_id = '90000000-0000-0000-0000-0000000000d6'
+                        AND alert_type = 'delivery_retries_exhausted') = 1,
+                     'delivery_retries_exhausted no se pierde (el plan seguia activo)');
+  -- Ya sin entrega en vuelo, la siguiente pasada cierra el plan (sus cuotas ya no estan pending/open).
+  h := public.cl_housekeeping(v_now);
+  PERFORM pg_temp.ok((SELECT status FROM public.cl_plans WHERE id = '90000000-0000-0000-0000-0000000000d6') = 'closed',
+                     'tras el fallo terminal: plan cerrado: ' || h::text);
+END $$;
+
 ROLLBACK;
 \echo cl_delivery_api: OK

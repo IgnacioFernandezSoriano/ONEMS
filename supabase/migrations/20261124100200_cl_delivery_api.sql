@@ -214,8 +214,9 @@ DROP FUNCTION IF EXISTS public.cl_emit_due_demands(timestamptz);
 --      entrega (o por una ejecucion anterior) no se vuelve a tocar.
 --   b) alerta invalid_timezone (zona de la cuenta invalida y conector sin zona propia): una sola mientras no se descarte.
 --   c) cierre de planes active -> closed tras end_date + close_lag_days sin cuotas pending/open.
--- Bloqueo como el sorteo y la liquidacion de la tarea 2: candado 'cl_sample:<cuenta>:<carrier>' y cuotas por id.
--- Un plan que falla deja la alerta housekeeping_failed (solo SQLSTATE) y no para a los demas.
+-- Bloqueo como el proceso de entregas: conector FOR UPDATE (SKIP LOCKED), candado 'cl_sample:<cuenta>:<carrier>' y
+-- cuotas por id. Los conectores con una entrega en vuelo se saltan (ronda 2 de la revision).
+-- Un conector que falla deja la alerta housekeeping_failed (solo SQLSTATE) en sus planes y no para a los demas.
 -- GANCHO tarea 8: la liquidacion de semanas vencidas CON falta (> 0) que ninguna entrega cubrio (3 dias tras el fin de
 -- la semana) va en este mismo bucle, en el punto marcado "TAREA 8"; no crear otro job.
 CREATE OR REPLACE FUNCTION public.cl_housekeeping(p_now timestamptz DEFAULT now())
@@ -226,61 +227,96 @@ CREATE OR REPLACE FUNCTION public.cl_housekeeping(p_now timestamptz DEFAULT now(
 AS $$
 DECLARE
   r           record;
+  v_feed      record;
   v_today     date;
   v_qid       uuid;
   v_settled   integer := 0;
   v_closed    integer := 0;
+  v_n         integer;
   v_tz_alerts integer := 0;
+  v_skipped   integer := 0;
 BEGIN
   PERFORM pg_advisory_xact_lock(hashtext('cl_housekeeping'));
 
-  FOR r IN SELECT p.id, p.account_id, p.carrier_id, p.feed_id, p.close_lag_days, f.emit_timezone, a.timezone AS account_tz
+  -- b) zona horaria invalida (una alerta mientras no se descarte). No toca cuotas ni planes.
+  FOR r IN SELECT p.id, f.emit_timezone, a.timezone AS account_tz
              FROM public.cl_plans p
              JOIN public.accounts a ON a.id = p.account_id
              LEFT JOIN public.cl_feeds f ON f.id = p.feed_id
             WHERE p.status = 'active'
             ORDER BY p.created_at, p.id
   LOOP
+    IF r.emit_timezone IS NULL AND r.account_tz IS NOT NULL AND NOT public.cl_is_valid_timezone(r.account_tz)
+       AND NOT EXISTS (SELECT 1 FROM public.cl_alerts x WHERE x.plan_id = r.id AND x.alert_type = 'invalid_timezone'
+                                                        AND x.status <> 'dismissed') THEN
+      PERFORM public.cl_raise_alert(r.id, NULL, 'invalid_timezone', 'medium',
+                                    jsonb_build_object('account_timezone', r.account_tz, 'used', 'UTC'));
+      v_tz_alerts := v_tz_alerts + 1;
+    END IF;
+  END LOOP;
+
+  -- a) y c), POR CONECTOR (ronda 2 de la revision). Orden de bloqueo del proceso de entregas: conector FOR UPDATE
+  -- (SKIP LOCKED: si una entrega lo tiene, se reintenta en la siguiente hora), luego candado del sorteo y cuotas por id.
+  -- Un conector con una entrega en vuelo (received, processing o failed, que siempre se reintenta: el fallo terminal
+  -- la deja rejected) no se liquida ni cierra: su transfer ya pudo sumar samples_obtained y un abort lo restaria.
+  -- Planes sin conector (feed_id NULL): no tienen entregas; se tratan sin bloqueo de conector.
+  FOR v_feed IN SELECT DISTINCT p.feed_id, p.account_id, p.carrier_id
+                  FROM public.cl_plans p WHERE p.status = 'active'
+                 ORDER BY p.feed_id NULLS LAST, p.account_id, p.carrier_id
+  LOOP
     BEGIN
-      -- b) zona horaria invalida (una alerta mientras no se descarte).
-      IF r.emit_timezone IS NULL AND r.account_tz IS NOT NULL AND NOT public.cl_is_valid_timezone(r.account_tz)
-         AND NOT EXISTS (SELECT 1 FROM public.cl_alerts x WHERE x.plan_id = r.id AND x.alert_type = 'invalid_timezone'
-                                                          AND x.status <> 'dismissed') THEN
-        PERFORM public.cl_raise_alert(r.id, NULL, 'invalid_timezone', 'medium',
-                                      jsonb_build_object('account_timezone', r.account_tz, 'used', 'UTC'));
-        v_tz_alerts := v_tz_alerts + 1;
+      IF v_feed.feed_id IS NOT NULL THEN
+        PERFORM 1 FROM public.cl_feeds f WHERE f.id = v_feed.feed_id FOR UPDATE SKIP LOCKED;
+        IF NOT FOUND THEN v_skipped := v_skipped + 1; CONTINUE; END IF;
+        IF EXISTS (SELECT 1 FROM public.cl_deliveries d
+                    WHERE d.feed_id = v_feed.feed_id AND d.status IN ('received','processing','failed')) THEN
+          v_skipped := v_skipped + 1;
+          CONTINUE;
+        END IF;
       END IF;
 
-      v_today := (p_now AT TIME ZONE public.cl_effective_tz(r.account_id, r.feed_id))::date;
+      PERFORM pg_advisory_xact_lock(hashtext('cl_sample:' || v_feed.account_id::text || ':' || v_feed.carrier_id::text));
 
-      -- a) semanas vencidas sin nada que pedir.
-      PERFORM pg_advisory_xact_lock(hashtext('cl_sample:' || r.account_id::text || ':' || r.carrier_id::text));
-      FOR v_qid IN SELECT q.id FROM public.cl_plan_quotas q
-                    WHERE q.plan_id = r.id AND q.status = 'pending'
-                      AND q.period_end + r.close_lag_days <= v_today
-                      AND q.samples_planned + q.samples_carried_in - q.samples_obtained <= 0
-                    ORDER BY q.id
-                      FOR UPDATE
+      FOR r IN SELECT p.id, p.account_id, p.feed_id, p.close_lag_days FROM public.cl_plans p
+                WHERE p.status = 'active' AND p.feed_id IS NOT DISTINCT FROM v_feed.feed_id
+                  AND p.account_id = v_feed.account_id AND p.carrier_id = v_feed.carrier_id
+                ORDER BY p.id
       LOOP
-        UPDATE public.cl_plan_quotas q SET status = 'open' WHERE q.id = v_qid AND q.status = 'pending';
-        PERFORM public.cl_settle_quota(v_qid);
-        v_settled := v_settled + 1;
-      END LOOP;
+        v_today := (p_now AT TIME ZONE public.cl_effective_tz(r.account_id, r.feed_id))::date;
 
-      -- TAREA 8: aqui, semanas vencidas con falta > 0 sin entrega que las cubra (3 dias tras el fin de la semana).
+        -- a) semanas vencidas sin nada que pedir.
+        FOR v_qid IN SELECT q.id FROM public.cl_plan_quotas q
+                      WHERE q.plan_id = r.id AND q.status = 'pending'
+                        AND q.period_end + r.close_lag_days <= v_today
+                        AND q.samples_planned + q.samples_carried_in - q.samples_obtained <= 0
+                      ORDER BY q.id
+                        FOR UPDATE
+        LOOP
+          UPDATE public.cl_plan_quotas q SET status = 'open' WHERE q.id = v_qid AND q.status = 'pending';
+          PERFORM public.cl_settle_quota(v_qid);
+          v_settled := v_settled + 1;
+        END LOOP;
+
+        -- TAREA 8: aqui, semanas vencidas con falta > 0 sin entrega que las cubra (3 dias tras el fin de la semana).
+
+        -- c) cierre del plan.
+        UPDATE public.cl_plans p SET status = 'closed'
+         WHERE p.id = r.id AND p.status = 'active'
+           AND p.end_date + p.close_lag_days < v_today
+           AND NOT EXISTS (SELECT 1 FROM public.cl_plan_quotas q WHERE q.plan_id = p.id AND q.status IN ('pending','open'));
+        GET DIAGNOSTICS v_n = ROW_COUNT;
+        v_closed := v_closed + v_n;
+      END LOOP;
     EXCEPTION WHEN OTHERS THEN
-      PERFORM public.cl_raise_alert(r.id, NULL, 'housekeeping_failed', 'high', jsonb_build_object('sqlstate', SQLSTATE));
+      PERFORM public.cl_raise_alert(p.id, NULL, 'housekeeping_failed', 'high', jsonb_build_object('sqlstate', SQLSTATE))
+         FROM public.cl_plans p
+        WHERE p.status = 'active' AND p.feed_id IS NOT DISTINCT FROM v_feed.feed_id
+          AND p.account_id = v_feed.account_id AND p.carrier_id = v_feed.carrier_id;
     END;
   END LOOP;
 
-  -- c) cierre de planes (tambien los que no tienen conector: usan la zona de la cuenta).
-  UPDATE public.cl_plans p SET status = 'closed'
-   WHERE p.status = 'active'
-     AND p.end_date + p.close_lag_days < (p_now AT TIME ZONE public.cl_effective_tz(p.account_id, p.feed_id))::date
-     AND NOT EXISTS (SELECT 1 FROM public.cl_plan_quotas q WHERE q.plan_id = p.id AND q.status IN ('pending','open'));
-  GET DIAGNOSTICS v_closed = ROW_COUNT;
-
-  RETURN jsonb_build_object('quotas_settled', v_settled, 'plans_closed', v_closed, 'timezone_alerts', v_tz_alerts);
+  RETURN jsonb_build_object('quotas_settled', v_settled, 'plans_closed', v_closed, 'timezone_alerts', v_tz_alerts,
+                            'feeds_skipped', v_skipped);
 END $$;
 REVOKE ALL ON FUNCTION public.cl_housekeeping(timestamptz) FROM PUBLIC, anon, authenticated, service_role;
 
@@ -335,3 +371,64 @@ BEGIN
    WHERE d.id = p_delivery_id AND d.status = 'processing';
 END $$;
 REVOKE ALL ON FUNCTION public.cl_delivery_mark_abort(uuid, text, text) FROM PUBLIC, anon, authenticated, service_role;
+
+-- ================================================================ 7. deshacer una entrega: aviso si deja corta una cuota ya liquidada
+-- Copia de 20261124100100 con un unico cambio (revision tarea 3, ronda 2, defensivo): tras restar las muestras
+-- anuladas, una cuota ya liquidada (ni pending ni open) que queda por debajo de su objetivo NO se reabre (reabrirla
+-- volveria a repartir un deficit que cl_settle_quota ya arrastro o dio por unfilled): se levanta la alerta
+-- quota_short_after_undo (high) con lo que falta, para que el regulador decida. Con cl_housekeeping bloqueando el
+-- conector y saltando las entregas en vuelo, este caso no deberia darse; queda como red.
+CREATE OR REPLACE FUNCTION public.cl_delivery_undo_samples(p_d public.cl_deliveries)
+ RETURNS integer
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path = public, extensions
+AS $$
+DECLARE
+  v_carrier uuid := (SELECT f.carrier_id FROM public.cl_feeds f WHERE f.id = p_d.feed_id);
+  v_n integer;
+  v_q uuid[];
+  v_r record;
+BEGIN
+  PERFORM pg_advisory_xact_lock(hashtext('cl_sample:' || p_d.account_id::text || ':' || v_carrier::text));
+  PERFORM 1 FROM public.cl_plan_quotas q
+   WHERE q.id IN (SELECT s.quota_id FROM public.cl_samples s WHERE s.delivery_id = p_d.id AND s.status = 'active')
+   ORDER BY q.id FOR UPDATE;
+
+  UPDATE public.cl_alerts a
+     SET status = 'dismissed',
+         details = COALESCE(a.details, '{}'::jsonb) || jsonb_build_object('dismissed_by_undo_delivery', p_d.id)
+   WHERE a.status = 'open' AND a.account_id = p_d.account_id
+     AND (a.delivery_id = p_d.id
+          OR (a.alert_type = 'missing_standard'
+              AND a.details->>'first_sample_id' IN (SELECT s.id::text FROM public.cl_samples s
+                                                     WHERE s.delivery_id = p_d.id AND s.status = 'active')));
+
+  DELETE FROM public.one_db o
+   USING public.cl_samples s
+   WHERE o.cl_sample_id = s.id AND s.delivery_id = p_d.id AND s.status = 'active';
+
+  WITH v AS (
+    UPDATE public.cl_samples SET status = 'voided'
+     WHERE delivery_id = p_d.id AND status = 'active'
+    RETURNING quota_id
+  )
+  SELECT COALESCE(array_agg(v.quota_id) FILTER (WHERE v.quota_id IS NOT NULL), '{}'::uuid[]), count(*)::integer
+    INTO v_q, v_n FROM v;
+
+  UPDATE public.cl_plan_quotas q SET samples_obtained = GREATEST(q.samples_obtained - c.n, 0)
+    FROM (SELECT x AS quota_id, count(*)::integer AS n FROM unnest(v_q) x GROUP BY x) c
+   WHERE q.id = c.quota_id;
+
+  FOR v_r IN SELECT q.id, q.plan_id, q.status, q.samples_planned + q.samples_carried_in - q.samples_obtained AS falta
+               FROM public.cl_plan_quotas q
+              WHERE q.id = ANY (v_q) AND q.status NOT IN ('pending','open')
+                AND q.samples_planned + q.samples_carried_in - q.samples_obtained > 0
+              ORDER BY q.id
+  LOOP
+    PERFORM public.cl_raise_alert(v_r.plan_id, v_r.id, 'quota_short_after_undo', 'high',
+      jsonb_build_object('delivery_id', p_d.id, 'quota_status', v_r.status, 'missing', v_r.falta));
+  END LOOP;
+  RETURN v_n;
+END $$;
+REVOKE ALL ON FUNCTION public.cl_delivery_undo_samples(public.cl_deliveries) FROM PUBLIC, anon, authenticated, service_role;
