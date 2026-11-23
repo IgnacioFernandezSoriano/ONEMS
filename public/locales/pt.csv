@@ -5423,6 +5423,22 @@ cl.error.cl_forbidden,Não tem permissão para fazer isto no Carrier Link.
 cl.error.cl_demand_testing_dry_run_only,Esta procura está em modo de teste e só permite uma simulação.
 cl.error.forbidden,Não tem permissão para fazer isto.
 cl.error.generic,Algo correu mal. Tente novamente.
+cl.error.cl_bad_control_totals,Os totais de controlo não são válidos.
+cl.error.cl_bad_period,O período da entrega não é válido.
+cl.error.cl_bad_request,O pedido está incompleto ou não é válido.
+cl.error.cl_cursor_mismatch,Outro processo está a carregar a entrega. Tente novamente dentro de um minuto.
+cl.error.cl_delivery_bad_transition,Esta mudança de estado da entrega não é permitida.
+cl.error.cl_delivery_immutable,Os dados que identificam uma entrega não podem ser alterados.
+cl.error.cl_delivery_not_found,Entrega não encontrada.
+cl.error.cl_delivery_not_loading,A entrega já não está a ser carregada.
+cl.error.cl_feed_not_found,Conector não encontrado.
+cl.error.cl_file_not_uploaded,Carregue o ficheiro antes de concluir a entrega.
+cl.error.cl_lease_lost,Outro processo assumiu esta entrega.
+cl.error.cl_no_active_plan,Nenhum plano ativo deste conector cobre este período.
+cl.error.cl_period_already_delivered,Este período já foi entregue.
+cl.error.cl_period_not_closed,O período ainda não terminou.
+cl.error.cl_period_not_in_calendar,O período não coincide com o calendário de entregas do conector.
+cl.error.cl_staging_not_empty,A entrega ainda está a ser processada.
 cl.select_account.title,Selecione uma conta
 cl.select_account.body,Escolha uma conta na barra superior para trabalhar com o Carrier Link.
 cl.samples.title,Amostras

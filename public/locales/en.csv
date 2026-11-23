@@ -5423,6 +5423,22 @@ cl.error.cl_forbidden,You do not have permission to do this in Carrier Link.
 cl.error.cl_demand_testing_dry_run_only,This demand is in testing mode and only allows a trial run.
 cl.error.forbidden,You do not have permission to do this.
 cl.error.generic,Something went wrong. Please try again.
+cl.error.cl_bad_control_totals,The control totals are not valid.
+cl.error.cl_bad_period,The delivery period is not valid.
+cl.error.cl_bad_request,The request is incomplete or not valid.
+cl.error.cl_cursor_mismatch,Another process is loading the delivery. Try again in a minute.
+cl.error.cl_delivery_bad_transition,This change of delivery status is not allowed.
+cl.error.cl_delivery_immutable,The data that identifies a delivery cannot be changed.
+cl.error.cl_delivery_not_found,Delivery not found.
+cl.error.cl_delivery_not_loading,The delivery is no longer being loaded.
+cl.error.cl_feed_not_found,Connector not found.
+cl.error.cl_file_not_uploaded,Upload the file before completing the delivery.
+cl.error.cl_lease_lost,Another process took over this delivery.
+cl.error.cl_no_active_plan,No active plan of this connector covers this period.
+cl.error.cl_period_already_delivered,This period has already been delivered.
+cl.error.cl_period_not_closed,The period has not ended yet.
+cl.error.cl_period_not_in_calendar,The period does not match the delivery calendar of the connector.
+cl.error.cl_staging_not_empty,The delivery is still being processed.
 cl.select_account.title,Select an account
 cl.select_account.body,Choose an account in the top bar to work with Carrier Link.
 cl.samples.title,Samples

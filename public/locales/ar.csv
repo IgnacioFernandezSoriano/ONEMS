@@ -5415,6 +5415,22 @@ cl.error.cl_forbidden,ليس لديك إذن للقيام بذلك في Carrier 
 cl.error.cl_demand_testing_dry_run_only,هذا الطلب في وضع الاختبار ويسمح بتشغيل تجريبي فقط.
 cl.error.forbidden,ليس لديك إذن للقيام بذلك.
 cl.error.generic,حدث خطأ ما. حاول مرة أخرى.
+cl.error.cl_bad_control_totals,إجماليات التحكم غير صالحة.
+cl.error.cl_bad_period,فترة التسليم غير صالحة.
+cl.error.cl_bad_request,الطلب غير مكتمل أو غير صالح.
+cl.error.cl_cursor_mismatch,تقوم عملية أخرى بتحميل التسليم. أعد المحاولة بعد دقيقة.
+cl.error.cl_delivery_bad_transition,هذا التغيير في حالة التسليم غير مسموح به.
+cl.error.cl_delivery_immutable,لا يمكن تغيير البيانات التي تعرّف التسليم.
+cl.error.cl_delivery_not_found,لم يتم العثور على التسليم.
+cl.error.cl_delivery_not_loading,لم يعد التسليم قيد التحميل.
+cl.error.cl_feed_not_found,لم يتم العثور على الموصل.
+cl.error.cl_file_not_uploaded,ارفع الملف قبل إكمال التسليم.
+cl.error.cl_lease_lost,تولّت عملية أخرى هذا التسليم.
+cl.error.cl_no_active_plan,لا توجد خطة نشطة لهذا الموصل تغطي هذه الفترة.
+cl.error.cl_period_already_delivered,تم تسليم هذه الفترة بالفعل.
+cl.error.cl_period_not_closed,لم تنته الفترة بعد.
+cl.error.cl_period_not_in_calendar,لا تتطابق الفترة مع تقويم التسليم الخاص بالموصل.
+cl.error.cl_staging_not_empty,لا يزال التسليم قيد المعالجة.
 cl.select_account.title,اختر حسابًا
 cl.select_account.body,اختر حسابًا من الشريط العلوي للعمل مع Carrier Link.
 cl.samples.title,العينات

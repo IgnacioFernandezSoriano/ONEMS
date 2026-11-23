@@ -5415,6 +5415,22 @@ cl.error.cl_forbidden,Vous n'avez pas l'autorisation de faire cela dans Carrier 
 cl.error.cl_demand_testing_dry_run_only,Cette demande est en mode test et n'autorise qu'une simulation.
 cl.error.forbidden,Vous n'avez pas l'autorisation de faire cela.
 cl.error.generic,Une erreur s'est produite. Veuillez réessayer.
+cl.error.cl_bad_control_totals,Les totaux de contrôle ne sont pas valides.
+cl.error.cl_bad_period,La période de livraison n'est pas valide.
+cl.error.cl_bad_request,La requête est incomplète ou non valide.
+cl.error.cl_cursor_mismatch,Un autre processus charge la livraison. Réessayez dans une minute.
+cl.error.cl_delivery_bad_transition,Ce changement de statut de la livraison n'est pas autorisé.
+cl.error.cl_delivery_immutable,Les données qui identifient une livraison ne peuvent pas être modifiées.
+cl.error.cl_delivery_not_found,Livraison introuvable.
+cl.error.cl_delivery_not_loading,La livraison n'est plus en cours de chargement.
+cl.error.cl_feed_not_found,Connecteur introuvable.
+cl.error.cl_file_not_uploaded,Téléversez le fichier avant de terminer la livraison.
+cl.error.cl_lease_lost,Un autre processus a pris en charge cette livraison.
+cl.error.cl_no_active_plan,Aucun plan actif de ce connecteur ne couvre cette période.
+cl.error.cl_period_already_delivered,Cette période a déjà été livrée.
+cl.error.cl_period_not_closed,La période n'est pas encore terminée.
+cl.error.cl_period_not_in_calendar,La période ne correspond pas au calendrier de livraison du connecteur.
+cl.error.cl_staging_not_empty,La livraison est encore en cours de traitement.
 cl.select_account.title,Sélectionnez un compte
 cl.select_account.body,Choisissez un compte dans la barre supérieure pour utiliser Carrier Link.
 cl.samples.title,Échantillons
