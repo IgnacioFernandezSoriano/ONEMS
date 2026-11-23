@@ -125,7 +125,7 @@ BEGIN
     PERFORM pg_temp.ok(NOT has_function_privilege('anon', f, 'EXECUTE'), f || ' anon sin EXECUTE');
     PERFORM pg_temp.ok(has_function_privilege('authenticated', f, 'EXECUTE'), f || ' authenticated EXECUTE');
   END LOOP;
-  FOREACH f IN ARRAY ARRAY['public.cl_manual_feed(uuid)', 'public.cl_manual_batch_status(uuid,uuid)'] LOOP
+  FOREACH f IN ARRAY ARRAY['public.cl_manual_authorize(uuid)', 'public.cl_manual_check_status(text)', 'public.cl_manual_batch_status(uuid,uuid)'] LOOP
     PERFORM pg_temp.ok(NOT has_function_privilege('authenticated', f, 'EXECUTE')
                    AND NOT has_function_privilege('anon', f, 'EXECUTE'), f || ' interna');
   END LOOP;
@@ -232,6 +232,7 @@ DECLARE r jsonb; s jsonb; f jsonb; v_batch uuid;
 BEGIN
   r := public.cl_manual_ingest('f0000000-0000-0000-0000-0000000000a1', pg_temp.payload());
   PERFORM pg_temp.ok(r->'needs_sampling' = 'true'::jsonb, 'needs_sampling: ' || r::text);
+  PERFORM pg_temp.ok(r->>'batch_status' = 'validated', 'batch_status validated');
   PERFORM pg_temp.ok(r->'ingest'->>'status' = 'validated' AND r->'ingest'->>'batch' IS NOT NULL, 'lote validado y guardado');
   PERFORM pg_temp.ok(NOT (r->'ingest' ? 'dry_run'), 'lote real (sin dry_run)');
   PERFORM pg_temp.ok(jsonb_array_length(r->'ingest'->'strata') = 1, 'un estrato en el resumen');
@@ -267,6 +268,7 @@ BEGIN
   r := public.cl_manual_ingest('f0000000-0000-0000-0000-0000000000a1', pg_temp.payload());
   PERFORM pg_temp.ok(r->'ingest' = current_setting('t.ingest')::jsonb, 'repetido: resumen guardado ' || r::text);
   PERFORM pg_temp.ok(r->'needs_sampling' = 'false'::jsonb, 'repetido: ya sorteado');
+  PERFORM pg_temp.ok(r->>'batch_status' = 'sampled', 'repetido: batch_status sampled ' || r::text);
   PERFORM pg_temp.ok(public.cl_manual_sample('f0000000-0000-0000-0000-0000000000a1', current_setting('t.batch')::uuid,
                      '91000000-0000-0000-0000-0000000000b1') = current_setting('t.sample')::jsonb, 'sorteo idempotente');
   PERFORM pg_temp.ok(public.cl_manual_finish('f0000000-0000-0000-0000-0000000000a1', current_setting('t.batch')::uuid)->>'status' = 'sampled', 'cierre idempotente');
@@ -332,6 +334,19 @@ BEGIN
   -- Un estrato que no es del lote: el error del sorteador.
   PERFORM pg_temp.ok(pg_temp.raises(format('SELECT public.cl_manual_sample(%L, %L, %L)', 'f0000000-0000-0000-0000-0000000000a1',
                      v_batch, '91000000-0000-0000-0000-0000000000b1')) LIKE '22023:%', 'estrato ajeno al lote');
+  PERFORM set_config('t.batch2', v_batch::text, false);
+END $$;
+RESET ROLE;
+
+-- 9. Lote repetido cuyo estado ya no es sorteable (p. ej. caducado): batch_status lo dice y no se sortea.
+UPDATE public.cl_batches SET status = 'expired' WHERE id = current_setting('t.batch2')::uuid;
+SET ROLE authenticated;
+SELECT pg_temp.as_user('93000000-0000-0000-0000-000000000093', 'authenticated');
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := public.cl_manual_ingest('f0000000-0000-0000-0000-0000000000a1', pg_temp.payload2());
+  PERFORM pg_temp.ok(r->>'batch_status' = 'expired' AND r->'needs_sampling' = 'false'::jsonb, 'caducado: ' || r::text);
 END $$;
 RESET ROLE;
 

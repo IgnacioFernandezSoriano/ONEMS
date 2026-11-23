@@ -11,6 +11,7 @@ import {
   runManualBatch,
   samplingTotals,
   progressPercent,
+  storedBatchMessageKey,
   type ManualBatchApi,
 } from '../carrierLink/manualBatch'
 
@@ -26,6 +27,7 @@ const ingestOk = (needs = true) => ({
     ],
   },
   needs_sampling: needs,
+  batch_status: needs ? 'validated' : 'sampled',
 })
 const run = (sid: string, req: number, sel: number) => ({
   batch_id: 'b', stratum_id: sid, samples_required: req, samples_selected: sel, candidates_valid: sel,
@@ -86,6 +88,7 @@ describe('parseManualIngest', () => {
     expect(r.strataIds).toEqual([S1, S2])
     expect(r.summary.status).toBe('validated')
     expect(r.summary.strata).toHaveLength(2)
+    expect(r.batchStatus).toBe('validated')
   })
   it('needs_sampling solo si la base lo dice y hay lote validado', () => {
     expect(parseManualIngest(ingestOk(false)).needsSampling).toBe(false)
@@ -137,8 +140,20 @@ describe('runManualBatch', () => {
     })
     const r = await runManualBatch(api, {})
     expect(calls).toEqual(['ingest', `sample:${S1}`, `sample:${S2}`])
-    expect(r).toMatchObject({ kind: 'failed', failed: { stratum_id: S2, errorKey: 'cl.error.cl_demand_not_open' } })
+    expect(r).toMatchObject({ kind: 'failed', failed: { stage: 'sample', stratum_id: S2, errorKey: 'cl.error.cl_demand_not_open' } })
     if (r.kind === 'failed') expect(r.sampling).toHaveLength(1)
+  })
+  it('error del cierre tras sortear todo: failed (stage finish) con lo sorteado', async () => {
+    const { api, calls } = fakeApi({
+      finish: async () => {
+        calls.push('finish')
+        throw { code: '22023', message: 'CL_FEED_PAUSED: the connector is paused' }
+      },
+    })
+    const r = await runManualBatch(api, {})
+    expect(calls).toEqual(['ingest', `sample:${S1}`, `sample:${S2}`, 'finish'])
+    expect(r).toMatchObject({ kind: 'failed', failed: { stage: 'finish', stratum_id: null, errorKey: 'cl.error.cl_feed_paused' } })
+    if (r.kind === 'failed') expect(r.sampling).toHaveLength(2)
   })
   it('error de la entrada: se lanza sin sortear', async () => {
     const { api, calls } = fakeApi({
@@ -149,6 +164,20 @@ describe('runManualBatch', () => {
     })
     await expect(runManualBatch(api, {})).rejects.toMatchObject({ message: expect.stringContaining('CL_FEED_PAUSED') })
     expect(calls).toEqual(['ingest'])
+  })
+})
+
+describe('storedBatchMessageKey', () => {
+  const stored = (batch_status: string | null, status = 'validated') =>
+    parseManualIngest({ ingest: { batch: 'b', status, strata: [] }, needs_sampling: false, batch_status })
+  it('mensaje según el estado guardado del lote', () => {
+    expect(storedBatchMessageKey(stored('sampled'))).toBe('cl.connectors.manual.already_loaded')
+    expect(storedBatchMessageKey(stored('rejected', 'rejected'))).toBe('cl.connectors.manual.rejected')
+    expect(storedBatchMessageKey(stored('undone'))).toBe('cl.connectors.manual.stored_undone')
+    expect(storedBatchMessageKey(stored('expired'))).toBe('cl.connectors.manual.stored_expired')
+    expect(storedBatchMessageKey(stored('received'))).toBe('cl.connectors.manual.stored_other')
+    expect(storedBatchMessageKey(stored(null, 'rejected'))).toBe('cl.connectors.manual.rejected')
+    expect(storedBatchMessageKey(stored(null))).toBe('cl.connectors.manual.stored_other')
   })
 })
 

@@ -5531,7 +5531,7 @@ cl.connectors.dry_run.help,Téléversez un fichier de lot au format JSON. Il est
 cl.connectors.dry_run.choose,Choisir un fichier JSON
 cl.connectors.dry_run.running,Vérification...
 cl.connectors.dry_run.bad_json,Le fichier n'est pas un JSON valide.
-cl.connectors.dry_run.replayed,Ce lot a déjà été testé : le résultat affiché est celui enregistré à ce moment-là.
+cl.connectors.dry_run.replayed,Ce lot (même batch_id) a déjà été chargé réellement : le résumé enregistré est affiché.
 cl.connectors.dry_run.validated,Le lot serait accepté. Résultat par strate :
 cl.connectors.dry_run.rejected,Le lot serait rejeté.
 cl.connectors.dry_run.bad_method,La méthode de sélection n'est pas celle attendue ({expected}).
@@ -5553,6 +5553,11 @@ cl.connectors.manual.ingesting,Chargement du lot...
 cl.connectors.manual.sampling,Tirage des échantillons : strate {done} sur {total}
 cl.connectors.manual.rejected,Le lot a été rejeté et reste enregistré comme rejeté.
 cl.connectors.manual.already_loaded,Ce lot avait déjà été chargé et ses échantillons tirés : rien n’a été modifié.
+cl.connectors.manual.do_not_leave,Ne fermez pas et ne rechargez pas cette page avant la fin du chargement.
+cl.connectors.manual.failed_finish,"Toutes les strates ont été tirées, mais la clôture du lot a échoué : {error}"
+cl.connectors.manual.stored_undone,"Ce lot avait déjà été chargé puis annulé : rien n’a été modifié. Pour le recharger, envoyez-le avec un autre batch_id."
+cl.connectors.manual.stored_expired,"Ce lot avait déjà été chargé, mais sa demande a expiré avant la fin du tirage : rien n’a été modifié."
+cl.connectors.manual.stored_other,Ce lot avait déjà été chargé (état : {status}) : rien n’a été modifié.
 cl.connectors.manual.required,Échantillons demandés
 cl.connectors.manual.selected,Échantillons retenus
 cl.connectors.manual.failed,Le tirage s’est arrêté à la strate {n} sur {total} : {error}

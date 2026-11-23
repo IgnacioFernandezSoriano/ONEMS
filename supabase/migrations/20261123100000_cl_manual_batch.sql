@@ -17,8 +17,13 @@
 -- conector: CL_BATCH_NOT_FOUND (el mismo error que un lote inexistente).
 -- cl_ingest_batch, cl_sample_stratum y cl_finish_batch siguen cerradas a authenticated: solo se llegan por aqui.
 
+--
+-- cl_manual_ingest devuelve { ingest, needs_sampling, batch_status }: batch_status es el estado ACTUAL del lote guardado
+-- (validated, sampled, rejected, undone, expired, received) para que la web explique un lote repetido.
+
 -- ================================================================ autorizacion comun (interna)
-CREATE OR REPLACE FUNCTION public.cl_manual_feed(p_feed_id uuid)
+-- Solo permisos: devuelve el conector o 42501 CL_FORBIDDEN (igual para ajeno, inexistente, NULL o sin Edit).
+CREATE OR REPLACE FUNCTION public.cl_manual_authorize(p_feed_id uuid)
  RETURNS public.cl_feeds
  LANGUAGE plpgsql
  STABLE
@@ -35,18 +40,28 @@ BEGIN
                  AND public.has_any_access(v_feed.account_id, 'edit', 'cl_connectors'))) THEN
     RAISE EXCEPTION 'CL_FORBIDDEN' USING ERRCODE = '42501';
   END IF;
-  -- Mismas reglas que la Edge Function para un lote real.
-  IF v_feed.status = 'paused' THEN
-    RAISE EXCEPTION 'CL_FEED_PAUSED: the connector is paused' USING ERRCODE = '22023';
-  END IF;
-  IF v_feed.status = 'testing' THEN
-    RAISE EXCEPTION 'CL_FEED_TESTING_DRY_RUN_ONLY: the connector is testing; only dry runs are accepted' USING ERRCODE = '22023';
-  END IF;
   RETURN v_feed;
 END $$;
-REVOKE ALL ON FUNCTION public.cl_manual_feed(uuid) FROM PUBLIC, anon, authenticated, service_role;
+REVOKE ALL ON FUNCTION public.cl_manual_authorize(uuid) FROM PUBLIC, anon, authenticated, service_role;
 
--- Lote del conector (via su demanda) que sigue pendiente de sorteo; NULL si no es de ese conector.
+-- Estado del conector: mismas reglas que la Edge Function para un lote real.
+CREATE OR REPLACE FUNCTION public.cl_manual_check_status(p_status text)
+ RETURNS void
+ LANGUAGE plpgsql
+ IMMUTABLE
+ SET search_path = public, extensions
+AS $$
+BEGIN
+  IF p_status = 'paused' THEN
+    RAISE EXCEPTION 'CL_FEED_PAUSED: the connector is paused' USING ERRCODE = '22023';
+  END IF;
+  IF p_status = 'testing' THEN
+    RAISE EXCEPTION 'CL_FEED_TESTING_DRY_RUN_ONLY: the connector is testing; only dry runs are accepted' USING ERRCODE = '22023';
+  END IF;
+END $$;
+REVOKE ALL ON FUNCTION public.cl_manual_check_status(text) FROM PUBLIC, anon, authenticated, service_role;
+
+-- Estado del lote si es de ese conector (via su demanda); NULL si no lo es o no existe.
 CREATE OR REPLACE FUNCTION public.cl_manual_batch_status(p_feed_id uuid, p_batch_id uuid)
  RETURNS text
  LANGUAGE sql
@@ -60,8 +75,8 @@ $$;
 REVOKE ALL ON FUNCTION public.cl_manual_batch_status(uuid, uuid) FROM PUBLIC, anon, authenticated, service_role;
 
 -- ================================================================ 1. entrada del lote
--- Devuelve { ingest: <resumen de cl_ingest_batch>, needs_sampling: bool }. needs_sampling es la misma condicion con la
--- que la Edge Function decide sortear: resumen 'validated' con lote y lote guardado de ESTE conector aun 'validated'.
+-- needs_sampling es la misma condicion con la que la Edge Function decide sortear: resumen 'validated' con lote y
+-- lote guardado de ESTE conector aun 'validated'.
 CREATE OR REPLACE FUNCTION public.cl_manual_ingest(p_feed_id uuid, p_payload jsonb)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -75,16 +90,10 @@ DECLARE
   v_rows   bigint;
   v_ingest jsonb;
   v_batch  uuid;
-  v_needs  boolean := false;
+  v_bstatus text;
 BEGIN
   -- Permisos antes que nada (sin oraculo de existencia ni del tamano del lote).
-  SELECT f.* INTO v_feed FROM public.cl_feeds f WHERE f.id = p_feed_id;
-  IF v_feed.id IS NULL
-     OR NOT (public.is_superadmin()
-             OR (v_feed.account_id = public.current_user_account_id()
-                 AND public.has_any_access(v_feed.account_id, 'edit', 'cl_connectors'))) THEN
-    RAISE EXCEPTION 'CL_FORBIDDEN' USING ERRCODE = '42501';
-  END IF;
+  v_feed := public.cl_manual_authorize(p_feed_id);
 
   -- Orden de la Edge Function: tamano, forma, numero de lecturas y, despues, estado del conector.
   IF pg_column_size(p_payload) > c_max_bytes THEN
@@ -101,19 +110,23 @@ BEGIN
     RAISE EXCEPTION 'CL_TOO_MANY_ROWS: % rows (max %)', v_rows, c_max_rows USING ERRCODE = '22023';
   END IF;
 
-  PERFORM public.cl_manual_feed(p_feed_id);   -- pausado / en prueba
+  PERFORM public.cl_manual_check_status(v_feed.status);
 
   v_ingest := public.cl_ingest_batch(p_feed_id, p_payload, false);
 
-  IF jsonb_typeof(v_ingest) = 'object' AND v_ingest->>'status' = 'validated' AND v_ingest->>'batch' IS NOT NULL THEN
+  IF jsonb_typeof(v_ingest) = 'object' AND v_ingest->>'batch' IS NOT NULL THEN
     BEGIN
       v_batch := (v_ingest->>'batch')::uuid;
     EXCEPTION WHEN invalid_text_representation THEN
       v_batch := NULL;
     END;
-    v_needs := v_batch IS NOT NULL AND public.cl_manual_batch_status(p_feed_id, v_batch) = 'validated';
+    IF v_batch IS NOT NULL THEN
+      v_bstatus := public.cl_manual_batch_status(p_feed_id, v_batch);
+    END IF;
   END IF;
-  RETURN jsonb_build_object('ingest', v_ingest, 'needs_sampling', v_needs);
+  RETURN jsonb_build_object('ingest', v_ingest,
+                            'needs_sampling', COALESCE(v_ingest->>'status' = 'validated' AND v_bstatus = 'validated', false),
+                            'batch_status', v_bstatus);
 END $$;
 REVOKE ALL ON FUNCTION public.cl_manual_ingest(uuid, jsonb) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.cl_manual_ingest(uuid, jsonb) TO authenticated;
@@ -126,7 +139,7 @@ CREATE OR REPLACE FUNCTION public.cl_manual_sample(p_feed_id uuid, p_batch_id uu
  SET search_path = public, extensions
 AS $$
 BEGIN
-  PERFORM public.cl_manual_feed(p_feed_id);
+  PERFORM public.cl_manual_check_status((public.cl_manual_authorize(p_feed_id)).status);
   IF public.cl_manual_batch_status(p_feed_id, p_batch_id) IS NULL THEN
     RAISE EXCEPTION 'CL_BATCH_NOT_FOUND: batch not found' USING ERRCODE = '22023';
   END IF;
@@ -143,7 +156,7 @@ CREATE OR REPLACE FUNCTION public.cl_manual_finish(p_feed_id uuid, p_batch_id uu
  SET search_path = public, extensions
 AS $$
 BEGIN
-  PERFORM public.cl_manual_feed(p_feed_id);
+  PERFORM public.cl_manual_check_status((public.cl_manual_authorize(p_feed_id)).status);
   IF public.cl_manual_batch_status(p_feed_id, p_batch_id) IS NULL THEN
     RAISE EXCEPTION 'CL_BATCH_NOT_FOUND: batch not found' USING ERRCODE = '22023';
   END IF;

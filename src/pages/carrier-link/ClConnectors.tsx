@@ -33,6 +33,7 @@ import {
   runManualBatch,
   samplingTotals,
   progressPercent,
+  storedBatchMessageKey,
   type ManualBatchOutcome,
 } from '@/lib/carrierLink/manualBatch'
 
@@ -1012,6 +1013,18 @@ function ManualBatchSection(props: { t: T; feed: ClFeed; cl: Cl }) {
   const fileRef = useRef<HTMLInputElement>(null)
   const allowed = canUploadManually(feed.status)
   const busy = phase.step === 'checking' || phase.step === 'running'
+  const running = phase.step === 'running'
+
+  // Mientras se carga, avisar antes de cerrar o recargar la pestaña (el lote quedaría a medio sortear).
+  useEffect(() => {
+    if (!running) return
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', onBeforeUnload)
+    return () => window.removeEventListener('beforeunload', onBeforeUnload)
+  }, [running])
 
   const onFile = async (file: File | undefined) => {
     if (!file) return
@@ -1132,6 +1145,7 @@ function ManualBatchSection(props: { t: T; feed: ClFeed; cl: Cl }) {
 
       {phase.step === 'running' && (
         <div className="space-y-1">
+          <p className="text-sm text-amber-700">{t('cl.connectors.manual.do_not_leave')}</p>
           <p className="text-sm text-gray-700">
             {phase.total === 0
               ? t('cl.connectors.manual.ingesting')
@@ -1177,11 +1191,12 @@ function ManualBatchResult(props: {
   )
 
   if (outcome.kind === 'stored') {
-    const rejected = outcome.ingest.summary.status === 'rejected'
+    const msgKey = storedBatchMessageKey(outcome.ingest)
+    const rejected = msgKey === 'cl.connectors.manual.rejected'
     return (
       <div className="space-y-2">
         <p className={`text-sm ${rejected ? 'text-red-600' : 'text-amber-700'}`}>
-          {rejected ? t('cl.connectors.manual.rejected') : t('cl.connectors.manual.already_loaded')}
+          {t(msgKey, { status: outcome.ingest.batchStatus ?? '-' })}
         </p>
         {rejected && outcome.ingest.summary.reason === 'selection_method' && (
           <p className="text-sm text-red-600">
@@ -1220,11 +1235,14 @@ function ManualBatchResult(props: {
   )
 
   if (outcome.kind === 'failed') {
-    const idx = outcome.ingest.strataIds.indexOf(outcome.failed.stratum_id) + 1
+    const { failed } = outcome
+    const idx = failed.stratum_id === null ? 0 : outcome.ingest.strataIds.indexOf(failed.stratum_id) + 1
     return (
       <div className="space-y-2">
         <p className="text-sm text-red-600">
-          {t('cl.connectors.manual.failed', { n: idx, total: outcome.ingest.strataIds.length, error: t(outcome.failed.errorKey) })}
+          {failed.stage === 'finish'
+            ? t('cl.connectors.manual.failed_finish', { error: t(failed.errorKey) })
+            : t('cl.connectors.manual.failed', { n: idx, total: outcome.ingest.strataIds.length, error: t(failed.errorKey) })}
         </p>
         <p className="text-sm text-gray-700">{t('cl.connectors.manual.failed_resume')}</p>
         {outcome.sampling.length > 0 && rows}

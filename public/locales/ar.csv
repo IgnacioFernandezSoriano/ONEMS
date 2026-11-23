@@ -5531,7 +5531,7 @@ cl.connectors.dry_run.help,حمّل ملف دفعة بتنسيق JSON. يُفح�
 cl.connectors.dry_run.choose,اختر ملف JSON
 cl.connectors.dry_run.running,جارٍ الفحص...
 cl.connectors.dry_run.bad_json,الملف ليس JSON صالحًا.
-cl.connectors.dry_run.replayed,سبق اختبار هذه الدفعة: النتيجة المعروضة هي المحفوظة في ذلك الوقت.
+cl.connectors.dry_run.replayed,تم تحميل هذه الدفعة (نفس batch_id) فعليًا من قبل: يُعرض الملخص المحفوظ.
 cl.connectors.dry_run.validated,ستُقبل الدفعة. النتيجة لكل طبقة:
 cl.connectors.dry_run.rejected,ستُرفض الدفعة.
 cl.connectors.dry_run.bad_method,طريقة الاختيار ليست المتوقعة ({expected}).
@@ -5553,6 +5553,11 @@ cl.connectors.manual.ingesting,جارٍ تحميل الدفعة...
 cl.connectors.manual.sampling,سحب العينات: الطبقة {done} من {total}
 cl.connectors.manual.rejected,تم رفض الدفعة وسُجّلت كدفعة مرفوضة.
 cl.connectors.manual.already_loaded,تم تحميل هذه الدفعة وسحب عيناتها من قبل: لم يتغير شيء.
+cl.connectors.manual.do_not_leave,لا تغلق هذه الصفحة ولا تُعد تحميلها حتى ينتهي التحميل.
+cl.connectors.manual.failed_finish,تم سحب جميع الطبقات، لكن إغلاق الدفعة فشل: {error}
+cl.connectors.manual.stored_undone,تم تحميل هذه الدفعة من قبل ثم أُلغيت: لم يتغير شيء. لإعادة تحميلها أرسلها بمعرّف batch_id آخر.
+cl.connectors.manual.stored_expired,تم تحميل هذه الدفعة من قبل، لكن طلبها انتهت صلاحيته قبل انتهاء السحب: لم يتغير شيء.
+cl.connectors.manual.stored_other,تم تحميل هذه الدفعة من قبل (الحالة: {status}): لم يتغير شيء.
 cl.connectors.manual.required,العينات المطلوبة
 cl.connectors.manual.selected,العينات المختارة
 cl.connectors.manual.failed,توقف السحب عند الطبقة {n} من {total}: {error}

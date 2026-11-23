@@ -5539,7 +5539,7 @@ cl.connectors.dry_run.help,Upload a batch file in JSON format. It is checked as 
 cl.connectors.dry_run.choose,Choose JSON file
 cl.connectors.dry_run.running,Checking...
 cl.connectors.dry_run.bad_json,The file is not valid JSON.
-cl.connectors.dry_run.replayed,This batch was already tested: the result shown is the one saved at that time.
+cl.connectors.dry_run.replayed,This batch (same batch_id) was already loaded for real: the stored summary is shown.
 cl.connectors.dry_run.validated,The batch would be accepted. Result per stratum:
 cl.connectors.dry_run.rejected,The batch would be rejected.
 cl.connectors.dry_run.bad_method,The selection method is not the expected one ({expected}).
@@ -5561,6 +5561,11 @@ cl.connectors.manual.ingesting,Loading the batch...
 cl.connectors.manual.sampling,Drawing samples: stratum {done} of {total}
 cl.connectors.manual.rejected,The batch was rejected and recorded as rejected.
 cl.connectors.manual.already_loaded,This batch had already been loaded and its samples drawn: nothing was changed.
+cl.connectors.manual.do_not_leave,Do not close or reload this page until the load finishes.
+cl.connectors.manual.failed_finish,"All strata were drawn, but closing the batch failed: {error}"
+cl.connectors.manual.stored_undone,This batch had already been loaded and was later undone: nothing was changed. Send it with a new batch_id to load it again.
+cl.connectors.manual.stored_expired,"This batch had already been loaded, but its demand expired before the draw finished: nothing was changed."
+cl.connectors.manual.stored_other,This batch had already been loaded (status: {status}): nothing was changed.
 cl.connectors.manual.required,Samples requested
 cl.connectors.manual.selected,Samples selected
 cl.connectors.manual.failed,The draw stopped at stratum {n} of {total}: {error}

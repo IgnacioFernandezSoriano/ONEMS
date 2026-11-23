@@ -35,11 +35,13 @@ export interface ManualIngest {
   batchId: string | null
   /** El lote guardado sigue pendiente de sorteo (nuevo, o uno que se quedó a medias). */
   needsSampling: boolean
+  /** Estado actual del lote guardado (validated, sampled, rejected, undone, expired, received) o null. */
+  batchStatus: string | null
   /** Estratos a sortear, en el orden del resumen (nunca del fichero), como summaryStratumIds de la Edge Function. */
   strataIds: string[]
 }
 
-/** Lee lo que devuelve cl_manual_ingest: { ingest, needs_sampling }. */
+/** Lee lo que devuelve cl_manual_ingest: { ingest, needs_sampling, batch_status }. */
 export function parseManualIngest(data: unknown): ManualIngest {
   const o = isObj(data) ? data : {}
   const ingest = isObj(o.ingest) ? o.ingest : {}
@@ -49,6 +51,7 @@ export function parseManualIngest(data: unknown): ManualIngest {
     summary: { ...summary, replayed: false },
     batchId: str(ingest.batch),
     needsSampling: o.needs_sampling === true && str(ingest.batch) !== null && summary.status === 'validated',
+    batchStatus: str(o.batch_status),
     strataIds: strata.filter(isObj).map((s) => str(s.stratum_id)).filter((s): s is string => s !== null),
   }
 }
@@ -99,12 +102,20 @@ export type ManualBatchOutcome =
   /** Lote no sorteable: rechazado (método de selección) o ya cargado antes (se muestra su resumen guardado). */
   | { kind: 'stored'; ingest: ManualIngest }
   | { kind: 'done'; ingest: ManualIngest; sampling: ManualSample[]; finish: ManualFinish }
-  /** Falló el sorteo de un estrato: lo ya sorteado queda guardado; volver a cargar el fichero lo retoma. */
-  | { kind: 'failed'; ingest: ManualIngest; sampling: ManualSample[]; failed: { stratum_id: string; errorKey: string } }
+  /**
+   * Falló el sorteo de un estrato (stage 'sample') o el cierre tras sortearlos todos (stage 'finish'): lo ya sorteado
+   * queda guardado; volver a cargar el fichero lo retoma.
+   */
+  | {
+      kind: 'failed'
+      ingest: ManualIngest
+      sampling: ManualSample[]
+      failed: { stage: 'sample' | 'finish'; stratum_id: string | null; errorKey: string }
+    }
 
 /**
  * Carga real de un lote, en el mismo orden que la Edge Function: entrada, sorteo de cada estrato del resumen (una
- * llamada por estrato) y cierre. Un error de la entrada o del cierre se lanza; el de un sorteo se devuelve como 'failed'.
+ * llamada por estrato) y cierre. Un error de la entrada se lanza; el de un sorteo o del cierre se devuelve como 'failed'.
  */
 export async function runManualBatch(
   api: ManualBatchApi,
@@ -120,12 +131,26 @@ export async function runManualBatch(
     try {
       sampling.push(parseManualSample(await api.sample(ingest.batchId, sid), sid))
     } catch (e) {
-      return { kind: 'failed', ingest, sampling, failed: { stratum_id: sid, errorKey: clErrorKey(e as ManualBatchError) } }
+      return { kind: 'failed', ingest, sampling, failed: { stage: 'sample', stratum_id: sid, errorKey: clErrorKey(e as ManualBatchError) } }
     }
     onProgress?.(sampling.length, total)
   }
-  const finish = parseManualFinish(await api.finish(ingest.batchId))
-  return { kind: 'done', ingest, sampling, finish }
+  try {
+    const finish = parseManualFinish(await api.finish(ingest.batchId))
+    return { kind: 'done', ingest, sampling, finish }
+  } catch (e) {
+    return { kind: 'failed', ingest, sampling, failed: { stage: 'finish', stratum_id: null, errorKey: clErrorKey(e as ManualBatchError) } }
+  }
+}
+
+/** Clave i18n del mensaje para un lote repetido que ya no se sortea, según su estado guardado. */
+export function storedBatchMessageKey(ingest: ManualIngest): string {
+  const st = ingest.batchStatus ?? (ingest.summary.status === 'rejected' ? 'rejected' : null)
+  if (st === 'sampled') return 'cl.connectors.manual.already_loaded'
+  if (st === 'rejected') return 'cl.connectors.manual.rejected'
+  if (st === 'undone') return 'cl.connectors.manual.stored_undone'
+  if (st === 'expired') return 'cl.connectors.manual.stored_expired'
+  return 'cl.connectors.manual.stored_other'
 }
 
 /** Totales del sorteo para el resumen final. */

@@ -5539,7 +5539,7 @@ cl.connectors.dry_run.help,Sube un fichero de lote en formato JSON. Se comprueba
 cl.connectors.dry_run.choose,Elegir fichero JSON
 cl.connectors.dry_run.running,Comprobando...
 cl.connectors.dry_run.bad_json,El fichero no es un JSON válido.
-cl.connectors.dry_run.replayed,Este lote ya se había ensayado: se muestra el resultado guardado entonces.
+cl.connectors.dry_run.replayed,Este lote (mismo batch_id) ya se había cargado de verdad: se muestra el resumen guardado.
 cl.connectors.dry_run.validated,El lote se aceptaría. Resultado por estrato:
 cl.connectors.dry_run.rejected,El lote se rechazaría.
 cl.connectors.dry_run.bad_method,El método de selección no es el esperado ({expected}).
@@ -5561,6 +5561,11 @@ cl.connectors.manual.ingesting,Cargando el lote...
 cl.connectors.manual.sampling,Sorteando muestras: estrato {done} de {total}
 cl.connectors.manual.rejected,El lote se ha rechazado y queda registrado como rechazado.
 cl.connectors.manual.already_loaded,Este lote ya se había cargado y sorteado: no se ha cambiado nada.
+cl.connectors.manual.do_not_leave,No cierres ni recargues esta página hasta que termine la carga.
+cl.connectors.manual.failed_finish,"Se han sorteado todos los estratos, pero el cierre del lote ha fallado: {error}"
+cl.connectors.manual.stored_undone,"Este lote ya se había cargado y después se deshizo: no se ha cambiado nada. Para volver a cargarlo, envíalo con otro batch_id."
+cl.connectors.manual.stored_expired,"Este lote ya se había cargado, pero su demanda caducó antes de terminar el sorteo: no se ha cambiado nada."
+cl.connectors.manual.stored_other,Este lote ya se había cargado (estado: {status}): no se ha cambiado nada.
 cl.connectors.manual.required,Muestras pedidas
 cl.connectors.manual.selected,Muestras elegidas
 cl.connectors.manual.failed,El sorteo se ha parado en el estrato {n} de {total}: {error}
