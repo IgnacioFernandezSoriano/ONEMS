@@ -268,8 +268,10 @@ BEGIN
       IF v_feed.feed_id IS NOT NULL THEN
         PERFORM 1 FROM public.cl_feeds f WHERE f.id = v_feed.feed_id FOR UPDATE SKIP LOCKED;
         IF NOT FOUND THEN v_skipped := v_skipped + 1; CONTINUE; END IF;
+        -- Solo las entregas reales en vuelo frenan la liquidacion (las de prueba no tocan cuotas).
         IF EXISTS (SELECT 1 FROM public.cl_deliveries d
-                    WHERE d.feed_id = v_feed.feed_id AND d.status IN ('received','processing','failed')) THEN
+                    WHERE d.feed_id = v_feed.feed_id AND NOT d.is_test
+                      AND d.status IN ('received','processing','failed')) THEN
           v_skipped := v_skipped + 1;
           CONTINUE;
         END IF;

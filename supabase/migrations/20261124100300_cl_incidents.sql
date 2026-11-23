@@ -504,8 +504,8 @@ BEGIN
        AND NOT EXISTS (SELECT 1 FROM public.cl_incidents x, jsonb_array_elements(x.periods) e
                         WHERE x.feed_id = p_feed.id AND x.incident_type = 'delivery_rejected'
                           AND (e->>'period_start')::date <= v_end AND (e->>'period_end')::date >= v_start)
-       AND NOT EXISTS (SELECT 1 FROM public.cl_deliveries d
-                        WHERE d.feed_id = p_feed.id AND d.status IN ('received','processing','failed')
+       AND NOT EXISTS (SELECT 1 FROM public.cl_deliveries d       -- una entrega de prueba nunca cubre el periodo
+                        WHERE d.feed_id = p_feed.id AND NOT d.is_test AND d.status IN ('received','processing','failed')
                           AND d.period_start <= v_end AND d.period_end >= v_start) THEN
       v_entries := v_entries || jsonb_build_array(jsonb_build_object('key', v_key, 'period_start', v_start,
                                                                      'period_end', v_end));
@@ -709,8 +709,10 @@ BEGIN
       IF v_feed.feed_id IS NOT NULL THEN
         SELECT f.* INTO v_f FROM public.cl_feeds f WHERE f.id = v_feed.feed_id FOR UPDATE SKIP LOCKED;
         IF NOT FOUND THEN v_skipped := v_skipped + 1; CONTINUE; END IF;
+        -- Solo las entregas reales en vuelo frenan la liquidacion (las de prueba no tocan cuotas).
         IF EXISTS (SELECT 1 FROM public.cl_deliveries d
-                    WHERE d.feed_id = v_feed.feed_id AND d.status IN ('received','processing','failed')) THEN
+                    WHERE d.feed_id = v_feed.feed_id AND NOT d.is_test
+                      AND d.status IN ('received','processing','failed')) THEN
           v_skipped := v_skipped + 1;
           CONTINUE;
         END IF;

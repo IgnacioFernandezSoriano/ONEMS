@@ -764,4 +764,30 @@ BEGIN
   PERFORM pg_temp.ok(public.cl_delivery_worker_claim('token-crash-5')->>'action' = 'idle', 'la base queda libre');
 END $$;
 
+
+-- Ronda 2 (tarea 6): una entrega de PRUEBA fallida o atascada de un periodo anterior no bloquea las reales del conector
+-- (el orden por periodo solo vale entre entregas reales); la de prueba sigue pudiendose procesar por su cuenta.
+DO $$
+DECLARE
+  f  constant text := 'f0000000-0000-0000-0000-0000000000a5';
+  tt constant uuid := 'de000000-0000-4000-8000-0000000000e1';
+  rr constant uuid := 'de000000-0000-4000-8000-0000000000e2';
+  c jsonb;
+BEGIN
+  PERFORM pg_temp.mk(tt::text, f, '2026-11-24', '2026-11-30', pg_temp.ship('T', 2, '2026-11-24 09:00', '2026-11-25 09:00'), true);
+  UPDATE public.cl_deliveries SET status = 'failed', error = 'CL_WORKER_ERROR', finished_at = now(),
+         progress = jsonb_build_object('attempts', 1, 'phase', 'failed')
+   WHERE id = tt;
+  PERFORM pg_temp.mk(rr::text, f, '2026-12-01', '2026-12-07', pg_temp.ship('R', 2, '2026-12-01 09:00', '2026-12-02 09:00'));
+  c := public.cl_delivery_worker_claim('token-r2-0001');
+  PERFORM pg_temp.ok(c->>'action' = 'load' AND (c->>'delivery_id')::uuid = rr,
+                     'la real posterior se toma aunque haya una prueba anterior fallida: ' || c::text);
+  PERFORM pg_temp.load(pg_temp.ship('R', 2, '2026-12-01 09:00', '2026-12-02 09:00'), 1000, 'token-r2-0001');
+  PERFORM pg_temp.run();
+  PERFORM pg_temp.ok((SELECT status FROM public.cl_deliveries WHERE id = rr) = 'processed', 'la real se procesa');
+  -- La prueba fallida se reintenta sola pasados 5 minutos (sigue siendo procesable).
+  c := public.cl_delivery_worker_claim('token-r2-0002', 120, now() + interval '10 minutes');
+  PERFORM pg_temp.ok(c->>'action' = 'load' AND (c->>'delivery_id')::uuid = tt, 'la prueba se reintenta: ' || c::text);
+END $$;
+
 ROLLBACK;

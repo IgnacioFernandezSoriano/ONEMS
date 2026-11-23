@@ -235,17 +235,19 @@ BEGIN
 
   SELECT d.id INTO v_id FROM public.cl_deliveries d WHERE d.status = 'processing';
   IF v_id IS NULL THEN
-    -- Por conector, estrictamente en orden de periodo: no se toma una entrega mientras otra anterior del mismo
-    -- conector siga recibida, en proceso o fallida (reintentable). Asi un reintento nunca llega despues de que una
-    -- entrega posterior haya liquidado la semana.
+    -- Por conector, estrictamente en orden de periodo: no se toma una entrega real mientras otra real anterior del
+    -- mismo conector siga recibida, en proceso o fallida (reintentable). Asi un reintento nunca llega despues de que
+    -- una entrega posterior haya liquidado la semana. Las entregas de prueba (is_test) no liquidan nada: no esperan a
+    -- ninguna y ninguna real las espera (una prueba fallida o atascada nunca bloquea las reales).
     SELECT d.id INTO v_id FROM public.cl_deliveries d
      WHERE (d.status = 'received'
             OR (d.status = 'failed' AND COALESCE((d.progress->>'attempts')::integer, 0) < 3
                 AND COALESCE(d.finished_at, d.received_at) < p_now - interval '5 minutes'
                 AND d.file_deleted_at IS NULL))
-       AND NOT EXISTS (SELECT 1 FROM public.cl_deliveries e
-                        WHERE e.feed_id = d.feed_id AND e.id <> d.id AND e.period_start < d.period_start
-                          AND e.status IN ('received','processing','failed'))
+       AND (d.is_test
+            OR NOT EXISTS (SELECT 1 FROM public.cl_deliveries e
+                            WHERE e.feed_id = d.feed_id AND e.id <> d.id AND e.period_start < d.period_start
+                              AND NOT e.is_test AND e.status IN ('received','processing','failed')))
      ORDER BY d.received_at, d.id
      LIMIT 1;
     IF v_id IS NULL THEN RETURN jsonb_build_object('action', 'idle'); END IF;

@@ -777,6 +777,9 @@ exactamente los mismos, pero las entregas se marcan `is_test: true`:
   entregar en prueba tantas veces como haga falta (con el mismo fichero, `POST /deliveries` devuelve la misma entrega
   de prueba; con otro fichero, abre otra) y, al pasar a Activo, ese periodo se entrega de nuevo como real y da sus
   muestras;
+- **nunca cubren un periodo**: si el conector ya está Activo, una entrega de prueba que quede (recibida, fallida o
+  atascada) no evita el aviso de *Entrega no recibida* del periodo, no retrasa el proceso de las entregas reales y no
+  impide liquidar las semanas; se procesa por su cuenta;
 - siguen exigiendo un periodo cerrado y del calendario (alineado con las entregas reales) y **un plan activo** que lo
   cubra (`422 CL_NO_ACTIVE_PLAN` si no): para certificar, ONEMS aplica el plan (o un plan de prueba) antes.
 

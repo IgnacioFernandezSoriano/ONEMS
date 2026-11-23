@@ -305,6 +305,34 @@ BEGIN
   PERFORM pg_temp.ok((pg_temp.inc(f3, 'unknown_data')).id IS NULL, 'punto sin lugar: cerrada sola: ' || h::text);
 END $$;
 
+-- ================================================================ 2c. una entrega de prueba nunca cubre un periodo (tarea 6, ronda 2)
+DO $$
+DECLARE
+  f9 constant uuid := 'f0000000-0000-0000-0000-0000000000e9';
+  h jsonb; v public.cl_incidents;
+BEGIN
+  INSERT INTO public.cl_feeds (id, account_id, carrier_id, name, status, emit_days, emit_hour) VALUES
+    (f9, 'a0000000-0000-0000-0000-000000000001', 'ca000000-0000-0000-0000-000000000001', 'Feed Nine', 'active', '{1,2,3,4,5,6,7}', 3);
+  INSERT INTO public.cl_plans (id, account_id, plan_name, carrier_id, product_id, total_samples, start_date, end_date, status, feed_id)
+  VALUES ('90000000-0000-0000-0000-0000000000e9', 'a0000000-0000-0000-0000-000000000001', 'P9',
+          'ca000000-0000-0000-0000-000000000001', 'cb000000-0000-0000-0000-000000000001', 10, '2026-11-10', '2026-11-30',
+          'active', f9);
+  -- Restos de pruebas del 10/11: una fallida y otra recibida. No cubren el periodo ni frenan al vigilante.
+  PERFORM pg_temp.dlv(f9, '2026-11-10', 901, 'failed', true);
+  PERFORM pg_temp.dlv(f9, '2026-11-10', 902, 'received', true);
+  h := public.cl_housekeeping('2026-11-12 08:00+03');
+  v := pg_temp.inc(f9, 'missing_delivery');
+  PERFORM pg_temp.ok(v.id IS NOT NULL AND jsonb_array_length(v.periods) = 1 AND v.periods->0->>'period_start' = '2026-11-10',
+                     'no recibida abierta pese a las entregas de prueba: ' || coalesce(v.periods::text, 'null') || ' ' || h::text);
+  PERFORM pg_temp.ok(pg_temp.nn(f9, 'missing_delivery', 'account_manager') = 1, 'un aviso a la cuenta');
+  h := public.cl_housekeeping('2026-11-12 08:30+03');
+  PERFORM pg_temp.ok(pg_temp.nn(f9, 'missing_delivery', 'account_manager') = 1
+                     AND jsonb_array_length((pg_temp.inc(f9, 'missing_delivery')).periods) = 1, 'repetido: un solo aviso');
+  -- Limpieza: fuera el conector de esta seccion (las demas secciones no lo esperan).
+  UPDATE public.cl_plans SET status = 'closed' WHERE id = '90000000-0000-0000-0000-0000000000e9';
+  UPDATE public.cl_feeds SET status = 'paused' WHERE id = f9;
+END $$;
+
 -- ================================================================ 3. delivery_rejected
 DO $$
 DECLARE
