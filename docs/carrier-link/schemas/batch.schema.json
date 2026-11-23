@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ONEMS Carrier Link - Lote",
+  "description": "Cuerpo de POST /batches. Restricciones no expresables aquí: stratum_id único dentro del lote; suma de filas de todos los estratos <= 5000; cuerpo <= 5 MB; valores de los campos item_id/place_ref/mode_ref <= 200 caracteres y de los campos adicionales <= 500.",
+  "type": "object",
+  "required": ["demand_id", "batch_id", "strata"],
+  "additionalProperties": false,
+  "properties": {
+    "demand_id": { "type": "string", "format": "uuid", "description": "demand_id de la demanda." },
+    "batch_id": {
+      "type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S",
+      "description": "Identificador del lote elegido por el conector; único por demanda (idempotencia)."
+    },
+    "strata": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/BatchStratum" } }
+  },
+  "$defs": {
+    "BatchStratum": {
+      "type": "object",
+      "required": ["stratum_id", "population_size", "selection_method", "rows"],
+      "additionalProperties": false,
+      "properties": {
+        "stratum_id": { "type": "string", "format": "uuid", "description": "stratum_id de la demanda." },
+        "population_size": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+        "selection_method": { "type": "string", "const": "uniform_random_within_stratum" },
+        "rows": { "type": "array", "maxItems": 5000, "items": { "$ref": "#/$defs/Row" } }
+      }
+    },
+    "Row": {
+      "type": "object",
+      "minProperties": 1,
+      "description": "Una lectura, con los nombres de campo del carrier (equivalencias). Solo campos acordados; valores escalares.",
+      "additionalProperties": { "type": ["string", "number", "boolean"] }
+    }
+  }
+}

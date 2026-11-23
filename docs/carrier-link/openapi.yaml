@@ -1,0 +1,213 @@
+openapi: 3.1.0
+info:
+  title: ONEMS Carrier Link - API del conector
+  version: "1.0.0"
+  description: |
+    API servidor a servidor entre el conector de un carrier y ONEMS.
+    Formato de demanda: schema_version 1.1. Ver docs/carrier-link/manual-conexion.es.md.
+    Todos los errores tienen la forma {"success": false, "error": "<CODIGO>[: detalle]"}.
+servers:
+  - url: https://{proyecto}.supabase.co/functions/v1/carrier-link-ingest
+    description: Dirección facilitada por el equipo de ONEMS.
+    variables:
+      proyecto:
+        default: proyecto
+        description: Identificador del proyecto (lo facilita ONEMS).
+security:
+  - apiKeyHeader: []
+  - bearerAuth: []
+paths:
+  /demands:
+    get:
+      operationId: listOpenDemands
+      summary: Demandas abiertas del conector de la clave
+      description: |
+        Devuelve como máximo 100 demandas en estado open, de la más antigua a la más reciente.
+        Cuenta para el límite de 30 peticiones por clave en 60 s.
+      responses:
+        "200":
+          description: Lista (posiblemente vacía) de demandas abiertas.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DemandsResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "405": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "500": { $ref: "#/components/responses/Error" }
+  /batches:
+    post:
+      operationId: submitBatch
+      summary: Envía (o ensaya) un lote de lecturas para una demanda
+      parameters:
+        - name: dry_run
+          in: query
+          required: false
+          description: |
+            Solo el valor literal "true" activa el ensayo (no se guarda nada).
+            Cualquier otro valor (1, TRUE, yes...) se trata como envío real.
+          schema: { type: string, enum: ["true"] }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "schemas/batch.schema.json" }
+      responses:
+        "200":
+          description: |
+            Lote procesado. Ensayo: solo ingest (batch null, dry_run true). Envío real: ingest + sampling + finish.
+            Reenvío de un batch_id ya guardado o lote rechazado por selection_method: solo ingest.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BatchResponse" }
+        "400": { $ref: "#/components/responses/ErrorOrFailed" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/ErrorOrFailed" }
+        "405": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/ErrorOrFailed" }
+        "413": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "500": { $ref: "#/components/responses/ErrorOrFailed" }
+components:
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: Clave del conector (onems_ + 48 hex). Tiene precedencia sobre Authorization.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: La misma clave en Authorization Bearer.
+  responses:
+    Error:
+      description: Error.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Unauthorized:
+      description: Clave ausente, incorrecta, desactivada o caducada.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    RateLimited:
+      description: Más de 30 peticiones con la clave en los últimos 60 s.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    ErrorOrFailed:
+      description: Error, o lote guardado con el sorteo interrumpido (failed).
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - { $ref: "#/components/schemas/Error" }
+              - { $ref: "#/components/schemas/BatchFailedResponse" }
+  schemas:
+    Demand:
+      $ref: "schemas/demand.schema.json"
+    DemandsResponse:
+      type: object
+      required: [demands]
+      properties:
+        demands:
+          type: array
+          maxItems: 100
+          items: { $ref: "schemas/demand.schema.json" }
+    Error:
+      type: object
+      required: [success, error]
+      properties:
+        success: { const: false }
+        error:
+          type: string
+          description: "Código (CL_... o texto) y, en errores de forma, ': detalle'."
+    IngestStratum:
+      type: object
+      required: [stratum_id, population_size, rows, candidates, candidates_valid, rejected, rows_rejected]
+      properties:
+        stratum_id: { type: string, format: uuid }
+        population_size: { type: integer, minimum: 0 }
+        rows: { type: integer, minimum: 0, description: Filas recibidas. }
+        candidates: { type: integer, minimum: 0, description: Envíos distintos recibidos. }
+        candidates_valid: { type: integer, minimum: 0 }
+        rejected:
+          type: object
+          description: Envíos no válidos por motivo.
+          additionalProperties: { type: integer, minimum: 1 }
+        rows_rejected:
+          type: object
+          description: Lecturas rechazadas por motivo.
+          additionalProperties: { type: integer, minimum: 1 }
+    IngestValidated:
+      type: object
+      required: [batch, status, strata]
+      properties:
+        batch:
+          type: ["string", "null"]
+          format: uuid
+          description: Identificador interno de ONEMS del lote; null en ensayo.
+        status: { const: validated }
+        dry_run: { const: true }
+        strata:
+          type: array
+          items: { $ref: "#/components/schemas/IngestStratum" }
+    IngestRejected:
+      type: object
+      required: [batch, status, reason, expected, strata]
+      properties:
+        batch: { type: ["string", "null"], format: uuid }
+        status: { const: rejected }
+        reason: { const: selection_method }
+        expected: { const: uniform_random_within_stratum }
+        dry_run: { const: true }
+        strata:
+          type: array
+          items:
+            type: object
+            required: [stratum_id]
+            properties:
+              stratum_id: { type: ["string", "null"] }
+              selection_method: { type: ["string", "null"] }
+    Ingest:
+      oneOf:
+        - { $ref: "#/components/schemas/IngestValidated" }
+        - { $ref: "#/components/schemas/IngestRejected" }
+    SamplingRun:
+      type: object
+      required: [batch_id, stratum_id, population_size, candidates_valid, samples_required, samples_selected, selected_item_ids, executed_at]
+      properties:
+        batch_id: { type: string, format: uuid, description: Identificador interno de ONEMS del lote. }
+        stratum_id: { type: string, format: uuid }
+        population_size: { type: integer, minimum: 0 }
+        candidates_valid: { type: integer, minimum: 0 }
+        samples_required: { type: integer, minimum: 0 }
+        samples_selected: { type: integer, minimum: 0 }
+        selected_item_ids: { type: array, items: { type: string } }
+        executed_at: { type: string, format: date-time }
+    Finish:
+      type: object
+      required: [batch_id, status, demand_status, strata_pending]
+      properties:
+        batch_id: { type: string, format: uuid }
+        status: { enum: [sampled, pending] }
+        demand_status: { enum: [open, fulfilled, partial, failed] }
+        strata_pending: { type: array, items: { type: string } }
+    BatchResponse:
+      type: object
+      required: [ingest]
+      properties:
+        ingest: { $ref: "#/components/schemas/Ingest" }
+        sampling: { type: array, items: { $ref: "#/components/schemas/SamplingRun" } }
+        finish: { $ref: "#/components/schemas/Finish" }
+    BatchFailedResponse:
+      type: object
+      required: [ingest, sampling, failed]
+      properties:
+        ingest: { $ref: "#/components/schemas/Ingest" }
+        sampling: { type: array, items: { $ref: "#/components/schemas/SamplingRun" } }
+        failed:
+          type: object
+          required: [stratum_id, code]
+          properties:
+            stratum_id: { type: string, format: uuid }
+            code: { type: string, description: "Código CL_..., o internal si fue un 500." }
