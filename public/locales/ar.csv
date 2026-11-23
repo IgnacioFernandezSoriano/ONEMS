@@ -5396,6 +5396,8 @@ cl.error.cl_demand_not_open,الطلب غير مفتوح، لذا لا يمكن 
 cl.error.cl_duplicate_quota,توجد حصة بالقيم نفسها في هذه الخطة.
 cl.error.cl_feed_carrier_mismatch,الموصل تابع لناقل مختلف عن ناقل الخطة.
 cl.error.cl_feed_paused,الموصل متوقف مؤقتًا. أعد تشغيله للمتابعة.
+cl.error.cl_body_too_large,حجم الملف أكبر من 5 ميغابايت. قسّمه إلى دفعات أصغر.
+cl.error.cl_feed_testing_dry_run_only,الموصل في وضع الاختبار: يقبل الدفعات التجريبية فقط. فعّله لتحميل دفعات حقيقية.
 cl.error.cl_mapping_incomplete,ربط الحقول غير مكتمل. أكمله قبل المتابعة.
 cl.error.cl_missing_points,تنقص نقاط البداية أو النهاية في بعض مدن الخطة.
 cl.error.cl_no_feed,لا يوجد موصل مرتبط بالخطة.
@@ -5539,6 +5541,30 @@ cl.connectors.dry_run.candidates,المرشحون
 cl.connectors.dry_run.valid,الصالحة
 cl.connectors.dry_run.rejected_by_reason,المرفوضة حسب السبب
 cl.connectors.dry_run.rows_rejected,القراءات المرفوضة
+cl.connectors.manual.title,تحميل دفعة
+cl.connectors.manual.help,لشركات النقل التي ترسل ملفات بدلاً من استخدام واجهة البرمجة. ارفع الدفعة بصيغة JSON: يتم التحقق منها أولاً، وبعد تأكيدك تُحمَّل فعليًا وتُسحب العينات، تمامًا كما لو وصلت عبر واجهة البرمجة.
+cl.connectors.manual.choose,اختر ملف الدفعة (JSON)
+cl.connectors.manual.only_active_testing,"الموصل في وضع الاختبار: استخدم ""اختبار دفعة"". يمكن تحميل الدفعات الحقيقية عندما يصبح نشطًا."
+cl.connectors.manual.only_active_paused,الموصل متوقف مؤقتًا: أعد تشغيله لتحميل الدفعات.
+cl.connectors.manual.confirm_text,سيتم تحميل هذه الدفعة فعليًا: تُحفظ قراءاتها وتُسحب عينات كل طبقة. لا يمكن تكرار ذلك (إعادة تحميل الدفعة نفسها تعرض نتيجتها فقط). هل تريد المتابعة؟
+cl.connectors.manual.confirm,تحميل الدفعة
+cl.connectors.manual.not_loadable,سيتم رفض هذه الدفعة: صحّح الملف قبل تحميله.
+cl.connectors.manual.ingesting,جارٍ تحميل الدفعة...
+cl.connectors.manual.sampling,سحب العينات: الطبقة {done} من {total}
+cl.connectors.manual.rejected,تم رفض الدفعة وسُجّلت كدفعة مرفوضة.
+cl.connectors.manual.already_loaded,تم تحميل هذه الدفعة وسحب عيناتها من قبل: لم يتغير شيء.
+cl.connectors.manual.required,العينات المطلوبة
+cl.connectors.manual.selected,العينات المختارة
+cl.connectors.manual.failed,توقف السحب عند الطبقة {n} من {total}: {error}
+cl.connectors.manual.failed_resume,تم حفظ الدفعة والطبقات التي سُحبت بالفعل. أعد المحاولة (أو حمّل الملف نفسه مرة أخرى) للمتابعة من حيث توقف.
+cl.connectors.manual.retry,إعادة المحاولة
+cl.connectors.manual.done,تم تحميل الدفعة: اختيرت {selected} عينة من أصل {required} مطلوبة.
+cl.connectors.manual.demand,حالة الطلب: {status}
+cl.connectors.manual.strata_pending,{count} من طبقات هذه الدفعة لم تُسحب عيناتها بعد.
+cl.connectors.manual.demand_status.open,مفتوح (لا تزال طبقات أخرى ستصل في دفعة أخرى)
+cl.connectors.manual.demand_status.fulfilled,مكتمل
+cl.connectors.manual.demand_status.partial,جزئي (عينات أقل من المطلوب)
+cl.connectors.manual.demand_status.failed,فاشل
 cl.reason.already_sampled,مأخوذة كعينة مسبقًا
 cl.reason.bad_timestamp,تاريخ أو وقت غير صحيح
 cl.reason.bad_value,قيمة غير صحيحة

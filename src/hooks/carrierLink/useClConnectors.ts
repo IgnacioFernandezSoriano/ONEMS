@@ -296,6 +296,18 @@ export function useClConnectors(accountId: string | null) {
     return data
   }
 
+  const callRpc = async (fn: string, args: Record<string, unknown>): Promise<unknown> => {
+    const { data, error: e } = await supabase.rpc(fn, args)
+    if (e) throw e
+    return data
+  }
+
+  /** Carga manual de un lote real (mismos pasos que la API del conector): entrada, sorteo por estrato y cierre. */
+  const manualIngest = (feedId: string, payload: unknown) => callRpc('cl_manual_ingest', { p_feed_id: feedId, p_payload: payload })
+  const manualSample = (feedId: string, batchId: string, stratumId: string) =>
+    callRpc('cl_manual_sample', { p_feed_id: feedId, p_batch_id: batchId, p_stratum_id: stratumId })
+  const manualFinish = (feedId: string, batchId: string) => callRpc('cl_manual_finish', { p_feed_id: feedId, p_batch_id: batchId })
+
   return {
     feeds,
     loading,
@@ -316,5 +328,8 @@ export function useClConnectors(accountId: string | null) {
     issueKey,
     deactivateKey,
     dryRun,
+    manualIngest,
+    manualSample,
+    manualFinish,
   }
 }

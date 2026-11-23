@@ -5404,6 +5404,8 @@ cl.error.cl_demand_not_open,"The demand is not open, so it cannot be changed."
 cl.error.cl_duplicate_quota,There is already a quota with the same values in this plan.
 cl.error.cl_feed_carrier_mismatch,The connector belongs to a different carrier than the plan.
 cl.error.cl_feed_paused,The connector is paused. Resume it to continue.
+cl.error.cl_body_too_large,The file is larger than 5 MB. Split it into smaller batches.
+cl.error.cl_feed_testing_dry_run_only,The connector is in testing: it only accepts test batches. Activate it to load real batches.
 cl.error.cl_mapping_incomplete,The field mapping is incomplete. Complete it before continuing.
 cl.error.cl_missing_points,Some cities in the plan are missing start or end points.
 cl.error.cl_no_feed,The plan has no connector assigned.
@@ -5547,6 +5549,30 @@ cl.connectors.dry_run.candidates,Candidates
 cl.connectors.dry_run.valid,Valid
 cl.connectors.dry_run.rejected_by_reason,Rejected by reason
 cl.connectors.dry_run.rows_rejected,Scans rejected
+cl.connectors.manual.title,Load batch
+cl.connectors.manual.help,"For carriers that send files instead of using the API. Upload the batch in JSON format: it is checked first, and after your confirmation it is loaded for real and the samples are drawn, exactly as if it had arrived through the API."
+cl.connectors.manual.choose,Choose batch file (JSON)
+cl.connectors.manual.only_active_testing,"The connector is in testing: use ""Test a batch"". Real batches can be loaded once it is active."
+cl.connectors.manual.only_active_paused,The connector is paused: resume it to load batches.
+cl.connectors.manual.confirm_text,This batch will be loaded for real: its scans are saved and the samples of each stratum are drawn. It cannot be repeated (loading the same batch again only shows its result). Continue?
+cl.connectors.manual.confirm,Load batch
+cl.connectors.manual.not_loadable,This batch would be rejected: fix the file before loading it.
+cl.connectors.manual.ingesting,Loading the batch...
+cl.connectors.manual.sampling,Drawing samples: stratum {done} of {total}
+cl.connectors.manual.rejected,The batch was rejected and recorded as rejected.
+cl.connectors.manual.already_loaded,This batch had already been loaded and its samples drawn: nothing was changed.
+cl.connectors.manual.required,Samples requested
+cl.connectors.manual.selected,Samples selected
+cl.connectors.manual.failed,The draw stopped at stratum {n} of {total}: {error}
+cl.connectors.manual.failed_resume,The batch and the strata already drawn are saved. Retry (or load the same file again) to continue where it stopped.
+cl.connectors.manual.retry,Retry
+cl.connectors.manual.done,Batch loaded: {selected} samples selected of {required} requested.
+cl.connectors.manual.demand,Demand status: {status}
+cl.connectors.manual.strata_pending,{count} strata of this batch still have no draw.
+cl.connectors.manual.demand_status.open,open (other strata are still to arrive in another batch)
+cl.connectors.manual.demand_status.fulfilled,fulfilled
+cl.connectors.manual.demand_status.partial,partial (fewer samples than requested)
+cl.connectors.manual.demand_status.failed,failed
 cl.reason.already_sampled,Already sampled
 cl.reason.bad_timestamp,Wrong date or time
 cl.reason.bad_value,Wrong value

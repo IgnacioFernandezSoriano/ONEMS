@@ -1,6 +1,7 @@
 /** Códigos de error que lanzan las funciones de Carrier Link (CL_*). Cada uno tiene `cl.error.<código en minúsculas>`. */
 export const CL_ERROR_CODES = [
   'CL_BAD_PAYLOAD',
+  'CL_BODY_TOO_LARGE',
   'CL_BATCH_ALREADY_UNDONE',
   'CL_BATCH_NOT_FOUND',
   'CL_BATCH_NOT_UNDOABLE',
@@ -10,6 +11,7 @@ export const CL_ERROR_CODES = [
   'CL_DUPLICATE_QUOTA',
   'CL_FEED_CARRIER_MISMATCH',
   'CL_FEED_PAUSED',
+  'CL_FEED_TESTING_DRY_RUN_ONLY',
   'CL_FORBIDDEN',
   'CL_MAPPING_INCOMPLETE',
   'CL_MISSING_POINTS',

@@ -5404,6 +5404,8 @@ cl.error.cl_demand_not_open,"A procura não está aberta, por isso não pode ser
 cl.error.cl_duplicate_quota,Já existe uma quota com os mesmos valores neste plano.
 cl.error.cl_feed_carrier_mismatch,O conector pertence a uma transportadora diferente da do plano.
 cl.error.cl_feed_paused,O conector está em pausa. Reative-o para continuar.
+cl.error.cl_body_too_large,O ficheiro tem mais de 5 MB. Divida-o em lotes mais pequenos.
+cl.error.cl_feed_testing_dry_run_only,O conector está em teste: só aceita ensaios. Ative-o para carregar lotes reais.
 cl.error.cl_mapping_incomplete,O mapeamento de campos está incompleto. Complete-o antes de continuar.
 cl.error.cl_missing_points,Faltam pontos de início ou de fim em algumas cidades do plano.
 cl.error.cl_no_feed,O plano não tem nenhum conector atribuído.
@@ -5547,6 +5549,30 @@ cl.connectors.dry_run.candidates,Candidatos
 cl.connectors.dry_run.valid,Válidos
 cl.connectors.dry_run.rejected_by_reason,Rejeitados por motivo
 cl.connectors.dry_run.rows_rejected,Leituras rejeitadas
+cl.connectors.manual.title,Carregar lote
+cl.connectors.manual.help,"Para transportadoras que enviam ficheiros em vez de usar a API. Carregue o lote em formato JSON: primeiro é verificado e, depois da sua confirmação, é carregado de verdade e as amostras são sorteadas, tal como se chegasse pela API."
+cl.connectors.manual.choose,Escolher ficheiro do lote (JSON)
+cl.connectors.manual.only_active_testing,"O conector está em teste: use ""Testar lote"". Os lotes reais podem ser carregados quando estiver ativo."
+cl.connectors.manual.only_active_paused,O conector está em pausa: reative-o para carregar lotes.
+cl.connectors.manual.confirm_text,Este lote será carregado de verdade: as suas leituras são guardadas e as amostras de cada estrato são sorteadas. Não se pode repetir (voltar a carregar o mesmo lote só mostra o seu resultado). Continuar?
+cl.connectors.manual.confirm,Carregar lote
+cl.connectors.manual.not_loadable,Este lote seria rejeitado: corrija o ficheiro antes de o carregar.
+cl.connectors.manual.ingesting,A carregar o lote...
+cl.connectors.manual.sampling,A sortear amostras: estrato {done} de {total}
+cl.connectors.manual.rejected,O lote foi rejeitado e fica registado como rejeitado.
+cl.connectors.manual.already_loaded,Este lote já tinha sido carregado e sorteado: nada foi alterado.
+cl.connectors.manual.required,Amostras pedidas
+cl.connectors.manual.selected,Amostras escolhidas
+cl.connectors.manual.failed,O sorteio parou no estrato {n} de {total}: {error}
+cl.connectors.manual.failed_resume,O lote e os estratos já sorteados ficam guardados. Tente de novo (ou volte a carregar o mesmo ficheiro) para continuar onde parou.
+cl.connectors.manual.retry,Tentar de novo
+cl.connectors.manual.done,Lote carregado: {selected} amostras escolhidas de {required} pedidas.
+cl.connectors.manual.demand,Estado do pedido: {status}
+cl.connectors.manual.strata_pending,Faltam sortear {count} estratos deste lote.
+cl.connectors.manual.demand_status.open,aberto (faltam estratos que chegarão noutro lote)
+cl.connectors.manual.demand_status.fulfilled,cumprido
+cl.connectors.manual.demand_status.partial,parcial (menos amostras do que as pedidas)
+cl.connectors.manual.demand_status.failed,falhado
 cl.reason.already_sampled,Já amostrado
 cl.reason.bad_timestamp,Data ou hora incorreta
 cl.reason.bad_value,Valor incorreto

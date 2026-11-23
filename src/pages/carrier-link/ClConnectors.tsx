@@ -27,6 +27,14 @@ import {
   type StandardField,
   type DryRunSummary,
 } from '@/lib/carrierLink/connectorConfig'
+import {
+  canUploadManually,
+  manualFileError,
+  runManualBatch,
+  samplingTotals,
+  progressPercent,
+  type ManualBatchOutcome,
+} from '@/lib/carrierLink/manualBatch'
 
 type T = (key: string, vars?: Record<string, unknown>, fallback?: string) => string
 
@@ -222,6 +230,7 @@ export function ClConnectors() {
               <ExtraFieldsSection key={`ef-${feed.carrier_id}`} t={t} carrierId={feed.carrier_id} cl={cl} feedId={feed.id} readOnly={readOnly} />
               <KeysSection key={`k-${feed.id}`} t={t} feedId={feed.id} cl={cl} canKeys={canKeys} />
               {!readOnly && <DryRunSection key={`dr-${feed.id}`} t={t} feedId={feed.id} cl={cl} />}
+              {!readOnly && <ManualBatchSection key={`mb-${feed.id}`} t={t} feed={feed} cl={cl} />}
             </>
           )}
         </>
@@ -911,10 +920,6 @@ function DryRunSection(props: { t: T; feedId: string; cl: Cl }) {
     }
   }
 
-  const reasonList = (items: { reason: string; count: number }[]) =>
-    items.length === 0 ? '-' : items.map((r) => `${t(`cl.reason.${r.reason}`, undefined, r.reason)}: ${r.count}`).join(', ')
-  const n = (v: number | null) => (v === null ? '-' : v)
-
   return (
     <Section title={t('cl.connectors.dry_run.title')} help={t('cl.connectors.dry_run.help')}>
       <div className="flex flex-wrap items-center gap-3">
@@ -932,47 +937,323 @@ function DryRunSection(props: { t: T; feedId: string; cl: Cl }) {
         {fileName && <span className="text-sm text-gray-600">{fileName}</span>}
       </div>
       {err && <p className="text-sm text-red-600">{t(err)}</p>}
-      {result && (
-        <div className="space-y-2">
-          {result.replayed && <p className="text-sm text-amber-700">{t('cl.connectors.dry_run.replayed')}</p>}
-          <p className="text-sm font-medium">
-            {dryRunOutcome(result) === 'accepted' ? t('cl.connectors.dry_run.validated') : t('cl.connectors.dry_run.rejected')}
-          </p>
-          {result.reason === 'selection_method' && (
-            <p className="text-sm text-red-600">{t('cl.connectors.dry_run.bad_method', { expected: result.expected ?? '' })}</p>
-          )}
-          {dryRunOutcome(result) === 'accepted' && result.strata.length > 0 && (
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
-                <thead className="bg-gray-50 text-gray-600">
-                  <tr>
-                    <th className="text-start px-3 py-2">{t('cl.connectors.dry_run.stratum')}</th>
-                    <th className="text-start px-3 py-2">{t('cl.connectors.dry_run.rows')}</th>
-                    <th className="text-start px-3 py-2">{t('cl.connectors.dry_run.candidates')}</th>
-                    <th className="text-start px-3 py-2">{t('cl.connectors.dry_run.valid')}</th>
-                    <th className="text-start px-3 py-2">{t('cl.connectors.dry_run.rejected_by_reason')}</th>
-                    <th className="text-start px-3 py-2">{t('cl.connectors.dry_run.rows_rejected')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.strata.map((s, i) => (
-                    <tr key={`${s.stratum_id}-${i}`} className="border-t border-gray-100">
-                      <td className="px-3 py-2 font-mono" title={s.stratum_id}>
-                        {i + 1}. {s.stratum_id.slice(0, 8)}
-                      </td>
-                      <td className="px-3 py-2">{n(s.rows)}</td>
-                      <td className="px-3 py-2">{n(s.candidates)}</td>
-                      <td className="px-3 py-2">{n(s.candidates_valid)}</td>
-                      <td className="px-3 py-2">{reasonList(s.rejected)}</td>
-                      <td className="px-3 py-2">{reasonList(s.rows_rejected)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+      {result && <DryRunResultView t={t} result={result} />}
+    </Section>
+  )
+}
+
+/** Resultado de un ensayo (lo usan "Probar lote" y la vista previa de "Cargar lote"). */
+function DryRunResultView(props: { t: T; result: DryRunSummary }) {
+  const { t, result } = props
+  const reasonList = (items: { reason: string; count: number }[]) =>
+    items.length === 0 ? '-' : items.map((r) => `${t(`cl.reason.${r.reason}`, undefined, r.reason)}: ${r.count}`).join(', ')
+  const n = (v: number | null) => (v === null ? '-' : v)
+  return (
+    <div className="space-y-2">
+      {result.replayed && <p className="text-sm text-amber-700">{t('cl.connectors.dry_run.replayed')}</p>}
+      <p className="text-sm font-medium">
+        {dryRunOutcome(result) === 'accepted' ? t('cl.connectors.dry_run.validated') : t('cl.connectors.dry_run.rejected')}
+      </p>
+      {result.reason === 'selection_method' && (
+        <p className="text-sm text-red-600">{t('cl.connectors.dry_run.bad_method', { expected: result.expected ?? '' })}</p>
+      )}
+      {dryRunOutcome(result) === 'accepted' && result.strata.length > 0 && (
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead className="bg-gray-50 text-gray-600">
+              <tr>
+                <th className="text-start px-3 py-2">{t('cl.connectors.dry_run.stratum')}</th>
+                <th className="text-start px-3 py-2">{t('cl.connectors.dry_run.rows')}</th>
+                <th className="text-start px-3 py-2">{t('cl.connectors.dry_run.candidates')}</th>
+                <th className="text-start px-3 py-2">{t('cl.connectors.dry_run.valid')}</th>
+                <th className="text-start px-3 py-2">{t('cl.connectors.dry_run.rejected_by_reason')}</th>
+                <th className="text-start px-3 py-2">{t('cl.connectors.dry_run.rows_rejected')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {result.strata.map((s, i) => (
+                <tr key={`${s.stratum_id}-${i}`} className="border-t border-gray-100">
+                  <td className="px-3 py-2 font-mono" title={s.stratum_id}>
+                    {i + 1}. {s.stratum_id.slice(0, 8)}
+                  </td>
+                  <td className="px-3 py-2">{n(s.rows)}</td>
+                  <td className="px-3 py-2">{n(s.candidates)}</td>
+                  <td className="px-3 py-2">{n(s.candidates_valid)}</td>
+                  <td className="px-3 py-2">{reasonList(s.rejected)}</td>
+                  <td className="px-3 py-2">{reasonList(s.rows_rejected)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
+
+type ManualPhase =
+  | { step: 'idle' }
+  | { step: 'checking' }
+  | { step: 'preview'; payload: unknown; preview: DryRunSummary }
+  | { step: 'running'; payload: unknown; done: number; total: number }
+  | { step: 'result'; payload: unknown; outcome: ManualBatchOutcome }
+
+const DEMAND_STATUSES = ['open', 'fulfilled', 'partial', 'failed']
+
+/**
+ * Carga manual de un lote real (carriers que mandan ficheros): fichero JSON → ensayo automático → confirmación en la
+ * página → entrada, sorteo por estrato (con progreso) y cierre, igual que la API del conector.
+ */
+function ManualBatchSection(props: { t: T; feed: ClFeed; cl: Cl }) {
+  const { t, feed, cl } = props
+  const [phase, setPhase] = useState<ManualPhase>({ step: 'idle' })
+  const [err, setErr] = useState<string | null>(null)
+  const [fileName, setFileName] = useState('')
+  const fileRef = useRef<HTMLInputElement>(null)
+  const allowed = canUploadManually(feed.status)
+  const busy = phase.step === 'checking' || phase.step === 'running'
+
+  const onFile = async (file: File | undefined) => {
+    if (!file) return
+    setFileName(file.name)
+    setErr(null)
+    setPhase({ step: 'idle' })
+    if (fileRef.current) fileRef.current.value = ''
+    let payload: unknown
+    try {
+      payload = JSON.parse(await file.text())
+    } catch {
+      setErr('cl.connectors.dry_run.bad_json')
+      return
+    }
+    const local = manualFileError(file.size, payload)
+    if (local) {
+      setErr(local)
+      return
+    }
+    setPhase({ step: 'checking' })
+    try {
+      const preview = parseDryRunResult(await cl.dryRun(feed.id, payload))
+      if (dryRunOutcome(preview) === 'unknown') {
+        setErr('cl.error.generic')
+        setPhase({ step: 'idle' })
+      } else setPhase({ step: 'preview', payload, preview })
+    } catch (e) {
+      setErr(clErrorKey(e as { message?: string; code?: string }))
+      setPhase({ step: 'idle' })
+    }
+  }
+
+  const load = async (payload: unknown) => {
+    setErr(null)
+    setPhase({ step: 'running', payload, done: 0, total: 0 })
+    try {
+      const outcome = await runManualBatch(
+        {
+          ingest: (p) => cl.manualIngest(feed.id, p),
+          sample: (b, s) => cl.manualSample(feed.id, b, s),
+          finish: (b) => cl.manualFinish(feed.id, b),
+        },
+        payload,
+        (done, total) => setPhase({ step: 'running', payload, done, total }),
+      )
+      setPhase({ step: 'result', payload, outcome })
+    } catch (e) {
+      setErr(clErrorKey(e as { message?: string; code?: string }))
+      setPhase({ step: 'idle' })
+    }
+    void cl.refetch()
+  }
+
+  const cancel = () => {
+    setPhase({ step: 'idle' })
+    setFileName('')
+    setErr(null)
+  }
+
+  const demandStatus = (s: string | null) =>
+    s && DEMAND_STATUSES.includes(s) ? t(`cl.connectors.manual.demand_status.${s}`) : (s ?? '-')
+
+  return (
+    <Section title={t('cl.connectors.manual.title')} help={t('cl.connectors.manual.help')}>
+      {!allowed && (
+        <p className="text-sm text-amber-700">
+          {feed.status === 'testing' ? t('cl.connectors.manual.only_active_testing') : t('cl.connectors.manual.only_active_paused')}
+        </p>
+      )}
+      {allowed && (
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".json,application/json"
+            className="hidden"
+            onChange={(e) => void onFile(e.target.files?.[0])}
+          />
+          <button
+            type="button"
+            disabled={busy || phase.step === 'preview'}
+            className={btnPrimary}
+            onClick={() => fileRef.current?.click()}
+          >
+            <Upload className="w-4 h-4" />
+            {phase.step === 'checking' ? t('cl.connectors.dry_run.running') : t('cl.connectors.manual.choose')}
+          </button>
+          {fileName && <span className="text-sm text-gray-600">{fileName}</span>}
+        </div>
+      )}
+      {err && <p className="text-sm text-red-600">{t(err)}</p>}
+
+      {phase.step === 'preview' && (
+        <div className="space-y-3">
+          <DryRunResultView t={t} result={phase.preview} />
+          {dryRunOutcome(phase.preview) === 'accepted' ? (
+            <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 space-y-2">
+              <p className="text-sm text-amber-900">{t('cl.connectors.manual.confirm_text')}</p>
+              <div className="flex flex-wrap gap-2">
+                <button type="button" className={btnSecondary} onClick={cancel}>
+                  {t('common.cancel')}
+                </button>
+                <button type="button" className={btnPrimary} onClick={() => void load(phase.payload)}>
+                  {t('cl.connectors.manual.confirm')}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-sm text-red-600">{t('cl.connectors.manual.not_loadable')}</p>
+              <button type="button" className={btnSecondary} onClick={cancel}>
+                {t('common.close')}
+              </button>
             </div>
           )}
         </div>
       )}
+
+      {phase.step === 'running' && (
+        <div className="space-y-1">
+          <p className="text-sm text-gray-700">
+            {phase.total === 0
+              ? t('cl.connectors.manual.ingesting')
+              : t('cl.connectors.manual.sampling', { done: phase.done, total: phase.total })}
+          </p>
+          <div
+            className="h-2 w-full rounded bg-gray-200 overflow-hidden"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={progressPercent(phase.done, phase.total)}
+          >
+            <div className="h-full bg-blue-600 transition-all" style={{ width: `${progressPercent(phase.done, phase.total)}%` }} />
+          </div>
+        </div>
+      )}
+
+      {phase.step === 'result' && (
+        <ManualBatchResult
+          t={t}
+          outcome={phase.outcome}
+          demandStatus={demandStatus}
+          onRetry={() => void load(phase.payload)}
+          onClose={cancel}
+        />
+      )}
     </Section>
+  )
+}
+
+function ManualBatchResult(props: {
+  t: T
+  outcome: ManualBatchOutcome
+  demandStatus: (s: string | null) => string
+  onRetry: () => void
+  onClose: () => void
+}) {
+  const { t, outcome, demandStatus, onRetry, onClose } = props
+  const close = (
+    <button type="button" className={btnSecondary} onClick={onClose}>
+      {t('common.close')}
+    </button>
+  )
+
+  if (outcome.kind === 'stored') {
+    const rejected = outcome.ingest.summary.status === 'rejected'
+    return (
+      <div className="space-y-2">
+        <p className={`text-sm ${rejected ? 'text-red-600' : 'text-amber-700'}`}>
+          {rejected ? t('cl.connectors.manual.rejected') : t('cl.connectors.manual.already_loaded')}
+        </p>
+        {rejected && outcome.ingest.summary.reason === 'selection_method' && (
+          <p className="text-sm text-red-600">
+            {t('cl.connectors.dry_run.bad_method', { expected: outcome.ingest.summary.expected ?? '' })}
+          </p>
+        )}
+        {close}
+      </div>
+    )
+  }
+
+  const totals = samplingTotals(outcome.sampling)
+  const rows = (
+    <div className="overflow-x-auto">
+      <table className="min-w-full text-sm">
+        <thead className="bg-gray-50 text-gray-600">
+          <tr>
+            <th className="text-start px-3 py-2">{t('cl.connectors.dry_run.stratum')}</th>
+            <th className="text-start px-3 py-2">{t('cl.connectors.manual.required')}</th>
+            <th className="text-start px-3 py-2">{t('cl.connectors.manual.selected')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {outcome.sampling.map((s, i) => (
+            <tr key={`${s.stratum_id}-${i}`} className="border-t border-gray-100">
+              <td className="px-3 py-2 font-mono" title={s.stratum_id}>
+                {i + 1}. {s.stratum_id.slice(0, 8)}
+              </td>
+              <td className="px-3 py-2">{s.samples_required ?? '-'}</td>
+              <td className="px-3 py-2">{s.samples_selected ?? '-'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+
+  if (outcome.kind === 'failed') {
+    const idx = outcome.ingest.strataIds.indexOf(outcome.failed.stratum_id) + 1
+    return (
+      <div className="space-y-2">
+        <p className="text-sm text-red-600">
+          {t('cl.connectors.manual.failed', { n: idx, total: outcome.ingest.strataIds.length, error: t(outcome.failed.errorKey) })}
+        </p>
+        <p className="text-sm text-gray-700">{t('cl.connectors.manual.failed_resume')}</p>
+        {outcome.sampling.length > 0 && rows}
+        <div className="flex flex-wrap gap-2">
+          {close}
+          <button type="button" className={btnPrimary} onClick={onRetry}>
+            {t('cl.connectors.manual.retry')}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-2">
+      <p className="text-sm font-medium text-green-700">
+        <CheckCircle className="inline w-4 h-4 me-1" />
+        {t('cl.connectors.manual.done', { selected: totals.selected, required: totals.required })}
+      </p>
+      <p className="text-sm text-gray-700">
+        {t('cl.connectors.manual.demand', { status: demandStatus(outcome.finish.demand_status) })}
+      </p>
+      {outcome.finish.status === 'pending' && (
+        <p className="text-sm text-amber-700">
+          {t('cl.connectors.manual.strata_pending', { count: outcome.finish.strata_pending.length })}
+        </p>
+      )}
+      {rows}
+      {close}
+    </div>
   )
 }

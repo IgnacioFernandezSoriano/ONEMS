@@ -5396,6 +5396,8 @@ cl.error.cl_demand_not_open,La demande n'est pas ouverte et ne peut donc pas êt
 cl.error.cl_duplicate_quota,Un quota avec les mêmes valeurs existe déjà dans ce plan.
 cl.error.cl_feed_carrier_mismatch,Le connecteur appartient à un autre transporteur que celui du plan.
 cl.error.cl_feed_paused,Le connecteur est en pause. Réactivez-le pour continuer.
+cl.error.cl_body_too_large,Le fichier dépasse 5 Mo. Divisez-le en lots plus petits.
+cl.error.cl_feed_testing_dry_run_only,Le connecteur est en test : il n’accepte que des essais. Activez-le pour charger des lots réels.
 cl.error.cl_mapping_incomplete,La correspondance des champs est incomplète. Complétez-la avant de continuer.
 cl.error.cl_missing_points,Il manque des points de départ ou d'arrivée pour certaines villes du plan.
 cl.error.cl_no_feed,Aucun connecteur n'est associé au plan.
@@ -5539,6 +5541,30 @@ cl.connectors.dry_run.candidates,Candidats
 cl.connectors.dry_run.valid,Valides
 cl.connectors.dry_run.rejected_by_reason,Rejetés par motif
 cl.connectors.dry_run.rows_rejected,Lectures rejetées
+cl.connectors.manual.title,Charger un lot
+cl.connectors.manual.help,"Pour les transporteurs qui envoient des fichiers au lieu d’utiliser l’API. Téléversez le lot au format JSON : il est d’abord vérifié puis, après votre confirmation, chargé réellement et les échantillons sont tirés, comme s’il arrivait par l’API."
+cl.connectors.manual.choose,Choisir le fichier du lot (JSON)
+cl.connectors.manual.only_active_testing,Le connecteur est en test : utilisez « Tester un lot ». Les lots réels pourront être chargés quand il sera actif.
+cl.connectors.manual.only_active_paused,Le connecteur est en pause : réactivez-le pour charger des lots.
+cl.connectors.manual.confirm_text,Ce lot sera chargé réellement : ses lectures sont enregistrées et les échantillons de chaque strate sont tirés. Il ne peut pas être répété (recharger le même lot ne fait qu’afficher son résultat). Continuer ?
+cl.connectors.manual.confirm,Charger le lot
+cl.connectors.manual.not_loadable,Ce lot serait rejeté : corrigez le fichier avant de le charger.
+cl.connectors.manual.ingesting,Chargement du lot...
+cl.connectors.manual.sampling,Tirage des échantillons : strate {done} sur {total}
+cl.connectors.manual.rejected,Le lot a été rejeté et reste enregistré comme rejeté.
+cl.connectors.manual.already_loaded,Ce lot avait déjà été chargé et ses échantillons tirés : rien n’a été modifié.
+cl.connectors.manual.required,Échantillons demandés
+cl.connectors.manual.selected,Échantillons retenus
+cl.connectors.manual.failed,Le tirage s’est arrêté à la strate {n} sur {total} : {error}
+cl.connectors.manual.failed_resume,Le lot et les strates déjà tirées sont enregistrés. Réessayez (ou rechargez le même fichier) pour reprendre là où il s’est arrêté.
+cl.connectors.manual.retry,Réessayer
+cl.connectors.manual.done,Lot chargé : {selected} échantillons retenus sur {required} demandés.
+cl.connectors.manual.demand,État de la demande : {status}
+cl.connectors.manual.strata_pending,{count} strates de ce lot n’ont pas encore de tirage.
+cl.connectors.manual.demand_status.open,ouverte (d’autres strates doivent arriver dans un autre lot)
+cl.connectors.manual.demand_status.fulfilled,satisfaite
+cl.connectors.manual.demand_status.partial,partielle (moins d’échantillons que demandé)
+cl.connectors.manual.demand_status.failed,échouée
 cl.reason.already_sampled,Déjà échantillonné
 cl.reason.bad_timestamp,Date ou heure incorrecte
 cl.reason.bad_value,Valeur incorrecte
