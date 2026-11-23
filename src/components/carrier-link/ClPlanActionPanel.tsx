@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AlertTriangle, Loader2 } from 'lucide-react'
 import { useTranslation } from '@/hooks/useTranslation'
 import { clErrorKey } from '@/lib/carrierLink/clErrors'
@@ -40,6 +40,8 @@ export function ClPlanActionPanel({ plan, action, cityName, quotaCount, missingP
   const [checks, setChecks] = useState<Checks | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [running, setRunning] = useState(false)
+  const confirmRef = useRef<HTMLButtonElement | null>(null)
+  const focused = useRef(false)
 
   // Antes de activar: cuotas guardadas, puntos que faltan y rutas sin estándar.
   useEffect(() => {
@@ -70,6 +72,15 @@ export function ClPlanActionPanel({ plan, action, cityName, quotaCount, missingP
     onClose({ kind: 'info', key: action === 'activate' ? 'cl.generator.activated' : 'cl.generator.deleted', vars: { name: plan.plan_name } })
   }
 
+  // Foco en el botón de confirmar en cuanto esté disponible (tras cargar las comprobaciones al activar).
+  const confirmReady = action === 'delete' || (!!checks && !!plan.feed_id && checks.quotaCount > 0 && checks.missingPoints.length === 0)
+  useEffect(() => {
+    if (confirmReady && !focused.current) {
+      focused.current = true
+      confirmRef.current?.focus()
+    }
+  }, [confirmReady])
+
   if (action === 'delete') {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 p-4 space-y-3">
@@ -78,7 +89,7 @@ export function ClPlanActionPanel({ plan, action, cityName, quotaCount, missingP
           <button type="button" onClick={() => onClose()} disabled={running} className={btnSecondary}>
             {t('common.cancel')}
           </button>
-          <button type="button" onClick={() => void run()} disabled={running} className={btnDanger}>
+          <button ref={confirmRef} type="button" onClick={() => void run()} disabled={running} className={btnDanger}>
             {running && <Loader2 className="w-4 h-4 animate-spin" />}
             {t('allocation_generator.delete')}
           </button>
@@ -137,6 +148,7 @@ export function ClPlanActionPanel({ plan, action, cityName, quotaCount, missingP
           {t('common.cancel')}
         </button>
         <button
+          ref={confirmRef}
           type="button"
           onClick={() => void run()}
           disabled={running || blocked}

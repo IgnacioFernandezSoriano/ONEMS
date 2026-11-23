@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { useAllocationPlans } from '@/hooks/useAllocationPlans'
 import { useAppliedAllocationPlans } from '@/hooks/useAppliedAllocationPlans'
 import { AllocationPlanGeneratorForm } from '@/components/allocation-plans/AllocationPlanGeneratorForm'
@@ -71,6 +71,16 @@ export function AllocationPlanGenerator() {
   const [capture, setCapture] = useState<Capture>('panelists')
   const [clAction, setClAction] = useState<{ plan: ClPlan; action: ClPlanAction } | null>(null)
   const [clMessage, setClMessage] = useState<{ kind: 'error' | 'info'; key: string; vars?: Record<string, string | number> } | null>(null)
+  const clPanelRef = useRef<HTMLDivElement | null>(null)
+  const clMessageRef = useRef<HTMLParagraphElement | null>(null)
+  // El panel de confirmación sale bajo la fila del plan: traerlo a la vista al abrirse.
+  useEffect(() => {
+    if (clAction) clPanelRef.current?.scrollIntoView({ block: 'nearest' })
+  }, [clAction])
+  // Y el resultado (éxito o error) también, al terminar la acción.
+  useEffect(() => {
+    if (clMessage) clMessageRef.current?.scrollIntoView({ block: 'nearest' })
+  }, [clMessage])
   // Aplicar/Eliminar de un plan de Carrier Link: como los de panelistas (no en modo consulta) y con Edit en cl_plans.
   const clCanAct = clOn && !readOnly && canEdit('cl_plans')
   const clGenerated = clOn ? clGeneratedPlans(cl.plans) : []
@@ -374,27 +384,9 @@ export function AllocationPlanGenerator() {
           <div className="p-6">
             <h2 className="text-lg font-medium mb-4">{t('allocation_generator.generated_plans_title')}</h2>
             {clOn && clMessage && (
-              <p className={`mb-4 text-sm ${clMessage.kind === 'error' ? 'text-red-600' : 'text-green-700'}`}>
+              <p ref={clMessageRef} className={`mb-4 text-sm ${clMessage.kind === 'error' ? 'text-red-600' : 'text-green-700'}`}>
                 {t(clMessage.key, clMessage.vars)}
               </p>
-            )}
-            {clCanAct && clAction && (
-              <div className="mb-4">
-                <ClPlanActionPanel
-                  plan={clAction.plan}
-                  action={clAction.action}
-                  cityName={cl.cityName}
-                  quotaCount={cl.quotaCount}
-                  missingPoints={cl.missingPoints}
-                  missingStandards={cl.missingStandards}
-                  activate={cl.activate}
-                  remove={cl.remove}
-                  onClose={(m) => {
-                    setClAction(null)
-                    if (m) setClMessage(m)
-                  }}
-                />
-              </div>
             )}
             {generatedPlans.length + clGenerated.length === 0 ? (
               <div className="text-gray-500 text-center py-8">{t('allocation_generator.no_generated_plans')}</div>
@@ -478,7 +470,8 @@ export function AllocationPlanGenerator() {
                       </tr>
                     ))}
                     {clGenerated.map((plan) => (
-                      <tr key={`cl-${plan.id}`}>
+                      <Fragment key={`cl-${plan.id}`}>
+                      <tr>
                         <td className="px-6 py-4">{plan.plan_name}</td>
                         <td className="px-6 py-4">{plan.carrier_name}</td>
                         <td className="px-6 py-4">{plan.product_label}</td>
@@ -521,6 +514,29 @@ export function AllocationPlanGenerator() {
                           </div>
                         </td>
                       </tr>
+                    {clCanAct && clAction?.plan.id === plan.id && (
+                      <tr key={`cl-panel-${plan.id}`}>
+                        <td colSpan={100} className="px-6 py-4 bg-gray-50">
+                          <div ref={clPanelRef}>
+                <ClPlanActionPanel
+                  plan={clAction.plan}
+                  action={clAction.action}
+                  cityName={cl.cityName}
+                  quotaCount={cl.quotaCount}
+                  missingPoints={cl.missingPoints}
+                  missingStandards={cl.missingStandards}
+                  activate={cl.activate}
+                  remove={cl.remove}
+                  onClose={(m) => {
+                    setClAction(null)
+                    if (m) setClMessage(m)
+                  }}
+                />
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                      </Fragment>
                     ))}
                   </tbody>
                 </table>
