@@ -46,6 +46,14 @@ import { useIncidentAttention } from '../../lib/hooks/useIncidentAttention'
 import { useDeferredSamples } from '../../hooks/useDeferredSamples'
 import { usePermissions } from '../../contexts/PermissionsContext'
 import { canAccess, routeAccess, type RouteAccess } from '../../lib/access'
+import { visibleEntries } from '../../lib/menuHeadings'
+import { isCarrierLinkEnabled } from '@/lib/featureFlags'
+import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
+import { useClCaptureCarriers } from '@/hooks/carrierLink/useClPlanRecords'
+import { carrierLinkMenuVisible, clMenuCarrierScope } from '@/lib/carrierLink/planRecords'
+
+// Carrier Link solo en DEV: fuera de DEV sus enlaces (y con ellos sus subencabezados) no se muestran.
+const carrierLinkOn = isCarrierLinkEnabled()
 
 interface MenuItem {
   path: string
@@ -55,11 +63,17 @@ interface MenuItem {
   /** Opción de la matriz de la cuenta (ROUTE_OPTION); los grupos con hijos no llevan: se ven si algún hijo se ve. */
   option?: RouteAccess
   children?: MenuItem[]
-  module?: 'e2e' | 'diagnosis' | 'carrier_link'
+  module?: 'e2e' | 'diagnosis'
   external?: boolean
+  /** Subencabezado de submenú: etiqueta pequeña (no enlace) que agrupa los enlaces siguientes. */
+  heading?: boolean
+  /** Subencabezado con el color de acento de Carrier Link. */
+  accent?: boolean
 }
 
 interface MenuGroup {
+  /** Identificador estable para filtrar por pestaña (la etiqueta va traducida). */
+  id?: 'INCIDENTS'
   label: string
   items: MenuItem[]
 }
@@ -69,6 +83,13 @@ export function Sidebar() {
   const { selectedAccountId, setSelectedAccountId, myAccounts, switchActiveAccount } = useAccount()
   const { canView, canManageAccess, loading: permissionsLoading } = usePermissions()
   const isSuperadmin = profile?.role === 'superadmin'
+  // En DEV, los enlaces de Carrier Link solo si la cuenta elegida (superadmin con "todas": alguna) tiene un carrier con
+  // captura carrier_link o both. Con el flag apagado (producción) no se consulta nada y no se muestran.
+  const effectiveAccountId = useEffectiveAccountId()
+  const clMenuCarriers = useClCaptureCarriers(
+    clMenuCarrierScope({ flagOn: carrierLinkOn, isSuperadmin, accountId: effectiveAccountId }),
+  )
+  const clMenuOn = carrierLinkMenuVisible({ flagOn: carrierLinkOn, carriers: clMenuCarriers })
   const [switchingAccount, setSwitchingAccount] = useState(false)
   const [switchError, setSwitchError] = useState(false)
   const location = useLocation()
@@ -89,28 +110,18 @@ export function Sidebar() {
   const [isHovered, setIsHovered] = useState(false)
   const [accounts, setAccounts] = useState<Array<{ id: string; name: string }>>([])
   const [accountName, setAccountName] = useState<string>('')
-  const [moduleFilter, setModuleFilter] = useState<'all' | 'e2e' | 'diagnosis' | 'carrier_link'>('e2e')
+  const [moduleFilter, setModuleFilter] = useState<'all' | 'e2e' | 'diagnosis'>('e2e')
 
   // Handle module filter change with auto-expand
-  const handleModuleFilterChange = (filter: 'all' | 'e2e' | 'diagnosis' | 'carrier_link') => {
+  const handleModuleFilterChange = (filter: 'all' | 'e2e' | 'diagnosis') => {
     setModuleFilter(filter)
     if (filter === 'diagnosis') {
       setExpandedSections(['/rfid/setup'])
     } else if (filter === 'e2e') {
       setExpandedSections(['/e2e/setup'])
-    } else if (filter === 'carrier_link') {
-      setExpandedSections(['/carrier-link'])
     }
   }
   
-  // Al entrar en una pantalla de Carrier Link (p. ej. aterrizaje), se muestra su pestaña
-  useEffect(() => {
-    if (location.pathname.startsWith('/carrier-link')) {
-      setModuleFilter('carrier_link')
-      setExpandedSections(prev => (prev.includes('/carrier-link') ? prev : [...prev, '/carrier-link']))
-    }
-  }, [location.pathname])
-
   // Auto-expand on hover when collapsed
   const isExpanded = isCollapsed ? isHovered : true
 
@@ -180,6 +191,9 @@ export function Sidebar() {
               option: 'e2e_sla',
               tooltip: t('menu.e2e_sla.tooltip'),
             },
+            { path: '#cl-setup', label: t('menu.carrier_link'), icon: Truck, heading: true, accent: true },
+            { path: '/carrier-link/reading-points', label: t('menu.cl_reading_points'), icon: MapPin, option: 'cl_reading_points' },
+            { path: '/carrier-link/connectors', label: t('menu.cl_connectors'), icon: Network, option: 'cl_connectors' },
           ],
         },
         {
@@ -282,6 +296,9 @@ export function Sidebar() {
               option: 'e2e_db_api',
               tooltip: t('menu.extract_e2e_db_api.tooltip'),
             },
+            { path: '#cl-db', label: t('menu.carrier_link'), icon: Truck, heading: true, accent: true },
+            { path: '/carrier-link/samples', label: t('menu.cl_samples'), icon: Package, option: 'cl_samples' },
+            { path: '/carrier-link/monitor', label: t('menu.cl_monitor'), icon: Activity, option: 'cl_monitor' },
           ],
         },
       ],
@@ -365,23 +382,7 @@ export function Sidebar() {
       ],
     },
     {
-      label: 'CARRIER_LINK',
-      items: [
-        {
-          path: '/carrier-link',
-          label: t('menu.carrier_link'),
-          icon: Truck,
-          children: [
-            { path: '/carrier-link/plans', label: t('menu.cl_plans'), icon: Target, option: 'cl_plans' },
-            { path: '/carrier-link/samples', label: t('menu.cl_samples'), icon: Package, option: 'cl_samples' },
-            { path: '/carrier-link/reading-points', label: t('menu.cl_reading_points'), icon: MapPin, option: 'cl_reading_points' },
-            { path: '/carrier-link/connectors', label: t('menu.cl_connectors'), icon: Network, option: 'cl_connectors' },
-            { path: '/carrier-link/monitor', label: t('menu.cl_monitor'), icon: Activity, option: 'cl_monitor' },
-          ],
-        },
-      ],
-    },
-    {
+      id: 'INCIDENTS',
       label: t('incidents.menu_group'),
       items: [
         {
@@ -505,14 +506,13 @@ export function Sidebar() {
   const menuGroups: MenuGroup[] = allModulesMenuGroups
 
   const hasAccess = (item: MenuItem): boolean => {
+    if (item.heading) return false
+    if (!clMenuOn && item.path.startsWith('/carrier-link')) return false
     if (item.children) return item.children.some(hasAccess)
     // Mientras cargan los derechos no se enseña nada que dependa de ellos (evita parpadeo de opciones).
     if (permissionsLoading && item.option !== 'open') return false
     return canAccess(item.option ?? routeAccess(item.path), isSuperadmin, canView)
   }
-
-  // La pestaña Carrier Link solo se ve si el usuario ve alguna opción cl_*
-  const showCarrierLinkTab = menuGroups.some(g => g.label === 'CARRIER_LINK' && g.items.some(hasAccess))
 
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(path + '/')
@@ -578,18 +578,6 @@ export function Sidebar() {
             >
               {t('menu.diagnosis')}
             </button>
-            {showCarrierLinkTab && (
-              <button
-                onClick={() => handleModuleFilterChange('carrier_link')}
-                className={`flex-1 px-2 py-1 text-xs font-medium rounded-md transition-colors ${
-                  moduleFilter === 'carrier_link'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                {t('menu.carrier_link')}
-              </button>
-            )}
           </div>
         </div>
       )}
@@ -602,9 +590,9 @@ export function Sidebar() {
 
           // Apply module filter: E2E hides the DIAGNOSIS group and vice versa
           if (moduleFilter !== 'all') {
-            if (moduleFilter === 'e2e' && (group.label === 'DIAGNOSIS' || group.label === 'CARRIER_LINK')) return null
-            if (moduleFilter === 'diagnosis' && (group.label === 'E2E' || group.label === 'CARRIER_LINK')) return null
-            if (moduleFilter === 'carrier_link' && (group.label === 'E2E' || group.label === 'DIAGNOSIS')) return null
+            if (moduleFilter === 'e2e' && group.label === 'DIAGNOSIS') return null
+            // Incidencias pertenece al módulo E2E: se oculta en Diagnosis
+            if (moduleFilter === 'diagnosis' && (group.label === 'E2E' || group.id === 'INCIDENTS')) return null
           }
 
           return (
@@ -614,11 +602,7 @@ export function Sidebar() {
                 <h3 className={`text-xs font-semibold text-gray-400 uppercase tracking-wider transition-opacity ${
                   isExpanded ? 'opacity-100' : 'opacity-0'
                 }`}>
-                  {group.label === 'DIAGNOSIS'
-                    ? t('menu.diagnosis')
-                    : group.label === 'CARRIER_LINK'
-                      ? t('menu.carrier_link')
-                      : group.label}
+                  {group.label === 'DIAGNOSIS' ? t('menu.diagnosis') : group.label}
                 </h3>
               </div>
 
@@ -722,8 +706,19 @@ export function Sidebar() {
                       {/* Children Items */}
                       {hasChildren && isSectionExpanded && isExpanded && (
                         <div className="ml-8 mt-1 space-y-1">
-                          {item.children!.map((child) => {
-                            if (!hasAccess(child)) return null
+                          {visibleEntries(item.children!, hasAccess).map((child) => {
+                            if (child.heading) {
+                              return (
+                                <div
+                                  key={child.path}
+                                  className={`px-3 pt-2 text-[10px] font-semibold uppercase tracking-wider ${
+                                    child.accent ? 'text-teal-600' : 'text-gray-400'
+                                  }`}
+                                >
+                                  {child.label}
+                                </div>
+                              )
+                            }
                             const ChildIcon = child.icon
                             const childActive = isActive(child.path)
 

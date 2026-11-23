@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { format } from 'date-fns'
 import { useTranslation } from '@/hooks/useTranslation'
 import { Button } from '@/components/common/Button'
@@ -12,6 +12,11 @@ import {
   type SeasonalDistribution,
 } from '@/lib/allocationPlanCalculator'
 import { effectivePolicy, type DatePolicy } from '@/lib/workingDays'
+import type { Capture } from '@/lib/carrierCapture'
+import { resolveCapture } from '@/lib/carrierLink/generatorCapture'
+import type { PlanForm } from '@/lib/carrierLink/planView'
+import { useClGeneratorFlow, type ClGeneratorSupport } from '@/hooks/carrierLink/useClGeneratorFlow'
+import { ClGeneratorPanel } from '@/components/carrier-link/ClGeneratorPanel'
 
 interface AllocationPlanGeneratorFormProps {
   carriers: Carrier[]
@@ -31,6 +36,12 @@ interface AllocationPlanGeneratorFormProps {
   /** nodeId -> blocked days (yyyy-MM-dd) of its panelist. */
   unavailabilityByNode: Map<string, Set<string>>
   onGenerate: (planData: any, details: any[]) => Promise<void>
+  /**
+   * Solo cuando la cuenta puede generar planes de Carrier Link (DEV, permiso y carriers de Carrier Link):
+   * aparece el campo "Forma de captura". Sin él el formulario es exactamente el de panelistas.
+   */
+  carrierLink?: ClGeneratorSupport
+  onCaptureChange?: (capture: Capture) => void
 }
 
 export function AllocationPlanGeneratorForm({
@@ -45,6 +56,8 @@ export function AllocationPlanGeneratorForm({
   cityPolicies,
   unavailabilityByNode,
   onGenerate,
+  carrierLink,
+  onCaptureChange,
 }: AllocationPlanGeneratorFormProps) {
   const { t } = useTranslation()
   // Active nodes without any panelist: the plan skips them (they would get shipments nobody can send).
@@ -74,6 +87,39 @@ export function AllocationPlanGeneratorForm({
     dropped: number
     poboxUncovered: number
   } | null>(null)
+
+  // ---- Forma de captura (solo con carrierLink). Panelistas = el flujo de siempre, sin cambios.
+  const [chosenCapture, setChosenCapture] = useState<Capture>('panelists')
+  const [feedId, setFeedId] = useState('')
+  const selectedCarrier = carriers.find((c) => c.id === formData.carrier_id) ?? null
+  const captureState = resolveCapture(selectedCarrier, chosenCapture)
+  const capture: Capture = carrierLink ? captureState.capture : 'panelists'
+  const clMode = capture === 'carrier_link'
+  const clFlow = useClGeneratorFlow({
+    support: carrierLink,
+    carrierId: clMode ? formData.carrier_id || null : null,
+    cities,
+    workingDows,
+    nonWorkingDays,
+  })
+  const clFeeds = carrierLink ? carrierLink.feeds.filter((f) => f.carrier_id === formData.carrier_id) : []
+  const cityNames = useMemo(() => new Map(cities.map((c) => [c.id, c.name])), [cities])
+
+  useEffect(() => {
+    onCaptureChange?.(capture)
+  }, [capture, onCaptureChange])
+
+  // El conector depende del carrier.
+  useEffect(() => {
+    setFeedId('')
+  }, [formData.carrier_id])
+
+  // La vista previa de Carrier Link guarda nombre, fechas, producto, total, matriz, estacionalidad y conector:
+  // si cambia cualquiera deja de valer (el cambio de carrier ya lo descarta el propio flujo).
+  const { discard: discardClPreview } = clFlow
+  useEffect(() => {
+    if (clMode) discardClPreview()
+  }, [clMode, formData, matrix, seasonal, useSeasonalDist, feedId, discardClPreview])
 
   const availableProducts = products.filter(
     (p) => !formData.carrier_id || p.carrier_id === formData.carrier_id
@@ -262,8 +308,39 @@ export function AllocationPlanGeneratorForm({
     }
   }
 
+  const clPlanForm = (): PlanForm => ({
+    plan_name: formData.plan_name,
+    carrier_id: formData.carrier_id,
+    product_id: formData.product_id,
+    feed_id: feedId,
+    start_date: formData.start_date,
+    end_date: formData.end_date,
+    total_samples: parseInt(formData.total_samples, 10) || 0,
+    feed_diagnosis: false,
+  })
+
+  const handleClSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await clFlow.generate(
+      clPlanForm(),
+      autoFillMatrix(matrix),
+      useSeasonalDist,
+      useSeasonalDist ? autoFillSeasonal(seasonal) : undefined,
+    )
+  }
+
+  const handleClSave = async () => {
+    if (!(await clFlow.save())) return
+    setFormData({ plan_name: '', carrier_id: '', product_id: '', total_samples: '', start_date: '', end_date: '' })
+    setMatrix({})
+    setSeasonal({})
+    setUseSeasonalDist(false)
+    setChosenCapture('panelists')
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <>
+    <form onSubmit={clMode ? handleClSubmit : handleSubmit} className="space-y-6">
       {/* Basic Info */}
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -365,6 +442,44 @@ export function AllocationPlanGeneratorForm({
           </select>
         </div>
       </div>
+
+      {carrierLink && (
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">{t('cl.capture_method.label')} *</label>
+            <select
+              value={capture}
+              disabled={captureState.fixed}
+              onChange={(e) => setChosenCapture(e.target.value as Capture)}
+              className="w-full px-3 py-2 border rounded-md disabled:bg-gray-100"
+            >
+              {captureState.options.map((o) => (
+                <option key={o} value={o}>
+                  {t(`cl.capture_method.${o}`)}
+                </option>
+              ))}
+            </select>
+            {!formData.carrier_id && <p className="text-xs text-gray-500 mt-1">{t('cl.generator.capture_hint')}</p>}
+          </div>
+          {clMode && (
+            <div>
+              <label className="block text-sm font-medium mb-1">{t('cl.plans.connector')} *</label>
+              <select required value={feedId} onChange={(e) => setFeedId(e.target.value)} className="w-full px-3 py-2 border rounded-md">
+                <option value="">{clFeeds.length === 0 ? t('cl.plans.no_connector') : t('cl.plans.select')}</option>
+                {clFeeds.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.name}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500 mt-1">{t('cl.plans.connector_hint')}</p>
+            </div>
+          )}
+        </div>
+      )}
+      {clMode && (
+        <div className="rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">{t('cl.generator.cl_hint')}</div>
+      )}
 
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -606,7 +721,7 @@ export function AllocationPlanGeneratorForm({
         )}
       </div>
 
-      {nodesWithoutPanelist.length > 0 && (
+      {!clMode && nodesWithoutPanelist.length > 0 && (
         <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
           <p className="font-medium">
             {t('allocation_generator.nodes_without_panelist_excluded', { count: nodesWithoutPanelist.length })}
@@ -615,7 +730,7 @@ export function AllocationPlanGeneratorForm({
         </div>
       )}
 
-      {notice && (
+      {!clMode && notice && (
         <div className="rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900 space-y-1">
           <p>
             {t('allocation_generator.policy_summary', {
@@ -636,10 +751,31 @@ export function AllocationPlanGeneratorForm({
       )}
 
       <div className="flex justify-end">
-        <Button type="submit" disabled={loading}>
-          {loading ? t('common.loading') : t('allocation_generator.generate_plan')}
-        </Button>
+        {clMode ? (
+          <Button type="submit" disabled={clFlow.busy || clFlow.saving || !clFlow.pointsReady}>
+            {clFlow.busy ? t('common.loading') : t('cl.generator.generate_preview')}
+          </Button>
+        ) : (
+          <Button type="submit" disabled={loading}>
+            {loading ? t('common.loading') : t('allocation_generator.generate_plan')}
+          </Button>
+        )}
       </div>
     </form>
+    {clMode && (
+      <ClGeneratorPanel
+        cityName={(id) => cityNames.get(id) ?? id}
+        preview={clFlow.preview}
+        message={clFlow.message}
+        csvErrors={clFlow.csvErrors}
+        busy={clFlow.busy}
+        saving={clFlow.saving}
+        canImport={clFlow.pointsReady && !clFlow.busy && !clFlow.saving}
+        onImport={(file) => void clFlow.importCsv(file, clPlanForm())}
+        onSave={() => void handleClSave()}
+        onDiscard={clFlow.discard}
+      />
+    )}
+    </>
   )
 }

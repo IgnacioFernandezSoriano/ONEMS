@@ -5411,8 +5411,9 @@ cl.error.cl_no_quotas,El plan todavía no tiene cuotas. Añade al menos una.
 cl.error.cl_plan_closed,El plan está cerrado y no se puede modificar.
 cl.error.cl_plan_locked_field,Este campo ya no se puede cambiar porque el plan ya ha empezado.
 cl.error.cl_plan_not_draft,Solo los planes en borrador se pueden modificar así.
-cl.error.cl_quota_locked,Esta cuota ya no se puede cambiar porque ya tiene muestras.
+cl.error.cl_quota_locked,"Esta cuota ya no se puede cambiar: ya tiene muestras o peticiones, o su semana está dentro del periodo congelado (ya pedida o a punto de pedirse)."
 cl.error.cl_quota_not_found,La cuota ya no existe. Recarga la página.
+cl.error.cl_rebalance_total_changed,La propuesta cambia el total de muestras del plan. Recarga la página y vuelve a intentarlo.
 cl.error.cl_stratum_already_delivered,Un estrato de este lote ya se entregó para esta demanda.
 cl.error.cl_too_many_rows,El archivo tiene demasiadas filas. Divídelo en archivos más pequeños.
 cl.error.cl_unknown_stratum,Algunas filas hacen referencia a una ciudad o ruta que no está en el plan.
@@ -5422,8 +5423,6 @@ cl.error.forbidden,No tienes permiso para hacer esto.
 cl.error.generic,Algo ha fallado. Inténtalo de nuevo.
 cl.select_account.title,Selecciona una cuenta
 cl.select_account.body,Elige una cuenta en la barra superior para trabajar con Carrier Link.
-cl.plans.title,Planes de muestreo
-cl.plans.help,Define qué rutas y volúmenes se muestrean a partir de los escaneos del carrier.
 cl.samples.title,Muestras
 cl.samples.help,Revisa las muestras generadas a partir de los escaneos del carrier.
 cl.reading_points.title,Puntos de lectura
@@ -5450,7 +5449,7 @@ cl.reading_points.role.both,Inicio y fin
 cl.reading_points.role.none,Intermedio
 cl.reading_points.name,Nombre (opcional)
 cl.reading_points.empty,Este carrier aún no tiene puntos de lectura.
-cl.reading_points.no_carriers,No hay carriers activos en esta cuenta.
+cl.reading_points.no_carriers,No hay carriers activos con captura Carrier Link en esta cuenta. Cambia la forma de captura en Operadores y productos.
 cl.reading_points.unknown_title,Lugares sin punto de lectura
 cl.reading_points.unknown_help,En los últimos 90 días llegaron escaneos de estos lugares sin poder asignarlos.
 cl.reading_points.readings,Lecturas
@@ -5560,41 +5559,22 @@ cl.reason.same_reading,Inicio y fin son la misma lectura
 cl.reason.start_after_end,Inicio posterior al fin
 cl.reason.unknown_product,Producto desconocido
 cl.reason.unknown_reading_point,Punto de lectura desconocido
-cl.plans.new,Nuevo plan
-cl.plans.edit,Editar plan
-cl.plans.name,Nombre
-cl.plans.product,Producto
-cl.plans.carrier,Carrier
 cl.plans.connector,Conector
 cl.plans.no_connector,Sin conector todavía
 cl.plans.connector_hint,Solo conectores del mismo carrier. Sin conector el plan no se puede activar.
 cl.plans.select,Selecciona...
-cl.plans.start,Fecha de inicio
-cl.plans.end,Fecha de fin
-cl.plans.period,Periodo
-cl.plans.total,Total de muestras
-cl.plans.total_hint,"Si cambias el total o las fechas, vuelve a generar y guardar las cuotas."
 cl.plans.status,Estado
 cl.plans.status.draft,Borrador
 cl.plans.status.active,Activo
 cl.plans.status.closed,Cerrado
-cl.plans.empty,Todavía no hay planes.
-cl.plans.samples,{count} muestras
-cl.plans.feed_diagnosis,Diagnóstico del conector (guardar datos extra para análisis)
-cl.plans.locked_hint,"El plan ya no es un borrador: no se pueden cambiar el carrier, el producto, el conector ni la fecha de inicio."
 cl.plans.error.no_account,Elige primero una cuenta.
 cl.plans.error.bad_period,La fecha de fin no puede ser anterior a la de inicio.
 cl.plans.error.bad_total,El total debe ser un número entero mayor o igual que 1.
 cl.plans.error.missing_field,"Rellena el nombre, el carrier, el producto y las fechas."
-cl.plans.generate,Generar cuotas
 cl.plans.no_routes,El carrier no tiene puntos de lectura activos con ciudad de inicio y de fin: no hay rutas.
 cl.plans.preview_title,Vista previa (sin guardar)
-cl.plans.save_quotas,Guardar cuotas
 cl.plans.saving_quotas,Guardando {count} cuotas...
 cl.plans.discard,Descartar
-cl.plans.quotas_saved,{count} cuotas guardadas.
-cl.plans.quotas_title,Cuotas
-cl.plans.no_quotas,"Este plan todavía no tiene cuotas. Usa ""Generar cuotas""."
 cl.plans.missing_points_title,Faltan puntos de lectura
 cl.plans.missing_points_help,Da de alta un punto activo del carrier en estas ciudades antes de activar el plan.
 cl.plans.missing.origin,sin punto de inicio
@@ -5602,8 +5582,6 @@ cl.plans.missing.destination,sin punto de fin
 cl.plans.missing_standards_title,{count} rutas sin estándar de entrega
 cl.plans.missing_standards_help,"Estas rutas se muestrean, pero sin estándar no se puede calcular si llegan en plazo. No impide activar el plan."
 cl.plans.no_standard,entra sin en plazo
-cl.plans.more,y {count} más (marcadas con ⚠ en la tabla)
-cl.plans.activate,Activar plan
 cl.plans.activate_confirm,"¿Activar el plan {name}? Después no se podrán cambiar el carrier, el producto, el conector, la fecha de inicio ni las cuotas."
 cl.plans.activate_blocked,No se puede activar mientras falten puntos de lectura.
 cl.plans.matrix.filter,Filtrar por ruta...
@@ -5618,7 +5596,6 @@ cl.plans.matrix.route,Ruta
 cl.plans.matrix.total,Total
 cl.plans.matrix.routes,{count} rutas
 cl.plans.error.quotas_mismatch,Las cuotas no coinciden con las fechas del plan: vuelve a generarlas.
-cl.plans.regenerate_notice,Han cambiado el total o las fechas: vuelve a generar y guardar las cuotas.
 cl.samples.plan,Plan
 cl.samples.week,Semana
 cl.samples.all,Todas
@@ -5725,3 +5702,88 @@ hc.delivery_standard_form.cl_last_mile_time,Tiempo equiv. último tramo
 help_center.doc.carrier_link.title,Carrier Link
 help_center.doc.carrier_link.desc,"Qué es Carrier Link, en qué orden se configura, qué hace cada pantalla y qué significa cada aviso."
 cl.help_link,Ayuda
+cl.capture_method.label,Forma de captura
+cl.capture_method.help,"Qué capturas admite el carrier en el Generador de Asignaciones: Panelistas, Carrier Link (escaneos del carrier; también habilita sus conectores y puntos de lectura) o Ambos."
+cl.capture_method.panelists,Panelistas
+cl.capture_method.carrier_link,Carrier Link
+cl.capture_method.both,Ambos
+cl.generator.capture_column,Captura
+cl.generator.capture_hint,Elige primero el carrier: su forma de captura decide las opciones.
+cl.generator.cl_hint,Carrier Link: sin panelistas. Las ciudades salen de los puntos de lectura activos del carrier. Genera la vista previa y guárdala como plan borrador.
+cl.generator.generate_preview,Generar vista previa
+cl.generator.save_plan,Guardar plan (borrador)
+cl.generator.requested_vs_generated,Pedidas: {requested} · Generadas: {generated}
+cl.generator.generated_less,No se han podido repartir {missing} muestras: no hay suficientes rutas o días laborables en el periodo.
+cl.generator.saved,Plan {name} guardado como borrador con {count} cuotas. Aparece en Planes generados.
+cl.generator.no_quotas,Este plan no tiene cuotas.
+cl.generator.activated,Plan {name} aplicado (activo).
+cl.generator.deleted,Plan {name} eliminado.
+cl.generator.delete_confirm,¿Eliminar el plan borrador {name} y sus cuotas?
+cl.generator.delete_not_allowed,No se pudo eliminar el plan: ya no es un borrador o no tienes permiso.
+cl.generator.more_routes,y {count} más
+cl.generator.csv.title,Importar cuotas de Carrier Link (CSV)
+cl.generator.csv.help,"Rellena antes el nombre, el carrier, el producto y las fechas. Columnas: origin_city, destination_city (código o nombre), week (2026-W05 o una fecha), samples. El total sale del fichero."
+cl.generator.csv.errors_title,El fichero tiene {count} errores; no se ha importado nada.
+cl.generator.csv.more_errors,y {count} errores más
+cl.generator.csv.missing_columns,Faltan columnas: {columns}.
+cl.generator.csv.empty,El fichero no tiene ninguna fila con muestras.
+cl.generator.csv.unknown_city,Fila {row}: ciudad desconocida «{city}».
+cl.generator.csv.same_city,Fila {row}: origen y destino son la misma ciudad.
+cl.generator.csv.bad_week,Fila {row}: semana no válida «{week}» (usa 2026-W05 o una fecha como 2026-01-31).
+cl.generator.csv.week_outside,Fila {row}: la semana {week} está fuera de las fechas del plan.
+cl.generator.csv.duplicate,Fila {row}: repite la ruta y la semana de la fila {first}.
+cl.generator.csv.bad_samples,"Fila {row}: muestras no válidas «{value}» (número entero, 0 o más)."
+cl.generator.csv.no_points,Fila {row}: la ruta {origin} → {destination} no tiene puntos de lectura activos del carrier.
+cl.generator.connector_required,Elige el conector: un plan de Carrier Link no se puede aplicar sin él y los planes guardados no se editan.
+cl.generator.needs_connector,Este plan no tiene conector y no se puede aplicar. Elimínalo y vuelve a generarlo eligiendo un conector.
+cl.records.heading,Registros del plan: cuotas ruta × semana ({count})
+cl.records.read_only_note,"Es un plan de Carrier Link: sus registros son cuotas por ruta y semana, de solo lectura aquí. Cambian con el Generador de Asignaciones y el Balanceo de Carga."
+cl.records.view_table,Tabla
+cl.records.view_matrix,Matriz
+cl.records.planned,Previsto
+cl.records.carried_in,Arrastrado
+cl.records.obtained,Obtenido
+cl.records.demands,Peticiones
+cl.records.view_samples,Ver muestras
+cl.records.page_total,Total (esta página)
+cl.records.empty,No hay registros con estos filtros.
+cl.records.matrix_loading,Cargando todas las cuotas del plan...
+cl.records.matrix_scope,La matriz muestra todas las cuotas del plan (no se aplican los filtros de la tabla).
+cl.records.status.pending,Pendiente
+cl.records.status.open,Abierta
+cl.records.status.fulfilled,Cumplida
+cl.records.status.carried,Arrastrada
+cl.records.status.unfilled,Sin cubrir
+cl.records.filter_total,Total (todas las cuotas con estos filtros)
+cl.records.plan_total,Total (todo el plan)
+cl.records.totals_unavailable,Los totales completos no están disponibles ahora: las cifras mostradas son solo de esta página.
+cl.balancing.plan_label,Plan
+cl.balancing.panelists_option,Panelistas (por periodo)
+cl.balancing.no_max_note,Plan de Carrier Link: los nodos son las ciudades de origen y la carga son las muestras previstas por semana. No hay máximo por panelista: la referencia es la media esperada de cada ciudad de origen según los días laborables de cada semana.
+cl.balancing.draft_note,Plan en borrador: se pueden mover muestras de cualquier semana.
+cl.balancing.fence_note,Plan activo: solo se mueven cuotas pendientes de semanas que empiezan después del fence.
+cl.balancing.deviation_hint,"Una semana está Alta o Saturada si supera la media esperada en este porcentaje (x1,5 para Saturada)."
+cl.balancing.fence_hint,Desde hoy hasta esta fecha (incluida) no se mueve nada. Vacío: desde hoy.
+cl.balancing.loading,Cargando las cuotas del plan...
+cl.balancing.empty,El plan no tiene cuotas.
+cl.balancing.kpi_saturated,Ciudades de origen saturadas
+cl.balancing.kpi_high,Ciudades de origen con carga alta
+cl.balancing.kpi_total,Muestras previstas
+cl.balancing.carried_in,+{count} arrastradas
+cl.balancing.preview_title,Vista previa del balanceo
+cl.balancing.preview_summary,"{moved} muestras cambian de semana en {origins} ciudades de origen ({changes} cuotas: {created} nuevas, {zeroed} a cero). No cambian el total del plan ni el de cada ciudad y cada ruta."
+cl.balancing.before_after,"{moved} movidas, desv. típica de {before} a {after}"
+cl.balancing.preview_matrix_note,La tabla de abajo muestra el reparto propuesto. No se guarda nada hasta que lo apliques.
+cl.balancing.confirm,Aplicar balanceo
+cl.balancing.applying,Aplicando...
+cl.balancing.applied,"Balanceo aplicado: {changed} cuotas cambiadas, {created} nuevas, {deleted} borradas."
+cl.balancing.nothing_to_do,No hay nada que mover: el reparto ya es el más equilibrado posible con lo que se puede mover.
+cl.balancing.matrix_title,Carga por ciudad de origen y semana
+cl.balancing.legend,Muestras previstas por semana (+arrastradas). Verde: normal; naranja: alta; rojo: saturada; gris: no se puede mover.
+cl.balancing.balance_all,Balancear todas las ciudades de origen
+cl.balancing.balance_origin,Balancear
+cl.balancing.origin,Ciudad de origen
+cl.balancing.routes,Rutas
+cl.balancing.total,Total
+cl.balancing.stddev,Desv. típica
+cl.balancing.cell_title,Esperado: {expected}; no movible: {locked}

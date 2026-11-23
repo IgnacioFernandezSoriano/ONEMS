@@ -5403,8 +5403,9 @@ cl.error.cl_no_quotas,لا تحتوي الخطة على حصص بعد. أضف ح
 cl.error.cl_plan_closed,الخطة مغلقة ولا يمكن تعديلها.
 cl.error.cl_plan_locked_field,لم يعد بالإمكان تغيير هذا الحقل لأن الخطة بدأت بالفعل.
 cl.error.cl_plan_not_draft,لا يمكن تعديل بهذه الطريقة إلا الخطط في حالة المسودة.
-cl.error.cl_quota_locked,لم يعد بالإمكان تغيير هذه الحصة لأنها تحتوي على عينات بالفعل.
+cl.error.cl_quota_locked,لم يعد بالإمكان تغيير هذه الحصة: لديها عينات أو طلبات بالفعل، أو أن أسبوعها يقع ضمن الفترة المجمّدة (طُلب بالفعل أو على وشك أن يُطلب).
 cl.error.cl_quota_not_found,لم تعد هذه الحصة موجودة. أعد تحميل الصفحة.
+cl.error.cl_rebalance_total_changed,يغيّر الاقتراح إجمالي عدد العينات في الخطة. أعد تحميل الصفحة وحاول مرة أخرى.
 cl.error.cl_stratum_already_delivered,تم بالفعل تسليم طبقة من هذه الدفعة لهذا الطلب.
 cl.error.cl_too_many_rows,يحتوي الملف على عدد كبير جدًا من الصفوف. قسّمه إلى ملفات أصغر.
 cl.error.cl_unknown_stratum,تشير بعض الصفوف إلى مدينة أو مسار غير موجود في الخطة.
@@ -5414,8 +5415,6 @@ cl.error.forbidden,ليس لديك إذن للقيام بذلك.
 cl.error.generic,حدث خطأ ما. حاول مرة أخرى.
 cl.select_account.title,اختر حسابًا
 cl.select_account.body,اختر حسابًا من الشريط العلوي للعمل مع Carrier Link.
-cl.plans.title,خطط أخذ العينات
-cl.plans.help,حدد المسارات والأحجام التي يتم أخذ عينات منها من عمليات مسح الناقل.
 cl.samples.title,العينات
 cl.samples.help,راجع العينات الناتجة عن عمليات مسح الناقل.
 cl.reading_points.title,نقاط القراءة
@@ -5442,7 +5441,7 @@ cl.reading_points.role.both,البداية والنهاية
 cl.reading_points.role.none,وسيط
 cl.reading_points.name,الاسم (اختياري)
 cl.reading_points.empty,لا توجد نقاط قراءة لهذا الناقل بعد.
-cl.reading_points.no_carriers,لا يوجد ناقلون نشطون في هذا الحساب.
+cl.reading_points.no_carriers,لا يوجد ناقلون نشطون بالتقاط Carrier Link في هذا الحساب. حدّد طريقة الالتقاط في المشغلون والمنتجات.
 cl.reading_points.unknown_title,أماكن بلا نقطة قراءة
 cl.reading_points.unknown_help,وصلت خلال آخر 90 يوما عمليات مسح من هذه الأماكن دون مطابقة.
 cl.reading_points.readings,القراءات
@@ -5552,41 +5551,22 @@ cl.reason.same_reading,البداية والنهاية هما القراءة ن�
 cl.reason.start_after_end,البداية بعد النهاية
 cl.reason.unknown_product,منتج غير معروف
 cl.reason.unknown_reading_point,نقطة قراءة غير معروفة
-cl.plans.new,خطة جديدة
-cl.plans.edit,تعديل الخطة
-cl.plans.name,الاسم
-cl.plans.product,المنتج
-cl.plans.carrier,الناقل
 cl.plans.connector,الموصل
 cl.plans.no_connector,لا يوجد موصل بعد
 cl.plans.connector_hint,موصلات الناقل نفسه فقط. لا يمكن تفعيل الخطة بدون موصل.
 cl.plans.select,اختر...
-cl.plans.start,تاريخ البدء
-cl.plans.end,تاريخ الانتهاء
-cl.plans.period,الفترة
-cl.plans.total,إجمالي العينات
-cl.plans.total_hint,إذا غيّرت الإجمالي أو التواريخ، أعد توليد الحصص وحفظها.
 cl.plans.status,الحالة
 cl.plans.status.draft,مسودة
 cl.plans.status.active,نشط
 cl.plans.status.closed,مغلق
-cl.plans.empty,لا توجد خطط بعد.
-cl.plans.samples,{count} عينة
-cl.plans.feed_diagnosis,تشخيص الموصل (الاحتفاظ ببيانات إضافية للتحليل)
-cl.plans.locked_hint,لم تعد الخطة مسودة: لا يمكن تغيير الناقل أو المنتج أو الموصل أو تاريخ البدء.
 cl.plans.error.no_account,اختر حسابًا أولاً.
 cl.plans.error.bad_period,لا يمكن أن يكون تاريخ الانتهاء قبل تاريخ البدء.
 cl.plans.error.bad_total,يجب أن يكون الإجمالي عددًا صحيحًا لا يقل عن 1.
 cl.plans.error.missing_field,املأ الاسم والناقل والمنتج والتواريخ.
-cl.plans.generate,توليد الحصص
 cl.plans.no_routes,لا يملك الناقل نقاط قراءة نشطة بمدينة بداية ومدينة نهاية: لا توجد مسارات.
 cl.plans.preview_title,معاينة (لم تُحفظ بعد)
-cl.plans.save_quotas,حفظ الحصص
 cl.plans.saving_quotas,جارٍ حفظ {count} حصة...
 cl.plans.discard,تجاهل
-cl.plans.quotas_saved,تم حفظ {count} حصة.
-cl.plans.quotas_title,الحصص
-cl.plans.no_quotas,"لا تحتوي هذه الخطة على حصص بعد. استخدم ""توليد الحصص""."
 cl.plans.missing_points_title,نقاط قراءة مفقودة
 cl.plans.missing_points_help,سجّل نقطة نشطة للناقل في هذه المدن قبل تفعيل الخطة.
 cl.plans.missing.origin,لا توجد نقطة بداية
@@ -5594,8 +5574,6 @@ cl.plans.missing.destination,لا توجد نقطة نهاية
 cl.plans.missing_standards_title,{count} مسار بدون معيار تسليم
 cl.plans.missing_standards_help,تُؤخذ عينات من هذه المسارات، لكن بدون معيار لا يمكن حساب الوصول في الموعد. لا يمنع ذلك التفعيل.
 cl.plans.no_standard,يُحتسب دون الالتزام بالموعد
-cl.plans.more,و{count} أخرى (مُعلّمة بـ ⚠ في الجدول)
-cl.plans.activate,تفعيل الخطة
 cl.plans.activate_confirm,تفعيل الخطة {name}؟ بعد ذلك لا يمكن تغيير الناقل أو المنتج أو الموصل أو تاريخ البدء أو الحصص.
 cl.plans.activate_blocked,لا يمكن تفعيل الخطة ما دامت هناك نقاط قراءة مفقودة.
 cl.plans.matrix.filter,تصفية حسب المسار...
@@ -5610,7 +5588,6 @@ cl.plans.matrix.route,المسار
 cl.plans.matrix.total,الإجمالي
 cl.plans.matrix.routes,{count} مسار
 cl.plans.error.quotas_mismatch,الحصص لا تتطابق مع تواريخ الخطة: أعد توليدها.
-cl.plans.regenerate_notice,تغيّر الإجمالي أو التواريخ: أعد توليد الحصص وحفظها.
 cl.samples.plan,الخطة
 cl.samples.week,الأسبوع
 cl.samples.all,الكل
@@ -5717,3 +5694,88 @@ hc.delivery_standard_form.cl_last_mile_time,وقت معادلة المرحلة �
 help_center.doc.carrier_link.title,Carrier Link
 help_center.doc.carrier_link.desc,"ما هو Carrier Link، وبأي ترتيب يُعدّ، وماذا تفعل كل شاشة، ومعنى كل تنبيه."
 cl.help_link,مساعدة
+cl.capture_method.label,طريقة الالتقاط
+cl.capture_method.help,طرق الالتقاط التي يقبلها الناقل في مولد التخصيص: المشاركون، أو Carrier Link (عمليات مسح الناقل؛ ويفعّل أيضًا وصلاته ونقاط قراءته)، أو كلاهما.
+cl.capture_method.panelists,المشاركون
+cl.capture_method.carrier_link,Carrier Link
+cl.capture_method.both,كلاهما
+cl.generator.capture_column,الالتقاط
+cl.generator.capture_hint,اختر شركة النقل أولاً: طريقة الالتقاط الخاصة بها تحدد الخيارات.
+cl.generator.cl_hint,Carrier Link: بدون مشاركين. تأتي المدن من نقاط القراءة النشطة لشركة النقل. أنشئ المعاينة واحفظها كخطة مسودة.
+cl.generator.generate_preview,إنشاء المعاينة
+cl.generator.save_plan,حفظ الخطة (مسودة)
+cl.generator.requested_vs_generated,المطلوب: {requested} · المُنشأ: {generated}
+cl.generator.generated_less,تعذّر توزيع {missing} عينة: لا توجد مسارات أو أيام عمل كافية في الفترة.
+cl.generator.saved,تم حفظ الخطة {name} كمسودة مع {count} حصة. تظهر في الخطط المُنشأة.
+cl.generator.no_quotas,لا تحتوي هذه الخطة على حصص.
+cl.generator.activated,تم تطبيق الخطة {name} (نشطة).
+cl.generator.deleted,تم حذف الخطة {name}.
+cl.generator.delete_confirm,هل تريد حذف خطة المسودة {name} وحصصها؟
+cl.generator.delete_not_allowed,تعذّر حذف الخطة: لم تعد مسودة أو ليس لديك إذن.
+cl.generator.more_routes,و{count} أخرى
+cl.generator.csv.title,استيراد حصص Carrier Link (CSV)
+cl.generator.csv.help,املأ أولاً الاسم وشركة النقل والمنتج والتواريخ. الأعمدة: origin_city، destination_city (الرمز أو الاسم)، week (2026-W05 أو تاريخ)، samples. يأتي الإجمالي من الملف.
+cl.generator.csv.errors_title,يحتوي الملف على {count} أخطاء؛ لم يتم استيراد أي شيء.
+cl.generator.csv.more_errors,و{count} أخطاء أخرى
+cl.generator.csv.missing_columns,أعمدة مفقودة: {columns}.
+cl.generator.csv.empty,لا يحتوي الملف على أي صف به عينات.
+cl.generator.csv.unknown_city,الصف {row}: مدينة غير معروفة «{city}».
+cl.generator.csv.same_city,الصف {row}: المصدر والوجهة هما نفس المدينة.
+cl.generator.csv.bad_week,الصف {row}: أسبوع غير صالح «{week}» (استخدم 2026-W05 أو تاريخاً مثل 2026-01-31).
+cl.generator.csv.week_outside,الصف {row}: الأسبوع {week} خارج تواريخ الخطة.
+cl.generator.csv.duplicate,الصف {row}: يكرر المسار والأسبوع في الصف {first}.
+cl.generator.csv.bad_samples,الصف {row}: عدد عينات غير صالح «{value}» (عدد صحيح، 0 أو أكثر).
+cl.generator.csv.no_points,الصف {row}: المسار {origin} → {destination} ليس له نقاط قراءة نشطة لشركة النقل.
+cl.generator.connector_required,اختر الموصل: لا يمكن تطبيق خطة Carrier Link بدونه، ولا يمكن تعديل الخطط المحفوظة.
+cl.generator.needs_connector,لا يحتوي هذا المخطط على موصل ولا يمكن تطبيقه. احذفه وأنشئه من جديد مع اختيار موصل.
+cl.records.heading,سجلات الخطة: حصص المسار × الأسبوع ({count})
+cl.records.read_only_note,هذه خطة Carrier Link: سجلاتها حصص لكل مسار وأسبوع، للقراءة فقط هنا. تتغير من خلال مولد التخصيص وموازنة الحمل.
+cl.records.view_table,جدول
+cl.records.view_matrix,مصفوفة
+cl.records.planned,المخطط
+cl.records.carried_in,المُرحَّل
+cl.records.obtained,المُحصَّل
+cl.records.demands,الطلبات
+cl.records.view_samples,عرض العينات
+cl.records.page_total,الإجمالي (هذه الصفحة)
+cl.records.empty,لا توجد سجلات تطابق هذه المرشحات.
+cl.records.matrix_loading,جارٍ تحميل جميع حصص الخطة...
+cl.records.matrix_scope,تعرض المصفوفة جميع حصص الخطة (لا تُطبَّق مرشحات الجدول).
+cl.records.status.pending,قيد الانتظار
+cl.records.status.open,مفتوحة
+cl.records.status.fulfilled,مكتملة
+cl.records.status.carried,مُرحَّلة
+cl.records.status.unfilled,غير مكتملة
+cl.records.filter_total,الإجمالي (كل الحصص بهذه المرشحات)
+cl.records.plan_total,الإجمالي (الخطة كاملة)
+cl.records.totals_unavailable,الإجماليات الكاملة غير متاحة حاليًا: الأرقام المعروضة تخص هذه الصفحة فقط.
+cl.balancing.plan_label,الخطة
+cl.balancing.panelists_option,المشاركون (حسب الفترة)
+cl.balancing.no_max_note,خطة Carrier Link: العُقد هي مدن المنشأ والحمل هو العينات المخططة في كل أسبوع. لا يوجد حد أقصى لكل مشارك: المرجع هو المتوسط المتوقع لكل مدينة منشأ حسب أيام العمل في كل أسبوع.
+cl.balancing.draft_note,خطة مسودة: يمكن نقل العينات في أي أسبوع.
+cl.balancing.fence_note,خطة نشطة: تُنقل فقط الحصص المعلقة للأسابيع التي تبدأ بعد تاريخ الحد.
+cl.balancing.deviation_hint,يكون الأسبوع مرتفعًا أو مشبعًا إذا تجاوز المتوسط المتوقع بهذه النسبة (x1.5 للمشبع).
+cl.balancing.fence_hint,من اليوم حتى هذا التاريخ (ضمنًا) لا يُنقل شيء. فارغ: من اليوم.
+cl.balancing.loading,جارٍ تحميل حصص الخطة...
+cl.balancing.empty,لا تحتوي الخطة على حصص.
+cl.balancing.kpi_saturated,مدن المنشأ المشبعة
+cl.balancing.kpi_high,مدن المنشأ ذات الحمل المرتفع
+cl.balancing.kpi_total,العينات المخططة
+cl.balancing.carried_in,+{count} مُرحّلة
+cl.balancing.preview_title,معاينة الموازنة
+cl.balancing.preview_summary,تنتقل {moved} عينة إلى أسبوع آخر في {origins} مدينة منشأ ({changes} حصة: {created} جديدة، {zeroed} إلى صفر). لا يتغير إجمالي الخطة ولا إجمالي كل مدينة وكل مسار.
+cl.balancing.before_after,{moved} منقولة، الانحراف المعياري من {before} إلى {after}
+cl.balancing.preview_matrix_note,يعرض الجدول أدناه التوزيع المقترح. لا يُحفظ شيء حتى تطبقه.
+cl.balancing.confirm,تطبيق الموازنة
+cl.balancing.applying,جارٍ التطبيق...
+cl.balancing.applied,تم تطبيق الموازنة: {changed} حصة معدلة، {created} جديدة، {deleted} محذوفة.
+cl.balancing.nothing_to_do,لا يوجد ما يُنقل: التوزيع متوازن قدر الإمكان بما يمكن نقله.
+cl.balancing.matrix_title,الحمل حسب مدينة المنشأ والأسبوع
+cl.balancing.legend,العينات المخططة لكل أسبوع (+المُرحّلة). الأخضر: عادي؛ البرتقالي: مرتفع؛ الأحمر: مشبع؛ الرمادي: لا يمكن نقله.
+cl.balancing.balance_all,موازنة كل مدن المنشأ
+cl.balancing.balance_origin,موازنة
+cl.balancing.origin,مدينة المنشأ
+cl.balancing.routes,المسارات
+cl.balancing.total,الإجمالي
+cl.balancing.stddev,الانحراف المعياري
+cl.balancing.cell_title,المتوقع: {expected}؛ غير قابل للنقل: {locked}

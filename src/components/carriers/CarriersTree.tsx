@@ -5,6 +5,11 @@ import { CarrierForm } from './CarrierForm'
 import { ProductForm } from './ProductForm'
 import { MaterialSelector } from './MaterialSelector'
 import type { Carrier, Product, ProductMaterial } from '@/lib/types'
+import { CAPTURE_METHOD_LABEL_KEY, captureMethodOf } from '@/lib/carrierCapture'
+import { isCarrierLinkEnabled } from '@/lib/featureFlags'
+
+// La forma de captura solo se enseña con Carrier Link habilitado (DEV).
+const carrierLinkOn = isCarrierLinkEnabled()
 
 interface CarriersTreeProps {
   carriers: Carrier[]
@@ -196,6 +201,14 @@ export function CarriersTree({
                   >
                     {carrier.status === 'active' ? t('common.active') : t('common.inactive')}
                   </span>
+                  {carrierLinkOn && <span
+                    className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${
+                      captureMethodOf(carrier) === 'panelists' ? 'bg-blue-50 text-blue-700' : 'bg-teal-50 text-teal-700'
+                    }`}
+                    title={t('cl.capture_method.label')}
+                  >
+                    {t(CAPTURE_METHOD_LABEL_KEY[captureMethodOf(carrier)])}
+                  </span>}
                 </div>
 
                 {/* Action Buttons */}

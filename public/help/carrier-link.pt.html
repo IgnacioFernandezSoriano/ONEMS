@@ -231,7 +231,9 @@
       <h3>Os ecrãs</h3>
       <a href="#reading-points">Pontos de leitura</a>
       <a href="#connectors">Conectores</a>
-      <a href="#plans">Planos de amostragem</a>
+      <a href="#generator">Gerador de alocação</a>
+      <a href="#balancing">Balanceamento de carga</a>
+      <a href="#records">Planos de alocação</a>
       <a href="#samples">Amostras</a>
       <a href="#monitor">Monitor de capturas</a>
       <h3>Referência</h3>
@@ -246,7 +248,7 @@
   <div class="page">
     <header>
       <h2>Carrier Link: amostras a partir dos registos do transportador</h2>
-      <p>O que é, por que ordem se configura e o que faz cada ecrã da secção Carrier Link do ONEMS.</p>
+      <p>O que é, por que ordem se configura e como se usam, com o Carrier Link, os ecrãs habituais do E2E e os dois próprios do Carrier Link.</p>
     </header>
 
     <section id="overview">
@@ -260,17 +262,19 @@
 <p>Em vez de um painelista de origem e outro de destino, cada amostra tem um <strong>ponto de leitura de início</strong> e um <strong>de fim</strong>. O tempo E2E vai da primeira leitura no início à última no fim.</p>
 <div class="callout info"><strong>Escala.</strong> Um plano pode chegar a cerca de <span dir="ltr">15 000</span> amostras por ano e por produto. Por isso as quotas repartem-se por rota (de cidade a cidade) e semana, sem que tenha de escolher os envios um a um.</div>
 <div class="callout warn"><strong>O que não se vê.</strong> Só entram envios que chegaram. Os que nunca chegam ou ficam noutra cidade não aparecem como amostra, e não há seguimento das saídas. Também não há rotas dentro da mesma cidade. O padrão de entrega só afeta a análise dos relatórios, nunca a captura nem o plano.</div>
+<div class="callout info"><strong>Não há uma secção à parte.</strong> O Carrier Link não é um módulo separado: tudo vive dentro do E2E. A única coisa que muda é a <strong>forma de captura</strong> do dado (painelistas ou transportadora), que se escolhe <strong>por transportadora</strong> em <strong>Transportadoras e produtos</strong>: <em>Painelistas</em>, <em>Carrier Link</em> ou <em>Ambos</em>. Uma mesma transportadora pode usar os dois sistemas ao mesmo tempo. As transportadoras que usam só painelistas funcionam exatamente como antes.</div>
     </section>
 
     <section id="order">
     <h2>A ordem de trabalho</h2>
 <ol class="steps">
-  <li><strong>Pontos de leitura.</strong> Em <strong>Pontos de leitura</strong>, registe os locais do transportador onde cada envio é lido e indique em que cidade as rotas começam ou terminam. Cada cidade precisa de pelo menos um ponto de início e um de fim.</li>
-  <li><strong>Conector.</strong> Em <strong>Conectores</strong>, crie o conector do transportador: as suas equivalências de campos e de produto, o calendário de pedidos e a chave. Teste-o com um lote de ensaio.</li>
-  <li><strong>Padrão de entrega.</strong> Em <strong>Padrões de entrega</strong>, confirme que cada rota tem o seu padrão e, se quiser comparar com os painelistas, o tempo de equivalência (veja <a href="#equivalence">O tempo de equivalência</a>).</li>
-  <li><strong>Plano de amostragem.</strong> Em <strong>Planos de amostragem</strong>, crie o plano, gere e guarde as quotas e prima <span class="btn primary">Ativar plano</span>.</li>
+  <li><strong>Forma de captura.</strong> Em <strong>Transportadoras e produtos</strong>, escolha para cada transportadora a sua <strong>Forma de captura</strong>: Painelistas, Carrier Link ou Ambos. Os pontos de leitura e os conectores só são oferecidos para transportadoras com Carrier Link ou Ambos.</li>
+  <li><strong>Pontos de leitura.</strong> Em <strong>Pontos de leitura</strong> (menu E2E ▸ Configuração ▸ Carrier Link), registe os locais do transportador onde cada envio é lido e indique em que cidade as rotas começam ou terminam. Cada cidade precisa de pelo menos um ponto de início e um de fim.</li>
+  <li><strong>Conector.</strong> Em <strong>Conectores</strong> (mesmo submenu), crie o conector do transportador: as suas equivalências de campos e de produto, o calendário de pedidos e a chave. Teste-o com um lote de ensaio.</li>
+  <li><strong>Padrão de entrega.</strong> Em <strong>E2E: SLA</strong>, confirme que cada rota tem o seu padrão e, se quiser comparar com os painelistas, o tempo de equivalência (veja <a href="#equivalence">O tempo de equivalência</a>).</li>
+  <li><strong>Gerar e aplicar o plano.</strong> Em <strong>Gerador de alocação</strong>, escolha a transportadora com a forma de captura Carrier Link, gere a pré-visualização, guarde o plano e prima <span class="btn primary">Aplicar</span>.</li>
   <li><strong>Ativar o conector.</strong> Quando tudo estiver pronto, passe o conector de Testes a Ativo. Até lá só admite ensaios e não se cria nenhuma amostra.</li>
-  <li><strong>Acompanhamento.</strong> Em <strong>Monitor de capturas</strong> veja os pedidos, os lotes e os alertas e, em <strong>Amostras</strong>, reveja as amostras que vão entrando.</li>
+  <li><strong>Acompanhamento.</strong> Para repartir melhor a carga, use <strong>Balanceamento de carga</strong>; para ver as quotas, <strong>Planos de alocação</strong>; em <strong>Monitor de capturas</strong> veja os pedidos, os lotes e os alertas e, em <strong>Amostras</strong>, reveja as amostras que vão entrando (menu Base de dados ▸ Carrier Link).</li>
 </ol>
 <div class="callout ok"><strong>E depois:</strong> o ONEMS pede os envios ao transportador nos dias e à hora do calendário do conector, faz o sorteio e coloca as amostras nos relatórios E2E. Só tem de tratar os alertas.</div>
     </section>
@@ -312,23 +316,50 @@
 <p>Em <strong>Testar lote (ensaio)</strong> carregue um ficheiro de lote do transportador. O ONEMS indica se o aceitaria e, se não, porquê. Não se guarda nada.</p>
     </section>
 
-    <section id="plans">
-    <h2>Planos de amostragem</h2>
-<p>Ecrã <strong>Planos de amostragem</strong>. Um plano diz quantas amostras se querem, de que transportador e produto, em que datas e entre que cidades.</p>
+    <section id="generator">
+    <h2>Gerador de alocação</h2>
+<p>Ecrã <strong>Gerador de alocação</strong> (menu E2E ▸ Alocação). É <strong>o mesmo ecrã</strong> que se usa com painelistas: só muda o campo <strong>Forma de captura</strong>. Um plano diz quantas amostras se querem, de que transportador e produto, em que datas e entre que cidades.</p>
 <ol class="steps">
-  <li>Prima <span class="btn primary">Novo plano</span> e preencha nome, transportador, produto, conector, datas e total de amostras. Marque a caixa de diagnóstico só se quiser além disso guardar dados para a análise de diagnóstico.</li>
-  <li>Prima <span class="btn">Gerar quotas</span>. O ONEMS reparte o total pelas rotas (de cidade a cidade) e pelas semanas, e mostra uma pré-visualização sem guardar.</li>
-  <li>Reveja a pré-visualização e prima <span class="btn">Guardar quotas</span>. Se mudar o total ou as datas, volte a gerar e a guardar.</li>
-  <li>Se o aviso <strong>Faltam pontos de leitura</strong> listar cidades, registe os seus pontos de início e de fim em <strong>Pontos de leitura</strong>. Enquanto faltar algum, o plano não se pode ativar.</li>
-  <li>Prima <span class="btn primary">Ativar plano</span> e confirme.</li>
+  <li>Escolha a transportadora. A sua forma de captura (a que foi fixada em <strong>Transportadoras e produtos</strong>) decide as opções. Se for <em>Ambos</em>, escolhe você entre Painelistas e Carrier Link em <strong>Forma de captura</strong>.</li>
+  <li>Com o Carrier Link, escolha também o <strong>conector</strong>. É obrigatório: sem ele o plano não se pode aplicar. Não há painelistas: as cidades vêm dos pontos de leitura ativos da transportadora.</li>
+  <li>Preencha nome, produto, datas e total de amostras, e escolha a repartição como com painelistas: a mesma matriz A/B/C, a sazonalidade e os dias úteis. Também pode importar as quotas com um ficheiro CSV, com as colunas cidade de origem, cidade de destino, semana e amostras.</li>
+  <li>Prima <span class="btn">Gerar pré-visualização</span>. O ONEMS reparte o total pelas rotas (de cidade a cidade) e pelas semanas, e mostra o resultado sem guardar. Se não conseguiu repartir todas as amostras, di-lo.</li>
+  <li>Reveja a pré-visualização e prima <span class="btn">Guardar plano (rascunho)</span>. O plano aparece em <strong>Planos gerados</strong>, com uma coluna <strong>Captura</strong> que indica se é de painelistas ou de Carrier Link. Um rascunho pode ser eliminado.</li>
+  <li>Para o pôr em marcha, prima <span class="btn primary">Aplicar</span>. Com o Carrier Link, <strong>aplicar significa que o ONEMS começa a pedir os envios ao transportador</strong>. O plano passa a <strong>Planos aplicados</strong>.</li>
 </ol>
-<div class="callout warn">Uma rota sem padrão de entrega é amostrada na mesma, mas as suas amostras entram sem «no prazo» até se criar o padrão. É só um aviso: não impede ativar o plano.</div>
-<div class="callout info">Depois de ativar, já não se podem alterar o transportador, o produto, o conector, a data de início nem as quotas. As amostras já obtidas não são tocadas.</div>
-<h3>A tabela de quotas</h3>
-<p>Cada célula mostra o <strong>previsto</strong>, o <strong>transitado</strong> de semanas anteriores entre parênteses e, com o plano em curso, o <strong>obtido</strong>. Pode vê-la por semana ou por mês e filtrar por rota.</p>
+<div class="callout warn">Se a alguma cidade faltarem pontos de leitura de início ou de fim, o ONEMS avisa e não deixa aplicar o plano até os registar em <strong>Pontos de leitura</strong>. Uma rota sem padrão de entrega é amostrada na mesma, mas as suas amostras entram sem «no prazo» até se criar o padrão: é só um aviso.</div>
+<div class="callout info">Depois de aplicar, já não se podem alterar o transportador, o produto, o conector, a data de início nem as quotas (exceto com o Balanceamento de carga). As amostras já obtidas não são tocadas.</div>
+<div class="callout ok"><strong>E depois:</strong> com o plano aplicado e o conector Ativo, o sistema pede os envios sozinho, semana a semana. Não é preciso fazer mais nada.</div>
+    </section>
+
+    <section id="balancing">
+    <h2>Balanceamento de carga</h2>
+<p>Ecrã <strong>Balanceamento de carga</strong> (menu E2E ▸ Alocação). É também <strong>o mesmo ecrã</strong> que com painelistas: ao escolher um plano de Carrier Link, o ecrã sabe de que tipo é e adapta-se.</p>
+<ul>
+  <li><strong>O que move:</strong> amostras de uma semana para outra, <strong>dentro de cada rota</strong>, para que não haja semanas saturadas ao lado de semanas quase vazias. Não altera o total do plano nem as rotas.</li>
+  <li><strong>Sem máximo por painelista:</strong> com o Carrier Link não há painelistas. As linhas são as cidades de origem e a carga são as amostras previstas por semana.</li>
+  <li><strong>Data de bloqueio (fence):</strong> de hoje até essa data, inclusive, não se move nada. Se a deixar vazia, o bloqueio começa hoje.</li>
+  <li><strong>Rascunho e ativo:</strong> num plano em rascunho pode mover-se qualquer semana; num plano ativo só as quotas pendentes das semanas que começam depois da data de bloqueio.</li>
+</ul>
+<ol class="steps">
+  <li>Escolha o plano de Carrier Link no seletor de planos.</li>
+  <li>Prima <span class="btn">Balancear todas as cidades de origem</span>, ou <span class="btn">Balancear</span> numa cidade concreta.</li>
+  <li>Reveja a <strong>Pré-visualização do balanceamento</strong>: quantas amostras mudam de semana. Ainda não se guarda nada.</li>
+  <li>Prima <span class="btn primary">Aplicar balanceamento</span>.</li>
+</ol>
+<div class="callout info">Se a repartição já for a mais equilibrada possível com o que se pode mover, o ONEMS indica que não há nada a mover.</div>
+    </section>
+
+    <section id="records">
+    <h2>Planos de alocação</h2>
+<p>Ecrã <strong>Planos de alocação</strong> (menu E2E ▸ Alocação). Ao escolher um plano de Carrier Link no seletor, os <strong>registos</strong> do plano são as suas <strong>quotas: uma por rota (de cidade a cidade) e por semana</strong>. Esta vista é de consulta; as quotas alteram-se com o Gerador de alocação e o Balanceamento de carga.</p>
+<ul>
+  <li><strong>Tabela:</strong> uma linha por quota, com o <strong>previsto</strong>, o <strong>transitado</strong> de semanas anteriores, o <strong>obtido</strong>, os pedidos feitos ao transportador e o seu estado: Pendente, Aberta, Cumprida, Transitada ou Por preencher. Pode filtrar-se.</li>
+  <li><strong>Matriz:</strong> as rotas em linhas e as semanas (ou os meses) em colunas. Cada célula mostra o previsto, o transitado entre parênteses e, com o plano em curso, o obtido. A matriz mostra todas as quotas do plano: não aplica os filtros da tabela.</li>
+  <li><strong>Ver amostras:</strong> em cada quota, uma ligação leva às amostras obtidas dessa rota e semana.</li>
+</ul>
 <h3>Se uma quota não for preenchida</h3>
 <p>Se o transportador não tiver envios suficientes, o ONEMS volta a pedir o que falta (até 3 vezes na mesma semana). O que continuar a faltar reparte-se pelas semanas que restam do mês e, se não couber, pelas dos meses seguintes. O que faltar no fim do plano fica por preencher e gera um alerta.</p>
-<div class="callout ok"><strong>E depois:</strong> com o plano ativo e o conector Ativo, o sistema pede os envios sozinho, semana a semana. Não é preciso fazer mais nada.</div>
     </section>
 
     <section id="samples">
@@ -359,7 +390,7 @@
     <h2>O tempo de equivalência</h2>
 <p>A leitura do transportador não inclui o último trecho até ao destinatário nem os atrasos de declaração que a medição com painelistas tem. Para que as duas medições sejam comparáveis, o padrão de entrega admite um <strong>tempo de equivalência</strong>.</p>
 <ol class="steps">
-  <li>Abra o ecrã dos padrões de entrega (<strong>Padrões de entrega</strong>).</li>
+  <li>Abra o ecrã dos padrões de entrega (<strong>E2E: SLA</strong>).</li>
   <li>Na rota que quiser, preencha <strong>Tempo equiv. primeiro trecho</strong> e <strong>Tempo equiv. último trecho</strong>, na mesma unidade do padrão. Por defeito valem 0.</li>
 </ol>
 <div class="callout info"><strong>Só para amostras do transportador.</strong> Este tempo soma-se apenas às amostras do transportador; as de painelistas não mudam. O ONEMS guarda em separado o tempo medido e o tempo acrescentado, e os relatórios (incluindo «no prazo») usam o total.</div>
@@ -380,7 +411,7 @@
 <tr><td>Produto desconhecido</td><td>O transportador enviou um produto que o ONEMS não tem nas suas equivalências.</td><td>Adicione a equivalência em <strong>Conectores</strong>, bloco Equivalências de produto.</td></tr>
 <tr><td>Ponto de leitura desconhecido</td><td>Chegaram leituras de um local que não está registado como ponto de leitura.</td><td>Registe o local em <strong>Pontos de leitura</strong> (bloco Locais sem ponto de leitura). Essas leituras são aproveitadas ao registá-lo.</td></tr>
 <tr><td>Possível envio mal encaminhado</td><td>Um envio tem leituras em mais de um ponto, ou numa cidade diferente da pedida.</td><td>Reveja-o em <strong>Amostras</strong>. Conta na mesma para a quota da rota.</td></tr>
-<tr><td>Falta o padrão de entrega</td><td>Uma rota não tem padrão de entrega, pelo que não se pode saber se as suas amostras chegam no prazo.</td><td>Crie o padrão dessa rota em <strong>Padrões de entrega</strong>. As amostras são recalculadas automaticamente.</td></tr>
+<tr><td>Falta o padrão de entrega</td><td>Uma rota não tem padrão de entrega, pelo que não se pode saber se as suas amostras chegam no prazo.</td><td>Crie o padrão dessa rota em <strong>E2E: SLA</strong>. As amostras são recalculadas automaticamente.</td></tr>
 <tr><td>Muitas leituras rejeitadas</td><td>Mais de 20 % das leituras de um lote foram rejeitadas.</td><td>Reveja as equivalências e os pontos de leitura; um lote de teste em <strong>Conectores</strong> mostra os motivos.</td></tr>
 <tr><td>Quota por preencher</td><td>No fim do plano, uma quota não ficou totalmente preenchida.</td><td>Reveja os alertas anteriores dessa rota; se for preciso, alargue o plano.</td></tr>
 <tr><td>O transportador não respondeu</td><td>O conector está ativo, mas o transportador não respondeu a um pedido vencido.</td><td>Confirme com o transportador que o seu sistema funciona e reveja o calendário e o estado do conector.</td></tr>
@@ -399,8 +430,9 @@
 <details><summary>O transportador pode escolher que envios manda?</summary><div>Não. O transportador propõe muitos candidatos e o ONEMS faz o sorteio final. A semente do sorteio fixa-se antes de receber os candidatos, pelo que ninguém a pode escolher depois de os ver.</div></details>
 <details><summary>Guardam-se dados pessoais?</summary><div>Não. Só se guardam os campos da lista de campos extra permitidos; o resto é descartado à entrada.</div></details>
 <details><summary>Quem pode criar chaves de conector?</summary><div>Só um superadmin ou o UPU Account Manager. A chave mostra-se uma única vez, ao criá-la.</div></details>
-<details><summary>Ativei o plano e não entram amostras. Porquê?</summary><div>Verifique se o conector está Ativo (em Testes só admite ensaios) e se o dia e a hora do calendário já passaram. Depois veja <strong>Monitor de capturas</strong>.</div></details>
+<details><summary>Apliquei o plano e não entram amostras. Porquê?</summary><div>Verifique se o conector está Ativo (em Testes só admite ensaios) e se o dia e a hora do calendário já passaram. Depois veja <strong>Monitor de capturas</strong>.</div></details>
 <details><summary>Como distingo estas amostras nos relatórios?</summary><div>Têm a origem «carrier», diferente da das amostras de painelistas, e podem separar-se.</div></details>
+<details><summary>Tenho de usar o Carrier Link com todas as transportadoras?</summary><div>Não. A forma de captura escolhe-se por transportadora em <strong>Transportadoras e produtos</strong>: Painelistas, Carrier Link ou Ambos. As transportadoras que usam só painelistas continuam a funcionar como antes, e os ecrãs do E2E não mostram nada do Carrier Link para elas.</div></details>
 <details><summary>Quem vê cada ecrã?</summary><div>O Account Manager (e o UPU Account Manager) edita planos, pontos, conectores e monitor, e vê as amostras. O Allocation Plan Manager edita planos e vê o resto exceto conectores. O DO Coordinator edita pontos de leitura e vê o resto exceto conectores. Panelist Manager e Materials Supplier não têm acesso. Um ecrã só de leitura mostra a etiqueta de só leitura.</div></details>
     </section>
 

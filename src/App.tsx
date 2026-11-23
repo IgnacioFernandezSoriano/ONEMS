@@ -59,11 +59,13 @@ import { PanelistAvailabilityIncidents } from './pages/incidents/PanelistAvailab
 import { PanelistReportedIncidents } from './pages/incidents/PanelistReportedIncidents'
 import { ReceiptErrors } from './pages/incidents/ReceiptErrors'
 import { HelpCenter } from './pages/HelpCenter'
-import { ClPlans } from './pages/carrier-link/ClPlans'
 import { ClSamples } from './pages/carrier-link/ClSamples'
 import { ClReadingPoints } from './pages/carrier-link/ClReadingPoints'
 import { ClConnectors } from './pages/carrier-link/ClConnectors'
 import { ClMonitor } from './pages/carrier-link/ClMonitor'
+import { isCarrierLinkEnabled } from './lib/featureFlags'
+
+const carrierLinkOn = isCarrierLinkEnabled()
 
 
 function App() {
@@ -129,15 +131,16 @@ function App() {
                       }
                     />
                     
-                    {/* Carrier Link */}
-                    <Route
-                      path="/carrier-link/plans"
-                      element={
-                        <ProtectedRoute option="cl_plans">
-                          <ClPlans />
-                        </ProtectedRoute>
-                      }
-                    />
+                    {/* Carrier Link (solo DEV; en producción todas las rutas redirigen) */}
+                    {!carrierLinkOn && (
+                      <Route path="/carrier-link/*" element={<Navigate to="/" replace />} />
+                    )}
+                    {carrierLinkOn && (<>
+                    {/* Asignación de Carrier Link = las mismas pantallas E2E (campo "Forma de captura") */}
+                    <Route path="/carrier-link/plans" element={<Navigate to="/allocation-plan-generator" replace />} />
+                    <Route path="/carrier-link/allocation-generator" element={<Navigate to="/allocation-plan-generator" replace />} />
+                    <Route path="/carrier-link/load-balancing" element={<Navigate to="/node-load-balancing" replace />} />
+                    <Route path="/carrier-link/allocation-plans" element={<Navigate to="/allocation-plans" replace />} />
                     <Route
                       path="/carrier-link/samples"
                       element={
@@ -170,6 +173,7 @@ function App() {
                         </ProtectedRoute>
                       }
                     />
+                    </>)}
 
                     {/* Delivery Standards */}
                     <Route

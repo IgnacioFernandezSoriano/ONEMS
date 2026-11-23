@@ -5403,8 +5403,9 @@ cl.error.cl_no_quotas,Le plan n'a pas encore de quotas. Ajoutez-en au moins un.
 cl.error.cl_plan_closed,Le plan est clos et ne peut pas être modifié.
 cl.error.cl_plan_locked_field,Ce champ ne peut plus être modifié car le plan a déjà commencé.
 cl.error.cl_plan_not_draft,Seuls les plans en brouillon peuvent être modifiés ainsi.
-cl.error.cl_quota_locked,Ce quota ne peut plus être modifié car il a déjà des échantillons.
+cl.error.cl_quota_locked,"Ce quota ne peut plus être modifié : il a déjà des échantillons ou des demandes, ou sa semaine est dans la période gelée (déjà demandée ou sur le point de l'être)."
 cl.error.cl_quota_not_found,Le quota n'existe plus. Rechargez la page.
+cl.error.cl_rebalance_total_changed,La proposition modifie le nombre total d'échantillons du plan. Rechargez la page et réessayez.
 cl.error.cl_stratum_already_delivered,Une strate de ce lot a déjà été livrée pour cette demande.
 cl.error.cl_too_many_rows,Le fichier contient trop de lignes. Divisez-le en fichiers plus petits.
 cl.error.cl_unknown_stratum,Certaines lignes font référence à une ville ou un trajet absent du plan.
@@ -5414,8 +5415,6 @@ cl.error.forbidden,Vous n'avez pas l'autorisation de faire cela.
 cl.error.generic,Une erreur s'est produite. Veuillez réessayer.
 cl.select_account.title,Sélectionnez un compte
 cl.select_account.body,Choisissez un compte dans la barre supérieure pour utiliser Carrier Link.
-cl.plans.title,Plans d'échantillonnage
-cl.plans.help,Définissez quels trajets et volumes sont échantillonnés à partir des scans du transporteur.
 cl.samples.title,Échantillons
 cl.samples.help,Consultez les échantillons générés à partir des scans du transporteur.
 cl.reading_points.title,Points de lecture
@@ -5442,7 +5441,7 @@ cl.reading_points.role.both,Début et fin
 cl.reading_points.role.none,Intermédiaire
 cl.reading_points.name,Nom (facultatif)
 cl.reading_points.empty,Aucun point de lecture pour ce transporteur.
-cl.reading_points.no_carriers,Aucun transporteur actif dans ce compte.
+cl.reading_points.no_carriers,Aucun transporteur actif avec capture Carrier Link dans ce compte. Définissez le mode de capture dans Opérateurs & Produits.
 cl.reading_points.unknown_title,Lieux sans point de lecture
 cl.reading_points.unknown_help,Des scans des 90 derniers jours proviennent de ces lieux sans correspondance.
 cl.reading_points.readings,Lectures
@@ -5552,41 +5551,22 @@ cl.reason.same_reading,Début et fin sont la même lecture
 cl.reason.start_after_end,Début après la fin
 cl.reason.unknown_product,Produit inconnu
 cl.reason.unknown_reading_point,Point de lecture inconnu
-cl.plans.new,Nouveau plan
-cl.plans.edit,Modifier le plan
-cl.plans.name,Nom
-cl.plans.product,Produit
-cl.plans.carrier,Transporteur
 cl.plans.connector,Connecteur
 cl.plans.no_connector,Pas encore de connecteur
 cl.plans.connector_hint,"Uniquement les connecteurs du même transporteur. Sans connecteur, le plan ne peut pas être activé."
 cl.plans.select,Sélectionner...
-cl.plans.start,Date de début
-cl.plans.end,Date de fin
-cl.plans.period,Période
-cl.plans.total,Total d'échantillons
-cl.plans.total_hint,"Si vous modifiez le total ou les dates, générez et enregistrez à nouveau les quotas."
 cl.plans.status,Statut
 cl.plans.status.draft,Brouillon
 cl.plans.status.active,Actif
 cl.plans.status.closed,Clôturé
-cl.plans.empty,Il n'y a pas encore de plan.
-cl.plans.samples,{count} échantillons
-cl.plans.feed_diagnosis,Diagnostic du connecteur (conserver des données supplémentaires pour analyse)
-cl.plans.locked_hint,"Le plan n'est plus un brouillon : le transporteur, le produit, le connecteur et la date de début ne peuvent plus être modifiés."
 cl.plans.error.no_account,Choisissez d'abord un compte.
 cl.plans.error.bad_period,La date de fin ne peut pas être antérieure à la date de début.
 cl.plans.error.bad_total,Le total doit être un nombre entier d'au moins 1.
 cl.plans.error.missing_field,"Renseignez le nom, le transporteur, le produit et les dates."
-cl.plans.generate,Générer les quotas
 cl.plans.no_routes,Le transporteur n'a pas de points de lecture actifs avec une ville de départ et une ville d'arrivée : il n'y a pas de trajets.
 cl.plans.preview_title,Aperçu (pas encore enregistré)
-cl.plans.save_quotas,Enregistrer les quotas
 cl.plans.saving_quotas,Enregistrement de {count} quotas...
 cl.plans.discard,Annuler
-cl.plans.quotas_saved,{count} quotas enregistrés.
-cl.plans.quotas_title,Quotas
-cl.plans.no_quotas,Ce plan n'a pas encore de quotas. Utilisez « Générer les quotas ».
 cl.plans.missing_points_title,Points de lecture manquants
 cl.plans.missing_points_help,Enregistrez un point actif du transporteur dans ces villes avant d'activer le plan.
 cl.plans.missing.origin,pas de point de départ
@@ -5594,8 +5574,6 @@ cl.plans.missing.destination,pas de point d'arrivée
 cl.plans.missing_standards_title,{count} trajets sans norme de livraison
 cl.plans.missing_standards_help,"Ces trajets sont échantillonnés, mais sans norme on ne peut pas calculer s'ils arrivent dans les délais. Cela n'empêche pas l'activation."
 cl.plans.no_standard,compté sans délai
-cl.plans.more,et {count} de plus (marqués ⚠ dans le tableau)
-cl.plans.activate,Activer le plan
 cl.plans.activate_confirm,"Activer le plan {name} ? Ensuite, le transporteur, le produit, le connecteur, la date de début et les quotas ne pourront plus être modifiés."
 cl.plans.activate_blocked,Le plan ne peut pas être activé tant qu'il manque des points de lecture.
 cl.plans.matrix.filter,Filtrer par trajet...
@@ -5610,7 +5588,6 @@ cl.plans.matrix.route,Trajet
 cl.plans.matrix.total,Total
 cl.plans.matrix.routes,{count} trajets
 cl.plans.error.quotas_mismatch,Les quotas ne correspondent pas aux dates du plan : générez-les à nouveau.
-cl.plans.regenerate_notice,Le total ou les dates ont changé : générez et enregistrez à nouveau les quotas.
 cl.samples.plan,Plan
 cl.samples.week,Semaine
 cl.samples.all,Toutes
@@ -5717,3 +5694,88 @@ hc.delivery_standard_form.cl_last_mile_time,Durée équiv. dernier tronçon
 help_center.doc.carrier_link.title,Carrier Link
 help_center.doc.carrier_link.desc,"Ce qu’est Carrier Link, dans quel ordre le configurer, ce que fait chaque écran et ce que signifie chaque alerte."
 cl.help_link,Aide
+cl.capture_method.label,Mode de capture
+cl.capture_method.help,"Captures acceptées par le transporteur dans le Générateur d’allocations : Panélistes, Carrier Link (scans du transporteur ; active aussi ses connecteurs et points de lecture) ou Les deux."
+cl.capture_method.panelists,Panélistes
+cl.capture_method.carrier_link,Carrier Link
+cl.capture_method.both,Les deux
+cl.generator.capture_column,Capture
+cl.generator.capture_hint,Choisissez d’abord le transporteur : son mode de capture détermine les options.
+cl.generator.cl_hint,Carrier Link : sans panélistes. Les villes viennent des points de lecture actifs du transporteur. Générez l’aperçu et enregistrez-le comme plan brouillon.
+cl.generator.generate_preview,Générer l’aperçu
+cl.generator.save_plan,Enregistrer le plan (brouillon)
+cl.generator.requested_vs_generated,Demandés : {requested} · Générés : {generated}
+cl.generator.generated_less,{missing} échantillons n’ont pas pu être répartis : pas assez de routes ou de jours ouvrés sur la période.
+cl.generator.saved,Plan {name} enregistré comme brouillon avec {count} quotas. Il apparaît dans Plans générés.
+cl.generator.no_quotas,Ce plan n’a pas de quotas.
+cl.generator.activated,Plan {name} appliqué (actif).
+cl.generator.deleted,Plan {name} supprimé.
+cl.generator.delete_confirm,Supprimer le plan brouillon {name} et ses quotas ?
+cl.generator.delete_not_allowed,Le plan n’a pas pu être supprimé : ce n’est plus un brouillon ou vous n’avez pas l’autorisation.
+cl.generator.more_routes,et {count} de plus
+cl.generator.csv.title,Importer des quotas Carrier Link (CSV)
+cl.generator.csv.help,"Renseignez d’abord le nom, le transporteur, le produit et les dates. Colonnes : origin_city, destination_city (code ou nom), week (2026-W05 ou une date), samples. Le total vient du fichier."
+cl.generator.csv.errors_title,Le fichier contient {count} erreurs ; rien n’a été importé.
+cl.generator.csv.more_errors,et {count} autres erreurs
+cl.generator.csv.missing_columns,Colonnes manquantes : {columns}.
+cl.generator.csv.empty,Le fichier ne contient aucune ligne avec des échantillons.
+cl.generator.csv.unknown_city,Ligne {row} : ville inconnue « {city} ».
+cl.generator.csv.same_city,Ligne {row} : l’origine et la destination sont la même ville.
+cl.generator.csv.bad_week,Ligne {row} : semaine non valide « {week} » (utilisez 2026-W05 ou une date comme 2026-01-31).
+cl.generator.csv.week_outside,Ligne {row} : la semaine {week} est hors des dates du plan.
+cl.generator.csv.duplicate,Ligne {row} : répète la route et la semaine de la ligne {first}.
+cl.generator.csv.bad_samples,"Ligne {row} : échantillons non valides « {value} » (nombre entier, 0 ou plus)."
+cl.generator.csv.no_points,Ligne {row} : la route {origin} → {destination} n’a pas de points de lecture actifs du transporteur.
+cl.generator.connector_required,Choisissez le connecteur : un plan Carrier Link ne peut pas être appliqué sans lui et les plans enregistrés ne se modifient pas.
+cl.generator.needs_connector,Ce plan n’a pas de connecteur et ne peut pas être appliqué. Supprimez-le et générez-le à nouveau en choisissant un connecteur.
+cl.records.heading,Enregistrements du plan : quotas trajet × semaine ({count})
+cl.records.read_only_note,"Il s'agit d'un plan Carrier Link : ses enregistrements sont des quotas par trajet et par semaine, en lecture seule ici. Ils changent avec le Générateur d'allocations et l'Équilibrage de charge."
+cl.records.view_table,Tableau
+cl.records.view_matrix,Matrice
+cl.records.planned,Prévu
+cl.records.carried_in,Reporté
+cl.records.obtained,Obtenu
+cl.records.demands,Demandes
+cl.records.view_samples,Voir les échantillons
+cl.records.page_total,Total (cette page)
+cl.records.empty,Aucun enregistrement ne correspond à ces filtres.
+cl.records.matrix_loading,Chargement de tous les quotas du plan...
+cl.records.matrix_scope,La matrice affiche tous les quotas du plan (les filtres du tableau ne s'appliquent pas).
+cl.records.status.pending,En attente
+cl.records.status.open,Ouvert
+cl.records.status.fulfilled,Atteint
+cl.records.status.carried,Reporté
+cl.records.status.unfilled,Non couvert
+cl.records.filter_total,Total (tous les quotas avec ces filtres)
+cl.records.plan_total,Total (tout le plan)
+cl.records.totals_unavailable,Les totaux complets ne sont pas disponibles pour le moment : les chiffres affichés concernent uniquement cette page.
+cl.balancing.plan_label,Plan
+cl.balancing.panelists_option,Panélistes (par période)
+cl.balancing.no_max_note,Plan Carrier Link : les nœuds sont les villes d'origine et la charge est le nombre d'échantillons prévus par semaine. Il n'y a pas de maximum par panéliste : la référence est la moyenne attendue de chaque ville d'origine selon les jours ouvrables de chaque semaine.
+cl.balancing.draft_note,Plan en brouillon : les échantillons de n'importe quelle semaine peuvent être déplacés.
+cl.balancing.fence_note,Plan actif : seuls les quotas en attente des semaines commençant après la date de fence sont déplacés.
+cl.balancing.deviation_hint,"Une semaine est Élevée ou Saturée si elle dépasse la moyenne attendue de ce pourcentage (x1,5 pour Saturée)."
+cl.balancing.fence_hint,D'aujourd'hui jusqu'à cette date (incluse) rien n'est déplacé. Vide : à partir d'aujourd'hui.
+cl.balancing.loading,Chargement des quotas du plan...
+cl.balancing.empty,Le plan n'a pas de quotas.
+cl.balancing.kpi_saturated,Villes d'origine saturées
+cl.balancing.kpi_high,Villes d'origine à charge élevée
+cl.balancing.kpi_total,Échantillons prévus
+cl.balancing.carried_in,+{count} reportés
+cl.balancing.preview_title,Aperçu de l'équilibrage
+cl.balancing.preview_summary,"{moved} échantillons changent de semaine dans {origins} villes d'origine ({changes} quotas : {created} nouveaux, {zeroed} à zéro). Le total du plan et ceux de chaque ville et de chaque route ne changent pas."
+cl.balancing.before_after,"{moved} déplacés, écart type de {before} à {after}"
+cl.balancing.preview_matrix_note,Le tableau ci-dessous montre la répartition proposée. Rien n'est enregistré tant que vous ne l'appliquez pas.
+cl.balancing.confirm,Appliquer l'équilibrage
+cl.balancing.applying,Application...
+cl.balancing.applied,"Équilibrage appliqué : {changed} quotas modifiés, {created} nouveaux, {deleted} supprimés."
+cl.balancing.nothing_to_do,Rien à déplacer : la répartition est déjà aussi équilibrée que possible avec ce qui peut être déplacé.
+cl.balancing.matrix_title,Charge par ville d'origine et semaine
+cl.balancing.legend,Échantillons prévus par semaine (+reportés). Vert : normal ; orange : élevée ; rouge : saturée ; gris : non déplaçable.
+cl.balancing.balance_all,Équilibrer toutes les villes d'origine
+cl.balancing.balance_origin,Équilibrer
+cl.balancing.origin,Ville d'origine
+cl.balancing.routes,Routes
+cl.balancing.total,Total
+cl.balancing.stddev,Écart type
+cl.balancing.cell_title,Attendu : {expected} ; non déplaçable : {locked}

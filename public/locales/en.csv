@@ -5411,8 +5411,9 @@ cl.error.cl_no_quotas,The plan has no quotas yet. Add at least one.
 cl.error.cl_plan_closed,The plan is closed and cannot be changed.
 cl.error.cl_plan_locked_field,This field can no longer be changed because the plan has already started.
 cl.error.cl_plan_not_draft,Only plans in draft status can be changed this way.
-cl.error.cl_quota_locked,This quota can no longer be changed because it already has samples.
+cl.error.cl_quota_locked,"This quota can no longer be changed: it already has samples or requests, or its week is inside the frozen period (already requested or about to be)."
 cl.error.cl_quota_not_found,The quota no longer exists. Reload the page.
+cl.error.cl_rebalance_total_changed,The proposal changes the total number of samples in the plan. Reload the page and try again.
 cl.error.cl_stratum_already_delivered,A stratum of this batch was already delivered for this demand.
 cl.error.cl_too_many_rows,The file has too many rows. Split it into smaller files.
 cl.error.cl_unknown_stratum,Some rows refer to a city or route that is not in the plan.
@@ -5422,8 +5423,6 @@ cl.error.forbidden,You do not have permission to do this.
 cl.error.generic,Something went wrong. Please try again.
 cl.select_account.title,Select an account
 cl.select_account.body,Choose an account in the top bar to work with Carrier Link.
-cl.plans.title,Sampling plans
-cl.plans.help,Define which routes and volumes are sampled from carrier scans.
 cl.samples.title,Samples
 cl.samples.help,Review the samples generated from carrier scans.
 cl.reading_points.title,Reading points
@@ -5450,7 +5449,7 @@ cl.reading_points.role.both,Start and end
 cl.reading_points.role.none,Intermediate
 cl.reading_points.name,Name (optional)
 cl.reading_points.empty,No reading points for this carrier yet.
-cl.reading_points.no_carriers,There are no active carriers in this account.
+cl.reading_points.no_carriers,There are no active carriers with Carrier Link capture in this account. Set the capture method in Carriers & Products.
 cl.reading_points.unknown_title,Places without a reading point
 cl.reading_points.unknown_help,Scans from the last 90 days arrived from these places and could not be matched.
 cl.reading_points.readings,Readings
@@ -5560,41 +5559,22 @@ cl.reason.same_reading,Start and end are the same scan
 cl.reason.start_after_end,Start after end
 cl.reason.unknown_product,Unknown product
 cl.reason.unknown_reading_point,Unknown reading point
-cl.plans.new,New plan
-cl.plans.edit,Edit plan
-cl.plans.name,Name
-cl.plans.product,Product
-cl.plans.carrier,Carrier
 cl.plans.connector,Connector
 cl.plans.no_connector,No connector yet
 cl.plans.connector_hint,Only connectors of the same carrier. The plan cannot be activated without one.
 cl.plans.select,Select...
-cl.plans.start,Start date
-cl.plans.end,End date
-cl.plans.period,Period
-cl.plans.total,Total samples
-cl.plans.total_hint,"If you change the total or the dates, generate and save the quotas again."
 cl.plans.status,Status
 cl.plans.status.draft,Draft
 cl.plans.status.active,Active
 cl.plans.status.closed,Closed
-cl.plans.empty,There are no plans yet.
-cl.plans.samples,{count} samples
-cl.plans.feed_diagnosis,Connector diagnosis (keep extra data for analysis)
-cl.plans.locked_hint,"The plan is no longer a draft: carrier, product, connector and start date cannot be changed."
 cl.plans.error.no_account,Select an account first.
 cl.plans.error.bad_period,The end date cannot be before the start date.
 cl.plans.error.bad_total,The total must be a whole number of at least 1.
 cl.plans.error.missing_field,"Fill in the name, carrier, product and dates."
-cl.plans.generate,Generate quotas
 cl.plans.no_routes,The carrier has no active reading points with a start and an end city: there are no routes.
 cl.plans.preview_title,Preview (not saved yet)
-cl.plans.save_quotas,Save quotas
 cl.plans.saving_quotas,Saving {count} quotas...
 cl.plans.discard,Discard
-cl.plans.quotas_saved,{count} quotas saved.
-cl.plans.quotas_title,Quotas
-cl.plans.no_quotas,"This plan has no quotas yet. Use ""Generate quotas""."
 cl.plans.missing_points_title,Reading points missing
 cl.plans.missing_points_help,Register an active point of the carrier in these cities before activating the plan.
 cl.plans.missing.origin,no start point
@@ -5602,8 +5582,6 @@ cl.plans.missing.destination,no end point
 cl.plans.missing_standards_title,{count} routes without a delivery standard
 cl.plans.missing_standards_help,"These routes are sampled, but without a standard the on-time result cannot be calculated. It does not block activation."
 cl.plans.no_standard,counted without on-time
-cl.plans.more,and {count} more (marked with ⚠ in the table)
-cl.plans.activate,Activate plan
 cl.plans.activate_confirm,"Activate the plan {name}? Afterwards the carrier, product, connector, start date and quotas can no longer be changed."
 cl.plans.activate_blocked,The plan cannot be activated while reading points are missing.
 cl.plans.matrix.filter,Filter by route...
@@ -5618,7 +5596,6 @@ cl.plans.matrix.route,Route
 cl.plans.matrix.total,Total
 cl.plans.matrix.routes,{count} routes
 cl.plans.error.quotas_mismatch,The quotas do not match the plan dates: generate them again.
-cl.plans.regenerate_notice,The total or the dates have changed: generate and save the quotas again.
 cl.samples.plan,Plan
 cl.samples.week,Week
 cl.samples.all,All
@@ -5725,3 +5702,88 @@ hc.delivery_standard_form.cl_last_mile_time,Last-leg equivalence time
 help_center.doc.carrier_link.title,Carrier Link
 help_center.doc.carrier_link.desc,"What Carrier Link is, the order to set it up in, what each screen does and what each alert means."
 cl.help_link,Help
+cl.capture_method.label,Capture method
+cl.capture_method.help,"Which captures the carrier accepts in the Allocation Generator: Panelists, Carrier Link (carrier scans; also enables its connectors and reading points) or Both."
+cl.capture_method.panelists,Panelists
+cl.capture_method.carrier_link,Carrier Link
+cl.capture_method.both,Both
+cl.generator.capture_column,Capture
+cl.generator.capture_hint,Choose the carrier first: its capture method decides the options.
+cl.generator.cl_hint,Carrier Link: no panelists. The cities come from the carrier’s active reading points. Generate the preview and save it as a draft plan.
+cl.generator.generate_preview,Generate preview
+cl.generator.save_plan,Save plan (draft)
+cl.generator.requested_vs_generated,Requested: {requested} · Generated: {generated}
+cl.generator.generated_less,{missing} samples could not be placed: there are not enough routes or working days in the period.
+cl.generator.saved,Plan {name} saved as a draft with {count} quotas. It appears in Generated Plans.
+cl.generator.no_quotas,This plan has no quotas.
+cl.generator.activated,Plan {name} applied (active).
+cl.generator.deleted,Plan {name} deleted.
+cl.generator.delete_confirm,Delete the draft plan {name} and its quotas?
+cl.generator.delete_not_allowed,The plan could not be deleted: it is no longer a draft or you do not have permission.
+cl.generator.more_routes,and {count} more
+cl.generator.csv.title,Import Carrier Link quotas (CSV)
+cl.generator.csv.help,"Fill in the name, carrier, product and dates first. Columns: origin_city, destination_city (code or name), week (2026-W05 or a date), samples. The total comes from the file."
+cl.generator.csv.errors_title,The file has {count} errors; nothing was imported.
+cl.generator.csv.more_errors,and {count} more errors
+cl.generator.csv.missing_columns,Missing columns: {columns}.
+cl.generator.csv.empty,The file has no row with samples.
+cl.generator.csv.unknown_city,"Row {row}: unknown city ""{city}""."
+cl.generator.csv.same_city,Row {row}: origin and destination are the same city.
+cl.generator.csv.bad_week,"Row {row}: invalid week ""{week}"" (use 2026-W05 or a date such as 2026-01-31)."
+cl.generator.csv.week_outside,Row {row}: week {week} is outside the plan dates.
+cl.generator.csv.duplicate,Row {row}: repeats the route and week of row {first}.
+cl.generator.csv.bad_samples,"Row {row}: invalid samples ""{value}"" (whole number, 0 or more)."
+cl.generator.csv.no_points,Row {row}: the route {origin} → {destination} has no active reading points of the carrier.
+cl.generator.connector_required,"Choose the connector: a Carrier Link plan cannot be applied without one, and saved plans cannot be edited."
+cl.generator.needs_connector,"This plan has no connector, so it cannot be applied. Delete it and generate it again choosing a connector."
+cl.records.heading,Plan records: route × week quotas ({count})
+cl.records.read_only_note,"This is a Carrier Link plan: its records are quotas per route and week, read-only here. They change with the Allocation Generator and Load Balancing."
+cl.records.view_table,Table
+cl.records.view_matrix,Matrix
+cl.records.planned,Planned
+cl.records.carried_in,Carried in
+cl.records.obtained,Obtained
+cl.records.demands,Requests
+cl.records.view_samples,View samples
+cl.records.page_total,Total (this page)
+cl.records.empty,No records match these filters.
+cl.records.matrix_loading,Loading all the plan quotas...
+cl.records.matrix_scope,The matrix shows every quota of the plan (the table filters do not apply).
+cl.records.status.pending,Pending
+cl.records.status.open,Open
+cl.records.status.fulfilled,Fulfilled
+cl.records.status.carried,Carried over
+cl.records.status.unfilled,Unfilled
+cl.records.filter_total,Total (all quotas with these filters)
+cl.records.plan_total,Total (whole plan)
+cl.records.totals_unavailable,Full totals not available right now: the figures shown are for this page only.
+cl.balancing.plan_label,Plan
+cl.balancing.panelists_option,Panelists (by period)
+cl.balancing.no_max_note,Carrier Link plan: the nodes are the origin cities and the load is the planned samples per week. There is no per-panelist maximum: the reference is the expected average of each origin city according to the working days of each week.
+cl.balancing.draft_note,Draft plan: samples can be moved in any week.
+cl.balancing.fence_note,Active plan: only pending quotas of weeks starting after the fence date are moved.
+cl.balancing.deviation_hint,A week is High or Saturated when it exceeds the expected average by this percentage (x1.5 for Saturated).
+cl.balancing.fence_hint,From today up to this date (included) nothing is moved. Empty: from today.
+cl.balancing.loading,Loading the plan quotas...
+cl.balancing.empty,The plan has no quotas.
+cl.balancing.kpi_saturated,Saturated origin cities
+cl.balancing.kpi_high,Origin cities with high load
+cl.balancing.kpi_total,Planned samples
+cl.balancing.carried_in,+{count} carried over
+cl.balancing.preview_title,Balancing preview
+cl.balancing.preview_summary,"{moved} samples change week in {origins} origin cities ({changes} quotas: {created} new, {zeroed} to zero). The plan total and the totals of each city and each route do not change."
+cl.balancing.before_after,"{moved} moved, standard deviation {before} to {after}"
+cl.balancing.preview_matrix_note,The table below shows the proposed distribution. Nothing is saved until you apply it.
+cl.balancing.confirm,Apply balancing
+cl.balancing.applying,Applying...
+cl.balancing.applied,"Balancing applied: {changed} quotas changed, {created} new, {deleted} deleted."
+cl.balancing.nothing_to_do,Nothing to move: the distribution is already as balanced as possible with what can be moved.
+cl.balancing.matrix_title,Load by origin city and week
+cl.balancing.legend,Planned samples per week (+carried over). Green: normal; orange: high; red: saturated; grey: cannot be moved.
+cl.balancing.balance_all,Balance all origin cities
+cl.balancing.balance_origin,Balance
+cl.balancing.origin,Origin city
+cl.balancing.routes,Routes
+cl.balancing.total,Total
+cl.balancing.stddev,Std. dev.
+cl.balancing.cell_title,Expected: {expected}; cannot be moved: {locked}
