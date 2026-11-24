@@ -1,6 +1,7 @@
 import { format, isValid, parseISO } from 'date-fns'
 import { useTranslation } from '@/hooks/useTranslation'
 import type { ReportedIncidentDetail } from '@/lib/types'
+import { PanelistHistoryButton } from '@/components/panelists/PanelistHistoryButton'
 
 function fmtDate(d: string | null | undefined): string | null {
   if (!d) return null
@@ -35,7 +36,7 @@ export function ReportedIncidentHeader({ inc, role }: {
 
   return (
     <div className="text-sm text-gray-600 mb-4 space-y-1">
-      <div>{name} · <span className="font-mono">{code}</span></div>
+      <div>{name} · <span className="font-mono">{code}</span> <PanelistHistoryButton panelistId={p?.id ?? inc.panelist_id} className="ms-1" /></div>
       <div aria-label={t('reported_incidents.header.contact')}>{contact.join(' · ')}</div>
       {d && (
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">

@@ -5725,3 +5725,56 @@ hc.delivery_standard_form.cl_last_mile_time,Tempo equiv. último trecho
 help_center.doc.carrier_link.title,Carrier Link
 help_center.doc.carrier_link.desc,"O que é o Carrier Link, por que ordem se configura, o que faz cada ecrã e o que significa cada alerta."
 cl.help_link,Ajuda
+panelist_history.button,History
+panelist_history.title,Panelist history
+panelist_history.close,Close
+panelist_history.loading,Loading…
+panelist_history.empty,No activity to show.
+panelist_history.open,view
+panelist_history.load_more,Load more
+panelist_history.pobox,PO box
+panelist_history.created,joined
+panelist_history.yes,yes
+panelist_history.no,no
+panelist_history.stats.sent,Shipments 30 days: {sent}/{scheduled}
+panelist_history.stats.receipt_problems,Reception problems 30 days: {n}
+panelist_history.stats.gps_no,GPS «No» 30 days: {n}
+panelist_history.stats.leave_days,Leave days this year: {n}
+panelist_history.stats.pobox_ref,PO box saved: {v}
+panelist_history.stats.home_ref,Home saved: {v}
+panelist_history.note.placeholder,Add a note about what you discussed with the panelist…
+panelist_history.note.save,Save note
+panelist_history.note.delete,Delete note
+panelist_history.note.delete_confirm,Delete this note? This cannot be undone.
+panelist_history.filter.all,All
+panelist_history.filter.note,Notes
+panelist_history.filter.incident,Incidents
+panelist_history.filter.receipt,Receptions
+panelist_history.filter.gps,GPS
+panelist_history.filter.leave,Leave
+panelist_history.filter.notice,Notices
+panelist_history.event.note,Note
+panelist_history.event.incident,Incident
+panelist_history.event.gps,GPS: said they were not at their place
+panelist_history.event.receipt_receiver,Reception problem
+panelist_history.event.receipt_sender,Their shipment had a problem at reception
+panelist_history.event.leave,Leave
+panelist_history.event.notice,Notice sent
+panelist_history.event.gps_ref_pobox,PO box saved
+panelist_history.event.gps_ref_home,Home saved
+panelist_history.event.gps_ref_declined,Does not want their home saved
+panelist_history.place.pobox,Was not at their PO box (reminded where to declare)
+panelist_history.place.home,Was not at home (reminded where to declare)
+panelist_history.ref.needs_review,to review
+panelist_history.leave.pending,pending approval
+panelist_history.leave.reviewed,approved
+panelist_history.leave.cancelled,cancelled
+panelist_history.error.forbidden,You do not have permission to view or change this panelist's history.
+panelist_history.error.note_length,The note must have between 1 and 2000 characters.
+panelist_history.error.generic,The history could not be loaded. Please try again.
+panelist_history.leave_reason.vacation,Vacation
+panelist_history.leave_reason.sick_leave,Sick leave
+panelist_history.leave_reason.personal,Personal reasons
+panelist_history.leave_reason.training,Training
+panelist_history.leave_reason.other,Other reason
+panelist_history.leave_reason.materials,Missing materials

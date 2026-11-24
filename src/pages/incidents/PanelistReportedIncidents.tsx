@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from '@/hooks/useTranslation'
 import { usePermissions } from '@/contexts/PermissionsContext'
 import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge'
@@ -18,6 +19,16 @@ export function PanelistReportedIncidents() {
   const { inbox, loading, error, fetchInbox } = useReportedIncidents()
   const { unreadByKey } = useUnreadConversations()
   const [selected, setSelected] = useState<string | null>(null)
+  const [params, setParams] = useSearchParams()
+
+  // Abre una incidencia concreta si llega por URL (?incident=<id>, desde el historial del panelista).
+  // Si no esta en la bandeja no se abre nada; el parametro se limpia siempre.
+  const linkedId = params.get('incident')
+  useEffect(() => {
+    if (loading || !linkedId) return
+    if (inbox.some((r) => r.id === linkedId)) setSelected(linkedId)
+    setParams({}, { replace: true })
+  }, [loading, inbox, linkedId, setParams])
   const [catFilter, setCatFilter] = useState<ReportedIncidentCategory | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<ReportedIncidentStatus | 'open_active'>('open_active')
 

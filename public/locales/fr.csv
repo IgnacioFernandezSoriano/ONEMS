@@ -5717,3 +5717,56 @@ hc.delivery_standard_form.cl_last_mile_time,Durée équiv. dernier tronçon
 help_center.doc.carrier_link.title,Carrier Link
 help_center.doc.carrier_link.desc,"Ce qu’est Carrier Link, dans quel ordre le configurer, ce que fait chaque écran et ce que signifie chaque alerte."
 cl.help_link,Aide
+panelist_history.button,Historique
+panelist_history.title,Historique du panéliste
+panelist_history.close,Fermer
+panelist_history.loading,Chargement…
+panelist_history.empty,Aucune activité à afficher.
+panelist_history.open,voir
+panelist_history.load_more,Charger plus
+panelist_history.pobox,boîte postale
+panelist_history.created,inscrit le
+panelist_history.yes,oui
+panelist_history.no,non
+panelist_history.stats.sent,Envois 30 jours : {sent}/{scheduled}
+panelist_history.stats.receipt_problems,Réceptions avec problème 30 jours : {n}
+panelist_history.stats.gps_no,GPS «Non» 30 jours : {n}
+panelist_history.stats.leave_days,Jours d'absence cette année : {n}
+panelist_history.stats.pobox_ref,Boîte postale enregistrée : {v}
+panelist_history.stats.home_ref,Domicile enregistré : {v}
+panelist_history.note.placeholder,Ajouter une note sur ce que vous avez vu avec le panéliste…
+panelist_history.note.save,Enregistrer la note
+panelist_history.note.delete,Supprimer la note
+panelist_history.note.delete_confirm,Supprimer cette note ? Action irréversible.
+panelist_history.filter.all,Tout
+panelist_history.filter.note,Notes
+panelist_history.filter.incident,Incidents
+panelist_history.filter.receipt,Réceptions
+panelist_history.filter.gps,GPS
+panelist_history.filter.leave,Absences
+panelist_history.filter.notice,Avis
+panelist_history.event.note,Note
+panelist_history.event.incident,Incident
+panelist_history.event.gps,GPS : a dit ne pas être à son lieu
+panelist_history.event.receipt_receiver,Problème de réception
+panelist_history.event.receipt_sender,Son envoi a posé problème à la réception
+panelist_history.event.leave,Absence
+panelist_history.event.notice,Avis envoyé
+panelist_history.event.gps_ref_pobox,Boîte postale enregistrée
+panelist_history.event.gps_ref_home,Domicile enregistré
+panelist_history.event.gps_ref_declined,Ne veut pas que son domicile soit enregistré
+panelist_history.place.pobox,N'était pas à sa boîte postale (rappel envoyé)
+panelist_history.place.home,N'était pas à son domicile (rappel envoyé)
+panelist_history.ref.needs_review,à vérifier
+panelist_history.leave.pending,en attente
+panelist_history.leave.reviewed,approuvée
+panelist_history.leave.cancelled,annulée
+panelist_history.error.forbidden,Vous n'avez pas l'autorisation de voir ou modifier l'historique de ce panéliste.
+panelist_history.error.note_length,La note doit contenir entre 1 et 2000 caractères.
+panelist_history.error.generic,Impossible de charger l'historique. Réessayez.
+panelist_history.leave_reason.vacation,Vacances
+panelist_history.leave_reason.sick_leave,Arrêt maladie
+panelist_history.leave_reason.personal,Raison personnelle
+panelist_history.leave_reason.training,Formation
+panelist_history.leave_reason.other,Autre motif
+panelist_history.leave_reason.materials,Manque de matériel
