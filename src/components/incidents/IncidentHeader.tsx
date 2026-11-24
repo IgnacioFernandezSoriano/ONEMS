@@ -3,6 +3,7 @@ import { useTranslation } from '@/hooks/useTranslation'
 import { fmtDay } from '@/lib/incidentFormat'
 import { IncidentStatusBadge } from '@/components/incidents/IncidentStatusBadge'
 import type { UnavailabilityHeader } from '@/lib/types'
+import { PanelistHistoryButton } from '@/components/panelists/PanelistHistoryButton'
 
 // Motivo de la baja (panelist_unavailability.reason) -> clave i18n existente.
 const UNAVAIL_REASON_KEY: Record<string, string> = {
@@ -92,7 +93,7 @@ export function IncidentHeader({ header, onSaveResolution, readOnly = false }: P
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div>
           <div className="text-xs font-medium text-gray-500 uppercase">{t('incidents.inbox.panelist')}</div>
-          <div className="text-sm font-medium">{header.panelist_name}</div>
+          <div className="text-sm font-medium">{header.panelist_name} <PanelistHistoryButton panelistId={header.panelist_id} className="ms-1" /></div>
           <div className="text-xs text-gray-500 font-mono">{header.panelist_code}</div>
         </div>
         <div>
