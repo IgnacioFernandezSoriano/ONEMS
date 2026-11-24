@@ -5841,6 +5841,7 @@ cl.monitor.incidents,Incidents non résolus : {count}
 cl.monitor.incidents_open_all,Ouvrir les incidents
 cl.alert.quota_already_settled,Semaine déjà clôturée
 cl.alert.delivery_retries_exhausted,Livraison échouée après 3 tentatives
+cl.alert.delivery_stuck,Livraison bloquée en traitement depuis plus de 2 heures
 cl.alert.detail.quota_already_settled,{skipped} envois sont arrivés après la clôture de la semaine et n’ont pas été utilisés.
 cl.alert.detail.retries_exhausted,La livraison a été rejetée. Échantillons retirés : {voided}.
 cl.reason.bad_record,Ligne illisible

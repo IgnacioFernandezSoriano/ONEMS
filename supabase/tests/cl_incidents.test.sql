@@ -1,4 +1,4 @@
--- Carrier Link v4.1, tarea 8: control de incidencias (20261124100300_cl_incidents.sql).
+-- Carrier Link v4.1, tarea 8: control de incidencias (20261124200300_cl_incidents.sql).
 -- Estructura y permiso cl_incidents (solo DEMO2), missing_delivery (abrir, anadir, un aviso por periodo aunque el job
 -- corra cada hora, cierre automatico R31 y a mano), delivery_rejected, high_rejection, unknown_data, quota_unfilled
 -- (D27; solo cierre a mano), destinatarios (AM + DO de la cuenta; carrier solo con notification_email en el maestro),
@@ -634,5 +634,69 @@ DO $$ BEGIN
   PERFORM pg_temp.ok(pg_temp.raises('SELECT public.cl_incidents_list(''a0000000-0000-0000-0000-000000000001'')') LIKE '42501:%', 'anon');
 END $$;
 RESET ROLE;
+
+-- ================================================================ 9. revision final
+-- I1: AM con Edit en cl_incidents pero sin cuenta activa (profiles.account_id NULL): el mismo 42501 en get/update/close.
+SELECT set_config('t.own', (SELECT id::text FROM public.cl_incidents
+                             WHERE account_id = 'a0000000-0000-0000-0000-000000000001' AND status <> 'resolved' LIMIT 1), true);
+-- Hoy no se puede dar (check_account_role + account_id inmutable): se simula dentro de esta transaccion de prueba
+-- (ROLLBACK) quitando la restriccion y sin disparadores para este UPDATE. La guarda debe negar igual.
+ALTER TABLE public.profiles DROP CONSTRAINT check_account_role;
+SET session_replication_role = replica;
+UPDATE public.profiles SET account_id = NULL WHERE id = '91000000-0000-0000-0000-000000000091';
+SET session_replication_role = origin;
+SET ROLE authenticated;
+DO $$
+DECLARE v_id uuid := current_setting('t.own')::uuid; e text;
+BEGIN
+  PERFORM pg_temp.ok(v_id IS NOT NULL, 'hay una incidencia abierta de A1');
+  PERFORM pg_temp.as_user('91000000-0000-0000-0000-000000000091', 'authenticated');
+  e := pg_temp.raises(format('SELECT public.cl_incident_get(%L)', v_id));
+  PERFORM pg_temp.ok(e = '42501:CL_FORBIDDEN', 'sin cuenta activa: get ' || coalesce(e, 'ok'));
+  e := pg_temp.raises(format('SELECT public.cl_incident_update(%L, ''in_progress'')', v_id));
+  PERFORM pg_temp.ok(e = '42501:CL_FORBIDDEN', 'sin cuenta activa: update ' || coalesce(e, 'ok'));
+  e := pg_temp.raises(format('SELECT public.cl_incident_close(%L)', v_id));
+  PERFORM pg_temp.ok(e = '42501:CL_FORBIDDEN', 'sin cuenta activa: close ' || coalesce(e, 'ok'));
+END $$;
+RESET ROLE;
+SET session_replication_role = replica;
+UPDATE public.profiles SET account_id = 'a0000000-0000-0000-0000-000000000001' WHERE id = '91000000-0000-0000-0000-000000000091';
+SET session_replication_role = origin;
+DO $$
+BEGIN
+  PERFORM pg_temp.ok((SELECT status FROM public.cl_incidents WHERE id = current_setting('t.own')::uuid) <> 'resolved',
+                     'la incidencia sigue abierta');
+END $$;
+
+-- T8-M2: un aviso 'sending' cuya incidencia se cierra no se envia despues del cierre (ni por un reintento tras un
+-- fallo, ni al reclamarlo otra vez con el arriendo caducado).
+DO $$
+DECLARE
+  f2 constant uuid := 'f0000000-0000-0000-0000-0000000000f2';
+  t1 constant timestamptz := now() + interval '5 days';
+  j jsonb; v_inc uuid; a uuid; b uuid; r text;
+BEGIN
+  UPDATE public.cl_notifications SET status = 'sent', lease_token = NULL, lease_until = NULL
+   WHERE status IN ('pending','sending');
+  PERFORM public.cl_incident_record('a0000000-0000-0000-0000-000000000001', f2, NULL, 'missing_delivery',
+                                    '[{"key":"zz/1","period_start":"2026-11-27","period_end":"2026-11-27"}]', NULL, t1);
+  v_inc := (pg_temp.inc(f2, 'missing_delivery')).id;
+  j := public.cl_notify_claim('tok-zzzz-0001', 100, 300, t1);
+  SELECT (x->>'notification_id')::uuid INTO a FROM jsonb_array_elements(j) x WHERE x->'to'->>0 = 'am@t.l';
+  SELECT (x->>'notification_id')::uuid INTO b FROM jsonb_array_elements(j) x WHERE x->'to'->>0 = 'do@t.l';
+  PERFORM pg_temp.ok(a IS NOT NULL AND b IS NOT NULL, 'dos avisos reclamados: ' || j::text);
+  PERFORM pg_temp.ok(public.cl_incident_close_core(v_inc, 'manual', NULL, NULL, t1), 'incidencia cerrada');
+  -- a: el envio en curso falla (temporal): no vuelve a pending, queda skipped.
+  r := public.cl_notify_result(a, 'tok-zzzz-0001', false, 'RESEND_500', false, NULL, t1);
+  PERFORM pg_temp.ok(r = 'skipped' AND (SELECT status = 'skipped' AND last_error = 'CL_INCIDENT_CLOSED' AND lease_token IS NULL
+                                          FROM public.cl_notifications WHERE id = a), 'fallo tras el cierre: skipped, ' || r);
+  -- b: la funcion murio; con el arriendo caducado no se reclama: skipped.
+  j := public.cl_notify_claim('tok-zzzz-0002', 100, 300, t1 + interval '10 minutes');
+  PERFORM pg_temp.ok(NOT (j @> jsonb_build_array(jsonb_build_object('notification_id', b))), 'no se reclama tras el cierre');
+  PERFORM pg_temp.ok((SELECT status = 'skipped' AND last_error = 'CL_INCIDENT_CLOSED' AND lease_token IS NULL
+                        FROM public.cl_notifications WHERE id = b), 'arriendo caducado tras el cierre: skipped');
+  -- Un envio que SI salio antes de enterarse del cierre se registra como enviado (ya no se puede deshacer).
+  PERFORM pg_temp.ok(public.cl_notify_result(b, 'tok-zzzz-0001', true) = 'lost', 'token viejo: lost');
+END $$;
 
 ROLLBACK;

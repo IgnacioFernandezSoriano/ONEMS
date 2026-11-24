@@ -5849,6 +5849,7 @@ cl.monitor.incidents,Unresolved incidents: {count}
 cl.monitor.incidents_open_all,Open Incidents
 cl.alert.quota_already_settled,Week already closed
 cl.alert.delivery_retries_exhausted,Delivery failed after 3 attempts
+cl.alert.delivery_stuck,Delivery stuck in processing for more than 2 hours
 cl.alert.detail.quota_already_settled,{skipped} shipments arrived after the week had been closed and were not used.
 cl.alert.detail.retries_exhausted,The delivery was rejected. Samples removed: {voided}.
 cl.reason.bad_record,Unreadable row

@@ -49,7 +49,7 @@ BEGIN
   PERFORM pg_temp.ok(NOT has_function_privilege('authenticated','public.cl_emit_due_demands(timestamptz)','EXECUTE'), 'authenticated no ejecuta emit');
   PERFORM pg_temp.ok(NOT has_function_privilege('anon','public.cl_emit_due_demands(timestamptz)','EXECUTE'), 'anon no ejecuta emit');
   PERFORM pg_temp.ok(NOT has_function_privilege('authenticated','public.cl_build_demand(uuid,uuid[])','EXECUTE'), 'authenticated no ejecuta build');
-  -- v4 (20261124100200): el job cl-emit-demands esta retirado; la funcion la pone el fixture.
+  -- v4 (20261124200200): el job cl-emit-demands esta retirado; la funcion la pone el fixture.
   PERFORM pg_temp.ok(NOT EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'cl-emit-demands'), 'job cron cl-emit-demands retirado');
 END $$;
 

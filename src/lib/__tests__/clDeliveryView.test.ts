@@ -95,8 +95,8 @@ describe('traducciones de entregas', () => {
   it('el proceso no escribe códigos que la lista no tenga', () => {
     const dir = resolve(__dirname, '../../../supabase')
     const files = [
-      'migrations/20261124100100_cl_process_delivery.sql',
-      'migrations/20261124100200_cl_delivery_api.sql',
+      'migrations/20261124200100_cl_process_delivery.sql',
+      'migrations/20261124200200_cl_delivery_api.sql',
       'functions/carrier-link-worker/loader.ts',
       'functions/carrier-link-worker/records.ts',
     ]

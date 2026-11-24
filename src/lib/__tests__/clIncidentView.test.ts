@@ -20,7 +20,7 @@ import {
 
 describe('tipos, estados y cierre', () => {
   it('los tipos son los del CHECK de cl_incidents y los filtros de cl_incidents_list', () => {
-    const sql = readFileSync(resolve(__dirname, '../../../supabase/migrations/20261124100300_cl_incidents.sql'), 'utf8')
+    const sql = readFileSync(resolve(__dirname, '../../../supabase/migrations/20261124200300_cl_incidents.sql'), 'utf8')
     for (const type of INCIDENT_TYPES) expect(sql).toContain(`'${type}'`)
     expect(sql).toMatch(/p_status NOT IN \('open','in_progress','resolved','unresolved'\)/)
   })

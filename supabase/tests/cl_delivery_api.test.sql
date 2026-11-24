@@ -1,4 +1,4 @@
--- Carrier Link v4, tarea 3: funciones de la API del conector (20261124100200_cl_delivery_api.sql).
+-- Carrier Link v4, tarea 3: funciones de la API del conector (20261124200200_cl_delivery_api.sql).
 -- Apertura sin compresion y con tamano declarado (CL_FILE_TOO_LARGE antes de crear la entrega), configuracion que
 -- solo anuncia 'none', estado de una entrega (cl_delivery_status: mismo error para ajena e inexistente, alertas
 -- filtradas para el transportista) y retirada del emisor de demandas v3. Todo en BEGIN ... ROLLBACK.

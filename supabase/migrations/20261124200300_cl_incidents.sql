@@ -16,10 +16,17 @@
 -- anadido nuevo; destinatarios: usuarios de la cuenta con rol account_manager o do_coordinator y, solo en missing_delivery,
 -- delivery_rejected y high_rejection, el correo de avisos del carrier del conector (carriers.notification_email, en el
 -- maestro de carriers, decision del responsable 23/11; sin el, no hay correo
--- al carrier). Los correos se resuelven al reclamar el aviso (no se guardan en la cola).
+-- al carrier). Las direcciones se fijan al encolar (un aviso = una direccion, recipient_email; ronda 1 de la tarea 8).
 -- D27: una semana pendiente con falta > 0 se liquida igualmente 3 dias tras su final si la entrega que debia cubrirla
 -- esta vencida (hora de entrega + margen) y no llego.
 -- Permiso nuevo cl_incidents: SOLO en la cuenta DEMO2 (no va en access_template; ver seccion 9).
+
+-- Bloqueos (revision final I2): ALTER TABLE carriers (ACCESS EXCLUSIVE y un escaneo por el CHECK; carriers la leen el
+-- ETL RFID, el bot n8n y la web), CREATE TRIGGER en cl_plan_quotas (viva desde v3: SHARE ROW EXCLUSIVE) y una fila en
+-- access_option, hasta el COMMIT. lock_timeout de 5 s: si algo tiene esas tablas, la migracion falla enseguida en vez de
+-- quedarse en cola bloqueando a todos detras; se reintenta mas tarde (entre dos pasadas del poll RFID). Aplicar en UNA
+-- transaccion.
+SET LOCAL lock_timeout = '5s';
 
 -- ================================================================ 1. correo del carrier (maestro) y margen del conector
 -- Correo de avisos del carrier (decision del responsable 23/11: en el maestro de carriers, no en el conector). Opcional;
@@ -523,7 +530,7 @@ BEGIN
 END $$;
 
 -- ================================================================ 6. cl_settle_quota con cierre definitivo (D27)
--- cl_settle_quota(uuid, p_final): copia literal de la version de 20261124100100 con un solo cambio: con p_final la
+-- cl_settle_quota(uuid, p_final): copia literal de la version de 20261124200100 con un solo cambio: con p_final la
 -- rama v3 "volver a pedir" (pending) no se aplica (una semana vencida sin entrega se liquida con lo que haya; el deficit
 -- va al arrastre de siempre o queda unfilled). cl_settle_quota(uuid) sigue igual para sus llamadores (p_final = false).
 CREATE OR REPLACE FUNCTION public.cl_settle_quota(p_quota_id uuid, p_final boolean)
@@ -636,7 +643,7 @@ CREATE OR REPLACE FUNCTION public.cl_settle_quota(p_quota_id uuid)
 AS $$ SELECT public.cl_settle_quota(p_quota_id, false) $$;
 
 -- ================================================================ 7. cl_housekeeping + tarea 8
--- Copia de la version de 20261124100200 (ronda 2) con tres anadidos, sin otro job:
+-- Copia de la version de 20261124200200 (ronda 2) con tres anadidos, sin otro job:
 --   d) unknown_data: se cierra sola cuando todos sus productos y puntos estan dados de alta (no toca cuotas).
 --   e) en el bloque de cada conector, ya bloqueado (FOR UPDATE SKIP LOCKED y sin entregas en vuelo, como antes):
 --      vigilancia del calendario (missing_delivery) para conectores activos.
@@ -644,6 +651,11 @@ AS $$ SELECT public.cl_settle_quota(p_quota_id, false) $$;
 --      (hora limite del periodo que contiene el fin de semana) y no llego -> pending -> open -> cl_settle_quota(final).
 --      Solo conectores no 'testing' (en prueba no hay entregas reales). El 'unfilled' que resulte abre quota_unfilled
 --      por el disparador de cl_plan_quotas.
+--   g) (revision final, T2-m12) entrega atascada: sigue en 'processing' mas de 2 h desde que se tomo este intento
+--      (progress.claimed_at; si falta, processing_started_at) -> UNA alerta delivery_stuck de severidad alta por entrega
+--      (cl_delivery_alert deduplica). Hay UNA sola entrega en proceso en toda la base: atascada, frena la cola de todas
+--      las cuentas. Los arriendos caducados ya cuentan intentos (3 -> rechazo terminal); esto avisa del resto (p. ej. la
+--      limpieza que falla cada minuto). No se muestra al carrier (cl_delivery_status filtra los tipos).
 -- El orden de bloqueo no cambia: conector -> candado del sorteo -> cuotas por id.
 CREATE OR REPLACE FUNCTION public.cl_housekeeping(p_now timestamptz DEFAULT now())
  RETURNS jsonb
@@ -665,8 +677,22 @@ DECLARE
   v_missing   integer := 0;
   v_late      integer := 0;
   v_unknown   integer := 0;
+  v_stuck     integer := 0;
 BEGIN
   PERFORM pg_advisory_xact_lock(hashtext('cl_housekeeping'));
+
+  -- g) entrega atascada en processing (sin bloquear la entrega: solo lee y anade una alerta).
+  FOR r IN SELECT d.id, d.progress->>'phase' AS phase, COALESCE((d.progress->>'attempts')::integer, 0) AS attempts,
+                  COALESCE((d.progress->>'claimed_at')::timestamptz, d.processing_started_at) AS since
+             FROM public.cl_deliveries d
+            WHERE d.status = 'processing'
+              AND COALESCE((d.progress->>'claimed_at')::timestamptz, d.processing_started_at) < p_now - interval '2 hours'
+              AND NOT EXISTS (SELECT 1 FROM public.cl_alerts a WHERE a.delivery_id = d.id AND a.alert_type = 'delivery_stuck')
+  LOOP
+    PERFORM public.cl_delivery_alert(r.id, NULL, NULL, 'delivery_stuck', 'high',
+                                     jsonb_build_object('phase', r.phase, 'attempts', r.attempts, 'processing_since', r.since));
+    v_stuck := v_stuck + 1;
+  END LOOP;
 
   -- b) zona horaria invalida (una alerta mientras no se descarte). No toca cuotas ni planes.
   FOR r IN SELECT p.id, f.emit_timezone, a.timezone AS account_tz
@@ -779,7 +805,7 @@ BEGIN
 
   RETURN jsonb_build_object('quotas_settled', v_settled, 'plans_closed', v_closed, 'timezone_alerts', v_tz_alerts,
                             'feeds_skipped', v_skipped, 'missing_periods', v_missing, 'late_weeks_settled', v_late,
-                            'unknown_closed', v_unknown);
+                            'unknown_closed', v_unknown, 'stuck_alerts', v_stuck);
 END $$;
 REVOKE ALL ON FUNCTION public.cl_housekeeping(timestamptz) FROM PUBLIC, anon, authenticated, service_role;
 
@@ -795,10 +821,11 @@ AS $$
 DECLARE v public.cl_incidents;
 BEGIN
   SELECT i.* INTO v FROM public.cl_incidents i WHERE i.id = p_incident_id;
+  -- COALESCE(..., false): sin cuenta activa la comparacion da NULL; se niega igual (revision final I1).
   IF v.id IS NULL
-     OR NOT (public.is_superadmin()
-             OR (v.account_id = public.current_user_account_id()
-                 AND public.has_any_access(v.account_id, p_level, 'cl_incidents'))) THEN
+     OR NOT COALESCE(public.is_superadmin()
+                     OR (v.account_id = public.current_user_account_id()
+                         AND public.has_any_access(v.account_id, p_level, 'cl_incidents')), false) THEN
     RAISE EXCEPTION 'CL_FORBIDDEN' USING ERRCODE = '42501';
   END IF;
   RETURN v;
@@ -958,7 +985,8 @@ END $$;
 -- account_access_reset (que copia la plantilla) no lo reciben. Kenya, Senegal, AGENT y el resto no lo tienen.
 -- Se concede solo en DEMO2 (f4d823d2-93e6-4755-9a89-9da87e7fa86e) con los niveles de cl_monitor (AM y UPU Edit, APM
 -- y DO View). OJO: un account_access_reset en DEMO2 lo quita; para devolverlo: SELECT public.cl_incidents_grant_demo2();
-INSERT INTO public.access_option (key, menu_group, sort) VALUES ('cl_incidents', 'carrier_link', 157);
+INSERT INTO public.access_option (key, menu_group, sort) VALUES ('cl_incidents', 'carrier_link', 157)
+ON CONFLICT (key) DO NOTHING;   -- re-ejecutable (la concesion a DEMO2 tambien: ON CONFLICT DO NOTHING)
 
 CREATE OR REPLACE FUNCTION public.cl_incidents_grant_demo2()
  RETURNS integer
@@ -1005,6 +1033,13 @@ BEGIN
      SET status = 'failed', last_error = COALESCE(n.last_error, 'CL_LEASE_EXPIRED'), lease_token = NULL,
          lease_until = NULL, updated_at = p_now
    WHERE n.status = 'sending' AND n.lease_until < p_now AND n.attempts >= 5;
+  -- Incidencia ya cerrada (revision final, T8-M2): lo que quedaba pendiente o en un envio que murio no sale despues
+  -- del cierre (cl_incident_close_core ya salta los pending; aqui, los 'sending' con el arriendo caducado).
+  UPDATE public.cl_notifications n
+     SET status = 'skipped', last_error = 'CL_INCIDENT_CLOSED', lease_token = NULL, lease_until = NULL, updated_at = p_now
+    FROM public.cl_incidents i
+   WHERE i.id = n.incident_id AND i.status = 'resolved'
+     AND ((n.status = 'pending' AND n.next_attempt_at <= p_now) OR (n.status = 'sending' AND n.lease_until < p_now));
 
   FOR v_n IN SELECT n.id, n.recipient_kind, n.recipient_email, n.event, n.periods, i.incident_type, i.periods AS all_periods,
                     f.name AS connector, a.default_language
@@ -1012,8 +1047,9 @@ BEGIN
                JOIN public.cl_incidents i ON i.id = n.incident_id
                JOIN public.cl_feeds f ON f.id = i.feed_id
                JOIN public.accounts a ON a.id = n.account_id
-              WHERE (n.status = 'pending' AND n.next_attempt_at <= p_now)
-                 OR (n.status = 'sending' AND n.lease_until < p_now)
+              WHERE ((n.status = 'pending' AND n.next_attempt_at <= p_now)
+                  OR (n.status = 'sending' AND n.lease_until < p_now))
+                AND i.status <> 'resolved'
               ORDER BY n.created_at, n.id
               LIMIT LEAST(GREATEST(COALESCE(p_limit, 20), 1), 100)
                 FOR UPDATE OF n SKIP LOCKED
@@ -1038,6 +1074,7 @@ BEGIN
 END $$;
 
 -- Resultado del envio. Solo cuenta si el aviso sigue 'sending' con ESE token (si no: 'lost', sin cambios). ok -> sent.
+-- Fallo con la incidencia ya cerrada -> skipped (CL_INCIDENT_CLOSED, no se reintenta).
 -- Fallo: p_final o 5 intentos -> failed; si no, pending con espera (5 min x intentos). p_error: solo un codigo
 -- (^[A-Z0-9_]{1,40}$), otro texto -> CL_SEND_ERROR. Devuelve el estado resultante.
 CREATE OR REPLACE FUNCTION public.cl_notify_result(p_notification_id uuid, p_token text, p_ok boolean,
@@ -1061,6 +1098,12 @@ BEGIN
     UPDATE public.cl_notifications n
        SET status = 'sent', sent_at = p_now, lease_token = NULL, lease_until = NULL, last_error = NULL,
            provider_id = CASE WHEN p_provider_id ~ '^[A-Za-z0-9_-]{1,100}$' THEN p_provider_id END, updated_at = p_now
+     WHERE n.id = v.id;
+  ELSIF EXISTS (SELECT 1 FROM public.cl_incidents i WHERE i.id = v.incident_id AND i.status = 'resolved') THEN
+    -- Fallo de un envio cuya incidencia se cerro mientras tanto: no se reintenta (revision final, T8-M2).
+    v_s := 'skipped';
+    UPDATE public.cl_notifications n
+       SET status = 'skipped', lease_token = NULL, lease_until = NULL, last_error = 'CL_INCIDENT_CLOSED', updated_at = p_now
      WHERE n.id = v.id;
   ELSE
     v_s := CASE WHEN COALESCE(p_final, false) OR v.attempts >= 5 THEN 'failed' ELSE 'pending' END;

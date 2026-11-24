@@ -25,7 +25,14 @@
 -- end_out_of_period). El calendario del conector (emit_days, emit_hour, emit_timezone; ahora "dias de entrega") define
 -- los periodos: una entrega el dia D cubre desde el dia de entrega anterior hasta D-1 (diaria: D-1; semanal el lunes:
 -- lunes..domingo anteriores; lunes y jueves: jue..dom y lun..mie). emit_hour es la hora local esperada (para due_at).
--- Forward-only. No toca cl_ingest_batch, demandas ni la carga manual por lotes (20261123100000).
+-- Forward-only. No toca cl_ingest_batch ni demandas.
+
+-- Bloqueos (revision final I2): ALTER TABLE y DROP/CREATE TRIGGER en cl_samples y cl_alerts (vivas desde v3:
+-- ACCESS EXCLUSIVE / SHARE ROW EXCLUSIVE) y DROP/CREATE POLICY en storage.objects (ACCESS EXCLUSIVE sobre la tabla de
+-- TODO Storage: fotos del bot, videos de formacion) hasta el COMMIT. lock_timeout de 5 s: si algo tiene esas tablas, la
+-- migracion falla enseguida en vez de quedarse en cola bloqueando a todos detras; se reintenta mas tarde. Aplicar el
+-- fichero en UNA transaccion (SET LOCAL solo vale dentro de una).
+SET LOCAL lock_timeout = '5s';
 
 -- ================================================================ 1. tablas
 CREATE TABLE public.cl_deliveries (
@@ -74,6 +81,9 @@ CREATE INDEX cl_deliveries_queue_idx ON public.cl_deliveries (received_at) WHERE
 -- Un periodo se entrega una sola vez: dos entregas reales "entregadas" (received/processing/processed/failed) del mismo
 -- conector no pueden solaparse en fechas (garantia en la base, ademas de los bloqueos de las funciones). Las entregas
 -- de prueba (is_test) no consumen periodos: se pueden repetir y no cuentan para el calendario ni para next_period.
+-- btree_gist (gist para el '=' de uuid) NO esta instalada en onems-dev: se instala aqui, en el esquema extensions, ANTES
+-- de la restriccion. La clase de operadores por defecto se busca por tipo (no por search_path) y '=' / '&&' estan en
+-- pg_catalog: funciona con cualquier search_path (lo comprueba cl_deliveries.test.sql con search_path = public).
 CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA extensions;
 ALTER TABLE public.cl_deliveries ADD CONSTRAINT cl_deliveries_no_overlap
   EXCLUDE USING gist (feed_id WITH =, daterange(period_start, period_end, '[]') WITH &&)
@@ -115,8 +125,10 @@ CREATE UNLOGGED TABLE public.cl_delivery_rows (
 );
 CREATE INDEX cl_delivery_rows_item_idx ON public.cl_delivery_rows (delivery_id, item_id);
 
--- Traza de la entrega en lo elegido y en sus alertas.
-ALTER TABLE public.cl_samples ADD COLUMN delivery_id uuid REFERENCES public.cl_deliveries(id) ON DELETE RESTRICT;
+-- Traza de la entrega en lo elegido y en sus alertas. cl_samples: NO ACTION (no RESTRICT): no se borra una entrega con
+-- muestras, pero la comprobacion es al final de la sentencia, asi que borrar una cuenta (cascada a entregas Y a
+-- muestras, en el orden que sea) funciona (revision final, T1-M4).
+ALTER TABLE public.cl_samples ADD COLUMN delivery_id uuid REFERENCES public.cl_deliveries(id) ON DELETE NO ACTION;
 ALTER TABLE public.cl_alerts  ADD COLUMN delivery_id uuid REFERENCES public.cl_deliveries(id) ON DELETE CASCADE;
 CREATE INDEX cl_samples_delivery_idx ON public.cl_samples (delivery_id);
 CREATE INDEX cl_alerts_delivery_idx  ON public.cl_alerts (delivery_id);
@@ -303,10 +315,12 @@ AS $$
 DECLARE v_feed public.cl_feeds;
 BEGIN
   SELECT f.* INTO v_feed FROM public.cl_feeds f WHERE f.id = p_feed_id;
+  -- COALESCE(..., false): sin cuenta activa (current_user_account_id() NULL) la comparacion da NULL y el IF no
+  -- saltaria; se niega igual (revision final I1).
   IF v_feed.id IS NULL
-     OR NOT (public.is_superadmin()
-             OR (v_feed.account_id = public.current_user_account_id()
-                 AND public.has_any_access(v_feed.account_id, 'edit', 'cl_connectors'))) THEN
+     OR NOT COALESCE(public.is_superadmin()
+                     OR (v_feed.account_id = public.current_user_account_id()
+                         AND public.has_any_access(v_feed.account_id, 'edit', 'cl_connectors')), false) THEN
     RAISE EXCEPTION 'CL_FORBIDDEN' USING ERRCODE = '42501';
   END IF;
   RETURN v_feed;

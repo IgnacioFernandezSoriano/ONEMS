@@ -1,4 +1,4 @@
--- Carrier Link v4, tarea 2: proceso de una entrega (20261124100100_cl_process_delivery.sql).
+-- Carrier Link v4, tarea 2: proceso de una entrega (20261124200100_cl_process_delivery.sql).
 -- Carga por el worker (tomar, trozos, arriendo, cursor, sha256, max_rows, lista cerrada de campos), fases de la base
 -- (equivalencias, validacion, envios por semana ISO de llegada, cuota por entrega, sorteo determinista, paso a
 -- cl_samples / one_db, alertas, liquidacion), vaciado de la zona de paso (M1), reanudar tras caida o fallo, entregas
@@ -242,6 +242,12 @@ BEGIN
   e := pg_temp.raises(format($q$SELECT public.cl_delivery_load_rows(%L, 'token-test-2', 0, %L, '{"offset":10,"rows":2,"sha_offset":10}')$q$,
                              v_id, jsonb_build_array(pg_temp.r(2, 'X', '2026-11-04 08:00', 'NBO'))));
   PERFORM pg_temp.ok(e LIKE '%CL_BAD_REQUEST%', 'filas no consecutivas: ' || COALESCE(e, 'null'));
+  -- Revision final (T2-m2): numero de fila repetido + hueco (1, 1, 3: min, max y cuenta cuadran) -> rechazado.
+  e := pg_temp.raises(format($q$SELECT public.cl_delivery_load_rows(%L, 'token-test-2', 0, %L, '{"offset":10,"rows":3,"sha_offset":10}')$q$,
+                             v_id, jsonb_build_array(pg_temp.r(1, 'X1', '2026-11-04 08:00', 'NBO'), pg_temp.r(1, 'X1', '2026-11-04 08:00', 'NBO'),
+                                                     pg_temp.r(3, 'X3', '2026-11-04 08:00', 'NBO'))));
+  PERFORM pg_temp.ok(e LIKE '%CL_BAD_REQUEST%', 'fila repetida con hueco: ' || COALESCE(e, 'null'));
+  PERFORM pg_temp.ok(pg_temp.staging(v_id) = 0, 'nada cargado');
   e := pg_temp.raises(format($q$SELECT public.cl_delivery_load_rows(%L, 'token-test-2', 0, '[]', '{"offset":10,"rows":0}')$q$, v_id));
   PERFORM pg_temp.ok(e LIKE '%CL_BAD_REQUEST%', 'cursor sin sha_offset: ' || COALESCE(e, 'null'));
   e := pg_temp.raises(format($q$SELECT public.cl_delivery_load_done(%L, 'token-test-2', 0, 'x', 1)$q$, v_id));
@@ -788,6 +794,46 @@ BEGIN
   -- La prueba fallida se reintenta sola pasados 5 minutos (sigue siendo procesable).
   c := public.cl_delivery_worker_claim('token-r2-0002', 120, now() + interval '10 minutes');
   PERFORM pg_temp.ok(c->>'action' = 'load' AND (c->>'delivery_id')::uuid = tt, 'la prueba se reintenta: ' || c::text);
+END $$;
+
+-- ================================================================ 12. revision final
+-- T2-m12: una entrega que sigue en 'processing' mas de 2 h desde que se tomo (arriendos caducados, limpieza que falla...)
+-- -> UNA alerta delivery_stuck de severidad alta (cl_housekeeping, cada hora). La entrega de prueba tt de arriba quedo
+-- tomada (processing, fase load) a now() + 10 min.
+DO $$
+DECLARE
+  tt constant uuid := 'de000000-0000-4000-8000-0000000000e1';
+  h jsonb;
+BEGIN
+  PERFORM pg_temp.ok((SELECT status FROM public.cl_deliveries WHERE id = tt) = 'processing', 'tt en proceso');
+  h := public.cl_housekeeping(now() + interval '1 hour');
+  PERFORM pg_temp.ok(NOT EXISTS (SELECT 1 FROM public.cl_alerts WHERE delivery_id = tt AND alert_type = 'delivery_stuck'),
+                     'menos de 2 h: sin alerta ' || h::text);
+  h := public.cl_housekeeping(now() + interval '3 hours');
+  PERFORM pg_temp.ok((h->>'stuck_alerts')::int = 1, 'housekeeping cuenta la alerta: ' || h::text);
+  h := public.cl_housekeeping(now() + interval '4 hours');
+  PERFORM pg_temp.ok((SELECT count(*) FROM public.cl_alerts WHERE delivery_id = tt AND alert_type = 'delivery_stuck'
+                        AND severity = 'high' AND plan_id IS NULL AND details->>'phase' = 'load'
+                        AND (details->>'attempts')::int >= 1) = 1, 'una sola alerta alta');
+  PERFORM pg_temp.ok((h->>'stuck_alerts')::int = 0, 'la segunda vez no cuenta: ' || h::text);
+END $$;
+
+-- T1-M4: borrar una cuenta con entregas y muestras de esas entregas funciona (FK cl_samples.delivery_id NO ACTION: se
+-- comprueba al final de la sentencia, cuando la cascada ya borro las muestras).
+DO $$
+DECLARE e text;
+BEGIN
+  -- El orden de la cascada depende del orden de creacion de las FK (aqui las muestras caen antes y RESTRICT tambien
+  -- pasaria): se comprueba ademas la accion de la FK en el catalogo ('a' = NO ACTION, 'r' = RESTRICT).
+  PERFORM pg_temp.ok((SELECT c.confdeltype FROM pg_constraint c
+                       WHERE c.conrelid = 'public.cl_samples'::regclass AND c.contype = 'f'
+                         AND c.confrelid = 'public.cl_deliveries'::regclass) = 'a', 'FK cl_samples.delivery_id NO ACTION');
+  PERFORM pg_temp.ok(EXISTS (SELECT 1 FROM public.cl_samples s JOIN public.cl_deliveries d ON d.id = s.delivery_id
+                              WHERE d.account_id = 'a0000000-0000-0000-0000-000000000001'), 'hay muestras con entrega');
+  e := pg_temp.raises($q$DELETE FROM public.accounts WHERE id = 'a0000000-0000-0000-0000-000000000001'$q$);
+  PERFORM pg_temp.ok(e IS NULL, 'borrar la cuenta: ' || COALESCE(e, 'ok'));
+  PERFORM pg_temp.ok(NOT EXISTS (SELECT 1 FROM public.cl_deliveries WHERE account_id = 'a0000000-0000-0000-0000-000000000001'),
+                     'entregas borradas en cascada');
 END $$;
 
 ROLLBACK;

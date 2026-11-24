@@ -132,7 +132,7 @@ END $$;
 -- 6. Opciones de acceso: 5 + 5 + 4 + 4 por cuenta; plantilla.
 DO $$
 BEGIN
-  -- 6 = las 5 de esta migracion + cl_incidents (20261124100300, fuera de la plantilla: solo DEMO2).
+  -- 6 = las 5 de esta migracion + cl_incidents (20261124200300, fuera de la plantilla: solo DEMO2).
   PERFORM pg_temp.fail_if((SELECT count(*) FROM public.access_option WHERE key LIKE 'cl\_%') <> 6, 'opciones cl_');
   PERFORM pg_temp.fail_if((SELECT sort FROM public.access_option WHERE key = 'cl_monitor') <> 156, 'sort cl_monitor');
   PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM public.accounts a

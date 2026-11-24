@@ -5841,6 +5841,7 @@ cl.monitor.incidents,حوادث غير محلولة: {count}
 cl.monitor.incidents_open_all,فتح الحوادث
 cl.alert.quota_already_settled,الأسبوع مُقفل مسبقًا
 cl.alert.delivery_retries_exhausted,فشل التسليم بعد 3 محاولات
+cl.alert.delivery_stuck,التسليم متوقف قيد المعالجة لأكثر من ساعتين
 cl.alert.detail.quota_already_settled,وصلت {skipped} إرسالية بعد إقفال الأسبوع ولم تُستخدم.
 cl.alert.detail.retries_exhausted,رُفض التسليم. العينات المسحوبة: {voided}.
 cl.reason.bad_record,صف غير مقروء

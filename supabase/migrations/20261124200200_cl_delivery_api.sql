@@ -1,6 +1,6 @@
 -- Carrier Link v4, tarea 3: contrato de la Edge Function carrier-link-ingest (GET /config, POST /deliveries,
--- POST /deliveries/{id}/complete, GET /deliveries/{id}). Sobre 20261124100000_cl_deliveries.sql (tarea 1) y
--- 20261124100100_cl_process_delivery.sql (tarea 2).
+-- POST /deliveries/{id}/complete, GET /deliveries/{id}). Sobre 20261124200000_cl_deliveries.sql (tarea 1) y
+-- 20261124200100_cl_process_delivery.sql (tarea 2).
 --
 --   1. Sin compresion en v4: cl_delivery_open y cl_manual_delivery_open ya no reciben p_compression (siempre 'none');
 --      cl_connector_config anuncia solo 'none'. El nucleo interno (cl_delivery_open_core) no cambia.
@@ -11,6 +11,10 @@
 --   4. Retirada del motor de demandas v3: fuera el job cl-emit-demands y la funcion cl_emit_due_demands. Las tablas de
 --      demandas y lotes se quedan (historial); no se emiten demandas nuevas.
 -- Forward-only.
+-- Bloqueos (revision final I2): ADD CONSTRAINT en cl_deliveries (nueva de v4), retirada del job vivo cl-emit-demands
+-- (filas de cron.job) y DROP de su funcion. lock_timeout de 5 s: falla enseguida en vez de esperar en cola. Aplicar en
+-- UNA transaccion.
+SET LOCAL lock_timeout = '5s';
 
 -- ================================================================ 1-2. abrir una entrega (sin compresion, con tamano)
 DROP FUNCTION IF EXISTS public.cl_delivery_open(uuid, date, date, text, jsonb, text, text);
@@ -62,7 +66,7 @@ REVOKE ALL ON FUNCTION public.cl_manual_delivery_open(uuid, date, date, text, js
 GRANT EXECUTE ON FUNCTION public.cl_manual_delivery_open(uuid, date, date, text, jsonb, text) TO authenticated;
 
 -- ================================================================ 1. configuracion: solo 'none'
--- Copia de 20261124100000 con un unico cambio: formats.compression = ["none"].
+-- Copia de 20261124200000 con un unico cambio: formats.compression = ["none"].
 CREATE OR REPLACE FUNCTION public.cl_connector_config(p_feed_id uuid, p_now timestamptz DEFAULT now())
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -355,7 +359,7 @@ REVOKE ALL ON FUNCTION public.cl_delivery_safe_error(text) FROM PUBLIC, anon, au
 ALTER TABLE public.cl_deliveries
   ADD CONSTRAINT cl_deliveries_error_code_only CHECK (error IS NULL OR error ~ '^CL_[A-Z0-9_]{1,60}( [0-9A-Z]{5})?$');
 
--- Copia de 20261124100100 con un unico cambio: final_error = cl_delivery_safe_error(p_error).
+-- Copia de 20261124200100 con un unico cambio: final_error = cl_delivery_safe_error(p_error).
 CREATE OR REPLACE FUNCTION public.cl_delivery_mark_abort(p_delivery_id uuid, p_status text, p_error text)
  RETURNS void
  LANGUAGE plpgsql
@@ -375,7 +379,7 @@ END $$;
 REVOKE ALL ON FUNCTION public.cl_delivery_mark_abort(uuid, text, text) FROM PUBLIC, anon, authenticated, service_role;
 
 -- ================================================================ 7. deshacer una entrega: aviso si deja corta una cuota ya liquidada
--- Copia de 20261124100100 con un unico cambio (revision tarea 3, ronda 2, defensivo): tras restar las muestras
+-- Copia de 20261124200100 con un unico cambio (revision tarea 3, ronda 2, defensivo): tras restar las muestras
 -- anuladas, una cuota ya liquidada (ni pending ni open) que queda por debajo de su objetivo NO se reabre (reabrirla
 -- volveria a repartir un deficit que cl_settle_quota ya arrastro o dio por unfilled): se levanta la alerta
 -- quota_short_after_undo (high) con lo que falta, para que el regulador decida. Con cl_housekeeping bloqueando el

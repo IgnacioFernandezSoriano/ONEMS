@@ -1,4 +1,4 @@
--- Fixture de tests: el emisor de demandas v3 (cl_emit_due_demands), retirado en 20261124100200_cl_delivery_api.sql.
+-- Fixture de tests: el emisor de demandas v3 (cl_emit_due_demands), retirado en 20261124200200_cl_delivery_api.sql.
 -- Los tests v3 (demandas, sorteo, liquidacion, deshacer) lo usan para montar sus escenarios. Copia literal de la
 -- definicion de 20261120110800_cl_final_fixes.sql. Se crea al principio del test y se borra al final:
 --   \ir fixtures/cl_v3_demand_emitter.sql      ...      DROP FUNCTION public.cl_emit_due_demands(timestamptz);

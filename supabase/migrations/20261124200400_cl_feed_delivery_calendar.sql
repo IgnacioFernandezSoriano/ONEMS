@@ -18,10 +18,11 @@ DECLARE
   v_cfg  jsonb;
 BEGIN
   SELECT f.* INTO v_feed FROM public.cl_feeds f WHERE f.id = p_feed_id;
+  -- COALESCE(..., false): sin cuenta activa la comparacion da NULL; se niega igual (revision final I1).
   IF v_feed.id IS NULL
-     OR NOT (public.is_superadmin()
-             OR (v_feed.account_id = public.current_user_account_id()
-                 AND public.has_any_access(v_feed.account_id, 'view', 'cl_connectors'))) THEN
+     OR NOT COALESCE(public.is_superadmin()
+                     OR (v_feed.account_id = public.current_user_account_id()
+                         AND public.has_any_access(v_feed.account_id, 'view', 'cl_connectors')), false) THEN
     RAISE EXCEPTION 'CL_FORBIDDEN' USING ERRCODE = '42501';
   END IF;
   v_cfg := public.cl_connector_config(p_feed_id, now());

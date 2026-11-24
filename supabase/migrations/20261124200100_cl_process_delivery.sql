@@ -1,5 +1,5 @@
 -- Carrier Link v4, tarea 2: proceso de una entrega completa (spec 2026-11-19-carrier-link-design.md, v4: R24-R28,
--- D20-D21). Sobre el modelo de la tarea 1 (20261124100000_cl_deliveries.sql).
+-- D20-D21). Sobre el modelo de la tarea 1 (20261124200000_cl_deliveries.sql).
 --
 -- Dos mitades:
 --   A. CARGA del fichero (Edge Function carrier-link-worker, service_role). Lee el objeto de Storage por trozos (HTTP
@@ -19,8 +19,12 @@
 --   ilegible...). La zona de paso se vacia SIEMPRE antes de salir de 'processing' (el disparador guarda lo exige, M1).
 -- Una sola entrega 'processing' a la vez (indice de la tarea 1); orden de bloqueo: conector y despues entrega.
 -- Entregas de prueba (is_test): se validan y cuentan; sin sorteo, sin muestras, sin one_db, sin alertas, sin liquidar.
--- Diagnostico (planes con feed_diagnosis): pendiente de la tarea 7 (ver TODO en cl_delivery_phase_transfer).
+-- Diagnostico (planes con feed_diagnosis): lo anade la tarea 7 (20261124200500_cl_diagnosis.sql).
 -- Forward-only. No toca cl_ingest_batch, demandas ni la carga manual por lotes.
+
+-- Bloqueos (revision final I2): solo tablas nuevas de v4 (cl_delivery_items, cl_delivery_strata) y filas de cron.job;
+-- lock_timeout de 5 s por si algo las tiene (falla enseguida en vez de esperar). Aplicar en UNA transaccion.
+SET LOCAL lock_timeout = '5s';
 
 -- ================================================================ 1. zona de paso de envios
 -- Un envio (item_id) por fila de la entrega en proceso. UNLOGGED como cl_delivery_rows; se vacia con ella.
@@ -54,7 +58,7 @@ ALTER TABLE public.cl_delivery_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.cl_delivery_strata ADD COLUMN skipped_settled integer NOT NULL DEFAULT 0 CHECK (skipped_settled >= 0);
 REVOKE ALL ON public.cl_delivery_items FROM PUBLIC, anon, authenticated, service_role;
 
--- ================================================================ 2. guarda de estados (de 20261124100000) + M1
+-- ================================================================ 2. guarda de estados (de 20261124200000) + M1
 -- Cambio: una entrega no sale de 'processing' mientras tenga filas en la zona de paso (R25).
 CREATE OR REPLACE FUNCTION public.cl_deliveries_guard()
  RETURNS trigger
@@ -86,7 +90,7 @@ BEGIN
 END $$;
 REVOKE ALL ON FUNCTION public.cl_deliveries_guard() FROM PUBLIC, anon, authenticated, service_role;
 
--- ================================================================ 3. resumen (de 20261124100000) + avance
+-- ================================================================ 3. resumen (de 20261124200000) + avance
 -- Cambio: anade phase, bytes_loaded, rows_loaded, attempts y processing_started_at (para GET /deliveries/{id}).
 CREATE OR REPLACE FUNCTION public.cl_delivery_summary(p_delivery_id uuid)
  RETURNS jsonb
@@ -268,6 +272,7 @@ BEGIN
        SET status = 'processing', error = NULL,
            processing_started_at = COALESCE(d.processing_started_at, p_now),
            progress = jsonb_build_object('phase', 'load', 'attempts', COALESCE((d.progress->>'attempts')::integer, 0) + 1,
+                                         'claimed_at', p_now,   -- entrada en processing de ESTE intento (alerta de atasco)
                                          'load', public.cl_delivery_load_start(),
                                          'lease_token', p_token, 'lease_until', p_now + v_lease)
      WHERE d.id = v_d.id
@@ -366,6 +371,7 @@ DECLARE
   v_min   bigint;
   v_max   bigint;
   v_cnt   bigint;
+  v_dist  bigint;
   v_limit bigint;
   f_item text; f_product text; f_scan text; f_place text; f_mode text;
   v_extra text[];
@@ -380,9 +386,12 @@ BEGIN
   END IF;
   v_prev := (v_d.progress->'load'->>'rows')::bigint;
   v_n := (p_load->>'rows')::bigint;
-  SELECT min((e->>'n')::bigint), max((e->>'n')::bigint), count(*) INTO v_min, v_max, v_cnt
+  -- Exactamente v_prev+1 .. v_n, cada numero una vez: un numero repetido junto a un hueco (1, 1, 3) cuadraria min, max y
+  -- cuenta; por eso tambien se exigen numeros distintos (revision final, T2-m2).
+  SELECT min((e->>'n')::bigint), max((e->>'n')::bigint), count(*), count(DISTINCT (e->>'n')::bigint)
+    INTO v_min, v_max, v_cnt, v_dist
     FROM jsonb_array_elements(p_rows) e;
-  IF v_cnt > 0 AND (v_min <> v_prev + 1 OR v_max <> v_n OR v_cnt <> v_max - v_min + 1)
+  IF v_cnt > 0 AND (v_min <> v_prev + 1 OR v_max <> v_n OR v_cnt <> v_max - v_min + 1 OR v_dist <> v_cnt)
      OR v_cnt = 0 AND v_n <> v_prev THEN
     RAISE EXCEPTION 'CL_BAD_REQUEST: rows must continue at row %', v_prev + 1 USING ERRCODE = '22023';
   END IF;

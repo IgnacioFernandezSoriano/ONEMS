@@ -64,7 +64,9 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
   const log = deps.log ?? (() => {})
   if (req.method === 'OPTIONS') return new Response(null, { status: 204 })
 
-  const route = parseRoute(new URL(req.url))
+  // A malformed percent-escape in the path (decodeURIComponent throws URIError) is a controlled 400, not a 500.
+  let route: ReturnType<typeof parseRoute>
+  try { route = parseRoute(new URL(req.url)) } catch { return fail('CL_BAD_REQUEST', 'malformed URL') }
   // Old and unknown routes answer before authentication: nothing to leak, no database work.
   if (route === null) return fail('CL_NOT_FOUND')
   if (route.kind === 'gone') return fail('CL_ENDPOINT_GONE')
@@ -88,6 +90,11 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
         const mapped = sqlErrorToHttp(error)
         if (mapped) throw new HttpError(mapped.code)
         log('db_error', error.code) // SQLSTATE only: messages may contain values
+        throw new HttpError('CL_INTERNAL')
+      }
+      // Every RPC here returns a JSON object; anything else (null, scalar, array) is a server fault, never a 2xx.
+      if (data === null || typeof data !== 'object' || Array.isArray(data)) {
+        log('db_empty_result', fn)
         throw new HttpError('CL_INTERNAL')
       }
       return data

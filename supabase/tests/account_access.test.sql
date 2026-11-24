@@ -53,7 +53,7 @@ DECLARE n int; b boolean;
   NR constant text := '95000000-0000-0000-0000-000000000095';
   MU constant text := '94000000-0000-0000-0000-000000000094';
 BEGIN
-  -- Plantilla: 34 opciones (28 + 6 cl_ de Carrier Link; cl_incidents solo en DEMO2, 20261124100300); 7 columnas (6 roles + no_role).
+  -- Plantilla: 34 opciones (28 + 6 cl_ de Carrier Link; cl_incidents solo en DEMO2, 20261124200300); 7 columnas (6 roles + no_role).
   SELECT count(*) INTO n FROM public.access_option;
   PERFORM pg_temp.fail_if(n <> 34, 'opciones: ' || n);
   SELECT count(DISTINCT role) INTO n FROM public.access_template;

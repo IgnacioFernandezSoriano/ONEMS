@@ -1,4 +1,4 @@
--- Carrier Link v4, tarea 7: diagnostico (20261124100500_cl_diagnosis.sql). Spec v4.2 R33-R36.
+-- Carrier Link v4, tarea 7: diagnostico (20261124200500_cl_diagnosis.sql). Spec v4.2 R33-R36.
 -- 1. Kenya intacta: el ETL RFID (process_rfid_pipeline) sobre un fixture solo RFID da EXACTAMENTE lo mismo con la
 --    migracion que sin ella (se emula "sin ella" dentro de la transaccion: DROP de sus disparadores y columnas), y todo
 --    queda capture_source = 'rfid'.

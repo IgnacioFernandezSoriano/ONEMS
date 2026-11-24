@@ -5849,6 +5849,7 @@ cl.monitor.incidents,Incidencias sin resolver: {count}
 cl.monitor.incidents_open_all,Abrir Incidencias
 cl.alert.quota_already_settled,Semana ya cerrada
 cl.alert.delivery_retries_exhausted,Entrega fallida tras 3 intentos
+cl.alert.delivery_stuck,Entrega atascada en proceso más de 2 horas
 cl.alert.detail.quota_already_settled,{skipped} envíos llegaron después de cerrar la semana y no se usaron.
 cl.alert.detail.retries_exhausted,La entrega se ha rechazado. Muestras retiradas: {voided}.
 cl.reason.bad_record,Fila ilegible

@@ -1,4 +1,4 @@
--- Carrier Link v4, tarea 5: cl_feed_delivery_calendar (20261124100400). Lectura del calendario de entregas para la
+-- Carrier Link v4, tarea 5: cl_feed_delivery_calendar (20261124200400). Lectura del calendario de entregas para la
 -- pantalla Conectores: frecuencia, proximo periodo, margen de no recibido. Permiso View en cl_connectors de la cuenta
 -- activa (o superadmin); lo demas, el mismo 42501 CL_FORBIDDEN. Todo en BEGIN ... ROLLBACK.
 \set ON_ERROR_STOP on
@@ -97,6 +97,26 @@ BEGIN
                      'A2: semanal sin plan -> sin proximo periodo: ' || j::text);
 END $$;
 RESET ROLE;
+
+-- Revision final (I1): con derecho pero sin cuenta activa (profiles.account_id NULL) -> el mismo 42501.
+-- Hoy no se puede dar (check_account_role + account_id inmutable): se simula dentro de esta transaccion de prueba
+-- (ROLLBACK) quitando la restriccion y sin disparadores para este UPDATE. La guarda debe negar igual.
+ALTER TABLE public.profiles DROP CONSTRAINT check_account_role;
+SET session_replication_role = replica;
+UPDATE public.profiles SET account_id = NULL WHERE id = '99000000-0000-0000-0000-000000000099';
+SET session_replication_role = origin;
+SET ROLE authenticated;
+DO $$
+DECLARE e text;
+BEGIN
+  PERFORM pg_temp.as_user('99000000-0000-0000-0000-000000000099', 'authenticated');
+  e := pg_temp.raises($q$SELECT public.cl_feed_delivery_calendar('f0000000-0000-0000-0000-0000000000c1')$q$);
+  PERFORM pg_temp.ok(e = '42501:CL_FORBIDDEN', 'sin cuenta activa: ' || coalesce(e, 'ok'));
+END $$;
+RESET ROLE;
+SET session_replication_role = replica;
+UPDATE public.profiles SET account_id = 'a0000000-0000-0000-0000-000000000001' WHERE id = '99000000-0000-0000-0000-000000000099';
+SET session_replication_role = origin;
 
 SET ROLE anon;
 DO $$

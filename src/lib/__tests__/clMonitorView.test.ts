@@ -23,7 +23,7 @@ describe('alertLabelKey y traducciones', () => {
   }
   // v4: avisos de las entregas (cl_delivery_alert(delivery, plan, quota, 'tipo', 'gravedad', ...)).
   const v4 = new Set<string>()
-  for (const f of readdirSync(dir).filter((x) => x.startsWith('202611241'))) {
+  for (const f of readdirSync(dir).filter((x) => x.startsWith('202611242'))) {
     const sql = readFileSync(resolve(dir, f), 'utf8')
     for (const m of sql.matchAll(/cl_delivery_alert\([^;]*?,\s*'([a-z_]+)'\s*,\s*'(?:high|medium|low)'/g)) v4.add(m[1])
   }

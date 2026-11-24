@@ -1,6 +1,6 @@
 // deno-lint-ignore-file require-await no-explicit-any no-import-prefix
 // Worker contra ficheros generados y una base simulada que aplica las mismas reglas que las RPC de
-// 20261124100100_cl_process_delivery.sql (arriendo, cursor, filas consecutivas, max_rows, sha256, zona de paso
+// 20261124200100_cl_process_delivery.sql (arriendo, cursor, filas consecutivas, max_rows, sha256, zona de paso
 // perdida). Cubre: registro partido entre trozos, CRLF, campo CSV entre comillas con salto de linea, BOM, lineas en
 // blanco, caida a mitad de fichero y reanudacion, sha256 distinto, registro demasiado largo, fichero inexistente.
 import { assert, assertEquals, assertRejects } from 'https://deno.land/std@0.224.0/assert/mod.ts'

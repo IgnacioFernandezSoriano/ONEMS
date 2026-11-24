@@ -286,3 +286,28 @@ Deno.test('missing, foreign and malformed delivery ids give the identical 404', 
   }
   assertEquals(new Set(bodies).size, 1, bodies.join(' | '))
 })
+
+// ---------------------------------------------------------------- final review: malformed URL, empty RPC result
+Deno.test('malformed percent-escape in the path -> controlled 400 CL_BAD_REQUEST, no auth or DB work', async () => {
+  for (const [m, p] of [['GET', '/deliveries/%E0%A4%A'], ['POST', '/deliveries/%zz/complete']]) {
+    const t = mock()
+    const r = await handle(req(m, p), t.deps)
+    assertEquals([r.status, (await r.json()).error], [400, 'CL_BAD_REQUEST'], p)
+    assertEquals(t.calls.length + t.usage.length, 0)
+  }
+})
+Deno.test('null or non-object RPC result -> 500 CL_INTERNAL, never 201/200 with an empty delivery', async () => {
+  const cases: [string, string, unknown, Record<string, unknown>][] = [
+    ['POST', '/deliveries', openBody(), { cl_delivery_open: { data: null } }],
+    ['POST', '/deliveries', openBody(), { cl_delivery_open: { data: 'x' } }],
+    ['POST', `/deliveries/${DID}/complete`, undefined, { cl_delivery_complete: { data: null } }],
+    ['GET', `/deliveries/${DID}`, undefined, { cl_delivery_status: { data: [summary()] } }],
+    ['GET', '/config', undefined, { cl_connector_config: { data: null } }],
+  ]
+  for (const [m, p, body, answers] of cases) {
+    const t = mock(answers as Parameters<typeof mock>[0])
+    const r = await handle(req(m, p, body), t.deps)
+    assertEquals([r.status, (await r.json()).error], [500, 'CL_INTERNAL'], `${m} ${p}`)
+    assertEquals(t.kicks(), 0)
+  }
+})

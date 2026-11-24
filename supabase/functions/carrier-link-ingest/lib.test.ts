@@ -120,9 +120,9 @@ Deno.test('error table: key statuses', () => {
 Deno.test('error table covers every CL_ code of the v4 database functions and the worker', async () => {
   const root = new URL('../../', import.meta.url)
   const sources = [
-    'migrations/20261124100000_cl_deliveries.sql',
-    'migrations/20261124100100_cl_process_delivery.sql',
-    'migrations/20261124100200_cl_delivery_api.sql',
+    'migrations/20261124200000_cl_deliveries.sql',
+    'migrations/20261124200100_cl_process_delivery.sql',
+    'migrations/20261124200200_cl_delivery_api.sql',
     'functions/carrier-link-worker/loader.ts',
     'functions/carrier-link-worker/records.ts',
   ]

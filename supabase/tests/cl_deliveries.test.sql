@@ -1,4 +1,4 @@
--- Carrier Link v4, tarea 1: modelo de entrega completa por periodo (20261124100000_cl_deliveries.sql).
+-- Carrier Link v4, tarea 1: modelo de entrega completa por periodo (20261124200000_cl_deliveries.sql).
 -- Estructura (zona de paso UNLOGGED cerrada, sin datos personales), privilegios, RLS y aislamiento por cuenta,
 -- bucket privado y politicas de Storage, validacion del periodo frente al calendario, idempotencia por
 -- sha256 + periodo, estados, y contenido de cl_connector_config. Todo en BEGIN ... ROLLBACK.
@@ -622,6 +622,30 @@ BEGIN
 END $$;
 RESET ROLE;
 
+-- Revision final (I1): un usuario CON el derecho pero sin cuenta activa (profiles.account_id NULL) no pasa la guarda
+-- (antes: account_id = NULL daba NULL y el IF no saltaba).
+-- Hoy no se puede dar (check_account_role + account_id inmutable): se simula dentro de esta transaccion de prueba
+-- (ROLLBACK) quitando la restriccion y sin disparadores para este UPDATE. La guarda debe negar igual.
+ALTER TABLE public.profiles DROP CONSTRAINT check_account_role;
+SET session_replication_role = replica;
+UPDATE public.profiles SET account_id = NULL WHERE id = '93000000-0000-0000-0000-000000000093';
+SET session_replication_role = origin;
+SET ROLE authenticated;
+DO $$
+DECLARE e text; v_day date := (now() AT TIME ZONE 'Africa/Nairobi')::date - 4;
+BEGIN
+  PERFORM pg_temp.as_user('93000000-0000-0000-0000-000000000093', 'authenticated');
+  e := pg_temp.raises(format('SELECT public.cl_manual_delivery_open(%L, %L, %L, %L, ''[]'')',
+         'f0000000-0000-0000-0000-0000000000a7', v_day, v_day, pg_temp.sha(43)));
+  PERFORM pg_temp.ok(e = '42501:CL_FORBIDDEN', 'sin cuenta activa no abre: ' || coalesce(e, 'ok'));
+  e := pg_temp.raises(format('SELECT public.cl_manual_delivery_complete(%L, gen_random_uuid())', 'f0000000-0000-0000-0000-0000000000a7'));
+  PERFORM pg_temp.ok(e = '42501:CL_FORBIDDEN', 'sin cuenta activa no completa: ' || coalesce(e, 'ok'));
+END $$;
+RESET ROLE;
+SET session_replication_role = replica;
+UPDATE public.profiles SET account_id = 'a0000000-0000-0000-0000-000000000001' WHERE id = '93000000-0000-0000-0000-000000000093';
+SET session_replication_role = origin;
+
 -- anon: nada.
 SET ROLE anon;
 DO $$
@@ -693,6 +717,17 @@ BEGIN
          ' ''2026-11-03'', ''api'', false, ''jsonl'', ''none'', ''x/t/overlap-real.jsonl'', %L, ''received'', now())',
          'a0000000-0000-0000-0000-000000000001', t, pg_temp.sha(96)));
   PERFORM pg_temp.ok(e LIKE '23P01:%', 'dos reales solapadas -> 23P01: ' || coalesce(e, 'ok'));
+  -- btree_gist vive en el esquema extensions (en remoto no estaba instalada: la instala la migracion) y la restriccion
+  -- funciona aunque el search_path no incluya extensions.
+  PERFORM pg_temp.ok((SELECT n.nspname FROM pg_extension x JOIN pg_namespace n ON n.oid = x.extnamespace
+                       WHERE x.extname = 'btree_gist') = 'extensions', 'btree_gist en extensions');
+  PERFORM set_config('search_path', 'public', true);
+  e := pg_temp.raises(format('INSERT INTO public.cl_deliveries (account_id, feed_id, period_start, period_end, source,'
+         ' is_test, format, compression, file_path, sha256, status, received_at) VALUES (%L, %L, ''2026-11-03'','
+         ' ''2026-11-03'', ''api'', false, ''jsonl'', ''none'', ''x/t/overlap-real2.jsonl'', %L, ''received'', now())',
+         'a0000000-0000-0000-0000-000000000001', t, pg_temp.sha(97)));
+  PERFORM set_config('search_path', 'public, extensions', true);
+  PERFORM pg_temp.ok(e LIKE '23P01:%', 'solape con search_path = public -> 23P01: ' || coalesce(e, 'ok'));
   UPDATE public.cl_feeds SET status = 'testing' WHERE id = t::uuid;
 END $$;
 

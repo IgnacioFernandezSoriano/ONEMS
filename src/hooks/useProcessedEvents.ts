@@ -20,7 +20,7 @@ export interface ProcessedEvent {
   raw_event_count: number;
   created_at: string;
   processed_at: string | null;
-  // Origen (Carrier Link, 20261124100500): 'rfid' o 'carrier'. Ausente si la BD no tiene la columna.
+  // Origen (Carrier Link, 20261124200500): 'rfid' o 'carrier'. Ausente si la BD no tiene la columna.
   capture_source?: 'rfid' | 'carrier';
   // Joined data
   postal_center_name?: string;

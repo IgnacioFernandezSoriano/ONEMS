@@ -26,8 +26,9 @@
 -- consolidaron, sus eventos 'carrier' (en cascada tramos e incidencias ligadas), sus incidencias de consolidacion y sus
 -- viajes. Reinicio de cuenta: al borrar un punto carrier_scan se borra antes su diagnostico (FK RESTRICT).
 -- Forward-only. Ninguna migracion v4 anterior esta aplicada en remoto.
--- Bloqueos: ALTER TABLE / CREATE TRIGGER toman ACCESS EXCLUSIVE en processed_events, journey_segments y readers hasta
--- el COMMIT. lock_timeout de 5 s: si el ETL RFID (cron del poll, cada 30 min) esta en marcha, la migracion falla
+-- Bloqueos: ALTER TABLE ADD COLUMN toma ACCESS EXCLUSIVE en processed_events y journey_segments; CREATE TRIGGER toma
+-- SHARE ROW EXCLUSIVE (bloquea escrituras, no lecturas) en processed_events, journey_segments y readers; todo hasta el
+-- COMMIT. lock_timeout de 5 s: si el ETL RFID (cron del poll, cada 30 min) esta en marcha, la migracion falla
 -- enseguida en vez de quedarse en cola bloqueando a todos detras; se reintenta mas tarde (entre dos pasadas del cron).
 SET LOCAL lock_timeout = '5s';
 
@@ -303,7 +304,7 @@ BEGIN
 END $$;
 REVOKE ALL ON FUNCTION public.cl_diagnosis_remove(uuid, text[]) FROM PUBLIC, anon, authenticated, service_role;
 
--- ================================================================ 3. transfer (copia de 20261124100100 + diagnostico)
+-- ================================================================ 3. transfer (copia de 20261124200100 + diagnostico)
 -- Unicos cambios: tras cl_transfer_sample, si el plan tiene Diagnostico, cl_diagnosis_feed_item (el TODO de la
 -- tarea 2); y en el ultimo paso (no quedan elegidos) el aviso R36 de puntos sin centro.
 CREATE OR REPLACE FUNCTION public.cl_delivery_phase_transfer(p_d public.cl_deliveries, p_feed public.cl_feeds,
@@ -412,7 +413,7 @@ BEGIN
 END $$;
 REVOKE ALL ON FUNCTION public.cl_delivery_phase_transfer(public.cl_deliveries, public.cl_feeds, integer) FROM PUBLIC, anon, authenticated, service_role;
 
--- ================================================================ 4. deshacer una entrega (copia de 20261124100200 + diagnostico)
+-- ================================================================ 4. deshacer una entrega (copia de 20261124200200 + diagnostico)
 -- Unico cambio: antes de anular las muestras, cl_diagnosis_remove de sus envios (raw y, si ya se consolido, lo derivado).
 CREATE OR REPLACE FUNCTION public.cl_delivery_undo_samples(p_d public.cl_deliveries)
  RETURNS integer

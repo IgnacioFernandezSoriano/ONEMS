@@ -4,6 +4,19 @@
 // token (si el arriendo se perdio, la base contesta 'lost' y no cambia nada). Nunca registra claves, correos ni textos.
 
 import { type NotifyItem, renderEmail } from './render.ts'
+import { SEND_TIMEOUT_MS } from './resend.ts'
+
+/** Defaults: 10 per claim x 20 s worst-case send = 200 s, well under the 300 s lease. */
+export const DEFAULT_BATCH = 10
+export const DEFAULT_LEASE_SECONDS = 300
+/** Time kept in reserve after the last send for cl_notify_result. */
+export const RESULT_MARGIN_MS = 10_000
+
+/** Claim size bounded so that size x worst-case send time (+ margin) fits in the lease. */
+export function boundedBatch(requested: number, leaseSeconds: number, sendTimeoutMs = SEND_TIMEOUT_MS): number {
+  const fit = Math.floor((leaseSeconds * 1000 - RESULT_MARGIN_MS) / sendTimeoutMs)
+  return Math.max(1, Math.min(requested, fit))
+}
 
 export interface SendResult { ok: boolean; final?: boolean; code?: string; id?: string }
 
@@ -19,6 +32,7 @@ export interface Deps {
   batch?: number
   leaseSeconds?: number
   budgetMs?: number
+  sendTimeoutMs?: number
 }
 
 const json = (status: number, body: unknown) =>
@@ -49,15 +63,25 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
   const token = deps.token?.() ?? crypto.randomUUID()
   const now = deps.now ?? Date.now
   const t0 = now()
-  const out = { sent: 0, retry: 0, failed: 0, lost: 0 }
+  const out = { sent: 0, retry: 0, failed: 0, skipped: 0, lost: 0 }
+  const budgetMs = deps.budgetMs ?? 100_000
+  const leaseSeconds = deps.leaseSeconds ?? DEFAULT_LEASE_SECONDS
+  const sendTimeoutMs = deps.sendTimeoutMs ?? SEND_TIMEOUT_MS
+  const limit = boundedBatch(deps.batch ?? DEFAULT_BATCH, leaseSeconds, sendTimeoutMs)
   try {
-    for (let round = 0; round < (deps.maxRounds ?? 5); round++) {
-      if (now() - t0 > (deps.budgetMs ?? 100_000)) break
+    rounds: for (let round = 0; round < (deps.maxRounds ?? 5); round++) {
+      if (now() - t0 > budgetMs) break
+      const claimedAt = now()
       const items = (await deps.rpc('cl_notify_claim', {
-        p_token: token, p_limit: deps.batch ?? 20, p_lease_seconds: deps.leaseSeconds ?? 300,
+        p_token: token, p_limit: limit, p_lease_seconds: leaseSeconds,
       })) as NotifyItem[] | null
       if (!Array.isArray(items) || items.length === 0) break
       for (const it of items) {
+        // Never start a send that could end after our lease (another run could claim it again) or past the run budget.
+        // The items left in 'sending' are claimed again when the lease expires; the Idempotency-Key covers a resend.
+        if (now() - claimedAt + sendTimeoutMs + RESULT_MARGIN_MS > leaseSeconds * 1000 || now() - t0 > budgetMs) {
+          break rounds
+        }
         let r: SendResult
         try {
           const mail = renderEmail(it)
@@ -74,6 +98,7 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
         if (status === 'sent') out.sent++
         else if (status === 'pending') out.retry++
         else if (status === 'failed') out.failed++
+        else if (status === 'skipped') out.skipped++   // its incident was closed meanwhile: not retried
         else out.lost++
       }
     }

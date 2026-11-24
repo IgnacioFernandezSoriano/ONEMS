@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-import-prefix
 import { assert, assertEquals, assertStringIncludes } from 'https://deno.land/std@0.224.0/assert/mod.ts'
 import { formatPeriods, LANGS, type NotifyItem, pickLang, renderEmail, TYPES } from './render.ts'
-import { type Deps, handle, type SendResult } from './handler.ts'
+import { boundedBatch, type Deps, DEFAULT_BATCH, DEFAULT_LEASE_SECONDS, handle, RESULT_MARGIN_MS, type SendResult } from './handler.ts'
 import { makeResendSender, SEND_TIMEOUT_MS } from './resend.ts'
 
 const SECRET = 'notify-secret-value-123'
@@ -101,9 +101,9 @@ Deno.test('handler: claims with a lease, sends with Idempotency-Key = notificati
   const { d, rpcCalls, sends } = deps([[a, b]], () => Promise.resolve({ ok: true, id: 're_1' }))
   const r = await handle(req(), d)
   assertEquals(r.status, 200)
-  assertEquals(await r.json(), { sent: 2, retry: 0, failed: 0, lost: 0 })
+  assertEquals(await r.json(), { sent: 2, retry: 0, failed: 0, skipped: 0, lost: 0 })
   const claim = rpcCalls.filter((c) => c.fn === 'cl_notify_claim')
-  assertEquals(claim[0].args, { p_token: 'tok-test-0001', p_limit: 20, p_lease_seconds: 300 })
+  assertEquals(claim[0].args, { p_token: 'tok-test-0001', p_limit: 10, p_lease_seconds: 300 })
   assertEquals(claim.length, 2, 'claims until the queue is empty')
   assertEquals(sends.map((s) => s.idempotencyKey), [`cl-notify-${a.notification_id}`, `cl-notify-${b.notification_id}`])
   assertEquals(sends[1].to, ['ops@c.example'])
@@ -119,7 +119,7 @@ Deno.test('handler: a retried notification is sent with the same idempotency key
   let n = 0
   const { d, sends, rpcCalls } = deps([[a], [a]], () => Promise.resolve(n++ === 0 ? { ok: false, code: 'RESEND_NETWORK' } : { ok: true }))
   const out = await (await handle(req(), d)).json()
-  assertEquals(out, { sent: 1, retry: 1, failed: 0, lost: 0 })
+  assertEquals(out, { sent: 1, retry: 1, failed: 0, skipped: 0, lost: 0 })
   assertEquals(new Set(sends.map((s) => s.idempotencyKey)).size, 1)
   assertEquals(rpcCalls.find((c) => c.fn === 'cl_notify_result')?.args.p_error, 'RESEND_NETWORK')
 
@@ -134,9 +134,42 @@ Deno.test('handler: permanent errors are final, send exceptions become CL_SEND_E
   const { d, rpcCalls } = deps([[item(), item({ notification_id: '33333333-3333-3333-3333-333333333333' })]], (m) =>
     m.idempotencyKey.endsWith('1111') ? Promise.resolve({ ok: false, final: true, code: 'RESEND_422' }) : Promise.reject(new Error('boom')))
   const out = await (await handle(req(), d)).json()
-  assertEquals(out, { sent: 0, retry: 1, failed: 1, lost: 0 })
+  assertEquals(out, { sent: 0, retry: 1, failed: 1, skipped: 0, lost: 0 })
   const res = rpcCalls.filter((c) => c.fn === 'cl_notify_result').map((c) => [c.args.p_error, c.args.p_final])
   assertEquals(res, [['RESEND_422', true], ['CL_SEND_ERROR', false]])
+})
+
+Deno.test('handler: a failed send whose incident was closed meanwhile is counted as skipped, not retried', async () => {
+  let claims = 0
+  const { d } = deps([], () => Promise.resolve({ ok: false, code: 'RESEND_500' }),
+    { rpc: (fn) => Promise.resolve(fn === 'cl_notify_claim' ? (claims++ === 0 ? [item()] : []) : 'skipped') })
+  assertEquals(await (await handle(req(), d)).json(), { sent: 0, retry: 0, failed: 0, skipped: 1, lost: 0 })
+})
+
+Deno.test('lease: claim size x worst-case send fits in the lease; a larger batch is clamped (final review #10)', async () => {
+  assert(DEFAULT_BATCH * SEND_TIMEOUT_MS + RESULT_MARGIN_MS <= DEFAULT_LEASE_SECONDS * 1000, 'defaults fit the lease')
+  assertEquals(boundedBatch(50, 300), 14)
+  assertEquals(boundedBatch(5, 300), 5)
+  assertEquals(boundedBatch(20, 10), 1, 'never zero')
+  const { d, rpcCalls } = deps([[item()]], () => Promise.resolve({ ok: true }), { batch: 50 })
+  await (await handle(req(), d)).body?.cancel()
+  const c = rpcCalls.find((x) => x.fn === 'cl_notify_claim')!.args
+  assertEquals(c.p_limit, 14)
+  assert((c.p_limit as number) * SEND_TIMEOUT_MS + RESULT_MARGIN_MS <= (c.p_lease_seconds as number) * 1000)
+})
+
+Deno.test('lease: no send starts that could end after the lease; the rest stay claimed for the next run', async () => {
+  // Worst case: every send takes the full timeout, and the claim hands back more than fits (20 items).
+  let clock = 0
+  const many = Array.from({ length: 20 }, (_, i) => item({ notification_id: `11111111-1111-1111-1111-${String(i).padStart(12, '0')}` }))
+  const finishedAt: number[] = []
+  const { d, rpcCalls, sends } = deps([many, many], () => { clock += SEND_TIMEOUT_MS; finishedAt.push(clock); return Promise.resolve({ ok: true }) },
+    { now: () => clock, budgetMs: 10_000_000 })
+  const out = await (await handle(req(), d)).json()
+  assertEquals(sends.length, 14)
+  assertEquals(out.sent, 14)
+  assert(Math.max(...finishedAt) + RESULT_MARGIN_MS <= DEFAULT_LEASE_SECONDS * 1000, 'every send ended inside the lease')
+  assertEquals(rpcCalls.filter((c) => c.fn === 'cl_notify_claim').length, 1, 'no new claim once the lease is spent')
 })
 
 Deno.test('no secret, address or text is ever logged', async () => {

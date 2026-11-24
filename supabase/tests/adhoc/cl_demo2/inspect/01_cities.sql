@@ -1,1 +1,0 @@
-SELECT c.id, c.name, c.code, c.region_id, (SELECT count(*) FROM public.postal_centers pc WHERE pc.city_id = c.id) AS pcs FROM public.cities c WHERE c.account_id = 'f4d823d2-93e6-4755-9a89-9da87e7fa86e' ORDER BY c.name;

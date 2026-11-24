@@ -30,6 +30,7 @@ export const CL_ALERT_TYPES = [
   // v4 (entregas completas)
   'quota_already_settled',
   'delivery_retries_exhausted',
+  'delivery_stuck',
   // v4.2 (diagnostico, R36)
   'diagnosis_point_without_center',
 ] as const
