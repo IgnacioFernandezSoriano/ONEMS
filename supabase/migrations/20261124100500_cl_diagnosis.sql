@@ -26,18 +26,18 @@
 -- consolidaron, sus eventos 'carrier' (en cascada tramos e incidencias ligadas), sus incidencias de consolidacion y sus
 -- viajes. Reinicio de cuenta: al borrar un punto carrier_scan se borra antes su diagnostico (FK RESTRICT).
 -- Forward-only. Ninguna migracion v4 anterior esta aplicada en remoto.
+-- Bloqueos: ALTER TABLE / CREATE TRIGGER toman ACCESS EXCLUSIVE en processed_events, journey_segments y readers hasta
+-- el COMMIT. lock_timeout de 5 s: si el ETL RFID (cron del poll, cada 30 min) esta en marcha, la migracion falla
+-- enseguida en vez de quedarse en cola bloqueando a todos detras; se reintenta mas tarde (entre dos pasadas del cron).
+SET LOCAL lock_timeout = '5s';
 
 -- ================================================================ 1. origen de captura en eventos y tramos
--- ADD COLUMN con DEFAULT constante: sin reescribir la tabla (PG >= 11). CHECK NOT VALID + VALIDATE: el escaneo de la
--- validacion no bloquea escrituras.
-ALTER TABLE public.processed_events ADD COLUMN capture_source text NOT NULL DEFAULT 'rfid';
-ALTER TABLE public.processed_events
-  ADD CONSTRAINT processed_events_capture_source_check CHECK (capture_source IN ('rfid','carrier')) NOT VALID;
-ALTER TABLE public.processed_events VALIDATE CONSTRAINT processed_events_capture_source_check;
-ALTER TABLE public.journey_segments ADD COLUMN capture_source text NOT NULL DEFAULT 'rfid';
-ALTER TABLE public.journey_segments
-  ADD CONSTRAINT journey_segments_capture_source_check CHECK (capture_source IN ('rfid','carrier')) NOT VALID;
-ALTER TABLE public.journey_segments VALIDATE CONSTRAINT journey_segments_capture_source_check;
+-- ADD COLUMN con DEFAULT constante: solo metadatos, sin reescribir la tabla (PG >= 11). El CHECK en linea comprueba las
+-- filas existentes con un escaneo bajo el mismo ACCESS EXCLUSIVE (en prod: 945 eventos y 446 tramos, inmediato).
+ALTER TABLE public.processed_events ADD COLUMN capture_source text NOT NULL DEFAULT 'rfid'
+  CONSTRAINT processed_events_capture_source_check CHECK (capture_source IN ('rfid','carrier'));
+ALTER TABLE public.journey_segments ADD COLUMN capture_source text NOT NULL DEFAULT 'rfid'
+  CONSTRAINT journey_segments_capture_source_check CHECK (capture_source IN ('rfid','carrier'));
 COMMENT ON COLUMN public.processed_events.capture_source IS
   'Origen de la lectura: rfid (lectores RFID) o carrier (escaneos de Carrier Link, event_id cl:...).';
 COMMENT ON COLUMN public.journey_segments.capture_source IS
