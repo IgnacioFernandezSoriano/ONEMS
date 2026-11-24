@@ -13,6 +13,9 @@ CREATE OR REPLACE FUNCTION pg_temp.gps_fixture() RETURNS void LANGUAGE plpgsql A
 BEGIN
   UPDATE public.panelists SET telegram_id = '1001' WHERE id = 'e1000000-0000-0000-0000-000000000001';
   UPDATE public.panelists SET telegram_id = '1004' WHERE id = 'e4000000-0000-0000-0000-000000000004';
+  -- 20261123190000 (fase 2): estas pruebas comparan con la oficina = caso POBOX (sin POBOX no hay referencia sin casa)
+  INSERT INTO public.account_config (account_id, pobox_enabled) VALUES ('a0000000-0000-0000-0000-000000000001', true)
+  ON CONFLICT (account_id) DO UPDATE SET pobox_enabled = true;
   INSERT INTO public.postal_centers (id, account_id, code, name, city_id, latitude, longitude) VALUES
     ('dd000000-0000-0000-0000-00000000000a','a0000000-0000-0000-0000-000000000001','PCA','Centro A',
      'c1000000-0000-0000-0000-000000000001', -1.28000, 36.82000),
@@ -133,17 +136,11 @@ BEGIN
   r := public.gps_save_location(P, '1001', -1.27190, 36.82000, 50, now(), 'm2');
   PERFORM pg_temp.fail_if(r->>'action' <> 'saved' OR r->>'status' <> 'far', '900 m: ' || r::text);
 
-  -- precision 350: primero reintento sin guardar, luego se acepta como low_accuracy
-  SELECT count(*) INTO n FROM public.declaration_location WHERE panelist_id = P;
+  -- 20261123180000 (solo distancia): la precision ya no cuenta ni provoca reintento; se guarda como dato
   r := public.gps_save_location(P, '1001', -1.27910, 36.82000, 350, now(), 'm3');
-  PERFORM pg_temp.fail_if(r->>'action' <> 'low_accuracy_retry', '350 primera: ' || r::text);
-  PERFORM pg_temp.fail_if((SELECT count(*) FROM public.declaration_location WHERE panelist_id = P) <> n,
-                          'el reintento no debe guardar fila');
-  r := public.gps_save_location(P, '1001', -1.27910, 36.82000, 350, now(), 'm4');
-  PERFORM pg_temp.fail_if(r->>'action' <> 'saved' OR r->>'status' <> 'low_accuracy', '350 segunda: ' || r::text);
-  -- sin precision tambien es poco precisa (ya se agoto el reintento de la visita)
+  PERFORM pg_temp.fail_if(r->>'action' <> 'saved' OR r->>'status' <> 'ok', '350 a 100 m: ' || r::text);
   r := public.gps_save_location(P, '1001', -1.27910, 36.82000, NULL, now(), 'm4b');
-  PERFORM pg_temp.fail_if(r->>'status' <> 'low_accuracy', 'sin precision: ' || r::text);
+  PERFORM pg_temp.fail_if(r->>'action' <> 'saved' OR r->>'status' <> 'ok', 'sin precision a 100 m: ' || r::text);
 
   -- mensaje de hace 10 min -> stale, no se guarda
   SELECT count(*) INTO n FROM public.declaration_location WHERE panelist_id = P;
@@ -386,9 +383,12 @@ DO $$
 DECLARE r jsonb; P constant uuid := 'e1000000-0000-0000-0000-000000000001';
 BEGIN
   PERFORM public.gps_record_consent(P, 'granted', 'es', 'v1', 't', NULL);
-  r := public.gps_save_location(P, '1001', -1.27910, 36.82000, 350, now(), 'm1');
-  r := public.gps_save_location(P, '1001', -1.27910, 36.82000, 350, now(), 'm2');
-  PERFORM pg_temp.fail_if(r->>'status' <> 'low_accuracy', 'low_accuracy guardada: ' || r::text);
+  -- 20261123180000: 'low_accuracy' ya no se genera; fila antigua insertada a mano (anterior al 23/11)
+  PERFORM public.gps_visit_start(P, '1001');
+  INSERT INTO public.declaration_location (account_id, panelist_id, telegram_id, captured_at, latitude, longitude,
+                                           accuracy_m, nearest_postal_center_id, distance_m, status)
+  VALUES ('a0000000-0000-0000-0000-000000000001', P, '1001', now(), -1.27910, 36.82000, 350,
+          'dd000000-0000-0000-0000-00000000000a', 100, 'low_accuracy');
   UPDATE public.panelist_context SET created_at = created_at - interval '31 minutes'
    WHERE context_data->>'panelist_id' = P::text AND context_type = 'gps_visit';
   r := public.gps_mark_declaration('d1000000-0000-0000-0000-000000000001', 'sent', P);
