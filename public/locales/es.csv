@@ -5943,3 +5943,56 @@ cl.capture_origin.label,Origen
 cl.capture_origin.tooltip,De dónde viene la lectura: un lector RFID o los escaneos del carrier (Carrier Link).
 cl.capture_origin.rfid,RFID
 cl.capture_origin.carrier,Carrier
+panelist_history.button,Historial
+panelist_history.title,Historial del panelista
+panelist_history.close,Cerrar
+panelist_history.loading,Cargando…
+panelist_history.empty,Sin actividad que mostrar.
+panelist_history.open,ver
+panelist_history.load_more,Cargar más
+panelist_history.pobox,POBOX
+panelist_history.created,alta
+panelist_history.yes,sí
+panelist_history.no,no
+panelist_history.stats.sent,Envíos 30 días: {sent}/{scheduled}
+panelist_history.stats.receipt_problems,Recepciones con problema 30 días: {n}
+panelist_history.stats.gps_no,GPS «No» 30 días: {n}
+panelist_history.stats.leave_days,Días de baja este año: {n}
+panelist_history.stats.pobox_ref,Apartado guardado: {v}
+panelist_history.stats.home_ref,Casa guardada: {v}
+panelist_history.note.placeholder,Añadir una nota sobre lo hablado con el panelista…
+panelist_history.note.save,Guardar nota
+panelist_history.note.delete,Borrar nota
+panelist_history.note.delete_confirm,¿Borrar esta nota? No se puede deshacer.
+panelist_history.filter.all,Todo
+panelist_history.filter.note,Notas
+panelist_history.filter.incident,Incidencias
+panelist_history.filter.receipt,Recepciones
+panelist_history.filter.gps,GPS
+panelist_history.filter.leave,Bajas
+panelist_history.filter.notice,Avisos
+panelist_history.event.note,Nota
+panelist_history.event.incident,Incidencia
+panelist_history.event.gps,GPS: dijo que no estaba en su sitio
+panelist_history.event.receipt_receiver,Recepción con problema
+panelist_history.event.receipt_sender,Su envío dio problema al recibirse
+panelist_history.event.leave,Baja
+panelist_history.event.notice,Aviso enviado
+panelist_history.event.gps_ref_pobox,Apartado guardado
+panelist_history.event.gps_ref_home,Casa guardada
+panelist_history.event.gps_ref_declined,No quiere que se guarde su casa
+panelist_history.place.pobox,No estaba en su apartado (se le recordó dónde declarar)
+panelist_history.place.home,No estaba en su casa (se le recordó dónde declarar)
+panelist_history.ref.needs_review,a revisar
+panelist_history.leave.pending,pendiente de aprobar
+panelist_history.leave.reviewed,aprobada
+panelist_history.leave.cancelled,cancelada
+panelist_history.error.forbidden,No tienes permiso para ver o cambiar el historial de este panelista.
+panelist_history.error.note_length,La nota debe tener entre 1 y 2000 caracteres.
+panelist_history.error.generic,No se ha podido cargar el historial. Inténtalo de nuevo.
+panelist_history.leave_reason.vacation,Vacaciones
+panelist_history.leave_reason.sick_leave,Baja por enfermedad
+panelist_history.leave_reason.personal,Motivo personal
+panelist_history.leave_reason.training,Formación
+panelist_history.leave_reason.other,Otro motivo
+panelist_history.leave_reason.materials,Falta de material

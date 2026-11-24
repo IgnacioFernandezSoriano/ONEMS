@@ -4,6 +4,7 @@ import { CaseAnalysisPanel } from '@/components/incidents/CaseAnalysisPanel'
 import { IncidentConversation } from '@/components/incidents/IncidentConversation'
 import { supabase } from '@/lib/supabase'
 import type { ReceiptCase } from '@/lib/types'
+import { PanelistHistoryButton } from '@/components/panelists/PanelistHistoryButton'
 
 interface Props {
   c: ReceiptCase
@@ -34,7 +35,10 @@ export function ReceiptCaseDialog({ c, onDone, readOnly = false }: Props) {
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" onClick={onDone}>
       <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl p-6 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}
         role="dialog" aria-modal="true" aria-labelledby="receipt-case-title">
-        <h3 id="receipt-case-title" className="text-lg font-bold mb-3">{t('receipt_errors.case_dialog_title', { tag: c.tag_raw })}</h3>
+        <div className="flex items-center gap-2 mb-3">
+          <h3 id="receipt-case-title" className="text-lg font-bold">{t('receipt_errors.case_dialog_title', { tag: c.tag_raw })}</h3>
+          <PanelistHistoryButton panelistId={panelistId} />
+        </div>
         <CaseAnalysisPanel kind="receipt" incidentId={c.id} readOnly={readOnly} />
         <IncidentConversation kind="receipt" incidentId={c.id} incidentPanelistId={panelistId} readOnly={readOnly} />
         <div className="flex justify-end mt-4">

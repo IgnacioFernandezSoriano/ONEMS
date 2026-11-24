@@ -478,6 +478,7 @@ export interface IncidentInboxRow {
 export interface UnavailabilityHeader {
   unavailability_id: string
   account_id: string | null
+  panelist_id: string | null
   panelist_name: string
   panelist_code: string
   panelist_language: string | null
