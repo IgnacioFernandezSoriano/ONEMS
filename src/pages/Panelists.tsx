@@ -12,6 +12,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { useAccount } from '@/contexts/AccountContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLatestRequest } from '@/lib/latestRequest';
+import { PanelistHistoryButton } from '@/components/panelists/PanelistHistoryButton'
 
 export function Panelists() {
   const { t } = useTranslation();
@@ -711,7 +712,7 @@ export function Panelists() {
                       </>)}
                     </td>
                     <td className="px-6 py-4 text-sm font-mono">{panelist.panelist_code}</td>
-                    <td className="px-6 py-4 text-sm">{panelist.name}</td>
+                    <td className="px-6 py-4 text-sm">{panelist.name} <PanelistHistoryButton panelistId={panelist.id} className="ms-1" /></td>
                     <td className="px-6 py-4 text-sm">{panelist.email}</td>
                     <td className="px-6 py-4 text-sm">{panelist.mobile}</td>
                     <td className="px-6 py-4 text-sm font-mono">{panelist.node?.auto_id || '-'}</td>

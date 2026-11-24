@@ -1,5 +1,6 @@
 import { useTranslation } from '@/hooks/useTranslation'
 import type { ReceiptRepeatPanelist } from '@/lib/types'
+import { PanelistHistoryButton } from '@/components/panelists/PanelistHistoryButton'
 
 interface Props { rows: ReceiptRepeatPanelist[]; onNotice: (p: ReceiptRepeatPanelist) => void; readOnly?: boolean }
 
@@ -24,7 +25,7 @@ export function ReceiptRepeatPanelists({ rows, onNotice, readOnly = false }: Pro
           <tbody className="divide-y divide-gray-200">
             {rows.length > 0 ? rows.map(r => (
               <tr key={r.panelist_id} className="hover:bg-gray-50">
-                <td className="px-6 py-3 text-sm"><div className="font-medium">{r.name}</div><div className="text-gray-500 text-xs font-mono">{r.panelist_code}</div></td>
+                <td className="px-6 py-3 text-sm"><div className="font-medium">{r.name} <PanelistHistoryButton panelistId={r.panelist_id} className="ms-1" /></div><div className="text-gray-500 text-xs font-mono">{r.panelist_code}</div></td>
                 <td className="px-6 py-3 text-sm">{r.fails_7d}</td>
                 <td className="px-6 py-3 text-sm">{r.fails_30d}</td>
                 <td className="px-6 py-3 text-sm">{r.top_reason ? t(`receipt_errors.reason.${r.top_reason}`) : '-'}</td>

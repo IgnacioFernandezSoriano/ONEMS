@@ -5717,3 +5717,56 @@ hc.delivery_standard_form.cl_last_mile_time,وقت معادلة المرحلة �
 help_center.doc.carrier_link.title,Carrier Link
 help_center.doc.carrier_link.desc,"ما هو Carrier Link، وبأي ترتيب يُعدّ، وماذا تفعل كل شاشة، ومعنى كل تنبيه."
 cl.help_link,مساعدة
+panelist_history.button,السجل
+panelist_history.title,سجل المشارك
+panelist_history.close,إغلاق
+panelist_history.loading,جارٍ التحميل…
+panelist_history.empty,لا يوجد نشاط لعرضه.
+panelist_history.open,عرض
+panelist_history.load_more,تحميل المزيد
+panelist_history.pobox,صندوق بريد
+panelist_history.created,انضم في
+panelist_history.yes,نعم
+panelist_history.no,لا
+panelist_history.stats.sent,الإرساليات خلال 30 يومًا: {sent}/{scheduled}
+panelist_history.stats.receipt_problems,مشكلات الاستلام خلال 30 يومًا: {n}
+panelist_history.stats.gps_no,GPS «لا» خلال 30 يومًا: {n}
+panelist_history.stats.leave_days,أيام الغياب هذا العام: {n}
+panelist_history.stats.pobox_ref,صندوق البريد محفوظ: {v}
+panelist_history.stats.home_ref,المنزل محفوظ: {v}
+panelist_history.note.placeholder,أضف ملاحظة حول ما ناقشته مع المشارك…
+panelist_history.note.save,حفظ الملاحظة
+panelist_history.note.delete,حذف الملاحظة
+panelist_history.note.delete_confirm,حذف هذه الملاحظة؟ لا يمكن التراجع.
+panelist_history.filter.all,الكل
+panelist_history.filter.note,الملاحظات
+panelist_history.filter.incident,الحوادث
+panelist_history.filter.receipt,الاستلامات
+panelist_history.filter.gps,GPS
+panelist_history.filter.leave,الغياب
+panelist_history.filter.notice,الإشعارات
+panelist_history.event.note,ملاحظة
+panelist_history.event.incident,حادث
+panelist_history.event.gps,GPS: قال إنه لم يكن في مكانه
+panelist_history.event.receipt_receiver,مشكلة في الاستلام
+panelist_history.event.receipt_sender,واجهت إرساليته مشكلة عند الاستلام
+panelist_history.event.leave,غياب
+panelist_history.event.notice,تم إرسال إشعار
+panelist_history.event.gps_ref_pobox,تم حفظ صندوق البريد
+panelist_history.event.gps_ref_home,تم حفظ المنزل
+panelist_history.event.gps_ref_declined,لا يريد حفظ منزله
+panelist_history.place.pobox,لم يكن في صندوق بريده (تم تذكيره بمكان التصريح)
+panelist_history.place.home,لم يكن في منزله (تم تذكيره بمكان التصريح)
+panelist_history.ref.needs_review,للمراجعة
+panelist_history.leave.pending,بانتظار الموافقة
+panelist_history.leave.reviewed,موافق عليها
+panelist_history.leave.cancelled,ملغاة
+panelist_history.error.forbidden,ليست لديك صلاحية لعرض أو تعديل سجل هذا المشارك.
+panelist_history.error.note_length,يجب أن تحتوي الملاحظة على ما بين 1 و2000 حرف.
+panelist_history.error.generic,تعذر تحميل السجل. حاول مرة أخرى.
+panelist_history.leave_reason.vacation,إجازة
+panelist_history.leave_reason.sick_leave,إجازة مرضية
+panelist_history.leave_reason.personal,أسباب شخصية
+panelist_history.leave_reason.training,تدريب
+panelist_history.leave_reason.other,سبب آخر
+panelist_history.leave_reason.materials,نقص المواد
