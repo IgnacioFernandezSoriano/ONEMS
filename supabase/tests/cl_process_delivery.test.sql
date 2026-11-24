@@ -441,6 +441,11 @@ BEGIN
                      = '[{"mode_ref": null, "place_ref": "XXX"}]'::jsonb, 'alerta unknown_reading_point');
   PERFORM pg_temp.ok(EXISTS (SELECT 1 FROM public.cl_alerts WHERE delivery_id = v_id AND alert_type = 'rejected_ratio'),
                      'alerta rejected_ratio');
+  -- 20261124210000: no_stratum y already_sampled no cuentan para el % de rechazo (8 rechazados de calidad).
+  PERFORM pg_temp.ok((SELECT (a.details->>'rejected')::int = 8 AND (a.details->>'shipments')::int = d2.shipments_total - 2
+                        FROM public.cl_alerts a JOIN public.cl_deliveries d2 ON d2.id = a.delivery_id
+                       WHERE a.delivery_id = v_id AND a.alert_type = 'rejected_ratio'),
+                     'rejected_ratio sin no_stratum ni already_sampled');
   PERFORM pg_temp.ok(EXISTS (SELECT 1 FROM public.cl_alerts WHERE delivery_id = v_id AND alert_type = 'possible_misrouting')
                      = ('I16' = ANY (v_exp47)), 'alerta possible_misrouting solo si I16 elegido');
   PERFORM pg_temp.ok(NOT EXISTS (SELECT 1 FROM public.cl_alerts WHERE delivery_id = v_id AND alert_type = 'insufficient_candidates'),
