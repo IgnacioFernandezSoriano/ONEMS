@@ -5926,3 +5926,11 @@ cl.incidents.close_effect.missing,تُعدّ فتراتها مراجَعة: لن
 cl.incidents.close_effect.other,تُلغى الإشعارات المعلّقة. إذا تكررت المشكلة يفتح ONEMS حادثة جديدة.
 cl.incidents.close_note,ملاحظة (اختيارية)
 cl.incidents.close_confirm,نعم، أغلق الحادثة
+cl.generator.diagnosis,التشخيص
+cl.generator.diagnosis_hint,تُرسل أيضًا جميع قراءات الشحنات المسحوبة (بما فيها النقاط الوسيطة) إلى تشخيص الشبكة. تُستبعد النقاط التي ليس لها مركز بريدي.
+cl.alert.diagnosis_point_without_center,نقاط قراءة بلا مركز بريدي مستبعدة من التشخيص
+cl.alert.detail.diagnosis_skipped,القراءات المستبعدة: {readings} ({shipments} شحنات). عيّن مركزًا بريديًا لهذه النقاط لتضمينها.
+cl.capture_origin.label,المصدر
+cl.capture_origin.tooltip,مصدر القراءة: قارئ RFID أو عمليات المسح لدى الناقل (Carrier Link).
+cl.capture_origin.rfid,RFID
+cl.capture_origin.carrier,الناقل

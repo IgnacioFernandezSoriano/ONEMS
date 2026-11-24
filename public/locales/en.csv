@@ -5934,3 +5934,11 @@ cl.incidents.close_effect.missing,"Its periods count as reviewed: they will not 
 cl.incidents.close_effect.other,"Pending notices are cancelled. If the problem happens again, ONEMS opens a new incident."
 cl.incidents.close_note,Note (optional)
 cl.incidents.close_confirm,"Yes, close incident"
+cl.generator.diagnosis,Diagnosis
+cl.generator.diagnosis_hint,All the scans of the drawn shipments (intermediate points too) also go to the network diagnosis. Points without a postal center are left out.
+cl.alert.diagnosis_point_without_center,Reading points without a postal center left out of the diagnosis
+cl.alert.detail.diagnosis_skipped,Scans left out: {readings} ({shipments} shipments). Assign a postal center to these points to include them.
+cl.capture_origin.label,Origin
+cl.capture_origin.tooltip,Where the reading comes from: an RFID reader or the carrier scans (Carrier Link).
+cl.capture_origin.rfid,RFID
+cl.capture_origin.carrier,Carrier

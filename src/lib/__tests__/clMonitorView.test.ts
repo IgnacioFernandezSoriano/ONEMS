@@ -75,3 +75,17 @@ describe('alertDetailLines (v4)', () => {
     expect(alertDetailLines('delivery_retries_exhausted', { last_error: 'CL_X', samples_voided: 2 }, null)[0].params).toEqual({ voided: 2 })
   })
 })
+
+describe('alertDetailLines (diagnostico, R36)', () => {
+  it('puntos sin centro y lecturas que quedan fuera', () => {
+    const l = alertDetailLines(
+      'diagnosis_point_without_center',
+      { points: [{ reader_id: 'r', name: 'HUB2', place_ref: 'HU2', mode_ref: null }], readings: 3, shipments: 2 },
+      null,
+    )
+    expect(l).toEqual([
+      { key: 'cl.alert.detail.points', params: { points: 'HU2 / -' } },
+      { key: 'cl.alert.detail.diagnosis_skipped', params: { readings: 3, shipments: 2 } },
+    ])
+  })
+})

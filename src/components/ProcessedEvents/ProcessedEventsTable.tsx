@@ -4,6 +4,8 @@ import { CheckSquare, Square, Link2, Link2Off } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { SmartTooltip } from '../common/SmartTooltip';
 import { TablePagination } from '../common/TablePagination';
+import { CaptureSourceBadge } from '../carrier-link/CaptureSource';
+import { isCarrierLinkEnabled } from '@/lib/featureFlags';
 
 interface ProcessedEventsTableProps {
   records: ProcessedEvent[];
@@ -19,6 +21,7 @@ export function ProcessedEventsTable({
   onSelectAll,
 }: ProcessedEventsTableProps) {
   const { t } = useTranslation();
+  const showOrigin = isCarrierLinkEnabled();
 
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -147,6 +150,14 @@ export function ProcessedEventsTable({
                   <SmartTooltip content={t('processed_events.timestamp_tooltip')} />
                 </div>
               </th>
+              {showOrigin && (
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <div className="flex items-center gap-1">
+                    {t('cl.capture_origin.label')}
+                    <SmartTooltip content={t('cl.capture_origin.tooltip')} />
+                  </div>
+                </th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
@@ -213,6 +224,11 @@ export function ProcessedEventsTable({
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="text-sm text-gray-900">{formatDateTime(record.timestamp)}</span>
                   </td>
+                  {showOrigin && (
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <CaptureSourceBadge source={record.capture_source} />
+                    </td>
+                  )}
                 </tr>
               );
             })}

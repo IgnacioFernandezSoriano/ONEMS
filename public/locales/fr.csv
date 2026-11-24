@@ -5926,3 +5926,11 @@ cl.incidents.close_effect.missing,"Ses périodes comptent comme examinées : ell
 cl.incidents.close_effect.other,"Les avis en attente sont annulés. Si le problème se reproduit, ONEMS ouvre un nouvel incident."
 cl.incidents.close_note,Note (facultative)
 cl.incidents.close_confirm,"Oui, clôturer l’incident"
+cl.generator.diagnosis,Diagnostic
+cl.generator.diagnosis_hint,Tous les scans des envois tirés (points intermédiaires compris) alimentent aussi le diagnostic du réseau. Les points sans centre postal sont exclus.
+cl.alert.diagnosis_point_without_center,Points de lecture sans centre postal exclus du diagnostic
+cl.alert.detail.diagnosis_skipped,Scans exclus : {readings} ({shipments} envois). Attribuez un centre postal à ces points pour les inclure.
+cl.capture_origin.label,Origine
+cl.capture_origin.tooltip,Provenance de la lecture : un lecteur RFID ou les scans du transporteur (Carrier Link).
+cl.capture_origin.rfid,RFID
+cl.capture_origin.carrier,Transporteur

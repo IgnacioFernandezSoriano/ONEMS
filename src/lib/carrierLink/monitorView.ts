@@ -30,6 +30,8 @@ export const CL_ALERT_TYPES = [
   // v4 (entregas completas)
   'quota_already_settled',
   'delivery_retries_exhausted',
+  // v4.2 (diagnostico, R36)
+  'diagnosis_point_without_center',
 ] as const
 
 export function alertLabelKey(alertType: string): string {
@@ -110,9 +112,12 @@ export function alertDetailLines(
       if (values) out.push({ key: 'cl.alert.detail.products', params: { values } })
       break
     }
-    case 'unknown_reading_point': {
+    case 'unknown_reading_point':
+    case 'diagnosis_point_without_center': {
       const points = list(d.points, (p) => (p && typeof p === 'object' ? `${p.place_ref ?? '-'} / ${p.mode_ref ?? '-'}` : null))
       if (points) out.push({ key: 'cl.alert.detail.points', params: { points } })
+      if (alertType === 'diagnosis_point_without_center')
+        out.push({ key: 'cl.alert.detail.diagnosis_skipped', params: { readings: num(d.readings), shipments: num(d.shipments) } })
       break
     }
     case 'feed_silent':

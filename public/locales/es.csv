@@ -5934,3 +5934,11 @@ cl.incidents.close_effect.missing,"Sus periodos cuentan como revisados: no se vo
 cl.incidents.close_effect.other,"Los avisos pendientes se cancelan. Si el problema vuelve a ocurrir, ONEMS abre una incidencia nueva."
 cl.incidents.close_note,Nota (opcional)
 cl.incidents.close_confirm,"Sí, cerrar incidencia"
+cl.generator.diagnosis,Diagnóstico
+cl.generator.diagnosis_hint,Todas las lecturas de los envíos sorteados (también las de puntos intermedios) pasan además al diagnóstico de red. Los puntos sin centro postal quedan fuera.
+cl.alert.diagnosis_point_without_center,Puntos de lectura sin centro postal fuera del diagnóstico
+cl.alert.detail.diagnosis_skipped,Lecturas fuera: {readings} ({shipments} envíos). Asigna un centro postal a estos puntos para incluirlas.
+cl.capture_origin.label,Origen
+cl.capture_origin.tooltip,De dónde viene la lectura: un lector RFID o los escaneos del carrier (Carrier Link).
+cl.capture_origin.rfid,RFID
+cl.capture_origin.carrier,Carrier
