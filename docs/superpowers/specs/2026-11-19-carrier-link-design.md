@@ -306,3 +306,10 @@ Cada fase se despliega a `onems-dev` con confirmación explícita.
   arrastre de siempre); la incidencia sigue abierta según R31.
 - D28. Pantalla "Incidencias" dentro de Carrier Link (solo DEV, mismo interruptor); permiso nuevo `cl_incidents` solo en
   DEMO2.
+
+## v4.2 (24/11/2026) — Diagnóstico (fase 4): respuestas del responsable
+
+- R33. En el diagnóstico entran **solo los envíos sorteados** (con todas sus lecturas si el plan tiene Diagnóstico), nunca el resto de la entrega (coherente con R25).
+- R34. Un número de seguimiento del carrier **nunca coincidirá** con una etiqueta RFID o de panelista: no se construye lógica de choques; basta con que el origen de cada lectura quede marcado (prefijo `cl:` en el identificador del evento y origen "carrier").
+- R35. Es aceptable que las lecturas del carrier tarden **hasta 30 minutos** en verse en el diagnóstico (mismo ritmo que el RFID, sin tocar ese proceso).
+- R36. Los puntos intermedios **sin centro postal** se **dejan fuera del diagnóstico con aviso** en el Monitor; el plan se activa igual.
