@@ -116,3 +116,25 @@ BEGIN
   PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM public.panelist_location_reference WHERE panelist_id = P), 'nada guardado');
 END $$;
 ROLLBACK;
+
+-- ===== permiso retirado con la pregunta en pantalla: la respuesta no guarda nada (revision de seguridad 24/11) =====
+BEGIN;
+\ir fixtures/incident_city.sql
+SELECT pg_temp.fx(false);                                      -- casa, permiso v4 concedido
+DO $$
+DECLARE r jsonb; loc uuid; P constant uuid := 'e1000000-0000-0000-0000-000000000001';
+  T constant jsonb := '{"question":"Q","answer":"A","reminder":"R"}';
+BEGIN
+  r := public.gps_save_location(P, '1001', -1.25000, 36.82000, NULL, now(), 'm1');
+  loc := (r->>'location_id')::uuid;
+  PERFORM pg_temp.fail_if((r->>'ask_place')::boolean IS NOT TRUE, 'pregunta hecha');
+  PERFORM public.gps_record_consent(P, 'denied', 'es', 'v4', 't', NULL);   -- retira el permiso
+  r := public.gps_answer_place(P, 'yes', T, loc);
+  PERFORM pg_temp.fail_if(r->>'action' <> 'no_consent', 'Si sin permiso vigente: ' || r::text);
+  r := public.gps_answer_place(P, 'no', T, loc);
+  PERFORM pg_temp.fail_if(r->>'action' <> 'no_consent', 'No sin permiso vigente: ' || r::text);
+  PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM public.panelist_location_reference WHERE panelist_id = P), 'sin referencia');
+  PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM public.panelist_incident WHERE panelist_id = P AND payload->>'reason' = 'wrong_place'),
+                          'sin incidencia wrong_place');
+END $$;
+ROLLBACK;
