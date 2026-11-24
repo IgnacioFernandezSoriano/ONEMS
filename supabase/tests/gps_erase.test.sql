@@ -16,6 +16,9 @@ DECLARE r jsonb; n int; c record; inc_pl jsonb; v_loc_far uuid;
 BEGIN
   UPDATE public.panelists SET telegram_id = '1001' WHERE id = P;
   UPDATE public.panelists SET telegram_id = '1004' WHERE id = P4;
+  -- 20261123190000 (fase 2): estas pruebas comparan con la oficina = caso POBOX (sin POBOX no hay referencia sin casa)
+  INSERT INTO public.account_config (account_id, pobox_enabled) VALUES ('a0000000-0000-0000-0000-000000000001', true)
+  ON CONFLICT (account_id) DO UPDATE SET pobox_enabled = true;
   INSERT INTO public.postal_centers (id, account_id, code, name, city_id, latitude, longitude) VALUES
     ('dd000000-0000-0000-0000-00000000000a','a0000000-0000-0000-0000-000000000001','PCA','Centro A',
      'c1000000-0000-0000-0000-000000000001', -1.28000, 36.82000);
@@ -27,12 +30,16 @@ BEGIN
 
   PERFORM public.gps_record_consent(P, 'granted', 'es', 'v1', 'Texto del permiso', '555');
   PERFORM public.gps_visit_start(P, '1001');
-  r := public.gps_save_location(P, '1001', -1.27910, 36.82000, 20, now(), 'm1');    -- ok, ~100 m
+  -- 20261123180000: 'far' ya no abre incidencia -> la incidencia nace de declarar sin posicion y la posicion
+  -- 'far' llega despues (enlace retroactivo, que escribe distance_m en la incidencia)
+  r := public.gps_mark_declaration(D1, 'sent', P);
+  PERFORM pg_temp.fail_if(r->>'status' <> 'no_location', 'marca sin posicion: ' || r::text);
   r := public.gps_save_location(P, '1001', -1.27190, 36.82000, 50, now(), 'm2');    -- far, ~900 m
   PERFORM pg_temp.fail_if(r->>'status' <> 'far', 'far: ' || r::text);
   v_loc_far := (r->>'location_id')::uuid;
-  r := public.gps_mark_declaration(D1, 'sent', P);
-  PERFORM pg_temp.fail_if(r->>'status' <> 'far', 'marca far: ' || r::text);
+  PERFORM pg_temp.fail_if((SELECT sent_gps_status FROM public.allocation_plan_details WHERE id = D1) <> 'far',
+                          'marca far por enlace retroactivo');
+  r := public.gps_save_location(P, '1001', -1.27910, 36.82000, 20, now(), 'm1');    -- ok, ~100 m
   SELECT payload INTO inc_pl FROM public.panelist_incident WHERE panelist_id = P AND category = 'gps_location'
    AND payload ? 'details';
   PERFORM pg_temp.fail_if(inc_pl->>'distance_m' IS NULL, 'incidencia con distancia antes: ' || coalesce(inc_pl::text,'NULL'));
