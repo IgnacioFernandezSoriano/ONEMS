@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://onems.example/carrier-link/v4/schemas/delivery-open-response.schema.json",
+  "title": "POST /deliveries response (201 new, 200 existing)",
+  "type": "object",
+  "required": [
+    "delivery",
+    "upload"
+  ],
+  "properties": {
+    "delivery": {
+      "$ref": "delivery.schema.json"
+    },
+    "upload": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "null when the existing delivery is no longer pending_upload.",
+      "required": [
+        "url",
+        "method",
+        "headers",
+        "expires_in_seconds"
+      ],
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "Signed upload URL (token in the query string). No API key on the PUT."
+        },
+        "method": {
+          "const": "PUT"
+        },
+        "headers": {
+          "type": "object",
+          "required": [
+            "Content-Type"
+          ],
+          "properties": {
+            "Content-Type": {
+              "enum": [
+                "application/x-ndjson",
+                "text/csv"
+              ]
+            }
+          }
+        },
+        "expires_in_seconds": {
+          "const": 7200
+        }
+      }
+    }
+  }
+}

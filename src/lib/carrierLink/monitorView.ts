@@ -1,47 +1,10 @@
-/** Vista del Monitor de Carrier Link: recuentos de demandas, resumen de lotes y textos de avisos. */
-
-export const MONITOR_PAGE_SIZE = 25
-
-export const DEMAND_STATUSES = ['open', 'fulfilled', 'partial', 'failed'] as const
-export type DemandStatus = (typeof DEMAND_STATUSES)[number]
-
-/** Recuento por estado; los estados desconocidos se ignoran. */
-export function demandCounts(demands: { status: string }[]): Record<DemandStatus, number> {
-  const out: Record<DemandStatus, number> = { open: 0, fulfilled: 0, partial: 0, failed: 0 }
-  for (const d of demands) if ((DEMAND_STATUSES as readonly string[]).includes(d.status)) out[d.status as DemandStatus]++
-  return out
-}
+/** Vista del Monitor de Carrier Link: textos de los avisos (las entregas estan en deliveryView). */
 
 function num(v: unknown): number {
   return typeof v === 'number' && Number.isFinite(v) ? v : 0
 }
 
-/**
- * Resumen de un lote. `cl_batches.summary` (de cl_ingest_batch) trae `strata[]` con `candidates` (envios distintos del
- * estrato) y `rejected` ({motivo: n}); los elegidos no estan en el resumen: salen de cl_sampling_runs y se pasan en
- * `selected` (si el resumen trajera `samples_selected` por estrato, se usa). Campos ausentes -> 0.
- */
-export function batchSummary(b: { summary: unknown; selected?: number }): {
-  shipments: number
-  rejected: number
-  selected: number
-} {
-  const strata = (b.summary as { strata?: unknown } | null)?.strata
-  let shipments = 0
-  let rejected = 0
-  let selectedInSummary = 0
-  if (Array.isArray(strata)) {
-    for (const s of strata as Record<string, unknown>[]) {
-      if (!s || typeof s !== 'object') continue
-      shipments += num(s.candidates)
-      if (s.rejected && typeof s.rejected === 'object') {
-        for (const n of Object.values(s.rejected as Record<string, unknown>)) rejected += num(n)
-      }
-      selectedInSummary += num(s.samples_selected)
-    }
-  }
-  return { shipments, rejected, selected: selectedInSummary || num(b.selected) }
-}
+export const MONITOR_PAGE_SIZE = 25
 
 /** Tipos de aviso de la spec (§5) mas los que lanza el codigo de la base. Cada uno tiene `cl.alert.<tipo>`. */
 export const CL_ALERT_TYPES = [
@@ -64,6 +27,12 @@ export const CL_ALERT_TYPES = [
   'selection_method',
   'reader_without_city',
   'undo_after_carry',
+  // v4 (entregas completas)
+  'quota_already_settled',
+  'delivery_retries_exhausted',
+  'delivery_stuck',
+  // v4.2 (diagnostico, R36)
+  'diagnosis_point_without_center',
 ] as const
 
 export function alertLabelKey(alertType: string): string {
@@ -99,9 +68,10 @@ export function alertDetailLines(
   if (route) out.push({ key: 'cl.alert.route', params: { origin: route.origin, destination: route.destination } })
   switch (alertType) {
     case 'insufficient_candidates':
+      // v3: candidates_valid / samples_required; v4: population / quota_for_delivery.
       out.push({
         key: 'cl.alert.detail.insufficient_candidates',
-        params: { valid: num(d.candidates_valid), required: num(d.samples_required) },
+        params: { valid: num(d.candidates_valid ?? d.population), required: num(d.samples_required ?? d.quota_for_delivery) },
       })
       break
     case 'quota_unfilled':
@@ -110,7 +80,7 @@ export function alertDetailLines(
     case 'rejected_ratio':
       out.push({
         key: 'cl.alert.detail.rejected_ratio',
-        params: { rejected: num(d.rejected), candidates: num(d.candidates), percent: Math.round(num(d.ratio) * 100) },
+        params: { rejected: num(d.rejected), candidates: num(d.candidates ?? d.shipments), percent: Math.round(num(d.ratio) * 100) },
       })
       break
     case 'population_incoherent':
@@ -127,18 +97,28 @@ export function alertDetailLines(
       break
     case 'possible_misrouting':
     case 'reader_without_city': {
-      const items = list(d.item_ids)
+      // v4 possible_misrouting: samples [{sample_id, item_id}].
+      const items = list(d.item_ids) ?? list(d.samples, (x) => (x && typeof x === 'object' && typeof x.item_id === 'string' ? x.item_id : null))
       if (items) out.push({ key: 'cl.alert.detail.items', params: { items } })
       break
     }
+    case 'quota_already_settled':
+      out.push({ key: 'cl.alert.detail.quota_already_settled', params: { skipped: num(d.skipped) } })
+      break
+    case 'delivery_retries_exhausted':
+      out.push({ key: 'cl.alert.detail.retries_exhausted', params: { voided: num(d.samples_voided) } })
+      break
     case 'unknown_product': {
       const values = list(d.values)
       if (values) out.push({ key: 'cl.alert.detail.products', params: { values } })
       break
     }
-    case 'unknown_reading_point': {
+    case 'unknown_reading_point':
+    case 'diagnosis_point_without_center': {
       const points = list(d.points, (p) => (p && typeof p === 'object' ? `${p.place_ref ?? '-'} / ${p.mode_ref ?? '-'}` : null))
       if (points) out.push({ key: 'cl.alert.detail.points', params: { points } })
+      if (alertType === 'diagnosis_point_without_center')
+        out.push({ key: 'cl.alert.detail.diagnosis_skipped', params: { readings: num(d.readings), shipments: num(d.shipments) } })
       break
     }
     case 'feed_silent':

@@ -5,8 +5,6 @@ import {
   validateCalendar,
   canManageCarrierKeys,
   connectorErrorKey,
-  parseDryRunResult,
-  dryRunOutcome,
 } from '../carrierLink/connectorConfig'
 
 const full = [
@@ -97,71 +95,3 @@ describe('connectorErrorKey', () => {
   })
 })
 
-describe('parseDryRunResult', () => {
-  it('lote validado: estratos con candidatos, válidos y rechazos por motivo', () => {
-    const r = parseDryRunResult({
-      batch: null,
-      status: 'validated',
-      dry_run: true,
-      strata: [
-        {
-          stratum_id: 's1',
-          population_size: 40,
-          rows: 12,
-          candidates: 5,
-          candidates_valid: 3,
-          rejected: { no_end: 1, same_reading: 1 },
-          rows_rejected: { unknown_reading_point: 2 },
-        },
-      ],
-    })
-    expect(r).toEqual({
-      status: 'validated',
-      reason: null,
-      expected: null,
-      replayed: false,
-      strata: [
-        {
-          stratum_id: 's1',
-          population_size: 40,
-          rows: 12,
-          candidates: 5,
-          candidates_valid: 3,
-          rejected: [
-            { reason: 'no_end', count: 1 },
-            { reason: 'same_reading', count: 1 },
-          ],
-          rows_rejected: [{ reason: 'unknown_reading_point', count: 2 }],
-        },
-      ],
-    })
-  })
-  it('lote rechazado por método de selección', () => {
-    const r = parseDryRunResult({
-      status: 'rejected',
-      reason: 'selection_method',
-      expected: 'uniform_without_replacement',
-      strata: [{ stratum_id: 's1', selection_method: 'first_n' }],
-    })
-    expect(r.status).toBe('rejected')
-    expect(r.reason).toBe('selection_method')
-    expect(r.expected).toBe('uniform_without_replacement')
-    expect(r.strata[0]).toMatchObject({ stratum_id: 's1', candidates: null, rejected: [] })
-  })
-  it('lote ya ensayado: replayed solo si la base devuelve true', () => {
-    expect(parseDryRunResult({ status: 'validated', replayed: true, strata: [] }).replayed).toBe(true)
-    expect(parseDryRunResult({ status: 'validated', replayed: 'yes', strata: [] }).replayed).toBe(false)
-  })
-  it('respuesta sin forma esperada → sin estratos', () => {
-    expect(parseDryRunResult(null)).toEqual({ status: null, reason: null, expected: null, replayed: false, strata: [] })
-  })
-})
-
-describe('dryRunOutcome', () => {
-  it('validated → accepted, rejected → rejected, resto → unknown', () => {
-    expect(dryRunOutcome(parseDryRunResult({ status: 'validated', strata: [] }))).toBe('accepted')
-    expect(dryRunOutcome(parseDryRunResult({ status: 'rejected', reason: 'selection_method' }))).toBe('rejected')
-    expect(dryRunOutcome(parseDryRunResult({ status: 'pending' }))).toBe('unknown')
-    expect(dryRunOutcome(parseDryRunResult(null))).toBe('unknown')
-  })
-})

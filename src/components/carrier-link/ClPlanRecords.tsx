@@ -250,7 +250,6 @@ export function ClPlanRecords({
                     <th className={thNum}>{t('cl.records.carried_in')}</th>
                     <th className={thNum}>{t('cl.records.obtained')}</th>
                     <th className={th}>{t('common.status')}</th>
-                    <th className={thNum}>{t('cl.records.demands')}</th>
                     {canViewSamples && <th className={th}>{t('cl.samples.title')}</th>}
                   </tr>
                 </thead>
@@ -272,7 +271,6 @@ export function ClPlanRecords({
                           {t(`cl.records.status.${r.status}`)}
                         </span>
                       </td>
-                      <td className="px-4 py-2 text-end">{r.demands}</td>
                       {canViewSamples && (
                         <td className="px-4 py-2 whitespace-nowrap">
                           <Link to={samplesLink(plan.id, r)} className="text-blue-600 hover:underline">
@@ -293,7 +291,6 @@ export function ClPlanRecords({
                       <td className="px-4 py-2 text-end">{totals.carried_in}</td>
                       <td className="px-4 py-2 text-end">{totals.obtained}</td>
                       <td />
-                      <td className="px-4 py-2 text-end">{totals.demands}</td>
                       {canViewSamples && <td />}
                     </tr>
                   )}
@@ -302,7 +299,7 @@ export function ClPlanRecords({
                       {hasFilters ? t('cl.records.filter_total') : t('cl.records.plan_total')}
                     </td>
                     {whole.kind === 'unavailable' ? (
-                      <td className="px-4 py-2 text-sm font-normal text-amber-700" colSpan={canViewSamples ? 6 : 5}>
+                      <td className="px-4 py-2 text-sm font-normal text-amber-700" colSpan={canViewSamples ? 5 : 4}>
                         {t('cl.records.totals_unavailable')}
                       </td>
                     ) : (
@@ -311,7 +308,6 @@ export function ClPlanRecords({
                         <td className="px-4 py-2 text-end">{wholeTotals ? wholeTotals.carried_in : '…'}</td>
                         <td className="px-4 py-2 text-end">{wholeTotals ? wholeTotals.obtained : '…'}</td>
                         <td />
-                        <td className="px-4 py-2 text-end">{wholeTotals ? wholeTotals.demands : '…'}</td>
                         {canViewSamples && <td />}
                       </>
                     )}

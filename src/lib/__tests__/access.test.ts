@@ -17,10 +17,10 @@ describe('access', () => {
     expect(missing).toEqual([])
   })
 
-  it('el catálogo tiene 33 opciones únicas y las rutas apuntan a opciones válidas', () => {
+  it('el catálogo tiene 34 opciones únicas y las rutas apuntan a opciones válidas', () => {
     const keys = new Set<string>(ACCESS_OPTIONS.map(o => o.key))
-    expect(ACCESS_OPTIONS.length).toBe(33)
-    expect(keys.size).toBe(33)
+    expect(ACCESS_OPTIONS.length).toBe(34)
+    expect(keys.size).toBe(34)
     for (const v of Object.values(ROUTE_OPTION)) {
       expect(v === 'open' || v === 'superadmin' || keys.has(v)).toBe(true)
     }
@@ -36,9 +36,11 @@ describe('access', () => {
       '/carrier-link/reading-points': 'cl_reading_points',
       '/carrier-link/connectors': 'cl_connectors',
       '/carrier-link/monitor': 'cl_monitor',
+      '/carrier-link/incidents': 'cl_incidents',
     }
     for (const [path, opt] of Object.entries(rutas)) expect(routeAccess(path)).toBe(opt)
     expect(OPTION_ROUTE.cl_monitor).toBe('/carrier-link/monitor')
+    expect(OPTION_ROUTE.cl_incidents).toBe('/carrier-link/incidents')
     expect(OPTION_ROUTE.cl_plans).toBe('/allocation-plan-generator')
   })
 

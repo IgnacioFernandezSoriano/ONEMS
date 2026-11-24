@@ -1,0 +1,427 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://onems.example/carrier-link/v4/schemas/config-response.schema.json",
+  "title": "GET /config response (schema_version 4.0)",
+  "description": "Everything the connector needs to prepare the next delivery. Unknown properties must be ignored.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "connector",
+    "date_timezone",
+    "calendar",
+    "fields",
+    "mapping_complete",
+    "extra_fields",
+    "include_all_scans",
+    "plans",
+    "products",
+    "points",
+    "next_period",
+    "last_delivery",
+    "formats",
+    "limits"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^4\\.[0-9]+$"
+    },
+    "connector": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "status",
+        "carrier"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "testing",
+            "active",
+            "paused"
+          ]
+        },
+        "carrier": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "date_timezone": {
+      "type": "string",
+      "description": "IANA zone of the period dates (the account's zone, or UTC)."
+    },
+    "calendar": {
+      "type": "object",
+      "required": [
+        "delivery_days",
+        "delivery_hour",
+        "timezone",
+        "deliveries_per_week",
+        "frequency"
+      ],
+      "properties": {
+        "delivery_days": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 7,
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 7
+          },
+          "description": "ISO weekday numbers (1 = Monday) on which a delivery is due."
+        },
+        "delivery_hour": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 23
+        },
+        "timezone": {
+          "type": "string",
+          "description": "Zone of delivery_hour."
+        },
+        "deliveries_per_week": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 7
+        },
+        "frequency": {
+          "enum": [
+            "daily",
+            "weekly",
+            "several_per_week"
+          ]
+        }
+      }
+    },
+    "fields": {
+      "type": "object",
+      "description": "Carrier field name of each standard field (null = not mapped).",
+      "properties": {
+        "item_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/field"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "product": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/field"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "scan_at": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/scan_field"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "place_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/field"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/field"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "mapping_complete": {
+      "type": "boolean"
+    },
+    "extra_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "include_all_scans": {
+      "type": "boolean"
+    },
+    "plans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "product",
+          "start_date",
+          "end_date",
+          "include_all_scans"
+        ],
+        "properties": {
+          "product": {
+            "type": "string"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "include_all_scans": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "products": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "code",
+          "carrier_codes"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "carrier_codes": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "points": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "place_ref",
+          "mode_ref",
+          "role"
+        ],
+        "properties": {
+          "place_ref": {
+            "type": "string"
+          },
+          "mode_ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "role": {
+            "enum": [
+              "origin",
+              "destination",
+              "both",
+              "intermediate"
+            ]
+          },
+          "city_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "city": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "next_period": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "required": [
+        "period_start",
+        "period_end",
+        "due_at",
+        "deliverable"
+      ],
+      "properties": {
+        "period_start": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "period_end": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "due_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "deliverable": {
+          "type": "boolean"
+        }
+      }
+    },
+    "last_delivery": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "required": [
+        "delivery_id",
+        "period_start",
+        "period_end",
+        "status"
+      ],
+      "properties": {
+        "delivery_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "period_start": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "period_end": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "status": {
+          "$ref": "delivery.schema.json#/$defs/status"
+        }
+      }
+    },
+    "formats": {
+      "type": "object",
+      "required": [
+        "format",
+        "compression"
+      ],
+      "properties": {
+        "format": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "jsonl",
+              "csv"
+            ]
+          }
+        },
+        "compression": {
+          "type": "array",
+          "items": {
+            "const": "none"
+          }
+        }
+      }
+    },
+    "limits": {
+      "type": "object",
+      "required": [
+        "max_file_bytes",
+        "max_rows",
+        "file_retention_days",
+        "max_control_totals"
+      ],
+      "properties": {
+        "max_file_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 524288000
+        },
+        "max_rows": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50000000
+        },
+        "file_retention_days": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3650
+        },
+        "max_control_totals": {
+          "const": 10000
+        }
+      }
+    }
+  },
+  "$defs": {
+    "field": {
+      "type": "object",
+      "required": [
+        "field"
+      ],
+      "properties": {
+        "field": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "scan_field": {
+      "type": "object",
+      "required": [
+        "field"
+      ],
+      "properties": {
+        "field": {
+          "type": "string",
+          "minLength": 1
+        },
+        "format": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "PostgreSQL to_timestamp format, e.g. DD/MM/YYYY HH24:MI:SS; null = ISO 8601."
+        },
+        "timezone": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "IANA zone of times without offset; null = date_timezone."
+        }
+      }
+    }
+  }
+}

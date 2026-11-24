@@ -1,0 +1,291 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://onems.example/carrier-link/v4/schemas/delivery.schema.json",
+  "title": "Delivery (POST /deliveries, POST /deliveries/{id}/complete, GET /deliveries/{id})",
+  "description": "Unknown properties must be ignored. The drawn shipments are never listed.",
+  "type": "object",
+  "required": [
+    "delivery_id",
+    "feed_id",
+    "status",
+    "is_test",
+    "source",
+    "period_start",
+    "period_end",
+    "format",
+    "compression",
+    "sha256",
+    "created_at"
+  ],
+  "properties": {
+    "delivery_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "feed_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "status": {
+      "$ref": "#/$defs/status"
+    },
+    "is_test": {
+      "type": "boolean"
+    },
+    "source": {
+      "enum": [
+        "api",
+        "manual"
+      ]
+    },
+    "period_start": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "period_end": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "format": {
+      "enum": [
+        "jsonl",
+        "csv"
+      ]
+    },
+    "compression": {
+      "const": "none"
+    },
+    "file_bytes": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "rows_total": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "rows_rejected": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "shipments_total": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "shipments_valid": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "shipments_drawn": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "rejected_reasons": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "rows": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "propertyNames": {
+            "enum": [
+              "bad_record",
+              "bad_value",
+              "missing_field",
+              "bad_timestamp",
+              "unknown_product",
+              "unknown_reading_point"
+            ]
+          }
+        },
+        "shipments": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "propertyNames": {
+            "enum": [
+              "already_sampled",
+              "unknown_product",
+              "product_mismatch",
+              "no_start",
+              "same_reading",
+              "no_end",
+              "start_after_end",
+              "reader_without_city",
+              "end_out_of_period",
+              "no_stratum"
+            ]
+          }
+        }
+      }
+    },
+    "error": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^CL_[A-Z0-9_]+( [0-9A-Z]{5})?$"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "received_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "finished_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "processing_started_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "phase": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/phase"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "bytes_loaded": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "rows_loaded": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "attempts": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "existing": {
+      "type": "boolean",
+      "description": "Only in POST /deliveries: true = same period and sha256 already open."
+    },
+    "max_file_bytes": {
+      "type": "integer",
+      "description": "Only in POST /deliveries."
+    },
+    "alerts": {
+      "type": "array",
+      "description": "Only in GET /deliveries/{id}.",
+      "items": {
+        "$ref": "#/$defs/alert"
+      }
+    }
+  },
+  "$defs": {
+    "status": {
+      "enum": [
+        "pending_upload",
+        "received",
+        "processing",
+        "processed",
+        "failed",
+        "rejected"
+      ]
+    },
+    "phase": {
+      "enum": [
+        "load",
+        "resolve",
+        "items",
+        "strata",
+        "draw",
+        "transfer",
+        "finish",
+        "abort",
+        "cleanup",
+        "done",
+        "failed",
+        "rejected"
+      ]
+    },
+    "alert": {
+      "type": "object",
+      "required": [
+        "type",
+        "severity",
+        "created_at",
+        "details"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "unknown_product",
+            "unknown_reading_point",
+            "rejected_ratio",
+            "reader_without_city",
+            "insufficient_candidates",
+            "delivery_retries_exhausted"
+          ]
+        },
+        "severity": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "details": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

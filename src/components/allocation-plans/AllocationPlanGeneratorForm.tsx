@@ -91,6 +91,8 @@ export function AllocationPlanGeneratorForm({
   // ---- Forma de captura (solo con carrierLink). Panelistas = el flujo de siempre, sin cambios.
   const [chosenCapture, setChosenCapture] = useState<Capture>('panelists')
   const [feedId, setFeedId] = useState('')
+  // Diagnostico (R33): todas las lecturas de los envios sorteados entran en el diagnostico de red.
+  const [feedDiagnosis, setFeedDiagnosis] = useState(false)
   const selectedCarrier = carriers.find((c) => c.id === formData.carrier_id) ?? null
   const captureState = resolveCapture(selectedCarrier, chosenCapture)
   const capture: Capture = carrierLink ? captureState.capture : 'panelists'
@@ -119,7 +121,7 @@ export function AllocationPlanGeneratorForm({
   const { discard: discardClPreview } = clFlow
   useEffect(() => {
     if (clMode) discardClPreview()
-  }, [clMode, formData, matrix, seasonal, useSeasonalDist, feedId, discardClPreview])
+  }, [clMode, formData, matrix, seasonal, useSeasonalDist, feedId, feedDiagnosis, discardClPreview])
 
   const availableProducts = products.filter(
     (p) => !formData.carrier_id || p.carrier_id === formData.carrier_id
@@ -316,7 +318,7 @@ export function AllocationPlanGeneratorForm({
     start_date: formData.start_date,
     end_date: formData.end_date,
     total_samples: parseInt(formData.total_samples, 10) || 0,
-    feed_diagnosis: false,
+    feed_diagnosis: feedDiagnosis,
   })
 
   const handleClSubmit = async (e: React.FormEvent) => {
@@ -335,6 +337,7 @@ export function AllocationPlanGeneratorForm({
     setMatrix({})
     setSeasonal({})
     setUseSeasonalDist(false)
+    setFeedDiagnosis(false)
     setChosenCapture('panelists')
   }
 
@@ -473,6 +476,18 @@ export function AllocationPlanGeneratorForm({
                 ))}
               </select>
               <p className="text-xs text-gray-500 mt-1">{t('cl.plans.connector_hint')}</p>
+              <label className="mt-3 flex items-start gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={feedDiagnosis}
+                  onChange={(e) => setFeedDiagnosis(e.target.checked)}
+                  className="mt-0.5"
+                />
+                <span>
+                  <span className="font-medium">{t('cl.generator.diagnosis')}</span>
+                  <span className="block text-xs text-gray-500">{t('cl.generator.diagnosis_hint')}</span>
+                </span>
+              </label>
             </div>
           )}
         </div>

@@ -46,3 +46,9 @@ describe('traducciones de errores CL_*', () => {
     })
   }
 })
+
+describe('clErrorKey con dígitos en el código', () => {
+  it('CL_SHA256_MISMATCH no se corta en CL_SHA', () => {
+    expect(clErrorKey({ message: 'CL_SHA256_MISMATCH' })).toBe('cl.error.cl_sha256_mismatch')
+  })
+})

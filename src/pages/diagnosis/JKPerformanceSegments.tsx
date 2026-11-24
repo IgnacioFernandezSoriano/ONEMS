@@ -8,6 +8,8 @@ import { RoutePerformanceTable } from '@/components/reporting/RoutePerformanceTa
 import { Info } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from '@/hooks/useTranslation';
+import { CaptureSourceSelect, type CaptureSourceFilter } from '@/components/carrier-link/CaptureSource';
+import { isCarrierLinkEnabled } from '@/lib/featureFlags';
 
 interface SegmentData {
   segmentKey: string;
@@ -50,6 +52,7 @@ export default function JKPerformanceSegments() {
   const [toCenter, setToCenter] = useState('');
   const [segmentType, setSegmentType] = useState<'all' | 'operational' | 'distribution'>('all');
   const [threshold, setThreshold] = useState<'all' | 'compliant' | 'warning' | 'critical'>('all');
+  const [captureSource, setCaptureSource] = useState<CaptureSourceFilter>('');
   
   const [carriers, setCarriers] = useState<Array<{id: string, name: string}>>([]);
   const [products, setProducts] = useState<Array<{id: string, code: string, description: string, carrier_id: string}>>([]);
@@ -206,6 +209,9 @@ export default function JKPerformanceSegments() {
           const centerObj = postalCenters.find(c => c.name === toCenter);
           if (centerObj) query = query.eq('to_postal_center_id', centerObj.id);
         }
+
+        // Origen (Carrier Link): solo con el filtro puesto; sin el, la consulta es la de siempre.
+        if (captureSource) query = query.eq('capture_source', captureSource);
 
         const { data: segments, error } = await query;
 
@@ -458,7 +464,7 @@ export default function JKPerformanceSegments() {
     return () => {
       cancelled = true;
     };
-  }, [effectiveAccountId, carrier, product, originCity, destinationCity, fromCenter, toCenter, segmentType, threshold, carriers, products, postalCenters]);
+  }, [effectiveAccountId, carrier, product, originCity, destinationCity, fromCenter, toCenter, segmentType, threshold, captureSource, carriers, products, postalCenters]);
 
   // Convert SegmentData to JKRouteData format for charts
   const routeDataForCharts = segmentData.map(seg => ({
@@ -648,6 +654,15 @@ export default function JKPerformanceSegments() {
                 <option value="critical">{t('common.critical', undefined, 'Critical')}</option>
               </select>
             </div>
+
+            {isCarrierLinkEnabled() && (
+              <CaptureSourceSelect
+                value={captureSource}
+                onChange={setCaptureSource}
+                labelClassName="block text-xs font-medium text-gray-700 mb-1"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              />
+            )}
           </div>
         </div>
 

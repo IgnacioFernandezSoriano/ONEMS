@@ -1,0 +1,46 @@
+{
+ "http_status": 200,
+ "body": {
+  "delivery": {
+   "error": null,
+   "phase": "done",
+   "format": "jsonl",
+   "sha256": "a39b906da577380d0fd42864fd8d556022927f94db7ac6e00451931e33602095",
+   "source": "api",
+   "status": "processed",
+   "feed_id": "c1517000-0000-4000-8000-0000000000f1",
+   "is_test": false,
+   "attempts": 1,
+   "existing": true,
+   "created_at": "2026-11-23T18:44:17.212716+01:00",
+   "file_bytes": 52581,
+   "period_end": "2026-11-04",
+   "rows_total": 387,
+   "compression": "none",
+   "delivery_id": "722953ef-50ce-432a-9939-94398237824e",
+   "finished_at": "2026-11-23T18:44:21.489723+01:00",
+   "received_at": "2026-11-23T18:44:18.382356+01:00",
+   "rows_loaded": 387,
+   "bytes_loaded": 52581,
+   "period_start": "2026-11-02",
+   "rows_rejected": 61,
+   "max_file_bytes": 52428800,
+   "shipments_drawn": 8,
+   "shipments_total": 163,
+   "shipments_valid": 159,
+   "rejected_reasons": {
+    "rows": {
+     "bad_record": 2,
+     "bad_timestamp": 4,
+     "unknown_product": 4,
+     "unknown_reading_point": 51
+    },
+    "shipments": {
+     "unknown_product": 4
+    }
+   },
+   "processing_started_at": "2026-11-23T18:44:18.890026+01:00"
+  },
+  "upload": null
+ }
+}

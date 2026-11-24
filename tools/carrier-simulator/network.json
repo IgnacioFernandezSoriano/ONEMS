@@ -1,0 +1,27 @@
+{
+  "_comment": "Simulated carrier SIMPOST (fictional country). Network of the carrier as ITS database knows it: carrier codes only. e2e/fixture.sql registers in ONEMS the post offices of NPT, SVL and EMR (ACC = origin, DLV = destination); RDF and every processing center or hub stay unknown to ONEMS on purpose.",
+  "carrier": "SIMPOST",
+  "timezone": "Africa/Nairobi",
+  "ts_format": "%d/%m/%Y %H:%M:%S",
+  "items_per_day": 120,
+  "services": {"STD": 0.7, "EXP": 0.2, "REG": 0.1},
+  "transit_days": {"STD": [1, 2, 2, 3, 3, 3, 4, 5], "EXP": [1, 1, 2], "REG": [2, 3, 4, 5, 6]},
+  "hub": "HUB-NAT",
+  "cities": [
+    {"code": "NPT", "name": "Northport",  "weight": 3, "post_office": "NPT-PO", "processing_center": "NPT-MPC"},
+    {"code": "SVL", "name": "Southvale",  "weight": 2, "post_office": "SVL-PO", "processing_center": "SVL-MPC"},
+    {"code": "EMR", "name": "Eastmere",   "weight": 2, "post_office": "EMR-PO", "processing_center": "EMR-MPC"},
+    {"code": "RDF", "name": "Ridgefield", "weight": 1, "post_office": "RDF-PO", "processing_center": "RDF-MPC"}
+  ],
+  "anomalies": {
+    "undelivered": 0.04,
+    "misrouted_corrected": 0.03,
+    "misrouted_lost": 0.02,
+    "clock_error": 0.03,
+    "bad_service": 0.03,
+    "bad_timestamp": 0.03,
+    "missing_site": 0.02
+  },
+  "bad_service_code": "XX9",
+  "bad_timestamp_value": "31/11/2026 25:61:00"
+}

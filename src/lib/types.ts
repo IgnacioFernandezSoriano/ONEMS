@@ -101,6 +101,8 @@ export interface Carrier {
   status: 'active' | 'inactive'
   /** Forma de captura (panelists | carrier_link | both); ver src/lib/carrierCapture.ts. */
   capture_method?: CaptureMethod
+  /** Correo de avisos de Carrier Link (incidencias del transportista); solo con Carrier Link. */
+  notification_email?: string | null
   created_at: string
   updated_at: string
 }

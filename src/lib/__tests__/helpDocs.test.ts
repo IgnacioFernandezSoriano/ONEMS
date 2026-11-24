@@ -34,7 +34,7 @@ describe('ayuda de Carrier Link', () => {
       const file = resolve(__dirname, '../../../public/help', `carrier-link.${lang}.html`)
       expect(existsSync(file)).toBe(true)
       const html = readFileSync(file, 'utf-8')
-      for (const id of ['generator', 'balancing', 'records', 'samples', 'reading-points', 'connectors', 'monitor']) {
+      for (const id of ['generator', 'balancing', 'records', 'samples', 'reading-points', 'connectors', 'monitor', 'incidents']) {
         expect(html).toContain(`<section id="${id}">`)
         expect(html).toContain(`href="#${id}"`)
       }

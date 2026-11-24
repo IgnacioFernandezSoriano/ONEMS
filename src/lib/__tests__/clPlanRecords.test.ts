@@ -147,7 +147,6 @@ describe('toQuotaRecord y totales', () => {
     samples_planned: 5,
     samples_carried_in: 2,
     samples_obtained: 4,
-    demands_count: 1,
     status: 'open',
   }
   it('mapea la fila con la semana YYYY-Www', () => {
@@ -161,20 +160,18 @@ describe('toQuotaRecord y totales', () => {
       planned: 5,
       carried_in: 2,
       obtained: 4,
-      demands: 1,
       status: 'open',
     })
   })
   it('valores nulos cuentan como 0', () => {
-    const r = toQuotaRecord({ ...row, samples_obtained: null, demands_count: null })
+    const r = toQuotaRecord({ ...row, samples_obtained: null })
     expect(r.obtained).toBe(0)
-    expect(r.demands).toBe(0)
   })
-  it('suma previsto, arrastrado, obtenido y peticiones', () => {
+  it('suma previsto, arrastrado y obtenido', () => {
     const a = toQuotaRecord(row)
-    const b = toQuotaRecord({ ...row, id: 'q2', samples_planned: 1, samples_carried_in: 0, samples_obtained: 1, demands_count: 3 })
-    expect(quotaTotals([a, b])).toEqual({ planned: 6, carried_in: 2, obtained: 5, demands: 4 })
-    expect(quotaTotals([])).toEqual({ planned: 0, carried_in: 0, obtained: 0, demands: 0 })
+    const b = toQuotaRecord({ ...row, id: 'q2', samples_planned: 1, samples_carried_in: 0, samples_obtained: 1 })
+    expect(quotaTotals([a, b])).toEqual({ planned: 6, carried_in: 2, obtained: 5 })
+    expect(quotaTotals([])).toEqual({ planned: 0, carried_in: 0, obtained: 0 })
   })
 })
 
@@ -230,14 +227,13 @@ describe('totales de todo el filtro (cl_plan_quota_totals)', () => {
       planned: 40,
       carried_in: 2,
       obtained: 7,
-      demands: 1,
     })
     expect(toQuotaFilterTotals([])).toBeNull()
     expect(toQuotaFilterTotals(null)).toBeNull()
   })
   it('total de todo el filtro: servidor, una página, cargando o no disponible (nunca "…" para siempre)', () => {
-    const page = { planned: 5, carried_in: 1, obtained: 2, demands: 0 }
-    const server = { quotas: 9, planned: 50, carried_in: 3, obtained: 8, demands: 1 }
+    const page = { planned: 5, carried_in: 1, obtained: 2 }
+    const server = { quotas: 9, planned: 50, carried_in: 3, obtained: 8 }
     expect(wholeQuotaTotals(server, false, 4, page)).toEqual({ kind: 'ready', totals: server })
     expect(wholeQuotaTotals(null, true, 1, page)).toEqual({ kind: 'ready', totals: page })
     expect(wholeQuotaTotals(null, false, 1, page)).toEqual({ kind: 'ready', totals: page })

@@ -63,6 +63,7 @@ import { ClSamples } from './pages/carrier-link/ClSamples'
 import { ClReadingPoints } from './pages/carrier-link/ClReadingPoints'
 import { ClConnectors } from './pages/carrier-link/ClConnectors'
 import { ClMonitor } from './pages/carrier-link/ClMonitor'
+import { ClIncidents } from './pages/carrier-link/ClIncidents'
 import { isCarrierLinkEnabled } from './lib/featureFlags'
 
 const carrierLinkOn = isCarrierLinkEnabled()
@@ -170,6 +171,14 @@ function App() {
                       element={
                         <ProtectedRoute option="cl_monitor">
                           <ClMonitor />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/carrier-link/incidents"
+                      element={
+                        <ProtectedRoute option="cl_incidents">
+                          <ClIncidents />
                         </ProtectedRoute>
                       }
                     />

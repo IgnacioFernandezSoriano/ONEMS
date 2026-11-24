@@ -34,15 +34,37 @@ export function captureOptionsFor(carrier: { capture_method?: string | null }): 
 }
 
 /**
- * Datos de alta/edición de un carrier listos para enviar: sin Carrier Link habilitado se quita capture_method,
- * para que producción funcione igual que antes (aunque la columna aún no exista).
+ * Datos de alta/edición de un carrier listos para enviar: sin Carrier Link habilitado se quitan capture_method y
+ * notification_email, para que producción funcione igual que antes (aunque las columnas aún no existan). Con Carrier
+ * Link, el correo de avisos vacío se guarda como null (sin correo no se avisa al transportista).
  */
-export function carrierWritePayload<T extends { capture_method?: unknown }>(
+export function carrierWritePayload<T extends { capture_method?: unknown; notification_email?: unknown }>(
   data: T,
   carrierLinkOn: boolean,
-): T | Omit<T, 'capture_method'> {
-  if (carrierLinkOn) return data
+): T | Omit<T, 'capture_method' | 'notification_email'> {
+  if (carrierLinkOn) {
+    if (!('notification_email' in data)) return data
+    return { ...data, notification_email: normalizeNotificationEmail(data.notification_email) }
+  }
   const out: Partial<T> = { ...data }
   delete out.capture_method
-  return out as Omit<T, 'capture_method'>
+  delete out.notification_email
+  return out as Omit<T, 'capture_method' | 'notification_email'>
+}
+
+/** Correo de avisos del transportista: sin espacios alrededor y en minúsculas; vacío = null. */
+export function normalizeNotificationEmail(v: unknown): string | null {
+  const s = typeof v === 'string' ? v.trim().toLowerCase() : ''
+  return s === '' ? null : s
+}
+
+/** Misma regla que el CHECK carriers_notification_email_valid: un solo correo, sin espacios, comas ni ; < > ". */
+export function isValidNotificationEmail(v: string | null): boolean {
+  if (v === null) return true
+  return v.length <= 254 && /^[^@\s,;<>"]+@[^@\s,;<>"]+\.[^@\s,;<>"]+$/.test(v)
+}
+
+/** El campo "correo de avisos" solo existe con Carrier Link (DEV) y para quien puede editar carriers. */
+export function showsNotificationEmail(carrierLinkOn: boolean, canEditCarriers: boolean): boolean {
+  return carrierLinkOn && canEditCarriers
 }

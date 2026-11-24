@@ -1,0 +1,8 @@
+{
+ "http_status": 422,
+ "body": {
+  "success": false,
+  "error": "CL_PERIOD_NOT_IN_CALENDAR",
+  "message": "The period does not match the delivery calendar. Use next_period from GET /config."
+ }
+}
