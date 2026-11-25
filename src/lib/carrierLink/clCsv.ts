@@ -5,6 +5,9 @@
 /** Tope de filas por descarga; si hay mas, la descarga sale recortada y se avisa. */
 export const CSV_MAX_ROWS = 50000
 
+/** Ids por consulta `.in()`: 100 uuids dejan la URL en unos 4 KB (200 rozaban el limite de 8 KB de algunos proxies). */
+export const ID_CHUNK = 100
+
 const FORMULA_START = /^[=+\-@\t\r]/
 
 export function csvCell(v: unknown): string {

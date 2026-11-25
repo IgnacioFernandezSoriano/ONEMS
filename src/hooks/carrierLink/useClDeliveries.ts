@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useLatestRequest } from '@/lib/latestRequest'
 import { fetchAllPages } from '@/lib/fetchAllPages'
-import { fetchCapped } from '@/lib/carrierLink/clCsv'
+import { ID_CHUNK, fetchCapped } from '@/lib/carrierLink/clCsv'
 
 export type ClDeliveryError = { message?: string; code?: string }
 
@@ -162,8 +162,8 @@ export function useClDeliveries(accountId: string | null, filters: ClDeliveryFil
       (a, b) => query(accountId, false).range(a, b) as unknown as PromiseLike<{ data: Record<string, unknown>[] | null; error: unknown }>,
     )
     const counts = new Map<string, number>()
-    for (let i = 0; i < r.rows.length; i += 200) {
-      const ids = r.rows.slice(i, i + 200).map((d) => d.id as string)
+    for (let i = 0; i < r.rows.length; i += ID_CHUNK) {
+      const ids = r.rows.slice(i, i + ID_CHUNK).map((d) => d.id as string)
       const alerts = await fetchAllPages<{ delivery_id: string }>((a, b) =>
         supabase.from('cl_alerts').select('delivery_id').eq('account_id', accountId).in('delivery_id', ids).order('id').range(a, b),
       )

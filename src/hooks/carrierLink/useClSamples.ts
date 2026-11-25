@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useLatestRequest } from '@/lib/latestRequest'
 import { fetchAllPages } from '@/lib/fetchAllPages'
-import { CSV_MAX_ROWS, fetchCapped } from '@/lib/carrierLink/clCsv'
+import { CSV_MAX_ROWS, ID_CHUNK, fetchCapped } from '@/lib/carrierLink/clCsv'
 import {
   SAMPLES_PAGE_SIZE,
   parseRouteFilter,
@@ -176,8 +176,8 @@ export function useClSamples(accountId: string | null, planId: string | null, fi
     const s = await exportSamples()
     const out: ClSampleScanExport[] = []
     let truncated = s.truncated
-    for (let i = 0; i < s.rows.length && out.length < CSV_MAX_ROWS; i += 200) {
-      const chunk = s.rows.slice(i, i + 200)
+    for (let i = 0; i < s.rows.length && out.length < CSV_MAX_ROWS; i += ID_CHUNK) {
+      const chunk = s.rows.slice(i, i + ID_CHUNK)
       const items = new Map(chunk.map((x) => [x.id, x.item_id]))
       const r = await fetchCapped<any>(
         (from, to) =>
@@ -196,7 +196,7 @@ export function useClSamples(accountId: string | null, planId: string | null, fi
       )
       out.push(...r.rows.map((x) => ({ ...mapScan(x), item_id: items.get(x.sample_id) ?? '' })))
       if (r.truncated) truncated = true
-      if (out.length >= CSV_MAX_ROWS && i + 200 < s.rows.length) truncated = true
+      if (out.length >= CSV_MAX_ROWS && i + ID_CHUNK < s.rows.length) truncated = true
     }
     const order = new Map(s.rows.map((x, i) => [x.item_id, i]))
     out.sort((a, b) => (order.get(a.item_id) ?? 0) - (order.get(b.item_id) ?? 0))

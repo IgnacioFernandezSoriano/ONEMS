@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CSV_MAX_ROWS, csvCell, csvDate, csvFileName, fetchCapped, toCsv } from '../carrierLink/clCsv'
+import { CSV_MAX_ROWS, ID_CHUNK, csvCell, csvDate, csvFileName, fetchCapped, toCsv } from '../carrierLink/clCsv'
 
 describe('csvCell', () => {
   it('empties null and undefined', () => {
@@ -78,5 +78,12 @@ describe('fetchCapped', () => {
   })
   it('default cap is 50.000', () => {
     expect(CSV_MAX_ROWS).toBe(50000)
+  })
+})
+
+describe('ID_CHUNK', () => {
+  it('an .in() of ID_CHUNK uuids stays far below 8 KB of URL', () => {
+    const ids = Array.from({ length: ID_CHUNK }, () => '00000000-0000-4000-8000-000000000000')
+    expect(new URLSearchParams({ sample_id: `in.(${ids.join(',')})` }).toString().length).toBeLessThan(5000)
   })
 })
