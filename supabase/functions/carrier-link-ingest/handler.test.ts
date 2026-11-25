@@ -356,3 +356,8 @@ Deno.test('GET /query: no key 401, POST 405', async () => {
   await r2.body?.cancel()
   assertEquals(t.calls.length, 0)
 })
+Deno.test('GET /query: a blank mapped field name is 422, not 500', async () => {
+  const t = mock({ cl_connector_config: { data: { ...QCONFIG, fields: { ...QCONFIG.fields, item_id: { field: '   ' } } } } })
+  const r = await handle(req('GET', '/query'), t.deps)
+  assertEquals([r.status, (await r.json()).error], [422, 'CL_MAPPING_INCOMPLETE'])
+})

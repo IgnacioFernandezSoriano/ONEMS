@@ -112,7 +112,10 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
         return fail('CL_BAD_REQUEST', `db must be one of: ${QUERY_DBS.join(', ')}`)
       }
       const cfg = await call('cl_connector_config', { p_feed_id: feedId }) as unknown as ConnectorConfig
-      if (cfg.mapping_complete !== true) return fail('CL_MAPPING_INCOMPLETE')
+      const named = (k: 'item_id' | 'scan_at' | 'place_ref') => (cfg.fields?.[k]?.field ?? '').trim() !== ''
+      if (cfg.mapping_complete !== true || !named('item_id') || !named('scan_at') || !named('place_ref')) {
+        return fail('CL_MAPPING_INCOMPLETE')
+      }
       return json(200, buildCarrierQuery(cfg, db as QueryDb))
     }
 

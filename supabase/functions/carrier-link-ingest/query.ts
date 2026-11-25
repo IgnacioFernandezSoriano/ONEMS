@@ -70,8 +70,15 @@ const norm = (v: unknown): string | null => (typeof v === 'string' && v.trim() !
 // Comment text never carries a line break (a value could otherwise end the comment).
 const commentSafe = (v: string) => v.replace(/[\r\n]+/g, ' ')
 
-function ident(db: QueryDb, name: string): string {
+/** Quoted name exactly as written (output column names of the file). */
+function quoted(db: QueryDb, name: string): string {
   return db === 'sqlserver' ? `[${name.replace(/]/g, ']]')}]` : `"${name.replace(/"/g, '""')}"`
+}
+
+/** Column reference in the carrier table. Oracle stores unquoted names in upper case, so a plain lower-case mapped
+ *  name (tracking_no) is looked up as "TRACKING_NO"; any other spelling is kept exactly. */
+function ident(db: QueryDb, name: string): string {
+  return quoted(db, db === 'oracle' && /^[a-z][a-z0-9_$#]*$/.test(name) ? name.toUpperCase() : name)
 }
 
 function text(db: QueryDb, expr: string): string {
@@ -107,7 +114,8 @@ function localDate(db: QueryDb, col: string, scanTz: string, dateTz: string): { 
 /** Rows of an inline table as UNION ALL of SELECTs (portable; no VALUES constructor). Empty -> a never-matching row. */
 function inlineRows(db: QueryDb, cols: string[], rows: (string | null)[][]): string {
   const from = db === 'oracle' ? ' FROM dual' : ''
-  const cell = (v: string | null) => (v === null ? nullText(db) : `CAST(${lit(v)} AS ${db === 'oracle' ? 'VARCHAR2(400)' : db === 'sqlserver' ? 'NVARCHAR(400)' : 'VARCHAR(400)'})`)
+  // SQL Server: N'...' so text outside the database code page (e.g. Arabic) is not lost.
+  const cell = (v: string | null) => (v === null ? nullText(db) : `CAST(${db === 'sqlserver' ? 'N' : ''}${lit(v)} AS ${db === 'oracle' ? 'VARCHAR2(400)' : db === 'sqlserver' ? 'NVARCHAR(400)' : 'VARCHAR(400)'})`)
   if (rows.length === 0) {
     return `SELECT ${cols.map((c) => `${nullText(db)} AS ${c}`).join(', ')}${from} WHERE 1 = 0`
   }
@@ -162,6 +170,15 @@ export function buildCarrierQuery(config: ConnectorConfig, db: QueryDb): Carrier
   const header = [
     `-- ONEMS Carrier Link: extraction query of one delivery (${db}).`,
     ...(db === 'postgresql' ? [] : ['-- SIN PROBAR / UNTESTED: this dialect has not been run by ONEMS yet. Check it before use.']),
+    ...(db === 'oracle'
+      ? ['-- Oracle: plain lower-case column names are written in upper case ("TRACKING_NO"), as Oracle stores unquoted',
+        '--   names; quoted names are case-sensitive. In SQL*Plus / SQL Developer run SET DEFINE OFF first (an & in a',
+        '--   code would prompt); through JDBC / ODP.NET send each statement without its trailing ;.']
+      : []),
+    ...(db === 'sqlserver'
+      ? ['-- SQL Server 2017 or later (TRIM, AT TIME ZONE). Comparisons follow the database collation (often',
+        '--   case-insensitive); ONEMS compares codes case-sensitively.']
+      : []),
     `-- Connector: ${commentSafe(config.connector?.name ?? '')} (carrier ${commentSafe(config.connector?.carrier ?? '')}).`,
     `-- Built from GET /config: products, agreed points, field names and period. Ask GET /query again before each`,
     `-- delivery: the period changes every time and the configuration may change.`,
@@ -205,7 +222,7 @@ export function buildCarrierQuery(config: ConnectorConfig, db: QueryDb): Carrier
   ]
   const withBlock = `WITH ${ctes.join(',\n')}`
 
-  const file = `${withBlock}\nSELECT ${out.map((n) => `s.${ident(db, n)}`).join(', ')}\n  FROM s JOIN complete k ON k.cl_item = s.cl_item\n` +
+  const file = `${withBlock}\nSELECT ${out.map((n) => `s.${ident(db, n)} AS ${quoted(db, n)}`).join(', ')}\n  FROM s JOIN complete k ON k.cl_item = s.cl_item\n` +
     (allScans ? '' : ` WHERE s.is_agreed = 1\n`) +
     ` ORDER BY s.cl_item, s.cl_ts;`
 

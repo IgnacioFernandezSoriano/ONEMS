@@ -125,3 +125,22 @@ Deno.test('sqlserver: period as CAST(... AS date), no DATE literal', () => {
   assert(sql.includes("CAST('2026-11-02' AS date)"))
   assert(!sql.includes("DATE '"))
 })
+
+Deno.test('oracle: plain lower-case names are upper-cased (unquoted Oracle columns), file keeps the carrier names', () => {
+  const c = clone()
+  c.extra_fields = ['weight_g', 'MixedCase']
+  const sql = buildCarrierQuery(c, 'oracle').sql
+  assert(sql.includes('c."TRACKING_NO"'), 'upper-cased column')
+  assert(sql.includes('AS "tracking_no"'), 'file column keeps the mapped name')
+  assert(sql.includes('"MixedCase"'), 'mixed case kept as is')
+  assert(sql.includes('SET DEFINE OFF'))
+})
+
+Deno.test('sqlserver: national literals keep non-Latin text', () => {
+  const c = clone()
+  c.points = [{ role: 'destination', mode_ref: null, place_ref: 'مكتب' }]
+  const sql = buildCarrierQuery(c, 'sqlserver').sql
+  assert(sql.includes("N'مكتب'"))
+  assert(sql.includes("N'STD'"))
+  assert(sql.includes('2017'), 'version requirement in the header')
+})
