@@ -47,7 +47,14 @@ python -I tools/carrier-simulator/tests/test_docs.py
 # 2. Prueba completa en local (reconstruye la base local onems_t, unos 3-4 minutos)
 bash tools/carrier-simulator/e2e/run.sh
 #    SAVE_EXAMPLES=1 bash tools/carrier-simulator/e2e/run.sh   -> además renueva examples/ y docs/carrier-link/ejemplo/
+
+# 3. La consulta de GET /query (PostgreSQL) frente al simulador (segundos; esquema temporal en la base postgres local)
+python -I tools/carrier-simulator/e2e/query_pg_check.py
 ```
+
+La 3 ejecuta en el Postgres local la SQL que devuelve `GET /query` sobre una tabla de lecturas simulada y comprueba que
+saca **exactamente** los mismos envíos, lecturas y totales de control que el conector del simulador (con y sin
+`include_all_scans`). Solo prueba el dialecto PostgreSQL; Oracle y SQL Server se publican sin probar.
 
 Antes, el Postgres portable tiene que estar arrancado en `127.0.0.1:5433` (`supabase/tests/run_tests.sh` indica el
 comando si no lo está). La prueba completa necesita también `deno` (ejecuta el worker real en local). El `psql` se
