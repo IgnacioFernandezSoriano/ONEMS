@@ -13,10 +13,11 @@ export const UPLOAD_URL_TTL_SECONDS = 7200
 export const FORMATS = ['jsonl', 'csv'] as const
 export const CONTENT_TYPE_BY_FORMAT: Record<string, string> = { jsonl: 'application/x-ndjson', csv: 'text/csv' }
 
-export const NEW_ROUTES = 'GET /config, POST /deliveries, POST /deliveries/{id}/complete, GET /deliveries/{id}'
+export const NEW_ROUTES = 'GET /config, GET /query, POST /deliveries, POST /deliveries/{id}/complete, GET /deliveries/{id}'
 
 export type Route =
   | { kind: 'config' }
+  | { kind: 'query' }
   | { kind: 'deliveries' }
   | { kind: 'complete'; id: string }
   | { kind: 'delivery'; id: string }
@@ -24,7 +25,7 @@ export type Route =
 
 /** Method each route accepts ('gone' answers 410 to any method). */
 export const ROUTE_METHOD: Record<Route['kind'], string | null> = {
-  config: 'GET', deliveries: 'POST', complete: 'POST', delivery: 'GET', gone: null,
+  config: 'GET', query: 'GET', deliveries: 'POST', complete: 'POST', delivery: 'GET', gone: null,
 }
 
 /** Path after `/carrier-link-ingest` (with or without the `/functions/v1` prefix). null = unknown route. */
@@ -34,6 +35,7 @@ export function parseRoute(url: URL): Route | null {
   if (!m) return null
   const seg = (m[1] ?? '').split('/').filter((s) => s !== '')
   if (seg.length === 1 && seg[0] === 'config') return { kind: 'config' }
+  if (seg.length === 1 && seg[0] === 'query') return { kind: 'query' }
   if (seg.length === 1 && seg[0] === 'deliveries') return { kind: 'deliveries' }
   if (seg.length === 2 && seg[0] === 'deliveries') return { kind: 'delivery', id: decodeURIComponent(seg[1]) }
   if (seg.length === 3 && seg[0] === 'deliveries' && seg[2] === 'complete') {

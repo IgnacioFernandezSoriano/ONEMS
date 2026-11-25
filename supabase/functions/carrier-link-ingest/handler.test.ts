@@ -311,3 +311,48 @@ Deno.test('null or non-object RPC result -> 500 CL_INTERNAL, never 201/200 with 
     assertEquals(t.kicks(), 0)
   }
 })
+
+// ---------------------------------------------------------------- GET /query
+const QCONFIG = {
+  connector: { name: 'Sim', carrier: 'SIMPOST' }, date_timezone: 'Africa/Nairobi', include_all_scans: false,
+  fields: { item_id: { field: 'tracking_no' }, product: { field: 'service' }, scan_at: { field: 'event_ts', timezone: 'Africa/Nairobi' },
+    place_ref: { field: 'site_code' }, mode_ref: { field: 'event_code' } },
+  extra_fields: ['weight_g'], mapping_complete: true, products: [{ code: 'SIM-STD', carrier_codes: ['STD'] }],
+  points: [{ place_ref: 'EMR-PO', mode_ref: 'ACC', role: 'origin' }, { place_ref: 'NPT-PO', mode_ref: 'DLV', role: 'destination' }],
+  next_period: { period_start: '2026-11-02', period_end: '2026-11-04', deliverable: true },
+}
+Deno.test('GET /query: the PostgreSQL query of the key feed by default', async () => {
+  const t = mock({ cl_connector_config: { data: QCONFIG } })
+  const r = await handle(req('GET', '/query'), t.deps)
+  assertEquals(r.status, 200)
+  const b = await r.json()
+  assertEquals([b.db, b.tested, b.period_start, b.period_end, b.table_placeholder], ['postgresql', true, '2026-11-02', '2026-11-04', 'carrier_scans'])
+  assert(String(b.sql).includes('"tracking_no"'))
+  assertEquals(t.calls, [{ fn: 'cl_connector_config', args: { p_feed_id: FEED } }])
+  assertEquals(t.usage, ['/carrier-link-ingest/query'])
+})
+Deno.test('GET /query?db=oracle: untested dialect', async () => {
+  const t = mock({ cl_connector_config: { data: QCONFIG } })
+  const b = await (await handle(req('GET', '/query?db=oracle'), t.deps)).json()
+  assertEquals([b.db, b.tested], ['oracle', false])
+})
+Deno.test('GET /query?db=mysql: 400 without database work', async () => {
+  const t = mock({ cl_connector_config: { data: QCONFIG } })
+  const r = await handle(req('GET', '/query?db=mysql'), t.deps)
+  assertEquals([r.status, (await r.json()).error], [400, 'CL_BAD_REQUEST'])
+  assertEquals(t.calls.length, 0)
+})
+Deno.test('GET /query: incomplete mapping is 422 CL_MAPPING_INCOMPLETE', async () => {
+  const t = mock({ cl_connector_config: { data: { ...QCONFIG, mapping_complete: false } } })
+  const r = await handle(req('GET', '/query'), t.deps)
+  assertEquals([r.status, (await r.json()).error], [422, 'CL_MAPPING_INCOMPLETE'])
+})
+Deno.test('GET /query: no key 401, POST 405', async () => {
+  const t = mock({ cl_connector_config: { data: QCONFIG } })
+  const r1 = await handle(req('GET', '/query', undefined, {}), t.deps)
+  assertEquals([r1.status, (await r1.json()).error], [401, 'CL_UNAUTHORIZED'])
+  const r2 = await handle(req('POST', '/query', {}), t.deps)
+  assertEquals([r2.status, r2.headers.get('Allow')], [405, 'GET'])
+  await r2.body?.cancel()
+  assertEquals(t.calls.length, 0)
+})
