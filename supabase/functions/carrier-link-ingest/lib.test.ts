@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-import-prefix
 import { assert, assertEquals } from 'https://deno.land/std@0.224.0/assert/mod.ts'
 import {
-  ABSOLUTE_MAX_FILE_BYTES, ERRORS, clCode, extractApiKey, hasCompressedBody, isUuid, parseRoute, publicDelivery,
+  ABSOLUTE_MAX_FILE_BYTES, ERRORS, ROUTE_METHOD, clCode, extractApiKey, hasCompressedBody, isUuid, parseRoute, publicDelivery,
   sqlErrorToHttp, statusOf, validateOpenRequest,
 } from './lib.ts'
 
@@ -19,6 +19,8 @@ Deno.test('parseRoute: v4 routes, with or without /functions/v1 and trailing sla
   assertEquals(parseRoute(u('/carrier-link-ingest/deliveries')), { kind: 'deliveries' })
   assertEquals(parseRoute(u('/carrier-link-ingest/deliveries/abc')), { kind: 'delivery', id: 'abc' })
   assertEquals(parseRoute(u('/carrier-link-ingest/deliveries/abc/complete')), { kind: 'complete', id: 'abc' })
+  assertEquals(parseRoute(u('/functions/v1/carrier-link-ingest/query')), { kind: 'query' })
+  assertEquals(ROUTE_METHOD.query, 'GET')
 })
 Deno.test('parseRoute: v3 routes are gone, others unknown', () => {
   assertEquals(parseRoute(u('/carrier-link-ingest/demands')), { kind: 'gone' })

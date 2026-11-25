@@ -41,6 +41,36 @@ paths:
         "405": { $ref: "#/components/responses/Error" }
         "429": { $ref: "#/components/responses/RateLimited" }
         "500": { $ref: "#/components/responses/Error" }
+  /query:
+    get:
+      operationId: getExtractionQuery
+      summary: Consulta SQL de extracción del próximo periodo, ya rellenada con la configuración del conector
+      description: |
+        Se construye en cada llamada a partir de lo mismo que devuelve GET /config: nombres de campo del carrier,
+        campos extra, códigos de producto del plan, puntos acordados con su papel, zona horaria de las fechas,
+        include_all_scans y el periodo de next_period (si no hay periodo pendiente, quedan los marcadores
+        <PERIOD_START> y <PERIOD_END>). Dos sentencias: filas del fichero y totales de control. El carrier solo
+        sustituye el nombre de su tabla de lecturas (table_placeholder). PostgreSQL está probado frente al
+        simulador; Oracle y SQL Server se publican sin probar (tested = false).
+      parameters:
+        - name: db
+          in: query
+          required: false
+          description: Tipo de base de datos del carrier.
+          schema: { type: string, enum: [postgresql, oracle, sqlserver], default: postgresql }
+      responses:
+        "200":
+          description: Consulta de extracción.
+          content:
+            application/json:
+              schema: { $ref: "schemas/query-response.schema.json" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/Error" }
+        "405": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "500": { $ref: "#/components/responses/Error" }
   /deliveries:
     post:
       operationId: openDelivery

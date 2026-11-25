@@ -126,6 +126,9 @@ Con el plan aplicado y el conector Activo, todo va solo:
   cierra igualmente tres días después con lo que haya.
 - **Si faltan muestras al cerrar la semana.** Lo que falta se reparte entre las semanas siguientes del mes y, si no
   caben, entre las de los meses siguientes. Lo que falte al acabar el plan queda «sin cubrir» y abre una incidencia.
+- **Qué datos extrae el carrier.** No hace falta mandarle nada: su programa pide a ONEMS la consulta de extracción
+  ya hecha (`GET /query`, para PostgreSQL, Oracle o SQL Server) con sus productos, sus puntos y el periodo que toca.
+  Si cambia algo en Conectores o Puntos de lectura, la siguiente consulta ya sale actualizada.
 - **Si el carrier no puede conectarse.** Puede mandar el fichero por otra vía; se sube a mano en Conectores (ver
   abajo) y se procesa igual.
 

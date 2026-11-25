@@ -2,6 +2,7 @@
 // whole request flow is tested with mocks in handler.test.ts. index.ts wires the real Supabase client.
 //
 //   GET  /config                     -> cl_connector_config (what the carrier needs to prepare a delivery)
+//   GET  /query?db=postgresql|oracle|sqlserver -> the extraction SQL of the next delivery, built from that config
 //   POST /deliveries                 -> cl_delivery_open + a signed upload URL (one PUT of the whole file)
 //   POST /deliveries/{id}/complete   -> cl_delivery_complete (received: processing starts within a minute)
 //   GET  /deliveries/{id}            -> cl_delivery_status (status, phase, counts, rejected reasons, drawn, alerts)
@@ -11,6 +12,7 @@ import {
   clCode, errorBody, extractApiKey, hasCompressedBody, isUuid, parseRoute, publicDelivery, sqlErrorToHttp, statusOf,
   validateOpenRequest,
 } from './lib.ts'
+import { QUERY_DBS, buildCarrierQuery, type ConnectorConfig, type QueryDb } from './query.ts'
 
 export interface ApiKey { id: string; scope: string; feed_id: string | null }
 export interface DbError { code?: string; message?: string }
@@ -102,6 +104,19 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
 
     if (route.kind === 'config') {
       return json(200, await call('cl_connector_config', { p_feed_id: feedId }))
+    }
+
+    if (route.kind === 'query') {
+      const db = new URL(req.url).searchParams.get('db') ?? 'postgresql'
+      if (!(QUERY_DBS as readonly string[]).includes(db)) {
+        return fail('CL_BAD_REQUEST', `db must be one of: ${QUERY_DBS.join(', ')}`)
+      }
+      const cfg = await call('cl_connector_config', { p_feed_id: feedId }) as unknown as ConnectorConfig
+      const named = (k: 'item_id' | 'scan_at' | 'place_ref') => (cfg.fields?.[k]?.field ?? '').trim() !== ''
+      if (cfg.mapping_complete !== true || !named('item_id') || !named('scan_at') || !named('place_ref')) {
+        return fail('CL_MAPPING_INCOMPLETE')
+      }
+      return json(200, buildCarrierQuery(cfg, db as QueryDb))
     }
 
     if (route.kind === 'deliveries') {
