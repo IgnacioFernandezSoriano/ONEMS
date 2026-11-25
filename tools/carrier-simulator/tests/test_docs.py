@@ -144,7 +144,7 @@ class SchemasTest(unittest.TestCase):
         self.assertEqual(sorted(V.docs), sorted([
             "config-response.schema.json", "delivery-file-row.schema.json", "delivery-open-request.schema.json",
             "delivery-open-response.schema.json", "delivery-response.schema.json", "delivery.schema.json",
-            "error.schema.json"]))
+            "error.schema.json", "query-response.schema.json"]))
         for name, s in V.docs.items():
             self.assertEqual(s["$schema"], DRAFT, name)
             self.assertTrue(s["$id"].endswith("/" + name), name)
@@ -169,6 +169,7 @@ class ExampleTest(unittest.TestCase):
     BODIES = {
         "01-get-config.json": "config-response.schema.json",
         "18-get-config-after.json": "config-response.schema.json",
+        "19-get-query.json": "query-response.schema.json",
         "04-open-response.json": "delivery-open-response.schema.json",
         "12-replay-open-existing.json": "delivery-open-response.schema.json",
         "06-complete-response.json": "delivery-response.schema.json",
@@ -226,6 +227,7 @@ def openapi():
 class OpenApiTest(unittest.TestCase):
     ROUTES = {
         "/config": {"get": {"200", "401", "404", "405", "429", "500"}},
+        "/query": {"get": {"200", "400", "401", "404", "405", "422", "429", "500"}},
         "/deliveries": {"post": {"200", "201", "400", "401", "403", "404", "409", "413", "422", "429", "500"}},
         "/deliveries/{id}/complete": {"post": {"200", "202", "401", "403", "404", "409", "410", "413", "422", "429",
                                                "500"}},

@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Documento | Especificación técnica de la interfaz conector del carrier ↔ ONEMS |
-| Versión | **4.0** (borrador para revisión) — 2026-11-23. Sustituye por completo a la versión 1.x (demandas y lotes). |
+| Versión | **4.1** (borrador para revisión) — 2026-11-25 (4.0: 2026-11-23). Sustituye por completo a la versión 1.x (demandas y lotes). |
 | Configuración | `schema_version` **4.0** (respuesta de `GET /config`) |
 | Destinatarios | Equipo técnico del carrier (desarrollo, integración y operación) |
 | Artefactos | [`openapi.yaml`](openapi.yaml) · [`schemas/`](schemas/) (JSON Schema 2020-12) · [`ejemplo/`](ejemplo/) (ejemplo completo) |
@@ -69,6 +69,8 @@ completos del periodo y entregarlos a tiempo.
  --------------------                                  -----
  GET /config  ------------------------------------->   calendario, campos, productos, puntos, next_period, límites
               <-------------------------------------   200
+ GET /query?db=…  (opcional) --------------------->   la consulta SQL de extracción de next_period, ya rellenada
+              <-------------------------------------   200 {sql, …}
  extrae TODOS los envíos completos de next_period,
  escribe el fichero (JSON Lines o CSV), calcula
  sha256, tamaño y totales de control
@@ -130,6 +132,7 @@ llevan un identificador `CL-REQ-nnn`; las pruebas de conformidad (§15.2) los ci
 | CL-REQ-020 | Un periodo rechazado DEBE reenviarse corregido (§12.3). Un periodo procesado NO DEBE reenviarse. | 12 |
 | CL-REQ-021 | El conector NO DEBE superar 30 peticiones por minuto y clave. | 9 |
 | CL-REQ-022 | El conector DEBE respetar los límites de `GET /config` (`limits`). Si un periodo no cabe, el carrier DEBE avisar a ONEMS antes de la fecha de entrega. | 6.5 |
+| CL-REQ-024 | El conector DEBERÍA obtener la consulta de extracción de `GET /query` antes de cada entrega (o aplicar §5.1 con el mismo resultado). Las variantes Oracle y SQL Server se publican sin probar: el carrier DEBE comprobarlas antes de usarlas. | 5.2 |
 | CL-REQ-023 | El conector DEBERÍA registrar, por cada entrega, el periodo, el `delivery_id`, el sha256, el tamaño, los totales de control y las respuestas, durante al menos 90 días (auditoría). | 7 |
 
 ---
@@ -268,6 +271,16 @@ Definiciones de apoyo:
   vuelve a ser completo en el periodo de esa nueva llegada y se incluye en él.
 
 ### 5.2. Consulta de ejemplo en el lado del carrier (SQL)
+
+**Consulta ya hecha: `GET /query`.** El carrier no tiene que escribir esta consulta. `GET /query?db=postgresql`
+(o `oracle`, o `sqlserver`) devuelve la consulta de su próxima entrega **ya rellenada** con su configuración: sus
+nombres de campo y campos extra, sus códigos de producto, sus puntos acordados con su papel, la zona horaria y el
+periodo de `next_period` (§9.2). Solo hay que sustituir `carrier_scans` por el nombre de su tabla (o vista) de
+lecturas. Como el periodo cambia en cada entrega y la configuración puede cambiar, se pide de nuevo antes de cada
+entrega. La variante PostgreSQL está comprobada frente al simulador de referencia; Oracle y SQL Server se publican
+**sin probar** (`tested: false`) y el carrier DEBE revisarlas antes de usarlas (CL-REQ-024).
+
+La consulta de abajo es la referencia ilustrativa de la misma regla, para quien prefiera escribirla.
 
 Ilustrativa, para PostgreSQL; adapte los nombres a sus tablas. Supone una tabla de lecturas
 `carrier_scans(tracking_no, event_ts timestamptz, site_code, event_code, service, weight_g)` y dos tablas cargadas
@@ -479,6 +492,7 @@ clave (§3.2). Respuestas en JSON (`Content-Type: application/json`). Las propie
 | Método y ruta | Qué hace | Respuestas correctas | Esquema |
 |---|---|---|---|
 | `GET /config` | Configuración del conector y próximo periodo | `200` | [`config-response`](schemas/config-response.schema.json) |
+| `GET /query?db=…` | Consulta SQL de extracción del próximo periodo, ya rellenada | `200` | [`query-response`](schemas/query-response.schema.json) |
 | `POST /deliveries` | Abre la entrega de un periodo y da la URL de subida | `201` nueva, `200` ya abierta | petición [`delivery-open-request`](schemas/delivery-open-request.schema.json), respuesta [`delivery-open-response`](schemas/delivery-open-response.schema.json) |
 | `PUT <upload.url>` | Sube el fichero (almacén, no la API; sin clave) | `200` | bytes del fichero ([`delivery-file-row`](schemas/delivery-file-row.schema.json) por registro) |
 | `POST /deliveries/{id}/complete` | Avisa de que el fichero está subido | `202` recibida, `200` ya en curso o terminada | [`delivery-response`](schemas/delivery-response.schema.json) |
@@ -505,7 +519,27 @@ Campos principales de la respuesta (ejemplo completo: [`ejemplo/01-get-config.js
 | `formats` | `{"format": ["jsonl","csv"], "compression": ["none"]}` |
 | `limits` | §6.5 |
 
-### 9.2. `POST /deliveries`
+### 9.2. `GET /query`
+
+Parámetro `db`: `postgresql` (por defecto), `oracle` o `sqlserver`; otro valor → `400 CL_BAD_REQUEST`. Misma clave,
+mismos límites de peticiones y mismo conector que `GET /config`. Ejemplo:
+[`ejemplo/19-get-query.json`](ejemplo/19-get-query.json).
+
+| Campo | Contenido |
+|---|---|
+| `db` | Tipo de base pedido |
+| `tested` | `true` solo para `postgresql`; `false` = sin probar por ONEMS (cabecera `SIN PROBAR / UNTESTED` en el SQL) |
+| `period_start`, `period_end` | Periodo de `next_period` puesto en la consulta; `null` si no hay periodo pendiente (el SQL lleva los marcadores `<PERIOD_START>` y `<PERIOD_END>`) |
+| `table_placeholder` | `carrier_scans`: nombre que el carrier sustituye por su tabla de lecturas |
+| `sql` | Dos sentencias: (1) las filas del fichero, con los nombres de campo del carrier; (2) los totales de control (§7) |
+
+Supuestos escritos en la cabecera del SQL: una fila por lectura; la columna de hora es fecha/hora **sin** zona horaria,
+en la zona de `fields.scan_at.timezone` (UTC si no consta). Si la columna ya lleva zona horaria se quita la primera
+conversión; si es texto, hay que convertirla antes. En SQL Server las zonas van con su nombre de Windows; si ONEMS no
+conoce la equivalencia, deja un marcador `<WINDOWS_TIME_ZONE_FOR_…>`. Errores: `401`, `422 CL_MAPPING_INCOMPLETE`
+(faltan equivalencias de campos en ONEMS), `429`.
+
+### 9.3. `POST /deliveries`
 
 Petición (lista cerrada de claves; otra clave → `400`):
 
@@ -534,14 +568,14 @@ Respuesta: `delivery` (§10) más `existing` y `max_file_bytes`, y `upload`:
 `upload` es `null` si la entrega ya no espera el fichero (por ejemplo, la misma petición repetida después de
 completar).
 
-### 9.3. `POST /deliveries/{id}/complete`
+### 9.4. `POST /deliveries/{id}/complete`
 
 Sin cuerpo. Respuestas: `202` (`received`, también si se repite mientras sigue `received`); `200` (ya
 `processing`, `processed` o `failed`); `409 CL_FILE_NOT_UPLOADED`; `403 CL_FEED_PAUSED` (conector pausado); si la entrega queda o estaba `rejected`, el código HTTP de su error (por ejemplo `409
 CL_SUPERSEDED`, `410 CL_UPLOAD_EXPIRED`, `413 CL_FILE_TOO_LARGE`, `422 CL_SHA256_MISMATCH`) con la entrega en el
 cuerpo. Un `id` ajeno, inexistente o mal formado responde siempre igual: `404 CL_DELIVERY_NOT_FOUND`.
 
-### 9.4. `GET /deliveries/{id}`
+### 9.5. `GET /deliveries/{id}`
 
 `200` con la entrega (§10) y sus `alerts` (§11.4). Una entrega `rejected` o `failed` también responde `200`: el
 motivo está en `delivery.error`.
@@ -639,7 +673,7 @@ Recuentos al terminar: `rows_total`, `rows_rejected`, `shipments_total` (envíos
 | 429 | `CL_RATE_LIMITED` | Más de 30 peticiones en un minuto (cabecera `Retry-After: 60`) | Esperar y reintentar |
 | 500 | `CL_INTERNAL` | Error interno | Reintentar con espera creciente |
 
-`CL_FILE_TOO_LARGE` y `CL_PERIOD_ALREADY_DELIVERED` los devuelve ya `POST /deliveries` (§9.2) y también
+`CL_FILE_TOO_LARGE` y `CL_PERIOD_ALREADY_DELIVERED` los devuelve ya `POST /deliveries` (§9.3) y también
 `complete`, si la entrega queda rechazada al completarla. Los demás códigos de rechazo del fichero
 (`CL_SHA256_MISMATCH`, `CL_TOO_MANY_ROWS`, `CL_RECORD_TOO_LONG`, `CL_MAPPING_INCOMPLETE`, `CL_BAD_ENCODING`,
 `CL_BAD_CSV_HEADER`, `CL_FILE_MISSING`, `CL_RETRIES_EXHAUSTED`), `CL_SUPERSEDED` y `CL_UPLOAD_EXPIRED` llegan como
@@ -970,6 +1004,7 @@ Los esquemas, el OpenAPI y el ejemplo se validan entre sí con `python -I tools/
 | Versión | Fecha | Cambios |
 |---|---|---|
 | 1.0–1.1 (v3 de diseño) | 2026-11 | ONEMS emitía demandas por estrato; el carrier sorteaba candidatos y los enviaba en lotes (`/demands`, `/batches`). **Retirada.** |
+| 4.1 | 2026-11-25 | `GET /query`: la consulta de extracción ya rellenada (PostgreSQL probada; Oracle y SQL Server sin probar). CL-REQ-024. |
 | 4.0 | 2026-11-23 | Entrega completa por periodo según calendario; sorteo solo en ONEMS; fichero JSON Lines o CSV sin comprimir con URL firmada; totales de control; estados y fases; avisos por correo al carrier. Las rutas v3 responden `410`. |
 
 ### Contacto
