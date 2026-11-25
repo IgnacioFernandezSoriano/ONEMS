@@ -17,9 +17,11 @@ import { useClDeliveries, DELIVERIES_PAGE_SIZE } from '@/hooks/carrierLink/useCl
 import { useClIncidentCounts } from '@/hooks/carrierLink/useClIncidents'
 import { useClMonitor } from '@/hooks/carrierLink/useClMonitor'
 import { MONITOR_PAGE_SIZE, alertDetailLines, alertLabelKey } from '@/lib/carrierLink/monitorView'
-import { DELIVERY_STATUSES, deliveryStatusKey } from '@/lib/carrierLink/deliveryView'
+import { DELIVERY_STATUSES, deliveryPhaseKey, deliveryStatusKey } from '@/lib/carrierLink/deliveryView'
 import { INCIDENT_TYPES, incidentTypeKey, incidentsLink } from '@/lib/carrierLink/incidentView'
 import { clampPage } from '@/lib/carrierLink/sampleView'
+import { ClCsvButton } from '@/components/carrier-link/ClCsvButton'
+import { csvDate } from '@/lib/carrierLink/clCsv'
 
 const input = 'border border-gray-300 rounded-lg px-3 py-2 text-sm'
 const ALL = ''
@@ -57,10 +59,55 @@ export function ClMonitor() {
     [feedId, status, from, to],
   )
   const deliveries = useClDeliveries(accountId, filters, deliveryPage, 15_000)
-  const { alerts, alertTotal, loading: alertsLoading, error, setAlertStatus } = useClMonitor(accountId, { alertPage, alertFilter })
+  const { alerts, alertTotal, loading: alertsLoading, error, setAlertStatus, exportAlerts } = useClMonitor(accountId, { alertPage, alertFilter })
   const incidents = useClIncidentCounts(accountId, feedId || null, seesIncidents)
 
   const feedName = (id: string) => feeds.find((f) => f.id === id)?.name ?? id.slice(0, 8)
+  const yesNo = (v: boolean) => (v ? t('cl.samples.yes') : t('cl.samples.no'))
+
+  const buildDeliveries = async () => {
+    const r = await deliveries.exportAll()
+    return {
+      headers: [
+        t('cl.csv.period_start'), t('cl.csv.period_end'), t('cl.connectors.connector'), t('cl.csv.source'), t('cl.csv.test'),
+        t('cl.deliveries.col.status'), t('cl.csv.phase'), t('cl.deliveries.col.rows'), t('cl.csv.rows_rejected'),
+        t('cl.csv.shipments'), t('cl.deliveries.col.valid'), t('cl.csv.shipments_rejected'), t('cl.deliveries.col.drawn'),
+        t('cl.deliveries.col.alerts'), t('cl.csv.received'), t('cl.csv.finished'), t('cl.csv.error'),
+      ],
+      rows: r.rows.map((d) => {
+        const phaseKey = deliveryPhaseKey(d.status, d.phase)
+        const shipRejected =
+          d.shipments_total !== null && d.shipments_valid !== null ? Math.max(0, d.shipments_total - d.shipments_valid) : null
+        return [
+          d.period_start, d.period_end, feedName(d.feed_id), t(`cl.deliveries.source.${d.source === 'manual' ? 'manual' : 'api'}`),
+          yesNo(d.is_test), t(deliveryStatusKey(d.status)), phaseKey ? t(phaseKey) : '', d.rows_total, d.rows_rejected,
+          d.shipments_total, d.shipments_valid, shipRejected, d.shipments_drawn, d.alerts, csvDate(d.received_at),
+          csvDate(d.finished_at), d.error ?? '',
+        ]
+      }),
+      truncated: r.truncated,
+    }
+  }
+
+  const buildAlerts = async () => {
+    const r = await exportAlerts()
+    return {
+      headers: [
+        t('cl.csv.date'), t('cl.csv.alert'), t('cl.csv.severity'), t('cl.deliveries.col.status'), t('cl.samples.origin'),
+        t('cl.samples.destination'), t('cl.csv.details'),
+      ],
+      rows: r.rows.map((a) => {
+        const origin = a.origin_city_id ? cityName(a.origin_city_id) : ''
+        const destination = a.destination_city_id ? cityName(a.destination_city_id) : ''
+        const route = origin && destination ? { origin, destination } : null
+        return [
+          csvDate(a.created_at), t(alertLabelKey(a.alert_type)), t(`cl.monitor.severity.${a.severity}`), t(`cl.monitor.alert.${a.status}`),
+          origin, destination, alertDetailLines(a.alert_type, a.details, route).map((l) => t(l.key, l.params)).join(' | '),
+        ]
+      }),
+      truncated: r.truncated,
+    }
+  }
 
   // Si el total se reduce y la pagina queda fuera de rango, se ajusta y se recarga.
   useEffect(() => {
@@ -134,7 +181,10 @@ export function ClMonitor() {
           )}
 
           <section className="space-y-2">
-            <h2 className="font-semibold text-gray-900">{t('cl.monitor.deliveries')}</h2>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="font-semibold text-gray-900">{t('cl.monitor.deliveries')}</h2>
+              <ClCsvButton fileBase="cl-deliveries" build={buildDeliveries} disabled={deliveries.loading || deliveries.total === 0} />
+            </div>
             <div className="flex flex-wrap items-end gap-3">
               <label className="text-sm">
                 <span className="block text-gray-600 mb-1">{t('cl.connectors.connector')}</span>
@@ -210,19 +260,22 @@ export function ClMonitor() {
           </section>
 
           <section className="space-y-2">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="font-semibold text-gray-900">{t('cl.monitor.alerts')}</h2>
-              <select
-                className={input}
-                value={alertFilter}
-                onChange={(e) => {
-                  setAlertFilter(e.target.value as 'open' | 'all')
-                  setAlertPage(0)
-                }}
-              >
-                <option value="open">{t('cl.monitor.alert_filter_open')}</option>
-                <option value="all">{t('cl.monitor.alert_filter_all')}</option>
-              </select>
+              <div className="flex flex-wrap items-center gap-2">
+                <ClCsvButton fileBase="cl-alerts" build={buildAlerts} disabled={alertsLoading || alertTotal === 0} />
+                <select
+                  className={input}
+                  value={alertFilter}
+                  onChange={(e) => {
+                    setAlertFilter(e.target.value as 'open' | 'all')
+                    setAlertPage(0)
+                  }}
+                >
+                  <option value="open">{t('cl.monitor.alert_filter_open')}</option>
+                  <option value="all">{t('cl.monitor.alert_filter_all')}</option>
+                </select>
+              </div>
             </div>
             <div className="bg-white border border-gray-200 rounded-lg">
               {!alertsLoading && alerts.length === 0 && (
