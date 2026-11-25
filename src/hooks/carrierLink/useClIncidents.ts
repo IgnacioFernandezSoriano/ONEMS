@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useLatestRequest } from '@/lib/latestRequest'
+import { fetchCapped } from '@/lib/carrierLink/clCsv'
 import {
   INCIDENTS_PAGE_SIZE,
   parseIncident,
@@ -52,7 +53,23 @@ export function useClIncidents(accountId: string | null, filters: IncidentFilter
     void load()
   }, [load])
 
-  return { items, total, loading, error, refetch: load }
+  /** Descarga CSV: todas las incidencias de los filtros (el servidor da como mucho 1.000 por llamada). */
+  const exportAll = useCallback(async (): Promise<{ rows: IncidentListItem[]; truncated: boolean }> => {
+    if (!accountId) return { rows: [], truncated: false }
+    return fetchCapped<IncidentListItem>(async (from, to) => {
+      const { data, error: e } = await supabase.rpc('cl_incidents_list', {
+        p_account_id: accountId,
+        p_status: statusParam(status),
+        p_type: type,
+        p_feed_id: feedId,
+        p_limit: to - from + 1,
+        p_offset: from,
+      })
+      return { data: e ? null : parseIncidentList(data).items, error: e }
+    })
+  }, [accountId, status, type, feedId])
+
+  return { items, total, loading, error, refetch: load, exportAll }
 }
 
 /** Recuento de incidencias sin resolver por tipo (para el Monitor): una llamada con limite 1 por tipo. */
