@@ -18,7 +18,6 @@ export interface ClAlertRow {
   destination_city_id: string | null
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapAlert(a: any): ClAlertRow {
   const quota = Array.isArray(a.quota) ? a.quota[0] : a.quota
   const d = (a.details && typeof a.details === 'object' ? a.details : {}) as Record<string, unknown>
@@ -85,7 +84,6 @@ export function useClMonitor(accountId: string | null, opts: Options) {
     // 416 / PGRST103 = pagina fuera de rango: no es un error para el usuario.
     setError(aRes.error && aRes.error.code !== 'PGRST103' ? aRes.error : null)
     setAlertTotal(aRes.count ?? 0)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setAlerts(((aRes.data ?? []) as any[]).map(mapAlert))
     setLoading(false)
   }, [accountId, alertPage, beginLoad, query])
@@ -106,7 +104,6 @@ export function useClMonitor(accountId: string | null, opts: Options) {
   /** Descarga CSV: todos los avisos del filtro (hasta CSV_MAX_ROWS). */
   const exportAlerts = useCallback(async (): Promise<{ rows: ClAlertRow[]; truncated: boolean }> => {
     if (!accountId) return { rows: [], truncated: false }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const r = await fetchCapped<any>((a, b) => query(accountId, false).range(a, b))
     return { rows: r.rows.map(mapAlert), truncated: r.truncated }
   }, [accountId, query])

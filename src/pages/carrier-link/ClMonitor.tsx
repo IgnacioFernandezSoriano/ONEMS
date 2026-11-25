@@ -72,7 +72,7 @@ export function ClMonitor() {
         t('cl.csv.period_start'), t('cl.csv.period_end'), t('cl.connectors.connector'), t('cl.csv.source'), t('cl.csv.test'),
         t('cl.deliveries.col.status'), t('cl.csv.phase'), t('cl.deliveries.col.rows'), t('cl.csv.rows_rejected'),
         t('cl.csv.shipments'), t('cl.deliveries.col.valid'), t('cl.csv.shipments_rejected'), t('cl.deliveries.col.drawn'),
-        t('cl.deliveries.col.alerts'), t('cl.csv.received'), t('cl.csv.finished'), t('cl.csv.error'),
+        t('cl.deliveries.col.alerts'), t('cl.csv.received'), t('cl.csv.finished'), t('cl.csv.error_message'),
       ],
       rows: r.rows.map((d) => {
         const phaseKey = deliveryPhaseKey(d.status, d.phase)

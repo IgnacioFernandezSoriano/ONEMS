@@ -45,7 +45,6 @@ export const CL_ALL_PLANS = 'all'
 
 const SCAN_COLUMNS = 'id, sample_id, scan_at, role, place_ref, mode_ref, reader:readers(carrier_place_ref, carrier_mode_ref)'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapSample(r: any): ClSampleRow {
   const od = Array.isArray(r.one_db) ? r.one_db[0] : r.one_db
   return {
@@ -63,7 +62,6 @@ function mapSample(r: any): ClSampleRow {
 }
 
 /** El punto se resuelve con el lector (carrier_scan) si la lectura no trae place/mode. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapScan(r: any): ClSampleScan {
   return {
     id: r.id,
@@ -149,7 +147,6 @@ export function useClSamples(accountId: string | null, planId: string | null, fi
         // 416 / PGRST103 = página fuera de rango: no es un error para el usuario, la pantalla ajusta la página.
         setError(e && e.code !== 'PGRST103' ? e : null)
         setTotal(count ?? 0)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         setSamples(((data ?? []) as any[]).map(mapSample))
         setLoading(false)
       })
@@ -164,14 +161,12 @@ export function useClSamples(accountId: string | null, planId: string | null, fi
       .order('scan_at', { ascending: true, nullsFirst: false })
       .limit(200)
     if (e) throw e
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return ((data ?? []) as any[]).map(mapScan)
   }, [])
 
   /** Descarga: todas las muestras de los filtros (hasta CSV_MAX_ROWS). */
   const exportSamples = useCallback(async (): Promise<{ rows: ClSampleRow[]; truncated: boolean }> => {
     if (!accountId || !planId) return { rows: [], truncated: false }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const r = await fetchCapped<any>((from, to) => query(accountId, planId, false).range(from, to))
     return { rows: r.rows.map(mapSample), truncated: r.truncated }
   }, [accountId, planId, query])
@@ -184,7 +179,6 @@ export function useClSamples(accountId: string | null, planId: string | null, fi
     for (let i = 0; i < s.rows.length && out.length < CSV_MAX_ROWS; i += 200) {
       const chunk = s.rows.slice(i, i + 200)
       const items = new Map(chunk.map((x) => [x.id, x.item_id]))
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const r = await fetchCapped<any>(
         (from, to) =>
           supabase
