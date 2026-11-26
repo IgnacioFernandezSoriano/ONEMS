@@ -71,4 +71,22 @@ BEGIN
   PERFORM pg_temp.fail_if(ops_case._typo_kind('00011418','ABC11418') IS NOT NULL, 'tk letras');
   PERFORM pg_temp.fail_if(ops_case._typo_kind('00011418','00041118') IS NOT NULL, 'tk 2 dif no adyacentes/no swap');
 END $$;
+-- 35 envios 'sent' mas hacia N4 (dias 4..38): el tope de 30 debe conservar los mas recientes
+INSERT INTO public.allocation_plan_details
+  (id, account_id, plan_id, origin_node_id, destination_node_id, fecha_programada, status, sent_at, tag_id,
+   origin_panelist_id, destination_panelist_id)
+SELECT gen_random_uuid(), 'a0000000-0000-0000-0000-000000000001', 'cc000000-0000-0000-0000-000000000001',
+       'b1000000-0000-0000-0000-000000000001', 'b4000000-0000-0000-0000-000000000004', current_date, 'sent',
+       now() - (g || ' days')::interval, lpad((90000000 + g)::text, 8, '0'),
+       'e1000000-0000-0000-0000-000000000001', 'e4000000-0000-0000-0000-000000000004'
+  FROM generate_series(4, 38) g;
+DO $$
+DECLARE r jsonb;
+BEGIN
+  r := ops_case._data('e4000000-0000-0000-0000-000000000004', '00011418', NULL, NULL);
+  PERFORM pg_temp.fail_if(jsonb_array_length(r->'expected_for_panelist') <> 30, 'expected tope 30');
+  PERFORM pg_temp.fail_if(NOT EXISTS (SELECT 1 FROM jsonb_array_elements(r->'expected_for_panelist') x WHERE x->>'tag' = '00011415'), 'expected incluye el mas reciente');
+  PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM jsonb_array_elements(r->'expected_for_panelist') x WHERE x->>'tag' = '90000038'), 'expected excluye el mas antiguo');
+  PERFORM pg_temp.fail_if(r->'expected_for_panelist'->0->>'sent_at' > r->'expected_for_panelist'->29->>'sent_at', 'expected orden ascendente');
+END $$;
 ROLLBACK;

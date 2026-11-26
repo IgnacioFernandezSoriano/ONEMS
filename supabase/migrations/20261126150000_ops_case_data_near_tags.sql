@@ -130,7 +130,7 @@ BEGIN
                                         AND x.received_at IS NULL))
              AND ((v_pnode IS NOT NULL AND x.destination_node_id = v_pnode)
                   OR (v_pnode IS NULL AND v_pcity IS NOT NULL AND n.city_id = v_pcity))
-           ORDER BY x.sent_at, x.tag_id LIMIT 30) q
+           ORDER BY x.sent_at DESC, x.tag_id LIMIT 30) q
     LEFT JOIN public.panelists op ON op.id = q.osid AND op.account_id = v_acc;
 
   -- Serie de cada remitente implicado (maximo 5, los de envio mas reciente; 30 etiquetas de los ultimos 45 dias).
