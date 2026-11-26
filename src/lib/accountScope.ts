@@ -3,7 +3,6 @@
  * account, so account-data queries must add this filter themselves; with no account (superadmin viewing
  * "all accounts") the query is returned unchanged. Normal users are already limited to their account by RLS.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function scopeToAccount<Q extends { eq: (column: string, value: any) => any }>(
   query: Q,
   accountId: string | null | undefined,

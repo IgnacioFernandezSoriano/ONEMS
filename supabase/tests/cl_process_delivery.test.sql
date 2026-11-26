@@ -823,6 +823,94 @@ BEGIN
   PERFORM pg_temp.ok((h->>'stuck_alerts')::int = 0, 'la segunda vez no cuenta: ' || h::text);
 END $$;
 
+-- ================================================================ 13. antes del primer carrier real (26/11)
+-- T2-m3: sweep_done solo marca borrado lo que ya no esta en storage.objects (si el borrado de Storage fallo, el fichero
+-- se vuelve a intentar). Fallida reintentable cuyo fichero se borro (retencion): pasa a rejected CL_FILE_MISSING (se
+-- deshacen sus muestras) y deja de bloquear las entregas posteriores del conector. claimed_at se renueva al retomar un
+-- arriendo caducado. Un error en el paso g de cl_housekeeping no para el resto. Purga del historial de pg_cron.
+DO $$
+DECLARE
+  f  constant text := 'f0000000-0000-0000-0000-0000000000a4';
+  tt constant uuid := 'de000000-0000-4000-8000-0000000000e1';
+  da constant uuid := 'de000000-0000-4000-8000-0000000000f1';
+  fb constant uuid := 'de000000-0000-4000-8000-0000000000f2';
+  rb constant uuid := 'de000000-0000-4000-8000-0000000000f3';
+  pa text; pb text; c jsonb; h jsonb; e text;
+BEGIN
+  -- La prueba tt de la seccion 12 ocupa el hueco de proceso: se cierra para empezar limpios.
+  UPDATE public.cl_deliveries SET status = 'rejected', error = 'CL_TEST_DONE', finished_at = now() WHERE id = tt;
+
+  -- A) Rechazada con el fichero todavia en Storage: no se marca; borrado de verdad: si.
+  PERFORM pg_temp.mk(da::text, f, '2026-11-30', '2026-12-06', '[]'::jsonb);
+  UPDATE public.cl_deliveries SET status = 'rejected', error = 'CL_SHA256_MISMATCH', finished_at = now() - interval '2 hours'
+   WHERE id = da RETURNING file_path INTO pa;
+  INSERT INTO storage.objects (bucket_id, name, metadata, created_at) VALUES ('cl-deliveries', pa, '{"size": 1}', now());
+  PERFORM pg_temp.ok(public.cl_delivery_sweep_list(1000) @> to_jsonb(ARRAY[pa]), 'rechazada en la lista de borrado');
+  PERFORM pg_temp.ok(public.cl_delivery_sweep_done(ARRAY[pa]) = 0, 'sigue en Storage: no cuenta');
+  PERFORM pg_temp.ok((SELECT file_deleted_at IS NULL FROM public.cl_deliveries WHERE id = da), 'sigue en Storage: sin marcar');
+  DELETE FROM storage.objects WHERE bucket_id = 'cl-deliveries' AND name = pa;
+  PERFORM pg_temp.ok(public.cl_delivery_sweep_done(ARRAY[pa]) = 1, 'borrado: cuenta');
+  PERFORM pg_temp.ok((SELECT file_deleted_at IS NOT NULL FROM public.cl_deliveries WHERE id = da), 'borrado: marcado');
+
+  -- B) Fallida (1 intento) de hace 40 dias y una real posterior del mismo conector, que espera a la fallida.
+  PERFORM pg_temp.mk(fb::text, f, '2026-12-07', '2026-12-13', '[]'::jsonb);
+  UPDATE public.cl_deliveries SET status = 'failed', error = 'CL_WORKER_ERROR', finished_at = now() - interval '40 days',
+         progress = jsonb_build_object('attempts', 1, 'phase', 'failed')
+   WHERE id = fb RETURNING file_path INTO pb;
+  PERFORM pg_temp.mk(rb::text, f, '2026-12-14', '2026-12-20', '[]'::jsonb);
+  PERFORM pg_temp.ok(public.cl_delivery_sweep_list(1000) @> to_jsonb(ARRAY[pb]), 'fallida caducada en la lista de borrado');
+  PERFORM pg_temp.ok(public.cl_delivery_sweep_done(ARRAY[pb]) = 1, 'fallida: cuenta');
+  PERFORM pg_temp.ok((SELECT status = 'rejected' AND error = 'CL_FILE_MISSING' AND file_deleted_at IS NOT NULL
+                             AND finished_at = now() AND (progress->>'samples_voided')::int = 0
+                        FROM public.cl_deliveries WHERE id = fb),
+                     'fallida sin fichero -> rejected CL_FILE_MISSING: '
+                     || (SELECT row_to_json(d)::text FROM (SELECT status, error, progress FROM public.cl_deliveries WHERE id = fb) d));
+  PERFORM pg_temp.ok(EXISTS (SELECT 1 FROM public.cl_incidents i WHERE i.feed_id = f::uuid AND i.incident_type = 'delivery_rejected'
+                               AND i.periods @> jsonb_build_array(jsonb_build_object('key', '2026-12-07/2026-12-13'))),
+                     'incidencia de entrega rechazada para reenviar el periodo');
+  c := public.cl_delivery_worker_claim('token-s13-0001');
+  PERFORM pg_temp.ok(c->>'action' = 'load' AND (c->>'delivery_id')::uuid = rb, 'la posterior ya no espera: ' || c::text);
+
+  -- C) Otro worker retoma el arriendo caducado: nuevo intento, claimed_at nuevo.
+  c := public.cl_delivery_worker_claim('token-s13-0002', 120, now() + interval '10 minutes');
+  PERFORM pg_temp.ok(c->>'action' = 'load', 'retoma: ' || c::text);
+  PERFORM pg_temp.ok((SELECT (progress->>'claimed_at')::timestamptz = now() + interval '10 minutes'
+                        FROM public.cl_deliveries WHERE id = rb), 'claimed_at renovado al retomar');
+
+  -- D) El aviso de atasco falla: el resto de la limpieza horaria sigue y devuelve su resumen; despues, la alerta sale.
+  CREATE FUNCTION public.zz_s13_boom() RETURNS trigger LANGUAGE plpgsql AS $f$
+  BEGIN IF NEW.alert_type = 'delivery_stuck' THEN RAISE EXCEPTION 'boom'; END IF; RETURN NEW; END $f$;
+  CREATE TRIGGER zz_s13_boom BEFORE INSERT ON public.cl_alerts FOR EACH ROW EXECUTE FUNCTION public.zz_s13_boom();
+  e := pg_temp.raises($q$SELECT public.cl_housekeeping(now() + interval '3 hours')$q$);
+  PERFORM pg_temp.ok(e IS NULL, 'housekeeping no se para por el paso g: ' || COALESCE(e, 'ok'));
+  h := public.cl_housekeeping(now() + interval '3 hours');
+  PERFORM pg_temp.ok((h->>'stuck_alerts')::int = 0, 'sin alerta mientras falla: ' || h::text);
+  DROP TRIGGER zz_s13_boom ON public.cl_alerts;
+  DROP FUNCTION public.zz_s13_boom();
+  h := public.cl_housekeeping(now() + interval '3 hours');
+  PERFORM pg_temp.ok((h->>'stuck_alerts')::int = 1, 'alerta cuando ya no falla: ' || h::text);
+END $$;
+
+-- E) Purga diaria del historial de pg_cron (ejecuciones de mas de 14 dias). Local: la tabla no existe en el shim.
+DO $$
+BEGIN
+  PERFORM pg_temp.ok(public.cron_history_purge() = 0, 'sin cron.job_run_details: 0');
+  CREATE TABLE cron.job_run_details (runid bigserial PRIMARY KEY, jobid bigint, status text,
+                                     start_time timestamptz, end_time timestamptz);
+  INSERT INTO cron.job_run_details (jobid, status, start_time, end_time) VALUES
+    (1, 'succeeded', now() - interval '20 days', now() - interval '20 days'),
+    (1, 'succeeded', now() - interval '15 days', NULL),
+    (1, 'succeeded', now() - interval '13 days', now() - interval '13 days'),
+    (1, 'running',   now(), NULL);
+  PERFORM pg_temp.ok(public.cron_history_purge() = 2, 'borra las de mas de 14 dias');
+  PERFORM pg_temp.ok((SELECT count(*) FROM cron.job_run_details) = 2, 'conserva las recientes');
+  PERFORM pg_temp.ok(EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'cron-history-purge' AND schedule = '40 3 * * *'
+                                AND command = 'SELECT public.cron_history_purge();'), 'tarea diaria 03:40 UTC');
+  PERFORM pg_temp.ok(NOT has_function_privilege('authenticated', 'public.cron_history_purge()', 'EXECUTE')
+                     AND NOT has_function_privilege('anon', 'public.cron_history_purge()', 'EXECUTE'), 'sin acceso de la web');
+  DROP TABLE cron.job_run_details;
+END $$;
+
 -- T1-M4: borrar una cuenta con entregas y muestras de esas entregas funciona (FK cl_samples.delivery_id NO ACTION: se
 -- comprueba al final de la sentencia, cuando la cascada ya borro las muestras).
 DO $$
