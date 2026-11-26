@@ -29,18 +29,18 @@ DECLARE
   v_voided integer;
   v_n      integer := 0;
 BEGIN
-  FOR r IN SELECT d.id, d.feed_id FROM public.cl_deliveries d
+  FOR r IN SELECT d.id, d.feed_id, d.status FROM public.cl_deliveries d
             WHERE d.file_path = ANY (p_paths) AND d.file_deleted_at IS NULL
               AND d.status IN ('rejected','processed','failed')
               AND NOT EXISTS (SELECT 1 FROM storage.objects o
                                WHERE o.bucket_id = 'cl-deliveries' AND o.name = d.file_path)
             ORDER BY d.feed_id, d.id
   LOOP
-    -- Conector primero, despues la entrega (mismo orden que el resto del proceso).
-    PERFORM 1 FROM public.cl_feeds f WHERE f.id = r.feed_id FOR UPDATE;
-    SELECT d.* INTO v_d FROM public.cl_deliveries d WHERE d.id = r.id FOR UPDATE;
-    CONTINUE WHEN v_d.file_deleted_at IS NOT NULL OR v_d.status NOT IN ('rejected','processed','failed');
-    IF v_d.status = 'failed' THEN
+    IF r.status = 'failed' THEN
+      -- Conector primero, despues la entrega (mismo orden que el resto del proceso); se vuelve a mirar bloqueada.
+      PERFORM 1 FROM public.cl_feeds f WHERE f.id = r.feed_id FOR UPDATE;
+      SELECT d.* INTO v_d FROM public.cl_deliveries d WHERE d.id = r.id FOR UPDATE;
+      CONTINUE WHEN v_d.status <> 'failed' OR v_d.file_deleted_at IS NOT NULL;
       v_voided := public.cl_delivery_undo_samples(v_d);
       UPDATE public.cl_deliveries d
          SET status = 'rejected', error = 'CL_FILE_MISSING', finished_at = now(), file_deleted_at = now(),
@@ -49,7 +49,10 @@ BEGIN
                                               'samples_voided', v_voided)
        WHERE d.id = v_d.id;
     ELSE
-      UPDATE public.cl_deliveries d SET file_deleted_at = now() WHERE d.id = v_d.id;
+      -- Rechazada o procesada: estado final, solo se anota el borrado.
+      UPDATE public.cl_deliveries d SET file_deleted_at = now()
+       WHERE d.id = r.id AND d.file_deleted_at IS NULL AND d.status IN ('rejected','processed');
+      CONTINUE WHEN NOT FOUND;
     END IF;
     v_n := v_n + 1;
   END LOOP;
