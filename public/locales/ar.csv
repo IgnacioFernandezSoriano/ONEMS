@@ -5641,7 +5641,7 @@ cl.alert.unknown_product,منتج غير معروف
 cl.alert.unknown_reading_point,نقطة قراءة غير معروفة
 cl.alert.possible_misrouting,شحنة قد تكون موجهة خطأً
 cl.alert.missing_standard,معيار التسليم مفقود
-cl.alert.rejected_ratio,عدد كبير من القراءات المرفوضة
+cl.alert.rejected_ratio,عدد كبير من الإرساليات المرفوضة
 cl.alert.quota_unfilled,حصة غير مكتملة
 cl.alert.feed_silent,لم يستجب الناقل
 cl.alert.missing_points,نقاط البداية أو النهاية مفقودة
@@ -5653,7 +5653,7 @@ cl.alert.undo_after_carry,تم التراجع عن دفعة بعد ترحيل ا
 cl.alert.route,المسار: {origin} -> {destination}
 cl.alert.detail.insufficient_candidates,{valid} مرشحًا صالحًا مقابل {required} عينات مطلوبة.
 cl.alert.detail.quota_unfilled,ينقص {missing} عينة من أصل {planned} مخطط لها.
-cl.alert.detail.rejected_ratio,تم رفض {rejected} قراءة من أصل {candidates} ({percent}%).
+cl.alert.detail.rejected_ratio,تم رفض {rejected} إرسالية من أصل {candidates} ({percent}%).
 cl.alert.detail.population_incoherent,أبلغ الناقل عن عدد مجتمع {population} لكنه أرسل {candidates} مرشحًا.
 cl.alert.detail.suspicious_distribution,تم تسليم جميع العينات ({samples}) في الموعد المحدد.
 cl.alert.detail.missing_points,نقاط البداية: {start}؛ نقاط النهاية: {end}.

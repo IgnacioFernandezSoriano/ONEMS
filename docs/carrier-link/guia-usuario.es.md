@@ -211,7 +211,7 @@ el carrier mide 2 días y el último tramo es 1 día; el informe cuenta 3 días.
 |---|---|---|
 | Punto de lectura desconocido | Llegaron lecturas de un lugar que no está dado de alta. | Dé de alta el lugar en Puntos de lectura (bloque «Lugares sin punto de lectura») si interesa. |
 | Producto desconocido | El carrier usa un código de producto que ONEMS no reconoce. | Añada la equivalencia de producto en Conectores. |
-| Muchas lecturas rechazadas | Más del 20 % de los envíos de una entrega no sirvió. | Ver la incidencia *Rechazo alto*. |
+| Muchos envíos rechazados | Más del 20 % de los envíos de una entrega no sirvió. | Ver la incidencia *Rechazo alto*. |
 | Candidatos insuficientes | En una ruta y semana hubo menos envíos válidos que muestras necesarias en esa entrega. | Lo que falta pasa a las entregas siguientes. Si se repite, la ruta tiene poco tráfico. |
 | Posible envío mal encaminado | Una muestra pasó por una ciudad distinta de su origen y su destino. | Revísela en Muestras. Cuenta igual para la cuota. |
 | Distribución sospechosa | Todas las muestras de una ruta y semana (20 o más) llegaron a tiempo. | Es raro; coméntelo con el equipo ONEMS. |
