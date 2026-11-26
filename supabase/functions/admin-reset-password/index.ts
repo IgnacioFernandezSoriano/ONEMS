@@ -53,12 +53,11 @@ serve(async (req) => {
       )
     }
 
-    // Autorización: superadmin, regla antigua (rol admin; se mantiene por compatibilidad hasta
-    // que el frontend nuevo esté en producción) o derecho de edición sobre 'users' en su cuenta.
+    // Autorización: superadmin o derecho de edición sobre 'users' en su cuenta. El rol 'admin' antiguo ya no da
+    // permiso por sí solo (runbook de roles, paso e).
     const isSuperadmin = adminProfile.role === 'superadmin'
-    const isLegacyAdmin = adminProfile.role === 'admin'
     let hasMatrixAccess = false
-    if (!isSuperadmin && !isLegacyAdmin && adminProfile.account_id) {
+    if (!isSuperadmin && adminProfile.account_id) {
       // has_access con el JWT del solicitante (supabaseClient), igual que create-user/delete-user
       const { data: ok } = await supabaseClient.rpc('has_access', {
         p_account_id: adminProfile.account_id,
@@ -67,7 +66,7 @@ serve(async (req) => {
       })
       hasMatrixAccess = ok === true
     }
-    if (!isSuperadmin && !isLegacyAdmin && !hasMatrixAccess) {
+    if (!isSuperadmin && !hasMatrixAccess) {
       return new Response(
         JSON.stringify({ error: 'Forbidden: you cannot reset passwords' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

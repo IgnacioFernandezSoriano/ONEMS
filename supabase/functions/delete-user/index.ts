@@ -52,10 +52,11 @@ serve(async (req) => {
       )
     }
 
-    const isLegacyAdmin = adminProfile.role === 'admin' || adminProfile.role === 'superadmin'
-    // Regla nueva: derecho de edición sobre 'users' en su cuenta (JWT del solicitante)
+    // Superadmin, o derecho de edición sobre 'users' en su cuenta (JWT del solicitante). El rol 'admin' antiguo
+    // ya no da permiso por sí solo (runbook de roles, paso e).
+    const isSuperadmin = adminProfile.role === 'superadmin'
     let hasMatrixAccess = false
-    if (!isLegacyAdmin && adminProfile.account_id) {
+    if (!isSuperadmin && adminProfile.account_id) {
       const { data: ok } = await supabaseClient.rpc('has_access', {
         p_account_id: adminProfile.account_id,
         p_option: 'users',
@@ -63,7 +64,7 @@ serve(async (req) => {
       })
       hasMatrixAccess = ok === true
     }
-    if (!isLegacyAdmin && !hasMatrixAccess) {
+    if (!isSuperadmin && !hasMatrixAccess) {
       return new Response(
         JSON.stringify({ error: 'Forbidden: you cannot delete users' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

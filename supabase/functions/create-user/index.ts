@@ -90,12 +90,8 @@ serve(async (req) => {
       // Superadmin puede crear admins o users (por defecto admin)
       finalRole = role || 'admin'
       finalAccountId = account_id || undefined
-    } else if (adminProfile.role === 'admin') {
-      // Admin solo puede crear users de su propia cuenta
-      finalRole = 'user'
-      finalAccountId = adminProfile.account_id || undefined
     } else {
-      // Regla nueva: quien tiene derecho de edición sobre 'users' en su cuenta
+      // Quien no es superadmin: solo con derecho de edición sobre 'users' en su cuenta
       // (matriz de roles, evaluada con el JWT del solicitante) crea users de su cuenta.
       let allowed = false
       if (adminProfile.account_id) {
