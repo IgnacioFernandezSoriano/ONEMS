@@ -5996,3 +5996,32 @@ panelist_history.leave_reason.personal,Personal reasons
 panelist_history.leave_reason.training,Training
 panelist_history.leave_reason.other,Other reason
 panelist_history.leave_reason.materials,Missing materials
+cl.csv.download,Download CSV
+cl.csv.error,The download failed. Try again.
+cl.csv.truncated,Only the first {max} rows were downloaded: narrow the filters.
+cl.csv.download_samples,Download samples (CSV)
+cl.csv.download_scans,Download scans (CSV)
+cl.csv.scan_role,Scan
+cl.csv.place,Place
+cl.csv.mode,Event code
+cl.csv.scan_at,Scan time
+cl.csv.period_start,Period start
+cl.csv.period_end,Period end
+cl.csv.source,Source
+cl.csv.test,Test
+cl.csv.phase,Phase
+cl.csv.rows_rejected,Rejected rows
+cl.csv.shipments,Shipments
+cl.csv.shipments_rejected,Rejected shipments
+cl.csv.received,Received
+cl.csv.finished,Finished
+cl.csv.error_message,Error
+cl.csv.date,Date
+cl.csv.alert,Alert
+cl.csv.severity,Severity
+cl.csv.details,Details
+cl.csv.closed_how,How it was closed
+cl.csv.last_period_start,Last period start
+cl.csv.last_period_end,Last period end
+cl.csv.opened,Opened
+cl.csv.closed,Closed

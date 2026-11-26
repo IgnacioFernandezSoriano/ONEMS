@@ -300,7 +300,6 @@ export function Sidebar() {
             { path: '#cl-db', label: t('menu.carrier_link'), icon: Truck, heading: true, accent: true },
             { path: '/carrier-link/samples', label: t('menu.cl_samples'), icon: Package, option: 'cl_samples' },
             { path: '/carrier-link/monitor', label: t('menu.cl_monitor'), icon: Activity, option: 'cl_monitor' },
-            { path: '/carrier-link/incidents', label: t('menu.cl_incidents'), icon: AlertOctagon, option: 'cl_incidents' },
           ],
         },
       ],
@@ -408,6 +407,7 @@ export function Sidebar() {
           option: 'receipts',
           tooltip: t('receipt_errors.badge_tooltip'),
         },
+        { path: '/carrier-link/incidents', label: t('menu.cl_incidents'), icon: AlertOctagon, option: 'cl_incidents' },
       ],
     },
     {

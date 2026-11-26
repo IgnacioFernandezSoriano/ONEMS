@@ -12,6 +12,8 @@ import { SelectAccountNotice } from '@/components/carrier-link/SelectAccountNoti
 import { clErrorKey } from '@/lib/carrierLink/clErrors'
 import { periodLabel } from '@/lib/carrierLink/deliveryView'
 import { clampPage } from '@/lib/carrierLink/sampleView'
+import { ClCsvButton } from '@/components/carrier-link/ClCsvButton'
+import { csvDate } from '@/lib/carrierLink/clCsv'
 import { useClFeedOptions } from '@/hooks/carrierLink/useClFeedOptions'
 import { useClAccountMembers, useClIncident, useClIncidents, type ClAccountMember } from '@/hooks/carrierLink/useClIncidents'
 import {
@@ -61,7 +63,27 @@ export function ClIncidents() {
   const [filters, setFilters] = useState<IncidentFilters>(() => filtersFromSearch(searchParams))
   const [page, setPage] = useState(0)
   const [openId, setOpenId] = useState<string | null>(null)
-  const { items, total, loading, error, refetch } = useClIncidents(accountId, filters, page)
+  const { items, total, loading, error, refetch, exportAll } = useClIncidents(accountId, filters, page)
+
+  const buildCsv = async () => {
+    const r = await exportAll()
+    return {
+      headers: [
+        t('cl.incidents.col.type'), t('cl.connectors.connector'), t('cl.incidents.col.status'), t('cl.csv.closed_how'),
+        t('cl.incidents.col.periods'), t('cl.csv.last_period_start'), t('cl.csv.last_period_end'), t('cl.incidents.col.assignee'),
+        t('cl.csv.opened'), t('cl.incidents.col.updated'), t('cl.csv.closed'),
+      ],
+      rows: r.rows.map((i) => {
+        const how = closedHowKey(i)
+        return [
+          t(incidentTypeKey(i.incident_type)), i.feed_name ?? '', t(incidentStatusKey(i.status)), how ? t(how) : '', i.periods_count,
+          i.last_period?.period_start ?? '', i.last_period?.period_end ?? '', i.assignee_name ?? '', csvDate(i.opened_at),
+          csvDate(i.updated_at), csvDate(i.closed_at),
+        ]
+      }),
+      truncated: r.truncated,
+    }
+  }
 
   useEffect(() => {
     if (loading) return
@@ -136,6 +158,10 @@ export function ClIncidents() {
               <AlertTriangle className="w-4 h-4" /> {t(clErrorKey(error))}
             </div>
           )}
+
+          <div>
+            <ClCsvButton fileBase="cl-incidents" build={buildCsv} disabled={loading || total === 0} />
+          </div>
 
           <div className="bg-white border border-gray-200 rounded-lg overflow-x-auto">
             <table className="min-w-full text-sm">

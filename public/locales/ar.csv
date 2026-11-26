@@ -5988,3 +5988,32 @@ panelist_history.leave_reason.personal,أسباب شخصية
 panelist_history.leave_reason.training,تدريب
 panelist_history.leave_reason.other,سبب آخر
 panelist_history.leave_reason.materials,نقص المواد
+cl.csv.download,تنزيل CSV
+cl.csv.error,فشل التنزيل. حاول مرة أخرى.
+cl.csv.truncated,تم تنزيل أول {max} صف فقط: ضيّق عوامل التصفية.
+cl.csv.download_samples,تنزيل العينات (CSV)
+cl.csv.download_scans,تنزيل القراءات (CSV)
+cl.csv.scan_role,القراءة
+cl.csv.place,المكان
+cl.csv.mode,رمز الحدث
+cl.csv.scan_at,وقت القراءة
+cl.csv.period_start,بداية الفترة
+cl.csv.period_end,نهاية الفترة
+cl.csv.source,المصدر
+cl.csv.test,اختبار
+cl.csv.phase,المرحلة
+cl.csv.rows_rejected,الصفوف المرفوضة
+cl.csv.shipments,الشحنات
+cl.csv.shipments_rejected,الشحنات المرفوضة
+cl.csv.received,تاريخ الاستلام
+cl.csv.finished,تاريخ الانتهاء
+cl.csv.error_message,الخطأ
+cl.csv.date,التاريخ
+cl.csv.alert,التنبيه
+cl.csv.severity,الخطورة
+cl.csv.details,التفاصيل
+cl.csv.closed_how,طريقة الإغلاق
+cl.csv.last_period_start,بداية آخر فترة
+cl.csv.last_period_end,نهاية آخر فترة
+cl.csv.opened,تاريخ الفتح
+cl.csv.closed,تاريخ الإغلاق

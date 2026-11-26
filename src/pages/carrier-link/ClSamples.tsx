@@ -13,6 +13,8 @@ import { useClPlans } from '@/hooks/carrierLink/useClPlans'
 import { useClSamples, CL_ALL_PLANS, type ClSampleScan } from '@/hooks/carrierLink/useClSamples'
 import { SAMPLES_PAGE_SIZE, clampPage, planWeekKeys, transitLabel } from '@/lib/carrierLink/sampleView'
 import { samplesParams } from '@/lib/carrierLink/planRecords'
+import { ClCsvButton } from '@/components/carrier-link/ClCsvButton'
+import { csvDate } from '@/lib/carrierLink/clCsv'
 
 const input = 'border border-gray-300 rounded-lg px-3 py-2 text-sm'
 
@@ -60,6 +62,8 @@ export function ClSamples() {
     samples,
     total,
     scans,
+    exportSamples,
+    exportScans,
     cities,
     loading: samplesLoading,
     error,
@@ -96,6 +100,32 @@ export function ClSamples() {
   }, [openId, scans])
 
   const name = (id: string | null) => (id ? cityName(id) : '-')
+  const transitText = (a: string | null, b: string | null) => {
+    const tr = a && b ? transitLabel(a, b) : null
+    return tr ? t('cl.samples.transit_value', { days: tr.days, hours: tr.hours }) : ''
+  }
+  const scanHeaders = [t('cl.samples.item'), t('cl.csv.scan_role'), t('cl.csv.place'), t('cl.csv.mode'), t('cl.csv.scan_at')]
+  const scanRow = (item: string, r: ClSampleScan) => [item, t(`cl.samples.role.${r.role}`), r.place, r.mode, csvDate(r.scan_at)]
+  const buildSamples = async () => {
+    const r = await exportSamples()
+    return {
+      headers: [
+        t('cl.samples.item'), t('cl.samples.week'), t('cl.samples.origin'), t('cl.samples.destination'), t('cl.samples.start'),
+        t('cl.samples.end'), t('cl.samples.transit'), t('cl.samples.on_time'), t('cl.samples.misrouted'),
+      ],
+      rows: r.rows.map((s) => [
+        s.item_id, s.quota_week ?? '', name(s.origin_city_id), name(s.destination_city_id), csvDate(s.start_at), csvDate(s.end_at),
+        transitText(s.start_at, s.end_at),
+        s.on_time_delivery === null ? '' : s.on_time_delivery ? t('cl.samples.yes') : t('cl.samples.no'),
+        s.possible_misrouting ? t('cl.samples.yes') : t('cl.samples.no'),
+      ]),
+      truncated: r.truncated,
+    }
+  }
+  const buildScans = async () => {
+    const r = await exportScans()
+    return { headers: scanHeaders, rows: r.rows.map((x) => scanRow(x.item_id, x)), truncated: r.truncated }
+  }
   const open = samples.find((s) => s.id === openId) ?? null
 
   const citySelect = (value: string, set: (v: string) => void) => (
@@ -187,6 +217,11 @@ export function ClSamples() {
               />
               {t('cl.samples.misrouted_only')}
             </label>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <ClCsvButton label={t('cl.csv.download_samples')} fileBase="cl-samples" build={buildSamples} disabled={loading || total === 0} />
+            <ClCsvButton label={t('cl.csv.download_scans')} fileBase="cl-sample-scans" build={buildScans} disabled={loading || total === 0} />
           </div>
 
           {error && (
@@ -299,6 +334,12 @@ export function ClSamples() {
                 {scanError && <p className="text-sm text-red-700">{t('cl.error.generic')}</p>}
                 {!scanError && scanRows === null && <Loader2 className="w-4 h-4 animate-spin" />}
                 {scanRows?.length === 0 && <p className="text-sm text-gray-500">{t('cl.samples.no_scans')}</p>}
+                {open && scanRows && scanRows.length > 0 && (
+                  <ClCsvButton
+                    fileBase={`cl-scans-${open.item_id}`}
+                    build={async () => ({ headers: scanHeaders, rows: scanRows.map((r) => scanRow(open.item_id, r)), truncated: false })}
+                  />
+                )}
                 <ol className="space-y-2">
                   {scanRows?.map((r) => (
                     <li key={r.id} className="text-sm border-l-2 border-blue-300 pl-3">

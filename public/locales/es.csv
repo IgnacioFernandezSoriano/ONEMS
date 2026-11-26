@@ -5996,3 +5996,32 @@ panelist_history.leave_reason.personal,Motivo personal
 panelist_history.leave_reason.training,Formación
 panelist_history.leave_reason.other,Otro motivo
 panelist_history.leave_reason.materials,Falta de material
+cl.csv.download,Descargar CSV
+cl.csv.error,La descarga ha fallado. Inténtelo de nuevo.
+cl.csv.truncated,Solo se han descargado las primeras {max} filas: acote los filtros.
+cl.csv.download_samples,Descargar muestras (CSV)
+cl.csv.download_scans,Descargar lecturas (CSV)
+cl.csv.scan_role,Lectura
+cl.csv.place,Lugar
+cl.csv.mode,Código de evento
+cl.csv.scan_at,Hora de la lectura
+cl.csv.period_start,Inicio del periodo
+cl.csv.period_end,Fin del periodo
+cl.csv.source,Origen
+cl.csv.test,Prueba
+cl.csv.phase,Fase
+cl.csv.rows_rejected,Filas rechazadas
+cl.csv.shipments,Envíos
+cl.csv.shipments_rejected,Envíos rechazados
+cl.csv.received,Recibida
+cl.csv.finished,Terminada
+cl.csv.error_message,Error
+cl.csv.date,Fecha
+cl.csv.alert,Alerta
+cl.csv.severity,Gravedad
+cl.csv.details,Detalle
+cl.csv.closed_how,Cómo se cerró
+cl.csv.last_period_start,Inicio del último periodo
+cl.csv.last_period_end,Fin del último periodo
+cl.csv.opened,Abierta
+cl.csv.closed,Cerrada

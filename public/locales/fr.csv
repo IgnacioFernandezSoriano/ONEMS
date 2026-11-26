@@ -5988,3 +5988,32 @@ panelist_history.leave_reason.personal,Raison personnelle
 panelist_history.leave_reason.training,Formation
 panelist_history.leave_reason.other,Autre motif
 panelist_history.leave_reason.materials,Manque de matériel
+cl.csv.download,Télécharger CSV
+cl.csv.error,Le téléchargement a échoué. Réessayez.
+cl.csv.truncated,Seules les {max} premières lignes ont été téléchargées : affinez les filtres.
+cl.csv.download_samples,Télécharger les échantillons (CSV)
+cl.csv.download_scans,Télécharger les lectures (CSV)
+cl.csv.scan_role,Lecture
+cl.csv.place,Lieu
+cl.csv.mode,Code d’événement
+cl.csv.scan_at,Heure de la lecture
+cl.csv.period_start,Début de la période
+cl.csv.period_end,Fin de la période
+cl.csv.source,Origine
+cl.csv.test,Test
+cl.csv.phase,Phase
+cl.csv.rows_rejected,Lignes rejetées
+cl.csv.shipments,Envois
+cl.csv.shipments_rejected,Envois rejetés
+cl.csv.received,Reçue
+cl.csv.finished,Terminée
+cl.csv.error_message,Erreur
+cl.csv.date,Date
+cl.csv.alert,Alerte
+cl.csv.severity,Gravité
+cl.csv.details,Détail
+cl.csv.closed_how,Mode de clôture
+cl.csv.last_period_start,Début de la dernière période
+cl.csv.last_period_end,Fin de la dernière période
+cl.csv.opened,Ouverte
+cl.csv.closed,Clôturée
