@@ -5649,7 +5649,7 @@ cl.alert.unknown_product,Unknown product
 cl.alert.unknown_reading_point,Unknown reading point
 cl.alert.possible_misrouting,Possible misrouted shipment
 cl.alert.missing_standard,Missing delivery standard
-cl.alert.rejected_ratio,Many readings rejected
+cl.alert.rejected_ratio,Many shipments rejected
 cl.alert.quota_unfilled,Quota not filled
 cl.alert.feed_silent,Carrier did not answer
 cl.alert.missing_points,Missing start or end points
@@ -5661,7 +5661,7 @@ cl.alert.undo_after_carry,Batch undone after quota carry-over
 cl.alert.route,Route: {origin} -> {destination}
 cl.alert.detail.insufficient_candidates,{valid} valid candidates for {required} samples required.
 cl.alert.detail.quota_unfilled,{missing} samples missing out of {planned} planned.
-cl.alert.detail.rejected_ratio,{rejected} of {candidates} readings rejected ({percent}%).
+cl.alert.detail.rejected_ratio,{rejected} of {candidates} shipments rejected ({percent}%).
 cl.alert.detail.population_incoherent,The carrier reports a population of {population} but sent {candidates} candidates.
 cl.alert.detail.suspicious_distribution,All {samples} samples were delivered on time.
 cl.alert.detail.missing_points,Start points: {start}; end points: {end}.

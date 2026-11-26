@@ -5649,7 +5649,7 @@ cl.alert.unknown_product,Producto desconocido
 cl.alert.unknown_reading_point,Punto de lectura desconocido
 cl.alert.possible_misrouting,Posible envío mal encaminado
 cl.alert.missing_standard,Falta el estándar de entrega
-cl.alert.rejected_ratio,Muchas lecturas rechazadas
+cl.alert.rejected_ratio,Muchos envíos rechazados
 cl.alert.quota_unfilled,Cuota sin cubrir
 cl.alert.feed_silent,El carrier no respondió
 cl.alert.missing_points,Faltan puntos de inicio o fin
@@ -5661,7 +5661,7 @@ cl.alert.undo_after_carry,Lote deshecho tras arrastrar la cuota
 cl.alert.route,Ruta: {origin} -> {destination}
 cl.alert.detail.insufficient_candidates,{valid} candidatos válidos para {required} muestras necesarias.
 cl.alert.detail.quota_unfilled,Faltan {missing} muestras de las {planned} previstas.
-cl.alert.detail.rejected_ratio,{rejected} de {candidates} lecturas rechazadas ({percent}%).
+cl.alert.detail.rejected_ratio,{rejected} de {candidates} envíos rechazados ({percent}%).
 cl.alert.detail.population_incoherent,El carrier indica una población de {population} pero envió {candidates} candidatos.
 cl.alert.detail.suspicious_distribution,Las {samples} muestras se entregaron en plazo.
 cl.alert.detail.missing_points,Puntos de inicio: {start}; puntos de fin: {end}.
