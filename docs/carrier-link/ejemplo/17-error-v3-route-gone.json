@@ -1,0 +1,8 @@
+{
+ "http_status": 410,
+ "body": {
+  "success": false,
+  "error": "CL_ENDPOINT_GONE",
+  "message": "Carrier Link v4 removed the demand and batch endpoints. Deliver every complete shipment of the period as one file: GET /config, POST /deliveries, POST /deliveries/{id}/complete, GET /deliveries/{id}."
+ }
+}

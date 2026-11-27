@@ -1,0 +1,134 @@
+{
+ "http_status": 200,
+ "body": {
+  "plans": [
+   {
+    "product": "SIM-STD",
+    "end_date": "2026-11-15",
+    "start_date": "2026-11-02",
+    "include_all_scans": false
+   }
+  ],
+  "fields": {
+   "item_id": {
+    "field": "tracking_no"
+   },
+   "product": {
+    "field": "service"
+   },
+   "scan_at": {
+    "field": "event_ts",
+    "format": "DD/MM/YYYY HH24:MI:SS",
+    "timezone": "Africa/Nairobi"
+   },
+   "mode_ref": {
+    "field": "event_code"
+   },
+   "place_ref": {
+    "field": "site_code"
+   }
+  },
+  "limits": {
+   "max_rows": 5000000,
+   "max_file_bytes": 52428800,
+   "max_control_totals": 10000,
+   "file_retention_days": 30
+  },
+  "points": [
+   {
+    "city": "Eastmere",
+    "role": "origin",
+    "city_id": "c1517000-0000-4000-8000-000000000103",
+    "mode_ref": "ACC",
+    "place_ref": "EMR-PO"
+   },
+   {
+    "city": "Eastmere",
+    "role": "destination",
+    "city_id": "c1517000-0000-4000-8000-000000000103",
+    "mode_ref": "DLV",
+    "place_ref": "EMR-PO"
+   },
+   {
+    "city": "Northport",
+    "role": "origin",
+    "city_id": "c1517000-0000-4000-8000-000000000101",
+    "mode_ref": "ACC",
+    "place_ref": "NPT-PO"
+   },
+   {
+    "city": "Northport",
+    "role": "destination",
+    "city_id": "c1517000-0000-4000-8000-000000000101",
+    "mode_ref": "DLV",
+    "place_ref": "NPT-PO"
+   },
+   {
+    "city": "Southvale",
+    "role": "origin",
+    "city_id": "c1517000-0000-4000-8000-000000000102",
+    "mode_ref": "ACC",
+    "place_ref": "SVL-PO"
+   },
+   {
+    "city": "Southvale",
+    "role": "destination",
+    "city_id": "c1517000-0000-4000-8000-000000000102",
+    "mode_ref": "DLV",
+    "place_ref": "SVL-PO"
+   }
+  ],
+  "formats": {
+   "format": [
+    "jsonl",
+    "csv"
+   ],
+   "compression": [
+    "none"
+   ]
+  },
+  "calendar": {
+   "timezone": "Africa/Nairobi",
+   "frequency": "several_per_week",
+   "delivery_days": [
+    1,
+    4
+   ],
+   "delivery_hour": 3,
+   "deliveries_per_week": 2
+  },
+  "products": [
+   {
+    "code": "SIM-STD",
+    "carrier_codes": [
+     "STD"
+    ]
+   }
+  ],
+  "connector": {
+   "id": "c1517000-0000-4000-8000-0000000000f1",
+   "name": "SimPost - simulated connector",
+   "status": "active",
+   "carrier": "SIMPOST"
+  },
+  "next_period": {
+   "due_at": "2026-11-05T01:00:00+01:00",
+   "period_end": "2026-11-04",
+   "deliverable": true,
+   "period_start": "2026-11-02"
+  },
+  "extra_fields": [
+   "weight_g"
+  ],
+  "date_timezone": "Africa/Nairobi",
+  "last_delivery": {
+   "status": "rejected",
+   "period_end": "2026-11-04",
+   "delivery_id": "7f73d68e-15d2-41fb-8658-fd7ad7215d66",
+   "period_start": "2026-11-02"
+  },
+  "schema_version": "4.0",
+  "mapping_complete": true,
+  "include_all_scans": false
+ }
+}

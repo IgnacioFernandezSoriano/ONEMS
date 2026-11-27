@@ -1,5 +1,7 @@
 // Catálogo de opciones de menú y mapeo ruta -> opción para roles y derechos por cuenta.
-// Las 33 claves coinciden con public.access_option (migración 20261119100000_account_access.sql).
+// Las 34 claves coinciden con public.access_option (migración 20261119100000_account_access.sql).
+
+import { isCarrierLinkEnabled } from './featureFlags'
 
 export type AccessOption =
   | 'dashboard' | 'topology' | 'carriers' | 'panelists' | 'e2e_sla'
@@ -10,7 +12,7 @@ export type AccessOption =
   | 'route_analysis' | 'segment_analysis' | 'epcis_api' | 'rfid_events_db'
   | 'reported_incidents' | 'panelist_availability' | 'receipts'
   | 'users' | 'account_working_days' | 'help_center'
-  | 'cl_plans' | 'cl_samples' | 'cl_reading_points' | 'cl_connectors' | 'cl_monitor'
+  | 'cl_plans' | 'cl_samples' | 'cl_reading_points' | 'cl_connectors' | 'cl_monitor' | 'cl_incidents'
 
 export type AccessLevel = 'edit' | 'view'
 
@@ -40,6 +42,8 @@ export const ACCESS_OPTIONS: { key: AccessOption; group: string; labelKey: strin
   { key: 'cl_reading_points', group: 'carrier_link', labelKey: 'menu.cl_reading_points' },
   { key: 'cl_connectors', group: 'carrier_link', labelKey: 'menu.cl_connectors' },
   { key: 'cl_monitor', group: 'carrier_link', labelKey: 'menu.cl_monitor' },
+  // Solo concedida en DEMO2 (no está en access_template). Pantalla y ruta: tarea 5.
+  { key: 'cl_incidents', group: 'carrier_link', labelKey: 'menu.cl_incidents' },
   { key: 'postal_centers', group: 'rfid_setup', labelKey: 'menu.postal_centers' },
   { key: 'readers_management', group: 'rfid_setup', labelKey: 'menu.readers_management' },
   { key: 'segment_sla', group: 'rfid_setup', labelKey: 'menu.segment_sla' },
@@ -106,11 +110,16 @@ export const ROUTE_OPTION: Record<string, AccessOption | 'superadmin' | 'open'> 
   '/incidents/panelist-reported': 'reported_incidents',
   '/incidents/receipts': 'receipts',
   '/help-center': 'help_center',
+  // Rutas antiguas de la asignación de Carrier Link: redirigen a las pantallas E2E (misma pantalla, campo "Forma de captura").
   '/carrier-link/plans': 'cl_plans',
+  '/carrier-link/allocation-generator': 'cl_plans',
+  '/carrier-link/load-balancing': 'cl_plans',
+  '/carrier-link/allocation-plans': 'cl_plans',
   '/carrier-link/samples': 'cl_samples',
   '/carrier-link/reading-points': 'cl_reading_points',
   '/carrier-link/connectors': 'cl_connectors',
   '/carrier-link/monitor': 'cl_monitor',
+  '/carrier-link/incidents': 'cl_incidents',
 }
 
 /** Ruta de entrada de cada opción (para elegir la primera pantalla permitida). */
@@ -131,11 +140,12 @@ export const OPTION_ROUTE: Partial<Record<AccessOption, string>> = {
   e2e_db: '/one-db',
   e2e_db_api: '/one-db-api',
   postal_centers: '/postal-centers',
-  cl_plans: '/carrier-link/plans',
+  cl_plans: '/allocation-plan-generator',
   cl_samples: '/carrier-link/samples',
   cl_reading_points: '/carrier-link/reading-points',
   cl_connectors: '/carrier-link/connectors',
   cl_monitor: '/carrier-link/monitor',
+  cl_incidents: '/carrier-link/incidents',
   readers_management: '/readers-management',
   segment_sla: '/slas-configuration',
   route_analysis: '/diagnosis/route-path-analysis',
@@ -151,8 +161,13 @@ export const OPTION_ROUTE: Partial<Record<AccessOption, string>> = {
 }
 
 /** Primera ruta permitida siguiendo el orden del menú; null si no hay ninguna. */
-export function firstAllowedPath(levels: Map<AccessOption, AccessLevel>): string | null {
-  const first = ACCESS_OPTIONS.find(o => levels.has(o.key) && OPTION_ROUTE[o.key])
+export function firstAllowedPath(
+  levels: Map<AccessOption, AccessLevel>,
+  carrierLink: boolean = isCarrierLinkEnabled(),
+): string | null {
+  const first = ACCESS_OPTIONS.find(
+    o => levels.has(o.key) && OPTION_ROUTE[o.key] && (carrierLink || o.group !== 'carrier_link'),
+  )
   return first ? OPTION_ROUTE[first.key] ?? null : null
 }
 
@@ -178,17 +193,34 @@ export function canAccess(access: RouteAccess, isSuperadmin: boolean, canView: (
   return isSuperadmin || canView(access)
 }
 
-/** Primera ruta permitida (orden del menú) según canView, o NO_ACCESS_PATH si no hay ninguna. */
-export function landingPath(canView: (o: AccessOption) => boolean): string {
-  const levels = new Map<AccessOption, AccessLevel>()
-  for (const o of ACCESS_OPTIONS) if (canView(o.key)) levels.set(o.key, 'view')
-  return firstAllowedPath(levels) ?? NO_ACCESS_PATH
+/**
+ * Rutas de entrada permitidas en el orden del menú: de las opciones que ve, solo las rutas en las que la propia ruta
+ * le deja entrar (cl_plans entra por el Generador, que exige allocation_generator: sin él se pasa a la siguiente).
+ * Fuera de Carrier Link cada opción entra por una ruta que exige esa misma opción, así que no cambia nada.
+ */
+function allowedLandingPaths(canView: (o: AccessOption) => boolean, carrierLink: boolean): string[] {
+  const paths: string[] = []
+  for (const o of ACCESS_OPTIONS) {
+    const path = OPTION_ROUTE[o.key]
+    if (!path || !canView(o.key) || (!carrierLink && o.group === 'carrier_link')) continue
+    if (!canAccess(routeAccess(path), false, canView) || paths.includes(path)) continue
+    paths.push(path)
+  }
+  return paths
 }
 
-/** Destino al denegar `currentPath`: la primera permitida, nunca la propia ruta (evita bucles). */
-export function deniedRedirect(currentPath: string, canView: (o: AccessOption) => boolean): string {
-  const target = landingPath(canView)
-  return target === currentPath ? NO_ACCESS_PATH : target
+/** Primera ruta permitida (orden del menú) según canView, o NO_ACCESS_PATH si no hay ninguna. */
+export function landingPath(canView: (o: AccessOption) => boolean, carrierLink: boolean = isCarrierLinkEnabled()): string {
+  return allowedLandingPaths(canView, carrierLink)[0] ?? NO_ACCESS_PATH
+}
+
+/** Destino al denegar `currentPath`: la primera permitida que no sea la propia ruta (evita bucles); si no, sin acceso. */
+export function deniedRedirect(
+  currentPath: string,
+  canView: (o: AccessOption) => boolean,
+  carrierLink: boolean = isCarrierLinkEnabled(),
+): string {
+  return allowedLandingPaths(canView, carrierLink).find(p => p !== currentPath) ?? NO_ACCESS_PATH
 }
 
 /** Reintentos de la carga de derechos si my_access falla (red, timeout...). */

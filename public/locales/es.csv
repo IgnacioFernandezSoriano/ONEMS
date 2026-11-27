@@ -5404,6 +5404,8 @@ cl.error.cl_demand_not_open,"La demanda no está abierta, por lo que no se puede
 cl.error.cl_duplicate_quota,Ya existe una cuota con los mismos valores en este plan.
 cl.error.cl_feed_carrier_mismatch,El conector pertenece a un carrier distinto del del plan.
 cl.error.cl_feed_paused,El conector está en pausa. Reactívalo para continuar.
+cl.error.cl_body_too_large,El fichero ocupa más de 5 MB. Divídelo en lotes más pequeños.
+cl.error.cl_feed_testing_dry_run_only,El conector está en prueba: solo admite ensayos. Actívalo para cargar lotes reales.
 cl.error.cl_mapping_incomplete,El mapeo de campos está incompleto. Complétalo antes de continuar.
 cl.error.cl_missing_points,Faltan puntos de inicio o de fin en algunas ciudades del plan.
 cl.error.cl_no_feed,El plan no tiene ningún conector asignado.
@@ -5411,8 +5413,9 @@ cl.error.cl_no_quotas,El plan todavía no tiene cuotas. Añade al menos una.
 cl.error.cl_plan_closed,El plan está cerrado y no se puede modificar.
 cl.error.cl_plan_locked_field,Este campo ya no se puede cambiar porque el plan ya ha empezado.
 cl.error.cl_plan_not_draft,Solo los planes en borrador se pueden modificar así.
-cl.error.cl_quota_locked,Esta cuota ya no se puede cambiar porque ya tiene muestras.
+cl.error.cl_quota_locked,"Esta cuota ya no se puede cambiar: ya tiene muestras o peticiones, o su semana está dentro del periodo congelado (ya pedida o a punto de pedirse)."
 cl.error.cl_quota_not_found,La cuota ya no existe. Recarga la página.
+cl.error.cl_rebalance_total_changed,La propuesta cambia el total de muestras del plan. Recarga la página y vuelve a intentarlo.
 cl.error.cl_stratum_already_delivered,Un estrato de este lote ya se entregó para esta demanda.
 cl.error.cl_too_many_rows,El archivo tiene demasiadas filas. Divídelo en archivos más pequeños.
 cl.error.cl_unknown_stratum,Algunas filas hacen referencia a una ciudad o ruta que no está en el plan.
@@ -5420,10 +5423,25 @@ cl.error.cl_forbidden,No tienes permiso para hacer esto en Carrier Link.
 cl.error.cl_demand_testing_dry_run_only,Esta demanda está en modo de pruebas y solo permite una simulación.
 cl.error.forbidden,No tienes permiso para hacer esto.
 cl.error.generic,Algo ha fallado. Inténtalo de nuevo.
+cl.error.cl_bad_control_totals,Los totales de control no son válidos.
+cl.error.cl_bad_period,El periodo de la entrega no es válido.
+cl.error.cl_bad_request,La petición está incompleta o no es válida.
+cl.error.cl_cursor_mismatch,Otro proceso está cargando la entrega. Inténtalo de nuevo en un minuto.
+cl.error.cl_delivery_bad_transition,Este cambio de estado de la entrega no está permitido.
+cl.error.cl_delivery_immutable,Los datos que identifican una entrega no se pueden cambiar.
+cl.error.cl_delivery_not_found,No se encuentra la entrega.
+cl.error.cl_delivery_not_loading,La entrega ya no se está cargando.
+cl.error.cl_feed_not_found,No se encuentra el conector.
+cl.error.cl_file_not_uploaded,Sube el archivo antes de completar la entrega.
+cl.error.cl_file_too_large,El archivo supera el tamaño que admite el conector.
+cl.error.cl_lease_lost,Otro proceso ha tomado esta entrega.
+cl.error.cl_no_active_plan,Ningún plan activo de este conector cubre este periodo.
+cl.error.cl_period_already_delivered,Este periodo ya se ha entregado.
+cl.error.cl_period_not_closed,El periodo todavía no ha terminado.
+cl.error.cl_period_not_in_calendar,El periodo no coincide con el calendario de entregas del conector.
+cl.error.cl_staging_not_empty,La entrega todavía se está procesando.
 cl.select_account.title,Selecciona una cuenta
 cl.select_account.body,Elige una cuenta en la barra superior para trabajar con Carrier Link.
-cl.plans.title,Planes de muestreo
-cl.plans.help,Define qué rutas y volúmenes se muestrean a partir de los escaneos del carrier.
 cl.samples.title,Muestras
 cl.samples.help,Revisa las muestras generadas a partir de los escaneos del carrier.
 cl.reading_points.title,Puntos de lectura
@@ -5431,7 +5449,7 @@ cl.reading_points.help,Gestiona los puntos del carrier donde se capturan los esc
 cl.connectors.title,Conectores
 cl.connectors.help,Configura cómo llegan a ONEMS los datos de escaneo del carrier.
 cl.monitor.title,Monitor de captura
-cl.monitor.help,Sigue el estado de la captura de datos de los carriers.
+cl.monitor.help,"Sigue las entregas recibidas de los transportistas, cómo se procesaron, las incidencias abiertas y las alertas."
 cl.reading_points.carrier,Transportista
 cl.reading_points.add,Añadir punto de lectura
 cl.reading_points.edit,Editar punto de lectura
@@ -5450,7 +5468,7 @@ cl.reading_points.role.both,Inicio y fin
 cl.reading_points.role.none,Intermedio
 cl.reading_points.name,Nombre (opcional)
 cl.reading_points.empty,Este carrier aún no tiene puntos de lectura.
-cl.reading_points.no_carriers,No hay carriers activos en esta cuenta.
+cl.reading_points.no_carriers,No hay carriers activos con captura Carrier Link en esta cuenta. Cambia la forma de captura en Operadores y productos.
 cl.reading_points.unknown_title,Lugares sin punto de lectura
 cl.reading_points.unknown_help,En los últimos 90 días llegaron escaneos de estos lugares sin poder asignarlos.
 cl.reading_points.readings,Lecturas
@@ -5469,15 +5487,14 @@ cl.connectors.edit,Editar conector
 cl.connectors.empty,Este transportista aún no tiene conector.
 cl.connectors.name,Nombre
 cl.connectors.extraction_model,Modelo de extracción
-cl.connectors.emit_days,Días de petición
+cl.connectors.emit_days,Días de entrega
 cl.connectors.emit_hour,Hora
 cl.connectors.emit_timezone,Zona horaria
 cl.connectors.account_timezone,(zona de la cuenta)
-cl.connectors.calendar_hint,Las peticiones al transportista se envían estos días a esta hora. Deja la zona vacía para usar la de la cuenta (p. ej. Europe/Madrid).
+cl.connectors.calendar_hint,"El transportista entrega un fichero estos días, hacia esta hora. Cada entrega cubre los días desde el día de entrega anterior (diaria: el día anterior; semanal: los 7 días anteriores). Deja la zona vacía para usar la de la cuenta (p. ej. Europe/Madrid)."
 cl.connectors.calendar,Calendario
-cl.connectors.last_batch,Último lote
 cl.connectors.last_error,Último error
-cl.connectors.testing_hint,En pruebas el conector solo admite ensayos; no se crean muestras.
+cl.connectors.testing_hint,"En pruebas, las entregas se comprueban y cuentan como si fueran reales, pero no se crean muestras."
 cl.connectors.mapping_incomplete,Las equivalencias de campos están incompletas: aún no se pueden leer los datos del transportista.
 cl.connectors.status.testing,Pruebas
 cl.connectors.status.active,Activo
@@ -5485,9 +5502,9 @@ cl.connectors.status.paused,Pausado
 cl.connectors.set_status.testing,Volver a pruebas
 cl.connectors.set_status.active,Activar
 cl.connectors.set_status.paused,Pausar
-cl.connectors.status_confirm.testing,El conector volverá a admitir solo ensayos.
-cl.connectors.status_confirm.active,El conector recibirá lotes reales y creará muestras. Las peticiones abiertas en pruebas se cerrarán.
-cl.connectors.status_confirm.paused,El conector dejará de recibir lotes y no se enviarán peticiones hasta que se reanude.
+cl.connectors.status_confirm.testing,Las nuevas entregas solo se comprobarán y contarán: no se crearán muestras.
+cl.connectors.status_confirm.active,Las nuevas entregas crearán muestras para los planes activos.
+cl.connectors.status_confirm.paused,El conector no aceptará entregas hasta que se reanude. Mientras esté pausado no se avisan las entregas que falten.
 cl.connectors.delete_title,Eliminar conector
 cl.connectors.delete_confirm,¿Eliminar el conector {name}?
 cl.connectors.error.name_required,Escribe un nombre para el conector.
@@ -5520,7 +5537,7 @@ cl.connectors.extras.help,Otros campos del transportista que se guardan con cada
 cl.connectors.extras.empty,Sin campos extra.
 cl.connectors.extras.field,Campo del transportista
 cl.connectors.keys.title,Claves del conector
-cl.connectors.keys.help,El transportista usa una clave para enviar sus lotes. Solo un superadmin o el UPU Account Manager pueden emitir claves.
+cl.connectors.keys.help,El transportista usa una clave para enviar sus entregas. Solo un superadmin o el UPU Account Manager pueden emitir claves.
 cl.connectors.keys.invalid,Revisa el nombre y la fecha de caducidad (debe ser futura).
 cl.connectors.keys.empty,Este conector no tiene claves.
 cl.connectors.keys.name,Nombre
@@ -5533,21 +5550,6 @@ cl.connectors.keys.inactive,Desactivada
 cl.connectors.keys.deactivate_confirm,¿Desactivar esta clave? El transportista ya no podrá usarla.
 cl.connectors.keys.new,Nueva clave
 cl.connectors.keys.issue,Emitir clave
-cl.connectors.dry_run.title,Probar lote (ensayo)
-cl.connectors.dry_run.help,Sube un fichero de lote en formato JSON. Se comprueba como si fuera real pero no se guarda nada.
-cl.connectors.dry_run.choose,Elegir fichero JSON
-cl.connectors.dry_run.running,Comprobando...
-cl.connectors.dry_run.bad_json,El fichero no es un JSON válido.
-cl.connectors.dry_run.replayed,Este lote ya se había ensayado: se muestra el resultado guardado entonces.
-cl.connectors.dry_run.validated,El lote se aceptaría. Resultado por estrato:
-cl.connectors.dry_run.rejected,El lote se rechazaría.
-cl.connectors.dry_run.bad_method,El método de selección no es el esperado ({expected}).
-cl.connectors.dry_run.stratum,Estrato
-cl.connectors.dry_run.rows,Lecturas
-cl.connectors.dry_run.candidates,Candidatos
-cl.connectors.dry_run.valid,Válidos
-cl.connectors.dry_run.rejected_by_reason,Rechazados por motivo
-cl.connectors.dry_run.rows_rejected,Lecturas rechazadas
 cl.reason.already_sampled,Ya muestreado
 cl.reason.bad_timestamp,Fecha u hora incorrecta
 cl.reason.bad_value,Valor incorrecto
@@ -5560,41 +5562,22 @@ cl.reason.same_reading,Inicio y fin son la misma lectura
 cl.reason.start_after_end,Inicio posterior al fin
 cl.reason.unknown_product,Producto desconocido
 cl.reason.unknown_reading_point,Punto de lectura desconocido
-cl.plans.new,Nuevo plan
-cl.plans.edit,Editar plan
-cl.plans.name,Nombre
-cl.plans.product,Producto
-cl.plans.carrier,Carrier
 cl.plans.connector,Conector
 cl.plans.no_connector,Sin conector todavía
 cl.plans.connector_hint,Solo conectores del mismo carrier. Sin conector el plan no se puede activar.
 cl.plans.select,Selecciona...
-cl.plans.start,Fecha de inicio
-cl.plans.end,Fecha de fin
-cl.plans.period,Periodo
-cl.plans.total,Total de muestras
-cl.plans.total_hint,"Si cambias el total o las fechas, vuelve a generar y guardar las cuotas."
 cl.plans.status,Estado
 cl.plans.status.draft,Borrador
 cl.plans.status.active,Activo
 cl.plans.status.closed,Cerrado
-cl.plans.empty,Todavía no hay planes.
-cl.plans.samples,{count} muestras
-cl.plans.feed_diagnosis,Diagnóstico del conector (guardar datos extra para análisis)
-cl.plans.locked_hint,"El plan ya no es un borrador: no se pueden cambiar el carrier, el producto, el conector ni la fecha de inicio."
 cl.plans.error.no_account,Elige primero una cuenta.
 cl.plans.error.bad_period,La fecha de fin no puede ser anterior a la de inicio.
 cl.plans.error.bad_total,El total debe ser un número entero mayor o igual que 1.
 cl.plans.error.missing_field,"Rellena el nombre, el carrier, el producto y las fechas."
-cl.plans.generate,Generar cuotas
 cl.plans.no_routes,El carrier no tiene puntos de lectura activos con ciudad de inicio y de fin: no hay rutas.
 cl.plans.preview_title,Vista previa (sin guardar)
-cl.plans.save_quotas,Guardar cuotas
 cl.plans.saving_quotas,Guardando {count} cuotas...
 cl.plans.discard,Descartar
-cl.plans.quotas_saved,{count} cuotas guardadas.
-cl.plans.quotas_title,Cuotas
-cl.plans.no_quotas,"Este plan todavía no tiene cuotas. Usa ""Generar cuotas""."
 cl.plans.missing_points_title,Faltan puntos de lectura
 cl.plans.missing_points_help,Da de alta un punto activo del carrier en estas ciudades antes de activar el plan.
 cl.plans.missing.origin,sin punto de inicio
@@ -5602,8 +5585,6 @@ cl.plans.missing.destination,sin punto de fin
 cl.plans.missing_standards_title,{count} rutas sin estándar de entrega
 cl.plans.missing_standards_help,"Estas rutas se muestrean, pero sin estándar no se puede calcular si llegan en plazo. No impide activar el plan."
 cl.plans.no_standard,entra sin en plazo
-cl.plans.more,y {count} más (marcadas con ⚠ en la tabla)
-cl.plans.activate,Activar plan
 cl.plans.activate_confirm,"¿Activar el plan {name}? Después no se podrán cambiar el carrier, el producto, el conector, la fecha de inicio ni las cuotas."
 cl.plans.activate_blocked,No se puede activar mientras falten puntos de lectura.
 cl.plans.matrix.filter,Filtrar por ruta...
@@ -5618,7 +5599,6 @@ cl.plans.matrix.route,Ruta
 cl.plans.matrix.total,Total
 cl.plans.matrix.routes,{count} rutas
 cl.plans.error.quotas_mismatch,Las cuotas no coinciden con las fechas del plan: vuelve a generarlas.
-cl.plans.regenerate_notice,Han cambiado el total o las fechas: vuelve a generar y guardar las cuotas.
 cl.samples.plan,Plan
 cl.samples.week,Semana
 cl.samples.all,Todas
@@ -5646,32 +5626,6 @@ cl.samples.no_scans,Esta muestra no tiene lecturas.
 cl.samples.role.start,Lectura de inicio
 cl.samples.role.end,Lectura de fin
 cl.samples.role.intermediate,Lectura intermedia
-cl.monitor.plan,Plan
-cl.monitor.all_plans,Todos los planes
-cl.monitor.demands,Peticiones al carrier (incluidas las de prueba)
-cl.monitor.demand.open,Abiertas
-cl.monitor.demand.fulfilled,Cumplidas
-cl.monitor.demand.partial,Parciales
-cl.monitor.demand.failed,Fallidas
-cl.monitor.batches,Lotes recibidos
-cl.monitor.batches_empty,Aún no hay lotes.
-cl.monitor.col.date,Recibido
-cl.monitor.col.status,Estado
-cl.monitor.col.shipments,Envíos
-cl.monitor.col.rejected,Rechazados
-cl.monitor.col.selected,Elegidos
-cl.monitor.batch.received,Recibido
-cl.monitor.batch.validated,Validado
-cl.monitor.batch.sampled,Muestreado
-cl.monitor.batch.rejected,Rechazado
-cl.monitor.batch.undone,Deshecho
-cl.monitor.batch.expired,Caducado
-cl.monitor.undo,Deshacer
-cl.monitor.undo_title,¿Deshacer este lote?
-cl.monitor.undo_effect,Las muestras elegidas de este lote se quitarán de los informes E2E y las cuotas afectadas se recalcularán.
-cl.monitor.undo_confirm,"Sí, deshacer el lote"
-cl.monitor.undo_cancel,Cancelar
-cl.monitor.undo_done,Lote deshecho. Cuotas vueltas a pendiente: {pending}; arrastradas (a revisar): {carried}; abiertas por otra petición: {kept}.
 cl.monitor.alerts,Avisos
 cl.monitor.alerts_empty,No hay avisos.
 cl.monitor.alert_filter_open,Solo abiertos
@@ -5695,7 +5649,7 @@ cl.alert.unknown_product,Producto desconocido
 cl.alert.unknown_reading_point,Punto de lectura desconocido
 cl.alert.possible_misrouting,Posible envío mal encaminado
 cl.alert.missing_standard,Falta el estándar de entrega
-cl.alert.rejected_ratio,Muchas lecturas rechazadas
+cl.alert.rejected_ratio,Muchos envíos rechazados
 cl.alert.quota_unfilled,Cuota sin cubrir
 cl.alert.feed_silent,El carrier no respondió
 cl.alert.missing_points,Faltan puntos de inicio o fin
@@ -5707,7 +5661,7 @@ cl.alert.undo_after_carry,Lote deshecho tras arrastrar la cuota
 cl.alert.route,Ruta: {origin} -> {destination}
 cl.alert.detail.insufficient_candidates,{valid} candidatos válidos para {required} muestras necesarias.
 cl.alert.detail.quota_unfilled,Faltan {missing} muestras de las {planned} previstas.
-cl.alert.detail.rejected_ratio,{rejected} de {candidates} lecturas rechazadas ({percent}%).
+cl.alert.detail.rejected_ratio,{rejected} de {candidates} envíos rechazados ({percent}%).
 cl.alert.detail.population_incoherent,El carrier indica una población de {population} pero envió {candidates} candidatos.
 cl.alert.detail.suspicious_distribution,Las {samples} muestras se entregaron en plazo.
 cl.alert.detail.missing_points,Puntos de inicio: {start}; puntos de fin: {end}.
@@ -5725,6 +5679,270 @@ hc.delivery_standard_form.cl_last_mile_time,Tiempo equiv. último tramo
 help_center.doc.carrier_link.title,Carrier Link
 help_center.doc.carrier_link.desc,"Qué es Carrier Link, en qué orden se configura, qué hace cada pantalla y qué significa cada aviso."
 cl.help_link,Ayuda
+cl.capture_method.label,Forma de captura
+cl.capture_method.help,"Qué capturas admite el carrier en el Generador de Asignaciones: Panelistas, Carrier Link (escaneos del carrier; también habilita sus conectores y puntos de lectura) o Ambos."
+cl.capture_method.panelists,Panelistas
+cl.capture_method.carrier_link,Carrier Link
+cl.capture_method.both,Ambos
+cl.generator.capture_column,Captura
+cl.generator.capture_hint,Elige primero el carrier: su forma de captura decide las opciones.
+cl.generator.cl_hint,Carrier Link: sin panelistas. Las ciudades salen de los puntos de lectura activos del carrier. Genera la vista previa y guárdala como plan borrador.
+cl.generator.generate_preview,Generar vista previa
+cl.generator.save_plan,Guardar plan (borrador)
+cl.generator.requested_vs_generated,Pedidas: {requested} · Generadas: {generated}
+cl.generator.generated_less,No se han podido repartir {missing} muestras: no hay suficientes rutas o días laborables en el periodo.
+cl.generator.saved,Plan {name} guardado como borrador con {count} cuotas. Aparece en Planes generados.
+cl.generator.no_quotas,Este plan no tiene cuotas.
+cl.generator.activated,Plan {name} aplicado (activo).
+cl.generator.deleted,Plan {name} eliminado.
+cl.generator.delete_confirm,¿Eliminar el plan borrador {name} y sus cuotas?
+cl.generator.delete_not_allowed,No se pudo eliminar el plan: ya no es un borrador o no tienes permiso.
+cl.generator.more_routes,y {count} más
+cl.generator.csv.title,Importar cuotas de Carrier Link (CSV)
+cl.generator.csv.help,"Rellena antes el nombre, el carrier, el producto y las fechas. Columnas: origin_city, destination_city (código o nombre), week (2026-W05 o una fecha), samples. El total sale del fichero."
+cl.generator.csv.errors_title,El fichero tiene {count} errores; no se ha importado nada.
+cl.generator.csv.more_errors,y {count} errores más
+cl.generator.csv.missing_columns,Faltan columnas: {columns}.
+cl.generator.csv.empty,El fichero no tiene ninguna fila con muestras.
+cl.generator.csv.unknown_city,Fila {row}: ciudad desconocida «{city}».
+cl.generator.csv.same_city,Fila {row}: origen y destino son la misma ciudad.
+cl.generator.csv.bad_week,Fila {row}: semana no válida «{week}» (usa 2026-W05 o una fecha como 2026-01-31).
+cl.generator.csv.week_outside,Fila {row}: la semana {week} está fuera de las fechas del plan.
+cl.generator.csv.duplicate,Fila {row}: repite la ruta y la semana de la fila {first}.
+cl.generator.csv.bad_samples,"Fila {row}: muestras no válidas «{value}» (número entero, 0 o más)."
+cl.generator.csv.no_points,Fila {row}: la ruta {origin} → {destination} no tiene puntos de lectura activos del carrier.
+cl.generator.connector_required,Elige el conector: un plan de Carrier Link no se puede aplicar sin él y los planes guardados no se editan.
+cl.generator.needs_connector,Este plan no tiene conector y no se puede aplicar. Elimínalo y vuelve a generarlo eligiendo un conector.
+cl.records.heading,Registros del plan: cuotas ruta × semana ({count})
+cl.records.read_only_note,"Es un plan de Carrier Link: sus registros son cuotas por ruta y semana, de solo lectura aquí. Cambian con el Generador de Asignaciones y el Balanceo de Carga."
+cl.records.view_table,Tabla
+cl.records.view_matrix,Matriz
+cl.records.planned,Previsto
+cl.records.carried_in,Arrastrado
+cl.records.obtained,Obtenido
+cl.records.view_samples,Ver muestras
+cl.records.page_total,Total (esta página)
+cl.records.empty,No hay registros con estos filtros.
+cl.records.matrix_loading,Cargando todas las cuotas del plan...
+cl.records.matrix_scope,La matriz muestra todas las cuotas del plan (no se aplican los filtros de la tabla).
+cl.records.status.pending,Pendiente
+cl.records.status.open,Abierta
+cl.records.status.fulfilled,Cumplida
+cl.records.status.carried,Arrastrada
+cl.records.status.unfilled,Sin cubrir
+cl.records.filter_total,Total (todas las cuotas con estos filtros)
+cl.records.plan_total,Total (todo el plan)
+cl.records.totals_unavailable,Los totales completos no están disponibles ahora: las cifras mostradas son solo de esta página.
+cl.balancing.plan_label,Plan
+cl.balancing.panelists_option,Panelistas (por periodo)
+cl.balancing.no_max_note,Plan de Carrier Link: los nodos son las ciudades de origen y la carga son las muestras previstas por semana. No hay máximo por panelista: la referencia es la media esperada de cada ciudad de origen según los días laborables de cada semana.
+cl.balancing.draft_note,Plan en borrador: se pueden mover muestras de cualquier semana.
+cl.balancing.fence_note,Plan activo: solo se mueven cuotas pendientes de semanas que empiezan después del fence.
+cl.balancing.deviation_hint,"Una semana está Alta o Saturada si supera la media esperada en este porcentaje (x1,5 para Saturada)."
+cl.balancing.fence_hint,Desde hoy hasta esta fecha (incluida) no se mueve nada. Vacío: desde hoy.
+cl.balancing.loading,Cargando las cuotas del plan...
+cl.balancing.empty,El plan no tiene cuotas.
+cl.balancing.kpi_saturated,Ciudades de origen saturadas
+cl.balancing.kpi_high,Ciudades de origen con carga alta
+cl.balancing.kpi_total,Muestras previstas
+cl.balancing.carried_in,+{count} arrastradas
+cl.balancing.preview_title,Vista previa del balanceo
+cl.balancing.preview_summary,"{moved} muestras cambian de semana en {origins} ciudades de origen ({changes} cuotas: {created} nuevas, {zeroed} a cero). No cambian el total del plan ni el de cada ciudad y cada ruta."
+cl.balancing.before_after,"{moved} movidas, desv. típica de {before} a {after}"
+cl.balancing.preview_matrix_note,La tabla de abajo muestra el reparto propuesto. No se guarda nada hasta que lo apliques.
+cl.balancing.confirm,Aplicar balanceo
+cl.balancing.applying,Aplicando...
+cl.balancing.applied,"Balanceo aplicado: {changed} cuotas cambiadas, {created} nuevas, {deleted} borradas."
+cl.balancing.nothing_to_do,No hay nada que mover: el reparto ya es el más equilibrado posible con lo que se puede mover.
+cl.balancing.matrix_title,Carga por ciudad de origen y semana
+cl.balancing.legend,Muestras previstas por semana (+arrastradas). Verde: normal; naranja: alta; rojo: saturada; gris: no se puede mover.
+cl.balancing.balance_all,Balancear todas las ciudades de origen
+cl.balancing.balance_origin,Balancear
+cl.balancing.origin,Ciudad de origen
+cl.balancing.routes,Rutas
+cl.balancing.total,Total
+cl.balancing.stddev,Desv. típica
+cl.balancing.cell_title,Esperado: {expected}; no movible: {locked}
+menu.cl_incidents,Incidencias de Carrier Link
+cl.error.cl_incident_closed,Esta incidencia ya está resuelta y no se puede cambiar.
+cl.connectors.frequency.daily,Entrega diaria
+cl.connectors.frequency.weekly,Entrega semanal
+cl.connectors.frequency.several_per_week,Varias entregas por semana
+cl.connectors.per_week,{count} por semana
+cl.connectors.next_period,Próxima entrega: {period} (se espera hacia {due}).
+cl.connectors.next_period_now,Próxima entrega: {period}. El periodo está cerrado: ya se puede entregar (se espera hacia {due}).
+cl.connectors.no_next_period,No hay ninguna entrega pendiente: ningún plan activo usa este conector.
+cl.connectors.last_delivery,Última entrega: {period}
+cl.connectors.grace.label,Margen antes de dar una entrega por no recibida
+cl.connectors.grace.hours,{count} h
+cl.connectors.grace.help,"Horas después de la hora de entrega esperada. Pasado ese margen, ONEMS abre una incidencia «Entrega no recibida» y avisa a la cuenta (y al transportista, si tiene correo de avisos)."
+cl.connectors.grace.invalid,Escribe un número entero de horas entre 0 y 168.
+cl.deliveries.title,Entregas
+cl.deliveries.help,"Cada entrega es un fichero con todos los envíos de un periodo. ONEMS lo comprueba, lo cuenta y sortea sus propias muestras en segundo plano."
+cl.deliveries.empty,Aún no hay entregas.
+cl.deliveries.col.period,Periodo
+cl.deliveries.col.status,Estado
+cl.deliveries.col.rows,Filas
+cl.deliveries.col.valid,Envíos válidos
+cl.deliveries.col.rejected,Rechazados (filas / envíos)
+cl.deliveries.col.drawn,Sorteados
+cl.deliveries.col.alerts,Alertas
+cl.deliveries.details,Detalle
+cl.deliveries.source.api,Por API
+cl.deliveries.source.manual,Subida a mano
+cl.deliveries.test,prueba
+cl.deliveries.retrying,Se reintentará sola (intento {attempts} de 3).
+cl.deliveries.rejected_hint,"Las filas rechazadas son lecturas que no se pudieron leer; los envíos rechazados, los que no se pudieron usar (sin lectura de inicio o de fin, etc.). Despliega una fila para ver los motivos."
+cl.deliveries.error,Motivo
+cl.deliveries.rows_rejected_by_reason,Filas rechazadas por motivo
+cl.deliveries.shipments_rejected_by_reason,Envíos rechazados por motivo
+cl.deliveries.shipments_total,Envíos en el fichero
+cl.deliveries.file,Fichero
+cl.deliveries.created_at,Abierta
+cl.deliveries.received_at,Recibida
+cl.deliveries.finished_at,Terminada
+cl.deliveries.attempts,Intentos
+cl.delivery.status.pending_upload,Esperando el fichero
+cl.delivery.status.received,Recibida
+cl.delivery.status.processing,Procesando
+cl.delivery.status.processed,Procesada
+cl.delivery.status.failed,Fallida (se reintenta)
+cl.delivery.status.rejected,Rechazada
+cl.delivery.status.unknown,Estado desconocido
+cl.delivery.phase.load,Leyendo el fichero
+cl.delivery.phase.resolve,Comprobando las lecturas
+cl.delivery.phase.items,Montando los envíos
+cl.delivery.phase.strata,Contando por ruta y semana
+cl.delivery.phase.draw,Sorteando las muestras
+cl.delivery.phase.transfer,Guardando las muestras
+cl.delivery.phase.finish,Cerrando la entrega
+cl.delivery.phase.cleanup,Limpiando
+cl.deliveries.upload.title,Subir una entrega a mano
+cl.deliveries.upload.help,"Para transportistas que envían el fichero por otra vía. Elige el periodo y un fichero JSON Lines (.jsonl) o CSV, sin comprimir. Pasa exactamente por las mismas comprobaciones que una entrega por API."
+cl.deliveries.upload.paused,El conector está pausado: reanúdalo para subir entregas.
+cl.deliveries.upload.testing,"El conector está en pruebas: la entrega se comprobará y contará, pero no se crearán muestras."
+cl.deliveries.upload.period_start,Periodo desde
+cl.deliveries.upload.period_end,hasta
+cl.deliveries.upload.choose,Elegir fichero
+cl.deliveries.upload.send,Subir entrega
+cl.deliveries.upload.confirm,El fichero se entregará para el periodo {period}. Un periodo se entrega una sola vez: una vez recibido no se puede sustituir. ¿Continuar?
+cl.deliveries.upload.do_not_leave,No cierres ni recargues esta página hasta que termine la subida.
+cl.deliveries.upload.hashing,Calculando la huella del fichero... {percent}%
+cl.deliveries.upload.step.opening,Abriendo la entrega...
+cl.deliveries.upload.step.uploading,Subiendo el fichero...
+cl.deliveries.upload.step.completing,Marcando la entrega como recibida...
+cl.deliveries.upload.received,Entrega recibida. Se procesa en segundo plano: síguela en la lista de abajo.
+cl.deliveries.upload.rejected,La entrega se ha rechazado.
+cl.deliveries.upload.existing,Este mismo fichero ya se había entregado para este periodo (estado: {status}). No se ha cambiado nada.
+cl.deliveries.upload.period_required,Elige la fecha de inicio y de fin del periodo.
+cl.deliveries.upload.period_order,El periodo termina antes de empezar.
+cl.deliveries.upload.period_too_long,Una entrega cubre como máximo 7 días.
+cl.deliveries.upload.file_required,Elige el fichero que se entrega.
+cl.deliveries.upload.bad_extension,El fichero debe ser JSON Lines (.jsonl) o CSV (.csv).
+cl.deliveries.upload.empty_file,El fichero está vacío.
+cl.monitor.deliveries,Entregas
+cl.monitor.all_connectors,Todos los conectores
+cl.monitor.all_statuses,Todos los estados
+cl.monitor.period_from,Periodo desde
+cl.monitor.period_to,hasta
+cl.monitor.incidents,Incidencias sin resolver: {count}
+cl.monitor.incidents_open_all,Abrir Incidencias
+cl.alert.quota_already_settled,Semana ya cerrada
+cl.alert.delivery_retries_exhausted,Entrega fallida tras 3 intentos
+cl.alert.delivery_stuck,Entrega atascada en proceso más de 2 horas
+cl.alert.detail.quota_already_settled,{skipped} envíos llegaron después de cerrar la semana y no se usaron.
+cl.alert.detail.retries_exhausted,La entrega se ha rechazado. Muestras retiradas: {voided}.
+cl.reason.bad_record,Fila ilegible
+cl.reason.reader_without_city,Punto de lectura sin ciudad
+cl.reason.no_stratum,Ruta o semana fuera del plan
+cl.error.cl_bad_csv_header,La cabecera del CSV no tiene las columnas configuradas.
+cl.error.cl_bad_encoding,El fichero no es texto UTF-8 válido.
+cl.error.cl_bad_sha_state,Error interno al comprobar la huella del fichero; se reintentará.
+cl.error.cl_compression_unsupported,No se admiten ficheros comprimidos: envía el fichero sin comprimir.
+cl.error.cl_file_missing,No se encontró el fichero en el almacenamiento.
+cl.error.cl_file_size_unknown,No se pudo leer el tamaño del fichero; se reintentará.
+cl.error.cl_processing_error,Error inesperado al procesar; se reintentará.
+cl.error.cl_record_too_long,Una fila del fichero es demasiado larga.
+cl.error.cl_retries_exhausted,El proceso falló 3 veces: la entrega se ha rechazado.
+cl.error.cl_sha256_mismatch,El fichero no coincide con la huella (SHA-256) declarada al abrir la entrega.
+cl.error.cl_staging_lost,Se perdieron los datos intermedios; se recargarán del fichero.
+cl.error.cl_stopped,El proceso se detuvo.
+cl.error.cl_storage_error,No se pudo leer el fichero del almacenamiento; se reintentará.
+cl.error.cl_storage_short_read,El fichero se leyó incompleto; se reintentará.
+cl.error.cl_superseded,Sustituida por otro fichero del mismo periodo antes de subirse.
+cl.error.cl_upload_expired,El fichero no se subió a tiempo.
+cl.error.cl_worker_error,Falló el proceso en segundo plano; se reintentará.
+cl.error.cl_worker_lost,El proceso en segundo plano dejó de responder; se reintentará.
+cl.carrier.notification_email,Correo de avisos de Carrier Link
+cl.carrier.notification_email_help,Una sola dirección. Aquí se avisa al transportista de entregas no recibidas o rechazadas y de rechazo alto. Déjalo vacío para no avisarle.
+cl.carrier.notification_email_invalid,Escribe una sola dirección de correo válida.
+cl.incidents.title,Incidencias de Carrier Link
+cl.incidents.help,"Problemas con las entregas de los transportistas que requieren atención. ONEMS las abre, avisa por correo y las cierra solo cuando el problema se arregla; también se pueden cerrar a mano."
+cl.incidents.empty,No hay incidencias.
+cl.incidents.type.missing_delivery,Entrega no recibida
+cl.incidents.type.delivery_rejected,Entrega rechazada
+cl.incidents.type.high_rejection,Rechazo alto
+cl.incidents.type.unknown_data,Productos o lugares desconocidos
+cl.incidents.type.quota_unfilled,Cuota no cubierta
+cl.incidents.type.unknown,Otra
+cl.incidents.explain.missing_delivery,El transportista no entregó estos periodos a la hora esperada más el margen. Se cierra sola cuando llega una entrega.
+cl.incidents.explain.delivery_rejected,El fichero de estos periodos se rechazó (ver el motivo). Se cierra sola cuando cada periodo tiene una entrega procesada.
+cl.incidents.explain.high_rejection,Más del 20 % de los envíos de una entrega no se pudo usar. Se cierra sola con la siguiente entrega sin rechazo alto.
+cl.incidents.explain.unknown_data,El transportista envió productos o lugares que ONEMS no conoce. Regístralos en Conectores (equivalencias de producto) o en Puntos de lectura; se cierra sola cuando están todos registrados.
+cl.incidents.explain.quota_unfilled,"Una semana del plan terminó sin suficientes muestras. Solo se cierra a mano, una vez revisada."
+cl.incidents.status.open,Abierta
+cl.incidents.status.in_progress,En curso
+cl.incidents.status.resolved,Resuelta
+cl.incidents.status.unknown,Desconocido
+cl.incidents.closed.manual,Cerrada a mano
+cl.incidents.closed.auto,Cerrada automáticamente
+cl.incidents.filter.status,Estado
+cl.incidents.filter.type,Tipo
+cl.incidents.filter.all_types,Todos los tipos
+cl.incidents.filter.status.unresolved,Sin resolver
+cl.incidents.filter.status.open,Abiertas
+cl.incidents.filter.status.in_progress,En curso
+cl.incidents.filter.status.resolved,Resueltas
+cl.incidents.filter.status.all,Todas
+cl.incidents.col.type,Incidencia
+cl.incidents.col.status,Estado
+cl.incidents.col.periods,Periodos
+cl.incidents.col.assignee,Responsable
+cl.incidents.col.updated,Último cambio
+cl.incidents.unassigned,Nadie
+cl.incidents.opened_at,Abierta el {date}
+cl.incidents.plan,Plan: {plan}
+cl.incidents.periods,Periodos ({count})
+cl.incidents.detected_at,detectado el {date}
+cl.incidents.detail.rejected_error,Motivo: {error}
+cl.incidents.detail.high_rejection,{rejected} de {shipments} envíos rechazados ({percent} %)
+cl.incidents.detail.unknown_data,productos nuevos: {products}; lugares nuevos: {points}
+cl.incidents.detail.quota_unfilled,faltan {missing} muestras
+cl.incidents.unknown_products,Productos desconocidos: {values}
+cl.incidents.unknown_points,Lugares desconocidos (lugar / modo): {values}
+cl.incidents.notices,Avisos enviados por correo
+cl.incidents.no_notices,Aún no hay avisos.
+cl.incidents.recipient.account,Cuenta (Account Managers y coordinadores)
+cl.incidents.recipient.carrier,Transportista
+cl.incidents.notice_counts,"enviados {sent}, pendientes {pending}, fallidos {failed}, no enviados {skipped}"
+cl.incidents.carrier_without_email,No se avisa al transportista: su ficha en Carriers no tiene correo de avisos de Carrier Link.
+cl.incidents.note,Nota
+cl.incidents.note_too_long,La nota puede tener como máximo 4000 caracteres.
+cl.incidents.saved,Guardado
+cl.incidents.close,Cerrar a mano
+cl.incidents.close_title,¿Cerrar esta incidencia?
+cl.incidents.close_effect.missing,"Sus periodos cuentan como revisados: no se volverán a avisar, aunque la entrega no llegue nunca."
+cl.incidents.close_effect.other,"Los avisos pendientes se cancelan. Si el problema vuelve a ocurrir, ONEMS abre una incidencia nueva."
+cl.incidents.close_note,Nota (opcional)
+cl.incidents.close_confirm,"Sí, cerrar incidencia"
+cl.generator.diagnosis,Diagnóstico
+cl.generator.diagnosis_hint,Todas las lecturas de los envíos sorteados (también las de puntos intermedios) pasan además al diagnóstico de red. Los puntos sin centro postal quedan fuera.
+cl.alert.diagnosis_point_without_center,Puntos de lectura sin centro postal fuera del diagnóstico
+cl.alert.detail.diagnosis_skipped,Lecturas fuera: {readings} ({shipments} envíos). Asigna un centro postal a estos puntos para incluirlas.
+cl.capture_origin.label,Origen
+cl.capture_origin.tooltip,De dónde viene la lectura: un lector RFID o los escaneos del carrier (Carrier Link).
+cl.capture_origin.rfid,RFID
+cl.capture_origin.carrier,Carrier
 panelist_history.button,Historial
 panelist_history.title,Historial del panelista
 panelist_history.close,Cerrar
@@ -5778,3 +5996,32 @@ panelist_history.leave_reason.personal,Motivo personal
 panelist_history.leave_reason.training,Formación
 panelist_history.leave_reason.other,Otro motivo
 panelist_history.leave_reason.materials,Falta de material
+cl.csv.download,Descargar CSV
+cl.csv.error,La descarga ha fallado. Inténtelo de nuevo.
+cl.csv.truncated,Solo se han descargado las primeras {max} filas: acote los filtros.
+cl.csv.download_samples,Descargar muestras (CSV)
+cl.csv.download_scans,Descargar lecturas (CSV)
+cl.csv.scan_role,Lectura
+cl.csv.place,Lugar
+cl.csv.mode,Código de evento
+cl.csv.scan_at,Hora de la lectura
+cl.csv.period_start,Inicio del periodo
+cl.csv.period_end,Fin del periodo
+cl.csv.source,Origen
+cl.csv.test,Prueba
+cl.csv.phase,Fase
+cl.csv.rows_rejected,Filas rechazadas
+cl.csv.shipments,Envíos
+cl.csv.shipments_rejected,Envíos rechazados
+cl.csv.received,Recibida
+cl.csv.finished,Terminada
+cl.csv.error_message,Error
+cl.csv.date,Fecha
+cl.csv.alert,Alerta
+cl.csv.severity,Gravedad
+cl.csv.details,Detalle
+cl.csv.closed_how,Cómo se cerró
+cl.csv.last_period_start,Inicio del último periodo
+cl.csv.last_period_end,Fin del último periodo
+cl.csv.opened,Abierta
+cl.csv.closed,Cerrada

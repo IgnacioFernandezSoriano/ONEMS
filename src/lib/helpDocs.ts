@@ -1,6 +1,8 @@
 // Catálogo de las páginas de ayuda de public/help (una por idioma: <file>.<idioma>.html).
 // Para añadir una ayuda nueva: crear los 5 archivos (docs/help/GUIA-DISENO-AYUDA.md) y añadirla aquí.
 
+import { isCarrierLinkEnabled } from './featureFlags'
+
 export const HELP_LANGS = ['en', 'es', 'fr', 'ar', 'pt'] as const
 export type HelpLang = typeof HELP_LANGS[number]
 
@@ -15,6 +17,8 @@ export interface HelpDoc {
   managersOnly?: boolean
   /** Se puede abrir sin iniciar sesión y enviar al panelista */
   public: boolean
+  /** Solo se lista si Carrier Link está habilitado (solo DEV) */
+  carrierLink?: boolean
 }
 
 export const HELP_DOCS: HelpDoc[] = [
@@ -71,6 +75,7 @@ export const HELP_DOCS: HelpDoc[] = [
     audience: 'managers',
     managersOnly: true,
     public: false,
+    carrierLink: true,
   },
   {
     // Para todos los usuarios con sesión: explica qué ve cada uno y a quién pedir un cambio
@@ -98,6 +103,11 @@ export function canSeeHelpDoc(
 ): boolean {
   if (!doc.managersOnly) return true
   return who.isSuperadmin || who.canManageAccess || who.hasAnyEdit
+}
+
+/** Filtra las ayudas de funciones no habilitadas en este entorno. */
+export function visibleHelpDocs(carrierLink: boolean = isCarrierLinkEnabled()): HelpDoc[] {
+  return HELP_DOCS.filter(d => carrierLink || !d.carrierLink)
 }
 
 export function helpLang(language: string | null | undefined): HelpLang {

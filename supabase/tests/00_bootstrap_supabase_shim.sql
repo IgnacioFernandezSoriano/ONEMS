@@ -92,6 +92,12 @@ CREATE TABLE IF NOT EXISTS storage.objects (
   created_at timestamptz DEFAULT now()
 );
 ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+-- Columnas y privilegios de Supabase que usan las politicas de Storage (Carrier Link, cl-deliveries).
+ALTER TABLE storage.buckets ADD COLUMN IF NOT EXISTS file_size_limit bigint;
+ALTER TABLE storage.buckets ADD COLUMN IF NOT EXISTS allowed_mime_types text[];
+ALTER TABLE storage.objects ADD COLUMN IF NOT EXISTS metadata jsonb;
+GRANT SELECT, INSERT, UPDATE, DELETE ON storage.objects TO anon, authenticated, service_role;
+GRANT SELECT ON storage.buckets TO anon, authenticated, service_role;
 CREATE OR REPLACE FUNCTION storage.foldername(name text) RETURNS text[]
   LANGUAGE sql IMMUTABLE AS $$ SELECT string_to_array(name, '/') $$;
 

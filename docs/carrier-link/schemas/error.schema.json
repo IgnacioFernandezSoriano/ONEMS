@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://onems.example/carrier-link/v4/schemas/error.schema.json",
+  "title": "Error body",
+  "type": "object",
+  "required": [
+    "success",
+    "error",
+    "message"
+  ],
+  "properties": {
+    "success": {
+      "const": false
+    },
+    "error": {
+      "type": "string",
+      "pattern": "^CL_[A-Z0-9_]+$"
+    },
+    "message": {
+      "type": "string",
+      "description": "Fixed English text of the code."
+    },
+    "detail": {
+      "type": "string",
+      "description": "Only for request validation errors."
+    },
+    "delivery": {
+      "$ref": "delivery.schema.json",
+      "description": "Only when complete finds the delivery rejected."
+    }
+  }
+}

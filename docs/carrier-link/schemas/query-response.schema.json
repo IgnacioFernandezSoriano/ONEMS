@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://onems.example/carrier-link/v4/schemas/query-response.schema.json",
+  "title": "GET /query response",
+  "description": "Extraction SQL of the next delivery, built from the connector configuration (GET /config).",
+  "type": "object",
+  "required": ["db", "tested", "period_start", "period_end", "table_placeholder", "sql"],
+  "properties": {
+    "db": { "enum": ["postgresql", "oracle", "sqlserver"] },
+    "tested": { "type": "boolean", "description": "true only for postgresql; oracle and sqlserver are published untested." },
+    "period_start": { "type": ["string", "null"], "format": "date", "description": "next_period.period_start, or null when no period is pending." },
+    "period_end": { "type": ["string", "null"], "format": "date" },
+    "table_placeholder": { "type": "string", "description": "Name to replace with the carrier's scan table (carrier_scans)." },
+    "sql": { "type": "string", "description": "Two statements: the delivery file rows, then the control totals." }
+  }
+}

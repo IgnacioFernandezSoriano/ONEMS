@@ -5,6 +5,7 @@ import { fetchAllPages } from '@/lib/fetchAllPages'
 import { workingDowsFromSchedule } from '@/lib/workingDays'
 import type { ClQuota } from '@/lib/carrierLink/quotaCalculator'
 import { buildPlanRow, LOCKED_WHEN_NOT_DRAFT, type PlanForm, type QuotaInput } from '@/lib/carrierLink/planView'
+import { toQuotaFilterTotals } from '@/lib/carrierLink/planRecords'
 
 export type ClPlanStatus = 'draft' | 'active' | 'closed'
 
@@ -138,6 +139,13 @@ export function useClPlans(accountId: string | null) {
     [],
   )
 
+  /** Número de cuotas del plan, contado en el servidor (cl_plan_quota_totals), sin traer las filas. */
+  const quotaCount = useCallback(async (planId: string): Promise<number> => {
+    const { data, error: e } = await supabase.rpc('cl_plan_quota_totals', { p_plan_id: planId })
+    if (e) throw e
+    return toQuotaFilterTotals(data)?.quotas ?? 0
+  }, [])
+
   const create = async (f: PlanForm): Promise<ClPlanResult> => {
     const built = buildPlanRow(accountId, f)
     if (!built.ok) return { success: false, error: { message: built.error }, key: `cl.plans.error.${built.error}` }
@@ -206,6 +214,25 @@ export function useClPlans(accountId: string | null) {
     return { success: true }
   }
 
+  /**
+   * Borra un plan borrador (sus cuotas caen en cascada). Si la base no deja borrar la fila (permisos o ya no es
+   * borrador) no se borra nada y se devuelve la clave del aviso.
+   */
+  const remove = async (planId: string): Promise<ClPlanResult> => {
+    if (!accountId) return { success: false, error: { message: 'no_account' }, key: 'cl.plans.error.no_account' }
+    const { data, error: e } = await supabase
+      .from('cl_plans')
+      .delete()
+      .eq('id', planId)
+      .eq('account_id', accountId)
+      .eq('status', 'draft')
+      .select('id')
+    if (e) return { success: false, error: e }
+    await refetch()
+    if (!data || data.length === 0) return { success: false, error: { message: 'not_deleted' }, key: 'cl.generator.delete_not_allowed' }
+    return { success: true }
+  }
+
   const cityName = useCallback((id: string) => cityNames.get(id) ?? id, [cityNames])
 
   return {
@@ -218,6 +245,7 @@ export function useClPlans(accountId: string | null) {
     error,
     refetch,
     quotas,
+    quotaCount,
     create,
     update,
     setQuotas,
@@ -225,5 +253,6 @@ export function useClPlans(accountId: string | null) {
     missingStandards,
     standardRoutes,
     activate,
+    remove,
   }
 }

@@ -2,6 +2,7 @@
 -- Escenarios construidos con las funciones reales (cuotas, activacion, emision, entrada, sorteo y cierre del lote).
 \set ON_ERROR_STOP on
 SET client_min_messages = error;
+\ir fixtures/cl_v3_demand_emitter.sql
 
 CREATE OR REPLACE FUNCTION pg_temp.ok(p_cond boolean, p_msg text) RETURNS void LANGUAGE plpgsql AS $$
 BEGIN IF p_cond IS NOT TRUE THEN RAISE EXCEPTION 'FAIL: %', p_msg; END IF; END $$;
@@ -470,3 +471,4 @@ BEGIN
   PERFORM pg_temp.ok((SELECT status FROM public.cl_demands WHERE id = v_d) = 'open', 'la demanda no cambia');
 END $$;
 ROLLBACK;
+DROP FUNCTION public.cl_emit_due_demands(timestamptz);

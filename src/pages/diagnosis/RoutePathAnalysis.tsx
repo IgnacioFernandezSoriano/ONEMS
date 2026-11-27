@@ -7,6 +7,8 @@ import RoutePathMapLeaflet from '../../components/diagnosis/RoutePathMapLeaflet'
 import RoutePathTable from '../../components/diagnosis/RoutePathTable'
 import { TimeUnitToggle } from '../../components/common/TimeUnitToggle'
 import { useTranslation } from '@/hooks/useTranslation'
+import { CaptureSourceSelect, type CaptureSourceFilter } from '@/components/carrier-link/CaptureSource'
+import { isCarrierLinkEnabled } from '@/lib/featureFlags'
 
 interface JourneySegment {
   id: string
@@ -52,6 +54,7 @@ interface FilterState {
   product_id: string
   origin_city: string
   destination_city: string
+  capture_source: CaptureSourceFilter
 }
 
 export default function RoutePathAnalysis() {
@@ -65,7 +68,8 @@ export default function RoutePathAnalysis() {
     carrier_id: '',
     product_id: '',
     origin_city: '',
-    destination_city: ''
+    destination_city: '',
+    capture_source: ''
   })
 
   const [carriers, setCarriers] = useState<any[]>([])
@@ -160,6 +164,8 @@ export default function RoutePathAnalysis() {
       if (filters.product_id) query = query.eq('product_id', filters.product_id)
       if (filters.origin_city) query = query.eq('origin_city_name', filters.origin_city)
       if (filters.destination_city) query = query.eq('destination_city_name', filters.destination_city)
+      // Origen (Carrier Link): solo con el filtro puesto; sin el, la consulta es la de siempre.
+      if (filters.capture_source) query = query.eq('capture_source', filters.capture_source)
 
       const { data: segments, error } = await query
 
@@ -482,6 +488,13 @@ export default function RoutePathAnalysis() {
               ))}
             </select>
           </div>
+
+          {isCarrierLinkEnabled() && (
+            <CaptureSourceSelect
+              value={filters.capture_source}
+              onChange={(v) => setFilters({ ...filters, capture_source: v })}
+            />
+          )}
         </div>
       </div>
 

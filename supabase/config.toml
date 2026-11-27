@@ -418,3 +418,11 @@ verify_jwt = false
 
 [functions.carrier-link-ingest]
 verify_jwt = false
+
+# Llamado por pg_cron (pg_net) con la cabecera x-cl-worker-secret, no con un JWT de usuario.
+[functions.carrier-link-worker]
+verify_jwt = false
+
+# Llamado por pg_cron (pg_net) con la cabecera x-cl-notify-secret (correos de incidencias de Carrier Link).
+[functions.carrier-link-notify]
+verify_jwt = false

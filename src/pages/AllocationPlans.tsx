@@ -11,6 +11,7 @@ import { SortableHeader } from '@/components/common/SortableHeader'
 import { SmartTooltip } from '@/components/common/SmartTooltip'
 
 import { useTranslation } from '@/hooks/useTranslation';
+import { ClHelpLink } from '@/components/carrier-link/ClHelpLink';
 import { useAccount } from '@/contexts/AccountContext'
 import { formatInTz } from '@/lib/accountTime'
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
@@ -18,9 +19,18 @@ import { fetchLastUndo, undoLast, undoLabel, isUndoChangedError, type UndoEntry 
 import { Undo2 } from 'lucide-react'
 import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge'
 import { usePermissions } from '@/contexts/PermissionsContext'
+import { isCarrierLinkEnabled } from '@/lib/featureFlags'
+import { carrierLinkPlansVisible, parseClPlanOption } from '@/lib/carrierLink/planRecords'
+import { useClPlans } from '@/hooks/carrierLink/useClPlans'
+import { useClCaptureCarriers } from '@/hooks/carrierLink/useClPlanRecords'
+import { ClPlanRecords } from '@/components/carrier-link/ClPlanRecords'
+
+// Sin Carrier Link (producción) la página es la de siempre: no se consulta nada de Carrier Link.
+const carrierLinkOn = isCarrierLinkEnabled()
+
 export function AllocationPlans() {
   const { t } = useTranslation();
-  const { canEdit } = usePermissions()
+  const { canEdit, canView } = usePermissions()
   const readOnly = !canEdit('allocation_plans')
   const { accountTimezone } = useAccount();
   const {
@@ -47,6 +57,22 @@ export function AllocationPlans() {
   const effectiveAccountId = useEffectiveAccountId()
   const [lastUndo, setLastUndo] = useState<UndoEntry | null>(null)
   const [undoing, setUndoing] = useState(false)
+
+  // ---- Carrier Link: solo en DEV, con View en cl_plans y algún carrier de Carrier Link. Sus registros son cuotas
+  // ruta × semana de solo lectura; si no se cumple la condición, la página es exactamente la de siempre.
+  const clCandidate = carrierLinkOn && canView('cl_plans') && !!effectiveAccountId
+  const clCarriers = useClCaptureCarriers(clCandidate ? effectiveAccountId : null)
+  const clOn = carrierLinkPlansVisible({
+    flagOn: carrierLinkOn,
+    canViewPlans: canView('cl_plans'),
+    accountId: effectiveAccountId,
+    carriers: clCarriers,
+  })
+  const cl = useClPlans(clOn ? effectiveAccountId : null)
+  const [clPlanId, setClPlanId] = useState<string | null>(null)
+  // Otra cuenta: el plan de Carrier Link elegido era de la anterior.
+  useEffect(() => setClPlanId(null), [effectiveAccountId])
+  const clPlan = clOn ? (cl.plans.find((p) => p.id === clPlanId) ?? null) : null
 
   // Respuestas fuera de orden (p. ej. el superadmin cambia de cuenta rápido): solo cuenta la última petición
   const undoReqSeq = useRef(0)
@@ -613,14 +639,13 @@ export function AllocationPlans() {
     )
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Header with Tooltip */}
+  const header = (
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold text-gray-900">{t("allocation_plans.title")}</h1>
             {readOnly && <ReadOnlyBadge />}
+            {clOn && clPlan && <ClHelpLink section="records" />}
             <SmartTooltip content="Allocation Plans Management - Purpose: View and manage generated allocation plans with detailed shipment assignments between origin and destination nodes. Key Features: Track scheduled shipments, monitor panelist assignments, identify availability issues, and perform bulk operations on multiple records. Usage: Filter plans by criteria, review assignments, update nodes or dates in bulk, cancel or reprocess shipments, and export data for analysis.">
               <svg
                 className="w-5 h-5 text-gray-400 hover:text-gray-600 cursor-help"
@@ -636,6 +661,36 @@ export function AllocationPlans() {
           <p className="text-gray-600 mt-1">{t('allocation_plans.view_and_manage')}</p>
         </div>
       </div>
+  )
+
+  // Plan de Carrier Link elegido: sus registros (cuotas) en la misma página; sin acciones de panelistas.
+  if (clPlan) {
+    return (
+      <div className="space-y-6">
+        {header}
+        <ClPlanRecords
+          key={clPlan.id}
+          plan={clPlan}
+          panelistPlans={plans}
+          clPlans={cl.plans}
+          onSelectPlan={(value) => {
+            const id = parseClPlanOption(value)
+            setClPlanId(id)
+            if (!id) setFilters((prev) => ({ ...prev, planId: value }))
+          }}
+          cities={cities}
+          cityName={cl.cityName}
+          loadAllQuotas={cl.quotas}
+          canViewSamples={canView('cl_samples')}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header with Tooltip */}
+      {header}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -870,6 +925,8 @@ export function AllocationPlans() {
         availabilityCounts={availabilityCounts}
         onFilterChange={handleFilterChange}
         onClearFilters={handleClearFilters}
+        clPlans={clOn ? cl.plans : undefined}
+        onSelectClPlan={clOn ? setClPlanId : undefined}
       />
 
       {!readOnly && <BulkOperationsPanel

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
 import { useTranslation } from '@/hooks/useTranslation'
 import { ClHelpLink } from '@/components/carrier-link/ClHelpLink'
+import { ClBadge } from '@/components/carrier-link/ClBadge'
 import { usePermissions } from '@/contexts/PermissionsContext'
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
 import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge'
@@ -9,6 +10,7 @@ import { SelectAccountNotice } from '@/components/carrier-link/SelectAccountNoti
 import { clErrorKey } from '@/lib/carrierLink/clErrors'
 import type { E2eRole, ReadingPointForm } from '@/lib/carrierLink/readingPoints'
 import { useClReadingPoints, useClCarriersAndCenters, type ClReadingPoint } from '@/hooks/carrierLink/useClReadingPoints'
+import { ClCsvButton } from '@/components/carrier-link/ClCsvButton'
 
 const ROLES: E2eRole[] = ['origin', 'destination', 'both', 'none']
 
@@ -37,6 +39,20 @@ export function ClReadingPoints() {
   }, [carriers, carrierId])
 
   const roleLabel = (r: E2eRole) => t(`cl.reading_points.role.${r}`)
+  const anyMode = (m: string | null) => m ?? t('cl.reading_points.any_mode')
+  const buildPoints = async () => ({
+    headers: [
+      t('cl.reading_points.place'), t('cl.reading_points.mode'), t('cl.reading_points.center'), t('cl.reading_points.city'),
+      t('cl.reading_points.role'),
+    ],
+    rows: points.map((p) => [p.carrier_place_ref, anyMode(p.carrier_mode_ref), p.postal_center_name ?? '', p.city_name ?? '', roleLabel(p.e2e_role)]),
+    truncated: false,
+  })
+  const buildUnknown = async () => ({
+    headers: [t('cl.reading_points.place'), t('cl.reading_points.mode'), t('cl.reading_points.readings')],
+    rows: unknown.map((u) => [u.place_ref, anyMode(u.mode_ref), u.readings]),
+    truncated: false,
+  })
 
   const emptyForm = (place = '', mode: string | null = ''): ReadingPointForm => ({
     carrier_id: carrierId,
@@ -97,6 +113,7 @@ export function ClReadingPoints() {
     <div className="p-6 space-y-4">
       <div className="flex items-center gap-3">
         <h1 className="text-2xl font-bold text-gray-900">{t('cl.reading_points.title')}</h1>
+        <ClBadge />
         <ClHelpLink section="reading-points" />
         {readOnly && <ReadOnlyBadge />}
       </div>
@@ -137,6 +154,12 @@ export function ClReadingPoints() {
           {lookupError && <p className="text-sm text-red-600">{t(clErrorKey(lookupError))}</p>}
           {!lookupError && carriers.length === 0 && <p className="text-sm text-gray-500">{t('cl.reading_points.no_carriers')}</p>}
           {error && <p className="text-sm text-red-600">{t(clErrorKey(error))}</p>}
+
+          {carrierId && (
+            <div>
+              <ClCsvButton fileBase="cl-reading-points" build={buildPoints} disabled={loading || points.length === 0} />
+            </div>
+          )}
 
           {carrierId && (
             <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto">
@@ -202,7 +225,10 @@ export function ClReadingPoints() {
 
           {carrierId && unknown.length > 0 && (
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 space-y-2">
-              <h2 className="font-semibold text-amber-900">{t('cl.reading_points.unknown_title')}</h2>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 className="font-semibold text-amber-900">{t('cl.reading_points.unknown_title')}</h2>
+                <ClCsvButton fileBase="cl-unknown-places" build={buildUnknown} />
+              </div>
               <p className="text-sm text-amber-900">{t('cl.reading_points.unknown_help')}</p>
               <table className="min-w-full text-sm">
                 <thead className="text-amber-900">

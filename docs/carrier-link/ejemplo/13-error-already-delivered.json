@@ -1,0 +1,8 @@
+{
+ "http_status": 409,
+ "body": {
+  "success": false,
+  "error": "CL_PERIOD_ALREADY_DELIVERED",
+  "message": "The period (or part of it) was already delivered."
+ }
+}

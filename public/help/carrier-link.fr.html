@@ -231,48 +231,53 @@
       <h3>Les écrans</h3>
       <a href="#reading-points">Points de lecture</a>
       <a href="#connectors">Connecteurs</a>
-      <a href="#plans">Plans d’échantillonnage</a>
+      <a href="#generator">Générateur d’allocations</a>
+      <a href="#balancing">Équilibrage de charge</a>
+      <a href="#records">Plans d’allocation</a>
       <a href="#samples">Échantillons</a>
       <a href="#monitor">Moniteur de captures</a>
+      <a href="#incidents">Incidents</a>
       <h3>Référence</h3>
       <a href="#equivalence">Le temps d’équivalence</a>
       <a href="#alerts">Que signifie chaque alerte</a>
       <a href="#faq">Questions</a>
     </nav>
-    <div class="side-foot">Mis à jour le 20 novembre 2026</div>
+    <div class="side-foot">Mis à jour le 23 novembre 2026</div>
   </aside>
 
   <main class="main">
   <div class="page">
     <header>
       <h2>Carrier Link : des échantillons issus des enregistrements du transporteur</h2>
-      <p>Ce que c’est, dans quel ordre le configurer et ce que fait chaque écran de la section Carrier Link d’ONEMS.</p>
+      <p>Ce que c’est, dans quel ordre le configurer et comment utiliser avec Carrier Link les écrans habituels d’E2E et les deux écrans propres à Carrier Link.</p>
     </header>
 
     <section id="overview">
     <h2>Qu’est-ce que Carrier Link</h2>
 <p>Jusqu’à présent, ONEMS mesure avec des envois d’essai que déplacent les panélistes (E2E) et avec des lectures RFID dans des centres postaux (diagnostic). <strong>Carrier Link</strong> ajoute une troisième source : ONEMS prend <strong>au hasard</strong> des envois réels déjà clôturés dans les enregistrements du transporteur (sa lecture de départ et sa lecture d’arrivée) et les utilise comme échantillons.</p>
 <div class="grid">
-  <div class="card"><h4>Échantillons au hasard</h4><p>Le transporteur propose de nombreux envois et ONEMS effectue le tirage final. Le tirage peut être reproduit devant un auditeur.</p></div>
+  <div class="card"><h4>Échantillons au hasard</h4><p>Le transporteur envoie tous ses envois complets de chaque période et ONEMS effectue le tirage. Le tirage peut être reproduit devant un auditeur.</p></div>
   <div class="card"><h4>Enregistrements déjà clôturés</h4><p>On n’utilise que des envois ayant une lecture de départ et une lecture d’arrivée, car on sait ainsi quel trajet (de ville à ville) ils ont suivi.</p></div>
   <div class="card"><h4>Mêmes rapports</h4><p>Il n’y a pas de nouveaux rapports : les échantillons apparaissent dans les rapports E2E et de diagnostic habituels, marqués avec l’origine « carrier ».</p></div>
 </div>
 <p>Au lieu d’un panéliste d’origine et d’un panéliste de destination, chaque échantillon a un <strong>point de lecture de départ</strong> et un <strong>point de lecture d’arrivée</strong>. Le temps E2E va de la première lecture au départ à la dernière à l’arrivée.</p>
 <div class="callout info"><strong>Échelle.</strong> Un plan peut atteindre environ <span dir="ltr">15 000</span> échantillons par an et par produit. C’est pourquoi les quotas sont répartis par trajet (de ville à ville) et par semaine, sans que vous ayez à choisir les envois un par un.</div>
 <div class="callout warn"><strong>Ce que l’on ne voit pas.</strong> Seuls les envois arrivés sont pris en compte. Ceux qui n’arrivent jamais ou restent dans une autre ville n’apparaissent pas comme échantillons, et les départs ne sont pas suivis. Il n’y a pas non plus de trajets à l’intérieur d’une même ville. La norme de livraison n’affecte que l’analyse des rapports, jamais la capture ni le plan.</div>
+<div class="callout info"><strong>Il n’y a pas de section à part.</strong> Carrier Link n’est pas un module séparé : tout se trouve dans E2E. La seule chose qui change est le <strong>mode de capture</strong> de la donnée (panélistes ou transporteur), qui se choisit <strong>par transporteur</strong> dans <strong>Transporteurs et produits</strong> : <em>Panélistes</em>, <em>Carrier Link</em> ou <em>Les deux</em>. Un même transporteur peut utiliser les deux systèmes à la fois. Les transporteurs qui n’utilisent que des panélistes fonctionnent exactement comme avant.</div>
     </section>
 
     <section id="order">
     <h2>L’ordre de travail</h2>
 <ol class="steps">
-  <li><strong>Points de lecture.</strong> Dans <strong>Points de lecture</strong>, enregistrez les lieux du transporteur où chaque envoi est lu et indiquez dans quelle ville les trajets commencent ou finissent. Chaque ville a besoin d’au moins un point de départ et un point d’arrivée.</li>
-  <li><strong>Connecteur.</strong> Dans <strong>Connecteurs</strong>, créez le connecteur du transporteur : ses équivalences de champs et de produits, le calendrier des demandes et la clé. Testez-le avec un lot d’essai.</li>
-  <li><strong>Norme de livraison.</strong> Dans <strong>Normes de livraison</strong>, vérifiez que chaque trajet a sa norme et, si vous voulez comparer avec les panélistes, le temps d’équivalence (voir <a href="#equivalence">Le temps d’équivalence</a>).</li>
-  <li><strong>Plan d’échantillonnage.</strong> Dans <strong>Plans d'échantillonnage</strong>, créez le plan, générez et enregistrez les quotas, puis appuyez sur <span class="btn primary">Activer le plan</span>.</li>
-  <li><strong>Activer le connecteur.</strong> Quand tout est prêt, faites passer le connecteur de Test à Actif. D’ici là, il n’accepte que des essais et aucun échantillon n’est créé.</li>
-  <li><strong>Suivi.</strong> Dans <strong>Moniteur de captures</strong>, suivez les demandes, les lots et les alertes ; dans <strong>Échantillons</strong>, examinez les échantillons au fur et à mesure.</li>
+  <li><strong>Mode de capture.</strong> Dans <strong>Opérateurs et Produits</strong>, choisissez pour chaque opérateur son <strong>Mode de capture</strong> : Panélistes, Carrier Link ou Les deux. Vous pouvez aussi y saisir l’<strong>e-mail de notification Carrier Link</strong> du transporteur (facultatif).</li>
+  <li><strong>Points de lecture.</strong> Dans <strong>Points de lecture</strong> (menu E2E ▸ Configuration ▸ Carrier Link), enregistrez les lieux du transporteur où chaque envoi est lu et indiquez dans quelle ville les routes commencent ou se terminent. Chaque ville a besoin d’au moins un point de départ et un point d’arrivée.</li>
+  <li><strong>Connecteur.</strong> Dans <strong>Connecteurs</strong> (même sous-menu), créez le connecteur du transporteur : ses équivalences de champs et de produits, le calendrier de livraison et la clé. Tant qu’il est en Test, les livraisons sont vérifiées et comptées mais ne créent pas d’échantillons.</li>
+  <li><strong>Norme de distribution.</strong> Dans <strong>E2E : SLA</strong>, vérifiez que chaque route a sa norme et, si vous voulez comparer avec les panélistes, le temps d’équivalence (voir <a href="#equivalence">Le temps d’équivalence</a>).</li>
+  <li><strong>Générer et appliquer le plan.</strong> Dans <strong>Générateur d’allocations</strong>, choisissez l’opérateur en mode de capture Carrier Link, générez l’aperçu, enregistrez le plan et appuyez sur <span class="btn primary">Appliquer</span>.</li>
+  <li><strong>Activer le connecteur.</strong> Quand tout est prêt, passez le connecteur de Test à Actif. Dès lors, chaque livraison crée des échantillons.</li>
+  <li><strong>Suivi.</strong> Dans <strong>Moniteur de captures</strong>, suivez les livraisons et les alertes ; dans <strong>Incidents</strong>, les problèmes à traiter ; dans <strong>Échantillons</strong>, les échantillons au fur et à mesure (menu Base de données ▸ Carrier Link).</li>
 </ol>
-<div class="callout ok"><strong>Et ensuite :</strong> ONEMS demande les envois au transporteur aux jours et à l’heure du calendrier du connecteur, effectue le tirage et place les échantillons dans les rapports E2E. Vous n’avez qu’à traiter les alertes.</div>
+<div class="callout ok"><strong>Ensuite :</strong> chaque jour de livraison, le transporteur envoie un fichier avec tous les envois de la période. ONEMS le vérifie, le compte, fait son propre tirage et intègre les échantillons aux rapports E2E. Si une livraison n’arrive pas ou est rejetée, ONEMS ouvre un incident et avertit par e-mail.</div>
     </section>
 
     <section id="reading-points">
@@ -291,44 +296,74 @@
     <section id="connectors">
     <h2>Connecteurs</h2>
 <p>Écran <strong>Connecteurs</strong>. Le connecteur est le canal par lequel le transporteur livre ses données à ONEMS. Il y en a un ou plusieurs par transporteur.</p>
-<h3>Ce que l’on configure</h3>
+<h3>Ce qui se configure</h3>
 <ul>
-  <li><strong>Calendrier :</strong> les jours de la semaine et l’heure auxquels ONEMS peut demander des données, pour ne pas gêner la base de données du transporteur. Si vous laissez le fuseau horaire vide, celui du compte est utilisé.</li>
+  <li><strong>Calendrier de livraison :</strong> les jours où le transporteur livre un fichier, et l’heure approximative. Chaque livraison couvre les jours depuis le jour de livraison précédent : quotidienne = la veille ; hebdomadaire = les 7 jours précédents ; plusieurs par semaine = les jours intermédiaires. L’écran affiche la fréquence, la <strong>prochaine période</strong> à livrer et la dernière livraison.</li>
+  <li><strong>Marge avant « non reçue » :</strong> heures après l’heure prévue avant qu’ONEMS n’ouvre un incident <em>Livraison non reçue</em> (6 par défaut, de 0 à 168).</li>
   <li><strong>Équivalences de champs :</strong> quel champ du transporteur contient chaque donnée (identifiant de l’envoi, produit, date et heure de lecture, lieu et mode). Tant qu’il en manque un, ONEMS ne peut pas lire les données.</li>
-  <li><strong>Équivalences de produit :</strong> à quel produit d’ONEMS correspond chaque valeur de produit du transporteur.</li>
-  <li><strong>Champs supplémentaires autorisés :</strong> d’autres champs du transporteur conservés avec chaque lecture. Tout autre champ est écarté à l’entrée, pour ne pas conserver de données personnelles.</li>
+  <li><strong>Équivalences de produits :</strong> à quel produit ONEMS correspond chaque valeur de produit du transporteur.</li>
+  <li><strong>Champs supplémentaires autorisés :</strong> autres champs du transporteur conservés avec chaque lecture. Tout autre champ est écarté à l’entrée, pour ne stocker aucune donnée personnelle.</li>
 </ul>
 <h3>États du connecteur</h3>
 <div class="table-wrap"><table>
 <tr><th>État</th><th>Ce qui se passe</th></tr>
-<tr><td><span class="badge b-yellow">Test</span></td><td>N’accepte que des lots d’essai : ils sont vérifiés comme s’ils étaient réels, mais rien n’est enregistré et aucun échantillon n’est créé.</td></tr>
-<tr><td><span class="badge b-green">Actif</span></td><td>Reçoit des lots réels et crée des échantillons. L’activer clôt les demandes ouvertes pendant la phase de test.</td></tr>
-<tr><td><span class="badge b-gray">En pause</span></td><td>Ne reçoit aucun lot et aucune demande n’est envoyée jusqu’à la reprise.</td></tr>
+<tr><td><span class="badge b-yellow">Test</span></td><td>Les livraisons sont vérifiées et comptées comme si elles étaient réelles, mais aucun échantillon n’est créé.</td></tr>
+<tr><td><span class="badge b-green">Actif</span></td><td>Chaque livraison crée des échantillons pour les plans actifs.</td></tr>
+<tr><td><span class="badge b-gray">En pause</span></td><td>Aucune livraison n’est acceptée et les livraisons manquantes ne sont pas signalées jusqu’à la reprise.</td></tr>
 </table></div>
 <h3>La clé du transporteur</h3>
-<p>Le transporteur utilise une clé pour envoyer ses lots. <strong>Seul un superadmin ou l’UPU Account Manager peut créer des clés.</strong> Appuyez sur <span class="btn">Nouvelle clé</span>, donnez-lui un nom et, si vous le souhaitez, une date d’expiration.</p>
-<div class="callout warn"><strong>La clé n’est affichée qu’une seule fois.</strong> Copiez-la et remettez-la au transporteur par un canal sûr : ensuite, ONEMS ne conserve qu’un préfixe pour la reconnaître. Si elle est perdue, créez-en une autre et désactivez l’ancienne.</div>
-<h3>Tester un lot</h3>
-<p>Dans <strong>Tester un lot (essai)</strong>, téléversez un fichier de lot du transporteur. ONEMS indique s’il l’accepterait et, sinon, pourquoi. Rien n’est enregistré.</p>
+<p>Le transporteur utilise une clé pour envoyer ses livraisons. <strong>Seul un superadmin ou l’UPU Account Manager peut créer des clés.</strong> Appuyez sur <span class="btn">Nouvelle clé</span>, donnez-lui un nom et, si vous le souhaitez, une date d’expiration.</p>
+<div class="callout warn"><strong>La clé n’est affichée qu’une fois.</strong> Copiez-la et transmettez-la au transporteur par un canal sûr : ensuite ONEMS ne garde qu’un préfixe pour la reconnaître. En cas de perte, créez-en une autre et désactivez l’ancienne.</div>
+<h3>Livraisons</h3>
+<p>Le bloc <strong>Livraisons</strong> liste les livraisons du connecteur, des plus récentes aux plus anciennes : période, état (En attente du fichier, Reçue, En traitement, Traitée, Échouée ou Rejetée), l’étape en cours pendant le traitement, lignes lues, envois valides, lignes et envois rejetés, échantillons tirés et alertes. Ouvrez une ligne pour voir les motifs de rejet, l’erreur et les dates. Une livraison <em>Échouée</em> est relancée automatiquement jusqu’à 3 fois.</p>
+<h3>Envoyer une livraison à la main</h3>
+<p>Pour les transporteurs qui envoient le fichier par un autre moyen : choisissez la période (la suivante est proposée), un fichier <strong>JSON Lines (.jsonl)</strong> ou <strong>CSV</strong> non compressé, et appuyez sur <span class="btn primary">Envoyer la livraison</span>. ONEMS calcule l’empreinte du fichier dans le navigateur, l’envoie et le traite exactement comme une livraison par API. Une période n’est livrée qu’une fois.</p>
     </section>
 
-    <section id="plans">
-    <h2>Plans d’échantillonnage</h2>
-<p>Écran <strong>Plans d'échantillonnage</strong>. Un plan indique combien d’échantillons on veut, de quel transporteur et de quel produit, à quelles dates et entre quelles villes.</p>
+    <section id="generator">
+    <h2>Générateur d’allocations</h2>
+<p>Écran <strong>Générateur d’allocations</strong> (menu E2E ▸ Allocation). C’est <strong>le même écran</strong> que celui utilisé avec les panélistes : seul le champ <strong>Mode de capture</strong> change. Un plan indique combien d’échantillons on veut, de quel transporteur et de quel produit, à quelles dates et entre quelles villes.</p>
 <ol class="steps">
-  <li>Appuyez sur <span class="btn primary">Nouveau plan</span> et renseignez le nom, le transporteur, le produit, le connecteur, les dates et le total d’échantillons. Cochez la case de diagnostic seulement si vous voulez en plus conserver des données pour l’analyse de diagnostic.</li>
-  <li>Appuyez sur <span class="btn">Générer les quotas</span>. ONEMS répartit le total entre les trajets (de ville à ville) et les semaines, et affiche un aperçu non enregistré.</li>
-  <li>Vérifiez l’aperçu et appuyez sur <span class="btn">Enregistrer les quotas</span>. Si vous modifiez le total ou les dates, générez et enregistrez à nouveau.</li>
-  <li>Si l’avis <strong>Points de lecture manquants</strong> liste des villes, enregistrez leurs points de départ et d’arrivée dans <strong>Points de lecture</strong>. Tant qu’il en manque, le plan ne peut pas être activé.</li>
-  <li>Appuyez sur <span class="btn primary">Activer le plan</span> et confirmez.</li>
+  <li>Choisissez le transporteur. Son mode de capture (celui fixé dans <strong>Transporteurs et produits</strong>) décide des options. S’il est sur <em>Les deux</em>, c’est vous qui choisissez entre Panélistes et Carrier Link dans <strong>Mode de capture</strong>.</li>
+  <li>Avec Carrier Link, choisissez aussi le <strong>connecteur</strong>. Il est obligatoire : sans lui, le plan ne peut pas être appliqué. Il n’y a pas de panélistes : les villes proviennent des points de lecture actifs du transporteur.</li>
+  <li>Renseignez le nom, le produit, les dates et le total d’échantillons, et choisissez la répartition comme avec les panélistes : la même matrice A/B/C, la saisonnalité et les jours ouvrables. Vous pouvez aussi importer les quotas depuis un fichier CSV, avec les colonnes ville d’origine, ville de destination, semaine et échantillons.</li>
+  <li>Appuyez sur <span class="btn">Générer l’aperçu</span>. ONEMS répartit le total entre les trajets (de ville à ville) et les semaines, et affiche le résultat sans l’enregistrer. S’il n’a pas pu répartir tous les échantillons, il vous le dit.</li>
+  <li>Vérifiez l’aperçu et appuyez sur <span class="btn">Enregistrer le plan (brouillon)</span>. Le plan apparaît dans <strong>Plans générés</strong>, avec une colonne <strong>Capture</strong> qui indique s’il s’agit d’un plan de panélistes ou de Carrier Link. Un brouillon peut être supprimé.</li>
+  <li>Pour le lancer, appuyez sur <span class="btn primary">Appliquer</span>. Avec Carrier Link, <strong>appliquer signifie qu’à partir de la date de début du plan, ONEMS attend les livraisons du transporteur selon le calendrier du connecteur</strong>. Le plan passe dans <strong>Plans appliqués</strong>.</li>
 </ol>
-<div class="callout warn">Un trajet sans norme de livraison est échantillonné quand même, mais ses échantillons entrent sans « à l’heure » tant que la norme n’est pas créée. Ce n’est qu’un avis : il n’empêche pas d’activer le plan.</div>
-<div class="callout info">Après l’activation, on ne peut plus modifier le transporteur, le produit, le connecteur, la date de début ni les quotas. Les échantillons déjà obtenus ne sont pas touchés.</div>
-<h3>Le tableau des quotas</h3>
-<p>Chaque cellule indique ce qui est <strong>prévu</strong>, ce qui a été <strong>reporté</strong> des semaines précédentes entre parenthèses et, une fois le plan en cours, ce qui a été <strong>obtenu</strong>. Vous pouvez l’afficher par semaine ou par mois et filtrer par trajet.</p>
+<div class="callout warn">S’il manque à une ville des points de lecture de départ ou d’arrivée, ONEMS vous le signale et ne vous laisse pas appliquer le plan avant que vous ne les ayez enregistrés dans <strong>Points de lecture</strong>. Un trajet sans norme de livraison est échantillonné quand même, mais ses échantillons entrent sans « à l’heure » tant que la norme n’est pas créée : ce n’est qu’un avis.</div>
+<div class="callout info">Après l’application, on ne peut plus modifier le transporteur, le produit, le connecteur, la date de début ni les quotas (sauf avec l’Équilibrage de charge). Les échantillons déjà obtenus ne sont pas touchés.</div>
+<div class="callout ok"><strong>Et ensuite :</strong> avec le plan appliqué et le connecteur Actif, les livraisons arrivent seules selon le calendrier et ONEMS effectue le tirage dans chacune. Il n’y a rien d’autre à faire.</div>
+    </section>
+
+    <section id="balancing">
+    <h2>Équilibrage de charge</h2>
+<p>Écran <strong>Équilibrage de charge</strong> (menu E2E ▸ Allocation). C’est aussi <strong>le même écran</strong> qu’avec les panélistes : quand vous choisissez un plan Carrier Link, l’écran reconnaît son type et s’adapte.</p>
+<ul>
+  <li><strong>Ce qu’il déplace :</strong> des échantillons d’une semaine à l’autre, <strong>à l’intérieur de chaque trajet</strong>, pour éviter des semaines saturées à côté de semaines presque vides. Il ne change ni le total du plan ni ses trajets.</li>
+  <li><strong>Pas de maximum par panéliste :</strong> avec Carrier Link, il n’y a pas de panélistes. Les lignes sont les villes d’origine et la charge est le nombre d’échantillons prévus par semaine.</li>
+  <li><strong>Date de blocage (fence) :</strong> d’aujourd’hui jusqu’à cette date incluse, rien n’est déplacé. Si vous la laissez vide, le blocage commence aujourd’hui.</li>
+  <li><strong>Brouillon et actif :</strong> dans un plan brouillon, on peut déplacer n’importe quelle semaine ; dans un plan actif, seulement les quotas en attente des semaines qui commencent après la date de blocage.</li>
+</ul>
+<ol class="steps">
+  <li>Choisissez le plan Carrier Link dans le sélecteur de plans.</li>
+  <li>Appuyez sur <span class="btn">Équilibrer toutes les villes d’origine</span>, ou sur <span class="btn">Équilibrer</span> pour une ville précise.</li>
+  <li>Vérifiez l’<strong>Aperçu de l’équilibrage</strong> : combien d’échantillons changent de semaine. Rien n’est enregistré pour l’instant.</li>
+  <li>Appuyez sur <span class="btn primary">Appliquer l’équilibrage</span>.</li>
+</ol>
+<div class="callout info">Si la répartition est déjà aussi équilibrée que possible avec ce qui peut être déplacé, ONEMS indique qu’il n’y a rien à déplacer.</div>
+    </section>
+
+    <section id="records">
+    <h2>Plans d’allocation</h2>
+<p>Écran <strong>Plans d’allocation</strong> (menu E2E ▸ Allocation). Quand vous choisissez un plan Carrier Link dans le sélecteur, les <strong>enregistrements</strong> du plan sont ses <strong>quotas : un par trajet (de ville à ville) et par semaine</strong>. Cette vue est en consultation ; les quotas se modifient avec le Générateur d’allocations et l’Équilibrage de charge.</p>
+<ul>
+  <li><strong>Tableau :</strong> une ligne par quota, avec ce qui est <strong>prévu</strong>, ce qui est <strong>reporté</strong> des semaines précédentes, ce qui a été <strong>obtenu</strong> et son état : En attente, Ouverte, Remplie, Reportée ou Non atteinte. On peut le filtrer.</li>
+  <li><strong>Matrice :</strong> les trajets en lignes et les semaines (ou les mois) en colonnes. Chaque cellule indique ce qui est prévu, le reporté entre parenthèses et, une fois le plan en cours, l’obtenu. La matrice montre tous les quotas du plan : elle n’applique pas les filtres du tableau.</li>
+  <li><strong>Voir les échantillons :</strong> sur chaque quota, un lien mène aux échantillons obtenus pour ce trajet et cette semaine.</li>
+</ul>
 <h3>Si un quota n’est pas atteint</h3>
-<p>Si le transporteur n’a pas assez d’envois, ONEMS redemande ce qui manque (jusqu’à 3 fois la même semaine). Ce qui manque encore est réparti sur les semaines restantes du mois et, si cela ne tient pas, sur les mois suivants. Ce qui manque à la fin du plan reste non atteint et génère une alerte.</p>
-<div class="callout ok"><strong>Et ensuite :</strong> avec le plan actif et le connecteur Actif, le système demande les envois tout seul, semaine après semaine. Il n’y a rien d’autre à faire.</div>
+<p>Le quota de chaque semaine est réparti entre les livraisons de cette semaine selon leurs jours ouvrés ; ce qu’une livraison ne couvre pas passe aux livraisons suivantes de la même semaine. La semaine est clôturée avec la livraison qui couvre son dernier jour (ou, si cette livraison n’arrive pas, quelques jours plus tard avec ce qu’il y a). Ce qui manque encore est réparti sur les semaines restantes du mois et, si cela ne tient pas, sur les mois suivants. Ce qui manque à la fin du plan reste non atteint et ouvre l’incident <em>Quota non atteint</em>.</p>
     </section>
 
     <section id="samples">
@@ -345,21 +380,34 @@
 
     <section id="monitor">
     <h2>Moniteur de captures</h2>
-<p>Écran <strong>Moniteur de captures</strong>. Vous suivez ici ce qui se passe avec la capture des données.</p>
+<p>Écran <strong>Moniteur de captures</strong>. On y suit ce qui se passe avec la capture des données.</p>
 <ul>
-  <li><strong>Demandes au transporteur :</strong> ouvertes, satisfaites, partielles ou échouées (y compris celles d’essai).</li>
-  <li><strong>Lots reçus :</strong> chaque lot avec son état (Reçu, Validé, Échantillonné, Rejeté, Annulé ou Expiré), le nombre d’envois, les rejetés et les retenus.</li>
-  <li><strong>Alertes :</strong> avec leur gravité (faible, moyenne ou élevée). Vous pouvez ne filtrer que les ouvertes et les marquer avec <span class="btn">Marquer comme vue</span> ou <span class="btn">Écarter</span>. Le sens de chacune est dans <a href="#alerts">Que signifie chaque alerte</a>.</li>
+  <li><strong>Incidents non résolus :</strong> leur nombre par type. Appuyez sur une case pour les ouvrir dans <a href="#incidents">Incidents</a>.</li>
+  <li><strong>Livraisons :</strong> les livraisons de tous les connecteurs, filtrées par connecteur, état et période, avec les mêmes colonnes et détails que dans Connecteurs.</li>
+  <li><strong>Alertes :</strong> avec leur gravité (faible, moyenne ou élevée). Vous pouvez filtrer celles qui sont ouvertes et les marquer avec <span class="btn">Marquer comme vue</span> ou <span class="btn">Écarter</span>. La signification de chacune est dans <a href="#alerts">Ce que signifie chaque alerte</a>.</li>
 </ul>
-<h3>Annuler un lot</h3>
-<p>Si un lot est erroné, appuyez sur <span class="btn">Annuler</span> sur sa ligne et confirmez. Les échantillons retenus dans ce lot sont retirés des rapports E2E et les quotas concernés sont recalculés. ONEMS indique combien de quotas sont revenus en attente et lesquels, ayant déjà été reportés, sont à vérifier.</p>
+    </section>
+
+    <section id="incidents">
+    <h2>Incidents</h2>
+<p>Écran <strong>Incidents</strong> (menu Base de données ▸ Carrier Link). Il liste les problèmes de livraisons des transporteurs à traiter. ONEMS les ouvre seul, avertit par e-mail les Account Managers et coordinateurs du compte (et le transporteur, pour ses propres problèmes, s’il a un e-mail de notification dans <strong>Opérateurs et Produits</strong>) et clôt seul la plupart d’entre eux quand le problème est réglé.</p>
+<div class="table-wrap"><table>
+<tr><th>Incident</th><th>Quand il s’ouvre</th><th>Quand il se clôt</th></tr>
+<tr><td>Livraison non reçue</td><td>Une période n’a pas été livrée à l’heure prévue plus la marge.</td><td>Seul, à la réception d’une livraison.</td></tr>
+<tr><td>Livraison rejetée</td><td>Le fichier d’une période a été rejeté (empreinte différente, format erroné, trop volumineux...).</td><td>Seul, quand chaque période a une livraison traitée.</td></tr>
+<tr><td>Rejet élevé</td><td>Plus de 20 % des envois d’une livraison n’ont pas pu être utilisés.</td><td>Seul, avec la livraison suivante sans rejet élevé.</td></tr>
+<tr><td>Produits ou lieux inconnus</td><td>Le transporteur a envoyé des produits ou des lieux inconnus d’ONEMS.</td><td>Seul, quand tous sont enregistrés.</td></tr>
+<tr><td>Quota non atteint</td><td>Une semaine du plan s’est terminée sans assez d’échantillons.</td><td>Uniquement à la main.</td></tr>
+</table></div>
+<p>Ouvrez une ligne pour voir ses périodes, les avis envoyés (seulement leur nombre et leur état, jamais les adresses), le responsable et la note. Avec le droit de modification, vous pouvez changer l’état (Ouvert ou En cours), désigner une personne du compte, écrire une note et appuyer sur <span class="btn">Clôturer à la main</span> ; la confirmation apparaît à côté de la ligne. La liste indique si un incident a été <strong>clôturé à la main</strong> ou <strong>clôturé automatiquement</strong>.</p>
+<div class="callout warn">Clôturer à la main un incident <em>Livraison non reçue</em> marque ses périodes comme examinées : elles ne sont plus signalées, même si la livraison n’arrive jamais.</div>
     </section>
 
     <section id="equivalence">
     <h2>Le temps d’équivalence</h2>
 <p>La lecture du transporteur n’inclut ni le dernier tronçon jusqu’au destinataire ni les retards de déclaration que comporte la mesure avec les panélistes. Pour que les deux mesures soient comparables, la norme de livraison admet un <strong>temps d’équivalence</strong>.</p>
 <ol class="steps">
-  <li>Ouvrez l’écran des normes de livraison (<strong>Normes de livraison</strong>).</li>
+  <li>Ouvrez l’écran des normes de livraison (<strong>E2E : SLA</strong>).</li>
   <li>Sur le trajet voulu, renseignez <strong>Durée équiv. premier tronçon</strong> et <strong>Durée équiv. dernier tronçon</strong>, dans la même unité que la norme. Par défaut, elles valent 0.</li>
 </ol>
 <div class="callout info"><strong>Uniquement pour les échantillons du transporteur.</strong> Ce temps s’ajoute seulement aux échantillons du transporteur ; ceux des panélistes ne changent pas. ONEMS conserve séparément le temps mesuré et le temps ajouté, et les rapports (y compris « à l’heure ») utilisent le total.</div>
@@ -371,36 +419,32 @@
 <p>Les alertes apparaissent dans <strong>Moniteur de captures</strong>. Voici les types d’alertes et ce qu’il faut faire pour chacune.</p>
 <div class="table-wrap"><table>
 <tr><th>Alerte</th><th>Ce que cela signifie</th><th>Que faire</th></tr>
-<tr><td>Candidats insuffisants</td><td>Le transporteur a envoyé moins d’envois valides que nécessaire pour un trajet et une semaine.</td><td>ONEMS redemande en général ceux qui manquent. Si cela se répète, parlez-en au transporteur.</td></tr>
-<tr><td>Strate vide</td><td>Le transporteur n’a renvoyé aucun envoi pour un trajet.</td><td>Vérifiez que les points de départ et d’arrivée de ces villes sont corrects et que le transporteur a du trafic sur ce trajet.</td></tr>
-<tr><td>Baisse de population</td><td>Les envois disponibles sur un trajet sont passés sous 30 % de la normale (médiane des 6 dernières semaines).</td><td>Demandez au transporteur s’il y a eu une coupure dans ses données ou un vrai changement de trafic.</td></tr>
-<tr><td>Population incohérente</td><td>Le transporteur indique moins d’envois disponibles que de candidats envoyés.</td><td>C’est une erreur de son extraction de données : demandez-lui de la vérifier.</td></tr>
-<tr><td>Distribution suspecte</td><td>Tous les échantillons d’un lot (20 ou plus) sont arrivés dans les délais. C’est rare et cela peut indiquer que le transporteur ne choisit pas au hasard.</td><td>Demandez au transporteur d’expliquer comment il sélectionne les envois et surveillez les lots suivants.</td></tr>
-<tr><td>Lot en retard</td><td>Le lot est arrivé après le délai prévu.</td><td>Si cela se répète, revoyez avec le transporteur le calendrier du connecteur.</td></tr>
+<tr><td>Candidats insuffisants</td><td>Dans une livraison, un trajet et une semaine ont eu moins d’envois valides que d’échantillons nécessaires.</td><td>Ce qui manque passe aux livraisons suivantes. Si cela se répète, le trajet a peu de trafic : revoyez le plan.</td></tr>
+<tr><td>Distribution suspecte</td><td>Tous les échantillons d’un trajet et d’une semaine (20 ou plus) sont arrivés dans les délais. C’est rare.</td><td>Parlez-en à l’équipe ONEMS et surveillez les livraisons suivantes.</td></tr>
 <tr><td>Produit inconnu</td><td>Le transporteur a envoyé un produit qui n’a pas d’équivalence dans ONEMS.</td><td>Ajoutez l’équivalence dans <strong>Connecteurs</strong>, bloc Équivalences de produit.</td></tr>
 <tr><td>Point de lecture inconnu</td><td>Des lectures sont arrivées d’un lieu qui n’est pas enregistré comme point de lecture.</td><td>Enregistrez le lieu dans <strong>Points de lecture</strong> (bloc Lieux sans point de lecture). Ces lectures sont exploitées dès l’enregistrement.</td></tr>
 <tr><td>Envoi peut-être mal acheminé</td><td>Un envoi a des lectures en plusieurs points, ou dans une ville différente de celle demandée.</td><td>Examinez-le dans <strong>Échantillons</strong>. Il compte quand même pour le quota du trajet.</td></tr>
-<tr><td>Norme de livraison manquante</td><td>Un trajet n’a pas de norme de livraison : on ne peut pas savoir si ses échantillons arrivent dans les délais.</td><td>Créez la norme de ce trajet dans <strong>Normes de livraison</strong>. Les échantillons sont recalculés automatiquement.</td></tr>
-<tr><td>Beaucoup de lectures rejetées</td><td>Plus de 20 % des lectures d’un lot ont été rejetées.</td><td>Vérifiez les équivalences et les points de lecture ; un lot d’essai dans <strong>Connecteurs</strong> en montre les motifs.</td></tr>
-<tr><td>Quota non atteint</td><td>À la fin du plan, un quota n’a pas été entièrement atteint.</td><td>Examinez les alertes précédentes de ce trajet ; si besoin, prolongez le plan.</td></tr>
-<tr><td>Le transporteur n'a pas répondu</td><td>Le connecteur est actif, mais le transporteur n’a pas répondu à une demande échue.</td><td>Vérifiez auprès du transporteur que son système fonctionne et revoyez le calendrier et l’état du connecteur.</td></tr>
+<tr><td>Norme de livraison manquante</td><td>Un trajet n’a pas de norme de livraison : on ne peut pas savoir si ses échantillons arrivent dans les délais.</td><td>Créez la norme de ce trajet dans <strong>E2E : SLA</strong>. Les échantillons sont recalculés automatiquement.</td></tr>
+<tr><td>Beaucoup de lectures rejetées</td><td>Plus de 20 % des envois d’une livraison n’ont pas pu être utilisés. Ouvre l’incident <em>Rejet élevé</em>.</td><td>Consultez les motifs dans <strong>Connecteurs</strong>, bloc Livraisons. S’il s’agit de lieux ou de produits inconnus, enregistrez ce qui manque ; sinon, parlez-en au transporteur.</td></tr>
+<tr><td>Quota non atteint</td><td>Une semaine du plan a été clôturée sans tous ses échantillons et ils ne pouvaient plus être reportés sur d’autres semaines. Ouvre l’incident <em>Quota non atteint</em>.</td><td>Examinez les alertes précédentes de ce trajet ; si besoin, ajustez le plan.</td></tr>
 <tr><td>Points de départ ou d'arrivée manquants</td><td>Il manque des points de départ ou d’arrivée dans une ville.</td><td>Enregistrez les points manquants dans <strong>Points de lecture</strong>.</td></tr>
-<tr><td>Fuseau horaire du compte invalide</td><td>Le fuseau horaire du compte n’est pas valide et ONEMS ne sait pas à quelle heure demander les données.</td><td>Corrigez-le dans le compte ou indiquez un fuseau propre dans le calendrier du connecteur.</td></tr>
-<tr><td>La demande n'a pas pu être envoyée</td><td>ONEMS n’a pas pu envoyer la demande au transporteur.</td><td>Consultez la dernière erreur du connecteur dans <strong>Connecteurs</strong> et vérifiez sa configuration.</td></tr>
-<tr><td>Méthode de sélection différente</td><td>Le transporteur a utilisé une méthode de sélection différente de celle convenue.</td><td>Demandez-lui d’utiliser la méthode convenue et vérifiez avec un lot d’essai.</td></tr>
+<tr><td>Fuseau horaire du compte invalide</td><td>Le fuseau horaire du compte n’est pas valide et ONEMS compte les périodes en UTC.</td><td>Corrigez-le dans le compte ou indiquez un fuseau propre dans le calendrier du connecteur.</td></tr>
 <tr><td>Lecteur sans ville</td><td>Un point de lecture se trouve dans un centre postal qui n’a pas de ville.</td><td>Attribuez une ville au centre postal.</td></tr>
-<tr><td>Lot annulé après report du quota</td><td>Un lot a été annulé alors que son quota avait déjà été réparti sur d’autres semaines.</td><td>Vérifiez les quotas du plan : ils apparaissent comme reportés (à vérifier).</td></tr>
+<tr><td>Semaine déjà clôturée</td><td>Des envois valides sont arrivés pour une semaine déjà clôturée et n’ont pas été utilisés.</td><td>Cela arrive surtout avec des livraisons en retard. Si cela se répète, revoyez le calendrier avec le transporteur.</td></tr>
+<tr><td>Livraison échouée après 3 tentatives</td><td>ONEMS n’a pas pu traiter une livraison après trois tentatives et l’a rejetée.</td><td>Le transporteur doit renvoyer cette période (l’incident <em>Livraison rejetée</em> le lui signale). Si cela se répète, prévenez l’équipe ONEMS.</td></tr>
+<tr><td>Alertes de la version précédente</td><td>Strate vide, Baisse de population, Population incohérente, Lot en retard, Le transporteur n’a pas répondu, La demande n’a pas pu être envoyée, Méthode de sélection différente et Lot annulé après report du quota appartenaient au système de demandes et de lots, désormais retiré.</td><td>Elles n’apparaissent que dans d’anciennes données : vous pouvez les écarter.</td></tr>
 </table></div>
     </section>
 
     <section id="faq">
     <h2>Questions</h2>
 <details><summary>Combien d’échantillons un plan peut-il avoir ?</summary><div>Un plan peut atteindre environ <span dir="ltr">15 000</span> échantillons par an et par produit.</div></details>
-<details><summary>Le transporteur peut-il choisir les envois qu’il envoie ?</summary><div>Non. Le transporteur propose de nombreux candidats et ONEMS effectue le tirage final. La graine du tirage est fixée avant la réception des candidats : personne ne peut la choisir après les avoir vus.</div></details>
+<details><summary>Le transporteur peut-il choisir les envois qu’il envoie ?</summary><div>Non. Pour chaque période, il envoie tous ses envois complets, sans choisir, et ONEMS effectue le tirage avec une graine qu’il conserve. Le transporteur ne sait jamais quels envois ont été tirés.</div></details>
 <details><summary>Des données personnelles sont-elles conservées ?</summary><div>Non. Seuls les champs de la liste des champs supplémentaires autorisés sont conservés ; le reste est écarté à l’entrée.</div></details>
 <details><summary>Qui peut créer des clés de connecteur ?</summary><div>Seulement un superadmin ou l’UPU Account Manager. La clé n’est affichée qu’une seule fois, à sa création.</div></details>
-<details><summary>J’ai activé le plan et aucun échantillon n’arrive. Pourquoi ?</summary><div>Vérifiez que le connecteur est Actif (en Test, il n’accepte que des essais) et que le jour et l’heure du calendrier sont déjà passés. Consultez ensuite <strong>Moniteur de captures</strong>.</div></details>
+<details><summary>J’ai appliqué le plan et aucun échantillon n’arrive. Pourquoi ?</summary><div>Vérifiez que le connecteur est Actif (en Test, les livraisons sont contrôlées mais ne créent pas d’échantillons), que l’heure de livraison du calendrier est passée et qu’aucun incident n’est ouvert. Consultez ensuite les livraisons dans <strong>Connecteurs</strong> ou dans <strong>Moniteur de captures</strong>.</div></details>
 <details><summary>Comment distinguer ces échantillons dans les rapports ?</summary><div>Ils portent l’origine « carrier », différente de celle des échantillons de panélistes, et peuvent être séparés.</div></details>
+<details><summary>Dois-je utiliser Carrier Link avec tous les transporteurs ?</summary><div>Non. Le mode de capture se choisit par transporteur dans <strong>Transporteurs et produits</strong> : Panélistes, Carrier Link ou Les deux. Les transporteurs qui n’utilisent que des panélistes continuent de fonctionner comme avant, et les écrans d’E2E n’affichent rien de Carrier Link pour eux.</div></details>
 <details><summary>Qui voit chaque écran ?</summary><div>L’Account Manager (et l’UPU Account Manager) modifie les plans, les points, les connecteurs et le moniteur, et voit les échantillons. L’Allocation Plan Manager modifie les plans et voit le reste sauf les connecteurs. Le DO Coordinator modifie les points de lecture et voit le reste sauf les connecteurs. Panelist Manager et Materials Supplier n’ont pas accès. Un écran en lecture seule affiche l’étiquette de lecture seule.</div></details>
     </section>
 

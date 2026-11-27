@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Plus, Pencil, Trash2, Copy, CheckCircle, Ban, Upload } from 'lucide-react'
+import { Plus, Pencil, Trash2, Copy, CheckCircle, Ban } from 'lucide-react'
 import { useTranslation } from '@/hooks/useTranslation'
 import { ClHelpLink } from '@/components/carrier-link/ClHelpLink'
+import { ClBadge } from '@/components/carrier-link/ClBadge'
 import { usePermissions } from '@/contexts/PermissionsContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { useEffectiveAccountId } from '@/hooks/useEffectiveAccountId'
@@ -9,7 +10,15 @@ import { useIsUpuAccountManager } from '@/hooks/useIsUpuAccountManager'
 import { ReadOnlyBadge } from '@/components/common/ReadOnlyBadge'
 import { SelectAccountNotice } from '@/components/carrier-link/SelectAccountNotice'
 import { useClCarriersAndCenters } from '@/hooks/carrierLink/useClReadingPoints'
-import { useClConnectors, type ClFeed, type ClFeedForm, type ClConnectorResult } from '@/hooks/carrierLink/useClConnectors'
+import {
+  useClConnectors,
+  useClFeedCalendar,
+  type ClFeed,
+  type ClFeedForm,
+  type ClConnectorResult,
+} from '@/hooks/carrierLink/useClConnectors'
+import { useClDeliveries, DELIVERIES_PAGE_SIZE } from '@/hooks/carrierLink/useClDeliveries'
+import { ClDeliveriesTable, ClManualDeliveryUpload, ClPager, DeliveryStatusBadge } from '@/components/carrier-link/ClDeliveries'
 import { clErrorKey } from '@/lib/carrierLink/clErrors'
 import {
   STANDARD_FIELDS,
@@ -20,12 +29,10 @@ import {
   validateCalendar,
   canManageCarrierKeys,
   connectorErrorKey,
-  parseDryRunResult,
-  dryRunOutcome,
   type ConnectorStatus,
   type StandardField,
-  type DryRunSummary,
 } from '@/lib/carrierLink/connectorConfig'
+import { GRACE_HOURS_MAX, deliveryFrequency, graceHoursOf, parseGraceHours, periodLabel } from '@/lib/carrierLink/deliveryView'
 
 type T = (key: string, vars?: Record<string, unknown>, fallback?: string) => string
 
@@ -130,6 +137,7 @@ export function ClConnectors() {
     <div className="p-6 space-y-4">
       <div className="flex items-center gap-3">
         <h1 className="text-2xl font-bold text-gray-900">{t('cl.connectors.title')}</h1>
+        <ClBadge />
         <ClHelpLink section="connectors" />
         {readOnly && <ReadOnlyBadge />}
       </div>
@@ -195,6 +203,7 @@ export function ClConnectors() {
                 days={days}
                 readOnly={readOnly}
                 setStatus={cl.setStatus}
+                saveGraceHours={cl.saveGraceHours}
                 onEdit={() => {
                   setModalError(null)
                   setEditor({
@@ -219,7 +228,7 @@ export function ClConnectors() {
               <ValueMappingsSection key={`vm-${feed.carrier_id}`} t={t} carrierId={feed.carrier_id} cl={cl} feedId={feed.id} readOnly={readOnly} />
               <ExtraFieldsSection key={`ef-${feed.carrier_id}`} t={t} carrierId={feed.carrier_id} cl={cl} feedId={feed.id} readOnly={readOnly} />
               <KeysSection key={`k-${feed.id}`} t={t} feedId={feed.id} cl={cl} canKeys={canKeys} />
-              {!readOnly && <DryRunSection key={`dr-${feed.id}`} t={t} feedId={feed.id} cl={cl} />}
+              <DeliveriesSection key={`dl-${feed.id}`} t={t} feed={feed} cl={cl} accountId={accountId} readOnly={readOnly} />
             </>
           )}
         </>
@@ -347,6 +356,7 @@ function FeedCard(props: {
   readOnly: boolean
   mappingOk: boolean
   setStatus: Cl['setStatus']
+  saveGraceHours: Cl['saveGraceHours']
   onEdit: () => void
   onDelete: () => void
 }) {
@@ -381,9 +391,6 @@ function FeedCard(props: {
             {t('cl.connectors.extraction_model')}: {feed.extraction_model}
           </span>
         )}
-        <span className="text-gray-500">
-          {t('cl.connectors.last_batch')}: {fmtDate(feed.last_batch_at)}
-        </span>
         {!readOnly && (
           <div className="flex gap-2 ms-auto">
             <button type="button" title={t('common.edit')} onClick={props.onEdit} className="text-blue-600 hover:text-blue-800">
@@ -395,6 +402,7 @@ function FeedCard(props: {
           </div>
         )}
       </div>
+      <DeliveryCalendar t={t} feed={feed} readOnly={readOnly} saveGraceHours={props.saveGraceHours} />
       {feed.last_error && <p className="text-sm text-red-600">{t('cl.connectors.last_error')}: {feed.last_error}</p>}
       {feed.status === 'testing' && <p className="text-sm text-amber-800">{t('cl.connectors.testing_hint')}</p>}
       {!props.mappingOk && <p className="text-sm text-amber-800">{t('cl.connectors.mapping_incomplete')}</p>}
@@ -872,105 +880,126 @@ function KeysSection(props: { t: T; feedId: string; cl: Cl; canKeys: boolean }) 
   )
 }
 
-function DryRunSection(props: { t: T; feedId: string; cl: Cl }) {
-  const { t, feedId, cl } = props
-  const [busy, setBusy] = useState(false)
-  const [err, setErr] = useState<string | null>(null)
-  const [result, setResult] = useState<DryRunSummary | null>(null)
-  const [fileName, setFileName] = useState('')
-  const fileRef = useRef<HTMLInputElement>(null)
+/**
+ * Calendario de entregas: frecuencia (diaria ... semanal), proximo periodo a entregar (lo calcula la base) y margen de
+ * "no recibido" antes de abrir una incidencia (editable con Edit).
+ */
+function DeliveryCalendar(props: { t: T; feed: ClFeed; readOnly: boolean; saveGraceHours: Cl['saveGraceHours'] }) {
+  const { t, feed, readOnly } = props
+  const { locale } = useTranslation()
+  const { calendar, error } = useClFeedCalendar(feed.id, feed)
+  const grace = graceHoursOf(feed.config)
+  const [draft, setDraft] = useState<string | null>(null)
+  const { busy, err, setErr, exec } = useWriteState()
+  const frequency = calendar?.frequency ?? deliveryFrequency(feed.emit_days)
 
-  const onFile = async (file: File | undefined) => {
-    if (!file) return
-    setFileName(file.name)
-    setErr(null)
-    setResult(null)
-    let payload: unknown
-    try {
-      payload = JSON.parse(await file.text())
-    } catch {
-      setErr('cl.connectors.dry_run.bad_json')
-      return
-    }
-    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
-      setErr('cl.connectors.dry_run.bad_json')
-      return
-    }
-    setBusy(true)
-    try {
-      const summary = parseDryRunResult(await cl.dryRun(feedId, payload))
-      if (dryRunOutcome(summary) === 'unknown') setErr('cl.error.generic')
-      else setResult(summary)
-    } catch (e) {
-      setErr(clErrorKey(e as { message?: string; code?: string }))
-    } finally {
-      setBusy(false)
-      if (fileRef.current) fileRef.current.value = ''
-    }
+  const save = async () => {
+    const h = parseGraceHours(draft ?? '')
+    if (h === null) return setErr('cl.connectors.grace.invalid')
+    if (await exec(() => props.saveGraceHours(feed.id, h))) setDraft(null)
   }
 
-  const reasonList = (items: { reason: string; count: number }[]) =>
-    items.length === 0 ? '-' : items.map((r) => `${t(`cl.reason.${r.reason}`, undefined, r.reason)}: ${r.count}`).join(', ')
-  const n = (v: number | null) => (v === null ? '-' : v)
+  return (
+    <div className="rounded-lg bg-gray-50 border border-gray-200 p-3 space-y-1 text-sm">
+      <p className="text-gray-800">
+        <span className="font-medium">{t(`cl.connectors.frequency.${frequency}`)}</span>
+        {frequency === 'several_per_week' && ` (${t('cl.connectors.per_week', { count: new Set(feed.emit_days).size })})`}
+      </p>
+      {error && <p className="text-red-600">{t(clErrorKey(error))}</p>}
+      {calendar && (
+        <>
+          <p className="text-gray-700">
+            {calendar.next_period
+              ? t(calendar.next_period.deliverable ? 'cl.connectors.next_period_now' : 'cl.connectors.next_period', {
+                  period: periodLabel(calendar.next_period.period_start, calendar.next_period.period_end, locale),
+                  due: calendar.next_period.due_at ? new Date(calendar.next_period.due_at).toLocaleString() : '-',
+                })
+              : t('cl.connectors.no_next_period')}
+          </p>
+          {calendar.last_delivery && (
+            <p className="text-gray-600 flex flex-wrap items-center gap-2">
+              {t('cl.connectors.last_delivery', {
+                period: periodLabel(calendar.last_delivery.period_start, calendar.last_delivery.period_end, locale),
+              })}
+              <DeliveryStatusBadge status={calendar.last_delivery.status} />
+            </p>
+          )}
+        </>
+      )}
+      <div className="flex flex-wrap items-center gap-2 text-gray-700">
+        <span>{t('cl.connectors.grace.label')}:</span>
+        {readOnly || draft === null ? (
+          <>
+            <span className="font-medium">{t('cl.connectors.grace.hours', { count: grace })}</span>
+            {!readOnly && (
+              <button
+                type="button"
+                title={t('common.edit')}
+                className="text-blue-600 hover:text-blue-800"
+                onClick={() => {
+                  setErr(null)
+                  setDraft(String(grace))
+                }}
+              >
+                <Pencil className="w-4 h-4" />
+              </button>
+            )}
+          </>
+        ) : (
+          <>
+            <input
+              type="number"
+              min={0}
+              max={GRACE_HOURS_MAX}
+              step={1}
+              className={`${input} py-1 w-24`}
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+            />
+            <button type="button" className="text-gray-600 hover:underline" onClick={() => setDraft(null)}>
+              {t('common.cancel')}
+            </button>
+            <button type="button" disabled={busy} className="text-blue-600 hover:underline disabled:opacity-40" onClick={() => void save()}>
+              {t('common.save')}
+            </button>
+          </>
+        )}
+      </div>
+      <p className="text-xs text-gray-500">{t('cl.connectors.grace.help')}</p>
+      {err && <p className="text-red-600">{t(err)}</p>}
+    </div>
+  )
+}
+
+/** Entregas del conector (paginadas en el servidor, con avance mientras se procesan) y subida manual (con Edit). */
+function DeliveriesSection(props: { t: T; feed: ClFeed; cl: Cl; accountId: string | null; readOnly: boolean }) {
+  const { t, feed, cl, accountId, readOnly } = props
+  const [page, setPage] = useState(0)
+  const filters = useMemo(() => ({ feedId: feed.id, status: null, from: null, to: null }), [feed.id])
+  const deliveries = useClDeliveries(accountId, filters, page, 10_000)
+  const [version, setVersion] = useState(0)
+  const { calendar } = useClFeedCalendar(readOnly ? null : feed.id, version)
 
   return (
-    <Section title={t('cl.connectors.dry_run.title')} help={t('cl.connectors.dry_run.help')}>
-      <div className="flex flex-wrap items-center gap-3">
-        <input
-          ref={fileRef}
-          type="file"
-          accept=".json,application/json"
-          className="hidden"
-          onChange={(e) => void onFile(e.target.files?.[0])}
+    <Section title={t('cl.deliveries.title')} help={t('cl.deliveries.help')}>
+      {!readOnly && (
+        <ClManualDeliveryUpload
+          feedStatus={feed.status}
+          defaultPeriod={calendar?.next_period ?? null}
+          maxFileBytes={calendar?.max_file_bytes ?? null}
+          api={(file) => cl.manualDeliveryApi(feed.id, file)}
+          onDone={() => {
+            setPage(0)
+            setVersion((v) => v + 1)
+            void deliveries.refetch()
+          }}
         />
-        <button type="button" disabled={busy} className={btnPrimary} onClick={() => fileRef.current?.click()}>
-          <Upload className="w-4 h-4" />
-          {busy ? t('cl.connectors.dry_run.running') : t('cl.connectors.dry_run.choose')}
-        </button>
-        {fileName && <span className="text-sm text-gray-600">{fileName}</span>}
-      </div>
-      {err && <p className="text-sm text-red-600">{t(err)}</p>}
-      {result && (
-        <div className="space-y-2">
-          {result.replayed && <p className="text-sm text-amber-700">{t('cl.connectors.dry_run.replayed')}</p>}
-          <p className="text-sm font-medium">
-            {dryRunOutcome(result) === 'accepted' ? t('cl.connectors.dry_run.validated') : t('cl.connectors.dry_run.rejected')}
-          </p>
-          {result.reason === 'selection_method' && (
-            <p className="text-sm text-red-600">{t('cl.connectors.dry_run.bad_method', { expected: result.expected ?? '' })}</p>
-          )}
-          {dryRunOutcome(result) === 'accepted' && result.strata.length > 0 && (
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
-                <thead className="bg-gray-50 text-gray-600">
-                  <tr>
-                    <th className="text-start px-3 py-2">{t('cl.connectors.dry_run.stratum')}</th>
-                    <th className="text-start px-3 py-2">{t('cl.connectors.dry_run.rows')}</th>
-                    <th className="text-start px-3 py-2">{t('cl.connectors.dry_run.candidates')}</th>
-                    <th className="text-start px-3 py-2">{t('cl.connectors.dry_run.valid')}</th>
-                    <th className="text-start px-3 py-2">{t('cl.connectors.dry_run.rejected_by_reason')}</th>
-                    <th className="text-start px-3 py-2">{t('cl.connectors.dry_run.rows_rejected')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.strata.map((s, i) => (
-                    <tr key={`${s.stratum_id}-${i}`} className="border-t border-gray-100">
-                      <td className="px-3 py-2 font-mono" title={s.stratum_id}>
-                        {i + 1}. {s.stratum_id.slice(0, 8)}
-                      </td>
-                      <td className="px-3 py-2">{n(s.rows)}</td>
-                      <td className="px-3 py-2">{n(s.candidates)}</td>
-                      <td className="px-3 py-2">{n(s.candidates_valid)}</td>
-                      <td className="px-3 py-2">{reasonList(s.rejected)}</td>
-                      <td className="px-3 py-2">{reasonList(s.rows_rejected)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
       )}
+      {deliveries.error && <p className="text-sm text-red-600">{t(clErrorKey(deliveries.error))}</p>}
+      <div className="bg-white border border-gray-200 rounded-lg">
+        <ClDeliveriesTable rows={deliveries.rows} loading={deliveries.loading} />
+        <ClPager page={page} total={deliveries.total} pageSize={DELIVERIES_PAGE_SIZE} loading={deliveries.loading} onPage={setPage} />
+      </div>
     </Section>
   )
 }

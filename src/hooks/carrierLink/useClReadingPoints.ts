@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useLatestRequest } from '@/lib/latestRequest'
+import { carriersForCapture } from '@/lib/carrierCapture'
 import {
   buildReadingPointRow,
   parseUnknownPlaces,
@@ -39,13 +40,14 @@ export interface ClCarrierOption {
   id: string
   code: string
   name: string
+  capture_method?: string | null
 }
 
 export type ClWriteResult = { success: true } | { success: false; error: string; key?: string }
 
 const SCAN_WINDOW_DAYS = 90
 
-/** Transportistas activos y centros postales (con ciudad) de la cuenta, para los desplegables. */
+/** Transportistas activos con captura Carrier Link (o ambas) y centros postales (con ciudad) de la cuenta, para los desplegables. */
 export function useClCarriersAndCenters(accountId: string | null) {
   const [carriers, setCarriers] = useState<ClCarrierOption[]>([])
   const [centers, setCenters] = useState<ClCenterOption[]>([])
@@ -61,7 +63,7 @@ export function useClCarriersAndCenters(accountId: string | null) {
     let cancelled = false
     void (async () => {
       const [c, p] = await Promise.all([
-        supabase.from('carriers').select('id, code, name').eq('account_id', accountId).eq('status', 'active').order('name'),
+        supabase.from('carriers').select('id, code, name, capture_method').eq('account_id', accountId).eq('status', 'active').order('name'),
         supabase
           .from('postal_centers')
           .select('id, name, city_id, city:cities(name)')
@@ -71,7 +73,7 @@ export function useClCarriersAndCenters(accountId: string | null) {
       ])
       if (cancelled) return
       setError(c.error ?? p.error ?? null)
-      setCarriers((c.data ?? []) as ClCarrierOption[])
+      setCarriers(carriersForCapture((c.data ?? []) as ClCarrierOption[], 'carrier_link'))
       setCenters(
         ((p.data ?? []) as any[]).map((r) => ({
           id: r.id,
