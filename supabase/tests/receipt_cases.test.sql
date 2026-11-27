@@ -139,6 +139,45 @@ BEGIN
 END $$;
 ROLLBACK;
 
+-- ===== Caso 4b (2026-11-27): dos candidatos, mismo origen y mismo receptor -> el enviado mas antiguo, ok_typo_fixed
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT pg_temp.setup();
+DO $$
+DECLARE v_old uuid; v_new uuid; r jsonb; c record;
+BEGIN
+  v_new := pg_temp.mk_det('N1', 'N4', 'sent', '00010256', now() - interval '3 days');
+  v_old := pg_temp.mk_det('N1', 'N4', 'sent', '00010265', now() - interval '4 days');
+  r := public.bot_receive_parcel('4004', '00010255');
+  PERFORM pg_temp.fail_if(r->>'outcome' IS DISTINCT FROM 'ok_typo_fixed', 'c4b outcome ' || r::text);
+  PERFORM pg_temp.fail_if((SELECT status FROM public.allocation_plan_details WHERE id = v_old) <> 'received', 'c4b antiguo recibido');
+  PERFORM pg_temp.fail_if((SELECT tag_id FROM public.allocation_plan_details WHERE id = v_old) <> '00010255', 'c4b etiqueta corregida');
+  PERFORM pg_temp.fail_if((SELECT status FROM public.allocation_plan_details WHERE id = v_new) <> 'sent', 'c4b el otro sigue enviado');
+  PERFORM pg_temp.fail_if((SELECT tag_id FROM public.allocation_plan_details WHERE id = v_new) <> '00010256', 'c4b el otro intacto');
+  SELECT * INTO c FROM public.receipt_case;
+  PERFORM pg_temp.fail_if(c.status IS DISTINCT FROM 'fixed' OR c.detail_id IS DISTINCT FROM v_old, 'c4b caso');
+  PERFORM pg_temp.fail_if(c.original_tag IS DISTINCT FROM '00010265', 'c4b original_tag');
+END $$;
+ROLLBACK;
+
+-- ===== Caso 4c (2026-11-27): mismo origen pero un candidato va a otro receptor -> sigue ambiguous_typo
+BEGIN;
+\ir fixtures/incident_city.sql
+\ir fixtures/no_incident_triggers.sql
+SELECT pg_temp.setup();
+DO $$
+DECLARE r jsonb;
+BEGIN
+  UPDATE public.panelists SET telegram_id = '4001' WHERE id = 'e1000000-0000-0000-0000-000000000001';
+  PERFORM pg_temp.mk_det('N4', 'N1', 'sent', '00010256');
+  PERFORM pg_temp.mk_det('N4', 'N2', 'sent', '00010265');
+  r := public.bot_receive_parcel('4001', '00010255');
+  PERFORM pg_temp.fail_if(r->>'outcome' IS DISTINCT FROM 'ambiguous_typo', 'c4c outcome ' || r::text);
+  PERFORM pg_temp.fail_if(EXISTS (SELECT 1 FROM public.allocation_plan_details WHERE status <> 'sent'), 'c4c estados');
+END $$;
+ROLLBACK;
+
 -- ===== Caso 5: recibido antes de declararse el envio -> anulado y por compensar
 BEGIN;
 \ir fixtures/incident_city.sql
