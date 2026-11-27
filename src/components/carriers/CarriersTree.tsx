@@ -6,10 +6,9 @@ import { ProductForm } from './ProductForm'
 import { MaterialSelector } from './MaterialSelector'
 import type { Carrier, Product, ProductMaterial } from '@/lib/types'
 import { CAPTURE_METHOD_LABEL_KEY, captureMethodOf } from '@/lib/carrierCapture'
-import { isCarrierLinkEnabled } from '@/lib/featureFlags'
+import { useCarrierLinkUi } from '@/hooks/useCarrierLinkUi'
 
 // La forma de captura solo se enseña con Carrier Link habilitado (DEV).
-const carrierLinkOn = isCarrierLinkEnabled()
 
 interface CarriersTreeProps {
   carriers: Carrier[]
@@ -45,6 +44,7 @@ export function CarriersTree({
   readOnly = false,
 }: CarriersTreeProps) {
   const { t } = useTranslation()
+  const carrierLinkOn = useCarrierLinkUi()
   const [expandedCarriers, setExpandedCarriers] = useState<Set<string>>(new Set())
   const [expandedProducts, setExpandedProducts] = useState<Set<string>>(new Set())
   const [modal, setModal] = useState<any>(null)

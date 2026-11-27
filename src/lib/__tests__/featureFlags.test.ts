@@ -11,8 +11,11 @@ describe('isCarrierLinkEnabled', () => {
     expect(isCarrierLinkEnabled('deploy-preview-12--onem-dev.netlify.app', undefined)).toBe(true)
     expect(isCarrierLinkEnabled('feat-x--onem-dev.netlify.app', undefined)).toBe(true)
   })
-  it('inactivo en producción y hosts desconocidos', () => {
-    expect(isCarrierLinkEnabled('onems.edgeavs.net', undefined)).toBe(false)
+  it('activo en producción (los derechos cl_* lo limitan por cuenta)', () => {
+    expect(isCarrierLinkEnabled('onems.edgeavs.net', undefined)).toBe(true)
+  })
+  it('inactivo en hosts desconocidos', () => {
+    expect(isCarrierLinkEnabled('onems.edgeavs.net.evil.com', undefined)).toBe(false)
     expect(isCarrierLinkEnabled('example.com', undefined)).toBe(false)
     expect(isCarrierLinkEnabled('onem-dev.netlify.app.evil.com', undefined)).toBe(false)
     expect(isCarrierLinkEnabled('evil-onem-dev.netlify.app', undefined)).toBe(false)
@@ -26,7 +29,7 @@ describe('isCarrierLinkEnabled', () => {
     expect(isCarrierLinkEnabled('localhost', 'off')).toBe(false)
   })
   it('override con otro valor se ignora', () => {
-    expect(isCarrierLinkEnabled('onems.edgeavs.net', 'yes')).toBe(false)
+    expect(isCarrierLinkEnabled('example.com', 'yes')).toBe(false)
     expect(isCarrierLinkEnabled('localhost', '')).toBe(true)
   })
 })

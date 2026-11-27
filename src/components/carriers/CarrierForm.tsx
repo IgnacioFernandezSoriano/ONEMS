@@ -11,12 +11,9 @@ import {
   type CaptureMethod,
 } from '@/lib/carrierCapture'
 import { usePermissions } from '@/contexts/PermissionsContext'
-import { isCarrierLinkEnabled } from '@/lib/featureFlags'
+import { useCarrierLinkUi } from '@/hooks/useCarrierLinkUi'
 
 import { useTranslation } from '@/hooks/useTranslation';
-
-// Forma de captura solo con Carrier Link habilitado (DEV); fuera, el formulario es el de siempre.
-const carrierLinkOn = isCarrierLinkEnabled()
 
 interface CarrierFormProps {
   carrier?: Carrier
@@ -27,6 +24,8 @@ interface CarrierFormProps {
 export function CarrierForm({ carrier, onSubmit, onCancel }: CarrierFormProps) {
   const { t } = useTranslation();
   const { canEdit } = usePermissions()
+  // Forma de captura solo en cuentas con Carrier Link; en las demás, el formulario es el de siempre.
+  const carrierLinkOn = useCarrierLinkUi()
   // Correo de avisos de Carrier Link: solo con Carrier Link y para quien edita carriers; si no, ni se ve ni se envía.
   const withEmail = showsNotificationEmail(carrierLinkOn, canEdit('carriers'))
   const [formData, setFormData] = useState({
