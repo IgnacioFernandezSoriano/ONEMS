@@ -227,6 +227,7 @@
     <nav class="nav" id="nav">
       <h3>Getting started</h3>
       <a href="#overview">What Carrier Link is</a>
+      <a href="#carrier">How it works for the carrier</a>
       <a href="#order">The order of work</a>
       <h3>The screens</h3>
       <a href="#reading-points">Reading points</a>
@@ -242,7 +243,7 @@
       <a href="#alerts">What each alert means</a>
       <a href="#faq">Questions</a>
     </nav>
-    <div class="side-foot">Updated on 23 November 2026</div>
+    <div class="side-foot">Updated on 27 November 2026</div>
   </aside>
 
   <main class="main">
@@ -261,9 +262,44 @@
   <div class="card"><h4>Same reports</h4><p>There are no new reports: the samples appear in the usual E2E and diagnosis reports, marked with the origin “carrier”.</p></div>
 </div>
 <p>Instead of an origin panelist and a destination panelist, each sample has a <strong>start reading point</strong> and an <strong>end reading point</strong>. The E2E time runs from the first reading at the start to the last at the end.</p>
-<div class="callout info"><strong>Scale.</strong> A plan can reach about <span dir="ltr">15,000</span> samples a year per product. That is why quotas are spread by route (city to city) and week, without you having to choose shipments one by one.</div>
+<div class="callout info"><strong>How many samples.</strong> There is no fixed limit: the number is set by the plan, and the real ceiling is the carrier's traffic on each route. Quotas are spread by route (city to city) and week, without you having to choose shipments one by one.</div>
 <div class="callout warn"><strong>What you do not see.</strong> Only shipments that have arrived are included. Those that never arrive or stay in another city do not appear as samples, and departures are not followed up. There are no routes within a single city either. The delivery standard only affects the analysis in the reports, never the capture or the plan.</div>
 <div class="callout info"><strong>There is no separate section.</strong> Carrier Link is not a separate module: everything lives inside E2E. The only thing that changes is the <strong>capture method</strong> of the data (panelists or carrier), which is chosen <strong>per carrier</strong> in <strong>Carriers &amp; Products</strong>: <em>Panelists</em>, <em>Carrier Link</em> or <em>Both</em>. The same carrier can use both systems at once. Carriers that use panelists only work exactly as before.</div>
+    </section>
+
+    <section id="carrier">
+    <h2>How it works for the carrier</h2>
+<p>The carrier <strong>does not decide what to send: the plan does</strong>. Before each delivery, its program asks ONEMS what we need and, with that answer, runs its own queries on its systems to extract <strong>all</strong> the shipments that match. It does not draw, does not filter on its own, and ONEMS never enters its systems.</p>
+<div class="flow">
+  <div class="node"><span class="tag">1 &middot; Regulator</span><b>The plan</b>Which product, which routes, which dates and how many samples.</div>
+  <div class="arrow">&rarr;</div>
+  <div class="node"><span class="tag">2 &middot; Carrier</span><b>Query</b>Asks ONEMS what we need for the next period.</div>
+  <div class="arrow">&rarr;</div>
+  <div class="node"><span class="tag">3 &middot; Carrier</span><b>Delivery</b>Extracts and sends all the complete shipments of the period.</div>
+  <div class="arrow">&rarr;</div>
+  <div class="node"><span class="tag">4 &middot; ONEMS</span><b>Draw</b>Checks, draws and creates the samples. The carrier never knows which.</div>
+</div>
+<h3>What ONEMS tells the carrier</h3>
+<div class="table-wrap"><table>
+<tr><th>What</th><th>Where it comes from</th></tr>
+<tr><td>Products to send, with the carrier's codes</td><td>The plan's product and the product mappings of the <strong>Connector</strong></td></tr>
+<tr><td>Reading points and their role (start, end, intermediate)</td><td><strong>Reading points</strong> of the plan's cities</td></tr>
+<tr><td>Dates to deliver (the next period)</td><td>Dates of the applied plan and the connector's calendar</td></tr>
+<tr><td>Fields to send and date-time format</td><td>Field mappings of the <strong>Connector</strong></td></tr>
+<tr><td>Whether all scans must be sent</td><td>The plan's diagnosis option</td></tr>
+<tr><td>The extraction SQL query, already filled in (optional)</td><td>All of the above, for PostgreSQL, Oracle or SQL Server</td></tr>
+</table></div>
+<div class="callout warn">Without an applied plan covering those dates, ONEMS tells the carrier there is nothing to deliver. That is why an applied plan is needed even for test deliveries.</div>
+<h3>What the carrier has to do</h3>
+<ul>
+  <li><strong>A complete shipment</strong> is a shipment of a plan product whose last scan at an end point falls within the period and which has an earlier scan at a start point. It is sent with all its scans at the agreed points.</li>
+  <li>The file is <strong>JSON Lines or CSV</strong>, uncompressed, with the carrier's own field names and <strong>no personal data</strong>.</li>
+  <li>It delivers periods <strong>in order</strong>, without skipping any, before the calendar time plus the margin. A period with no shipments is still delivered, with an empty file.</li>
+  <li>It may not leave out shipments because of their transit time, incidents or data errors.</li>
+  <li>A <strong>rejected</strong> period is corrected and resent; a <strong>processed</strong> one is not resent.</li>
+</ul>
+<p>In return, the carrier sees the result of each delivery (rows read, valid and rejected shipments by reason, and <strong>how many</strong> were drawn, never which) and receives email alerts about its own problems.</p>
+<div class="callout info"><strong>Technical manual.</strong> The detail for the carrier's IT team (API, file format, errors and conformance tests) is in the connection manual, which the ONEMS team provides to the carrier.</div>
     </section>
 
     <section id="order">
@@ -277,7 +313,7 @@
   <li><strong>Activate the connector.</strong> When everything is ready, move the connector from Testing to Active. From then on each delivery creates samples.</li>
   <li><strong>Monitoring.</strong> In <strong>Capture monitor</strong> follow the deliveries and alerts, in <strong>Incidents</strong> the problems that need attention, and in <strong>Samples</strong> the samples as they come in (menu Database ▸ Carrier Link).</li>
 </ol>
-<div class="callout ok"><strong>And then:</strong> on each delivery day the carrier sends one file with all the shipments of the period. ONEMS checks it, counts it, makes its own draw and puts the samples into the E2E reports. If a delivery does not arrive or is rejected, ONEMS opens an incident and notifies by email.</div>
+<div class="callout ok"><strong>And then:</strong> on each delivery day the carrier asks ONEMS what the plan needs and sends one file with all the shipments of the period. ONEMS checks it, counts it, makes its own draw and puts the samples into the E2E reports. If a delivery does not arrive or is rejected, ONEMS opens an incident and notifies by email.</div>
     </section>
 
     <section id="reading-points">
@@ -438,7 +474,8 @@
 
     <section id="faq">
     <h2>Questions</h2>
-<details><summary>How many samples can a plan have?</summary><div>A plan can reach about <span dir="ltr">15,000</span> samples a year per product.</div></details>
+<details><summary>How many samples can a plan have?</summary><div>There is no fixed limit: as many as the plan sets. The real ceiling is the carrier's traffic: if a route and week do not have enough shipments, the <em>Not enough candidates</em> alert appears and the shortfall moves to the following deliveries.</div></details>
+<details><summary>Do we have to tell the carrier which shipments we want?</summary><div>No need to send it anything. Its program asks ONEMS before each delivery and receives what the plan sets: products, reading points and dates. If the plan, the points or the mappings change, the next query is already up to date.</div></details>
 <details><summary>Can the carrier choose which shipments it sends?</summary><div>No. In each period it sends all its complete shipments, without choosing, and ONEMS makes the draw with a seed it keeps. The carrier never knows which shipments were drawn.</div></details>
 <details><summary>Is personal data stored?</summary><div>No. Only the fields on the allowed extra fields list are kept; everything else is discarded on entry.</div></details>
 <details><summary>Who can create connector keys?</summary><div>Only a superadmin or the UPU Account Manager. The key is shown just once, when it is created.</div></details>
