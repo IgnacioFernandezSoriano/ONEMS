@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://onems.example/carrier-link/v4/schemas/delivery-open-request.schema.json",
+  "title": "POST /deliveries request body",
+  "description": "Closed list of keys: any other key is refused with 400 CL_BAD_REQUEST.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "period_start",
+    "period_end",
+    "sha256",
+    "size_bytes",
+    "control_totals"
+  ],
+  "properties": {
+    "period_start": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "period_end": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{64}$",
+      "description": "SHA-256 of the exact bytes that will be uploaded (hex)."
+    },
+    "size_bytes": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 524288000,
+      "description": "Exact size of the file in bytes; at most limits.max_file_bytes."
+    },
+    "format": {
+      "enum": [
+        "jsonl",
+        "csv",
+        null
+      ],
+      "default": "jsonl",
+      "description": "Optional; null or absent = jsonl."
+    },
+    "compression": {
+      "enum": [
+        "none",
+        null
+      ],
+      "description": "Optional; only \"none\" (uncompressed files only)."
+    },
+    "control_totals": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": {
+        "$ref": "#/$defs/control_total"
+      }
+    }
+  },
+  "$defs": {
+    "control_total": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "place_ref",
+        "delivered"
+      ],
+      "properties": {
+        "place_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "mode_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200
+        },
+        "product": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200
+        },
+        "delivered": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        }
+      }
+    }
+  }
+}

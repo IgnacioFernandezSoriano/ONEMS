@@ -1,10 +1,17 @@
 import { HelpCircle } from 'lucide-react'
 import { useTranslation } from '@/hooks/useTranslation'
 import { helpDocUrl } from '@/lib/helpDocs'
+import { isCarrierLinkEnabled } from '@/lib/featureFlags'
 
-/** Enlace «Ayuda» junto al título de cada pantalla de Carrier Link; abre su apartado de la ayuda en otra pestaña. */
-export function ClHelpLink({ section }: { section: 'plans' | 'samples' | 'reading-points' | 'connectors' | 'monitor' }) {
+export type ClHelpSection = 'generator' | 'balancing' | 'records' | 'samples' | 'reading-points' | 'connectors' | 'monitor' | 'incidents'
+
+/**
+ * Enlace «Ayuda» junto al título de las pantallas con Carrier Link; abre su apartado de la ayuda en otra pestaña.
+ * Solo se muestra si Carrier Link está habilitado en este entorno.
+ */
+export function ClHelpLink({ section }: { section: ClHelpSection }) {
   const { t, locale } = useTranslation()
+  if (!isCarrierLinkEnabled()) return null
   return (
     <a
       href={helpDocUrl('carrier-link', locale, section)}

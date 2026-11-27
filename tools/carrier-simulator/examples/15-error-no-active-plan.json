@@ -1,0 +1,8 @@
+{
+ "http_status": 422,
+ "body": {
+  "success": false,
+  "error": "CL_NO_ACTIVE_PLAN",
+  "message": "No active plan of this connector covers the period."
+ }
+}

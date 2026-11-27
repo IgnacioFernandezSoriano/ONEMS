@@ -1,0 +1,21 @@
+{
+ "period_start": "2026-11-02",
+ "period_end": "2026-11-04",
+ "format": "jsonl",
+ "fields": [
+  "tracking_no",
+  "service",
+  "event_ts",
+  "site_code",
+  "event_code",
+  "weight_g"
+ ],
+ "shipments": 163,
+ "rows": 385,
+ "invalid_rows": 2,
+ "records": 387,
+ "shipments_with_unagreed_scans": 12,
+ "include_all_scans": false,
+ "size_bytes": 52581,
+ "sha256": "a39b906da577380d0fd42864fd8d556022927f94db7ac6e00451931e33602095"
+}

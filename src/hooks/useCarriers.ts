@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Carrier, Product, ProductMaterial } from '@/lib/types'
+import { carrierWritePayload, type CaptureMethod } from '@/lib/carrierCapture'
+import { useCarrierLinkUi } from './useCarrierLinkUi'
 import { useEffectiveAccountId } from './useEffectiveAccountId'
 import { useLatestRequest } from '@/lib/latestRequest'
 
 export function useCarriers() {
   const effectiveAccountId = useEffectiveAccountId()
   const beginLoad = useLatestRequest()
+  // Sin Carrier Link en la cuenta nunca se envía capture_method ni el correo de avisos.
+  const carrierLinkOn = useCarrierLinkUi()
   const [carriers, setCarriers] = useState<Carrier[]>([])
   const [products, setProducts] = useState<Product[]>([])
   const [productMaterials, setProductMaterials] = useState<ProductMaterial[]>([])
@@ -62,15 +66,15 @@ export function useCarriers() {
   }, [effectiveAccountId])
 
   // Carrier operations
-  const createCarrier = async (data: { code: string; name: string; type?: string; status?: string }) => {
-    const carrierData = { ...data, account_id: effectiveAccountId }
+  const createCarrier = async (data: { code: string; name: string; type?: string; status?: string; capture_method?: CaptureMethod }) => {
+    const carrierData = { ...carrierWritePayload(data, carrierLinkOn), account_id: effectiveAccountId }
     const { data: newCarrier, error } = await supabase.from('carriers').insert(carrierData).select().single()
     if (error) throw error
     setCarriers([...carriers, newCarrier])
   }
 
   const updateCarrier = async (id: string, data: Partial<Carrier>) => {
-    const { data: updated, error } = await supabase.from('carriers').update(data).eq('id', id).select().single()
+    const { data: updated, error } = await supabase.from('carriers').update(carrierWritePayload(data, carrierLinkOn)).eq('id', id).select().single()
     if (error) throw error
     setCarriers(carriers.map(c => c.id === id ? updated : c))
   }

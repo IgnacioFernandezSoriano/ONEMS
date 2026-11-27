@@ -1,0 +1,27 @@
+{
+ "period_start": "2026-11-02",
+ "period_end": "2026-11-04",
+ "format": "jsonl",
+ "size_bytes": 52581,
+ "sha256": "a39b906da577380d0fd42864fd8d556022927f94db7ac6e00451931e33602095",
+ "control_totals": [
+  {
+   "place_ref": "EMR-PO",
+   "mode_ref": "DLV",
+   "product": "STD",
+   "delivered": 54
+  },
+  {
+   "place_ref": "NPT-PO",
+   "mode_ref": "DLV",
+   "product": "STD",
+   "delivered": 55
+  },
+  {
+   "place_ref": "SVL-PO",
+   "mode_ref": "DLV",
+   "product": "STD",
+   "delivered": 54
+  }
+ ]
+}

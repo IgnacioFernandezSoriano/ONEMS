@@ -251,3 +251,65 @@ Cada fase se despliega a `onems-dev` con confirmación explícita.
 - Primer carrier y cómo entregaría los datos (decide la fase 3).
 - Qué significa el origen **RFID** en E2E; hasta entonces no existe ese valor.
 - Si un envío mal encaminado debe compensarse con otra muestra (R15: "ya veremos").
+
+---
+
+## v4 (23/11/2026) — Entrega completa por periodo, sorteo 100 % ONEMS
+
+**Decisiones del responsable (no reabrir):**
+- R24. El carrier NO sortea ni preselecciona. En cada entrega envía **todos los envíos completos** del periodo de entrega; ONEMS cuenta la población, sortea y se queda solo con lo elegido. Motivo: el carrier podría escoger los mejores.
+- R25. La zona de recepción se **vacía tras procesar** cada entrega: la base solo contiene como máximo una entrega. De lo recibido solo se conserva una huella, los recuentos por ruta y la lista de elegidos (auditoría).
+- R26. **Frecuencia de entrega** por conector, de diaria a semanal (calendario del conector: días + hora local). Es independiente del periodo estadístico, que sigue siendo la semana (plan, cuotas, informes).
+- R27. Se mantiene el modelo **push** (el carrier nos envía); la integridad se vigila con **auditorías de ONEMS**: envíos testigo (panelistas que viajan por ese carrier), comparación de distribución de tiempos con panelistas en la misma ruta, totales de control por entrega frente a lo declarado, auditorías por sorpresa. El acceso directo a la base del carrier queda como opción adicional, no como norma.
+- R28. Volúmenes aún desconocidos: diseñar para entregas diarias o semanales de tamaño variable, con topes configurables y alertas de volumen anómalo.
+
+**Definición normativa de "envío completo del periodo"** (con los códigos del carrier): envío del producto del plan que (1) tiene su evento de llegada final en un punto de llegada acordado con fecha local dentro del periodo de entrega; (2) tiene un evento de salida en un punto de salida acordado anterior a la llegada (de ese periodo o anterior); (3) se envía con todas sus lecturas en los puntos acordados (y todas las intermedias si el plan tiene diagnóstico). La entrega lleva además totales de control (envíos entregados del producto por punto de llegada en el periodo).
+
+**Diseño (decisiones de diseño, revisables):**
+- D19. La entrega llega como **fichero sin comprimir** (JSON Lines o CSV con los nombres del carrier; ni gzip ni zip: así se implementó, `CL_COMPRESSION_UNSUPPORTED`) a un almacén de ficheros (Supabase Storage, bucket privado por cuenta), mediante URL de subida firmada que obtiene el conector con su clave (o subida manual desde Conectores). Nada pasa por los límites de 8 s / 5.000 filas de la API.
+- D20. Un **proceso en segundo plano** (pg_cron, rol sin límite de tiempo, por lotes de filas) vuelca el fichero a una tabla de paso **UNLOGGED**, aplica equivalencias y validaciones existentes, calcula la población por estrato (ruta × semana ISO de la llegada), sortea con semilla registrada (md5(semilla‖item)), pasa los elegidos a `cl_samples`/`one_db` (y sus lecturas a diagnóstico si aplica), registra la auditoría y hace TRUNCATE de la tabla de paso; el fichero se borra tras N días (configurable) conservando su hash.
+- D21. **Cuota por entrega**: la cuota semanal de cada ruta se reparte entre las entregas de esa semana en proporción a sus días laborables; el déficit pasa a las entregas siguientes (reutiliza el arrastre existente).
+- D22. Las **demandas** dejan de ser una petición de candidatos: el conector consulta una configuración (`GET /config`: productos, puntos con su papel, campos, calendario, periodo a entregar) y entrega según su calendario. Las entregas tardías o ausentes generan alerta.
+- D23. **Auditorías automáticas**: (a) testigos — si un envío de panelista que viaja por ese carrier (requiere conocer su número de seguimiento del carrier) se entregó en el periodo y no aparece, alerta; (b) distribución — tiempos del carrier frente a panelistas de la misma ruta/semana (prueba estadística), alerta si la cola lenta falta; (c) totales de control — recibidos vs declarados; (d) volumen anómalo frente a la mediana.
+
+## v4.1 (23/11/2026) — Control de incidencias de Carrier Link
+
+**Decisiones del responsable (no reabrir):**
+- R29. Carrier Link tiene su **propio control de incidencias**, distinto de las Incidencias de panelistas (que siguen solo en E2E).
+- R30. Opción **C**: cada incidencia tiene seguimiento (abierta / en curso / resuelta, responsable, notas) **y** avisa por
+  correo al responsable de la cuenta **y**, cuando el problema es del carrier, al propio carrier.
+- R31. **Entrega no recibida**: la incidencia se cierra **a mano** o **sola con la siguiente entrega que llegue** (la primera
+  que se reciba, sea del periodo que sea).
+- R32. Mientras siga abierta, **cada periodo que no llega envía un nuevo correo de aviso** (no se abre una incidencia nueva por
+  cada periodo: se añade el periodo a la misma incidencia).
+
+**Casos que vigila (propuesta, revisable):**
+
+| Caso | Se abre cuando | Se cierra sola cuando | Aviso al carrier |
+|---|---|---|---|
+| Entrega no recibida | pasa la hora de entrega del calendario + margen y no hay entrega del periodo | llega la siguiente entrega (R31) | sí |
+| Entrega rechazada | fichero que no cuadra con lo anunciado (huella, tamaño, formato, nº de filas) o rechazada tras 3 fallos | se recibe y procesa bien ese mismo periodo | sí |
+| Muchos envíos rechazados | proporción de envíos inválidos de una entrega por encima del umbral | la siguiente entrega queda por debajo | sí |
+| Datos desconocidos | puntos de lectura o productos que no están dados de alta | se dan de alta | no (lo arregla ONEMS) |
+| Cuota no cubierta | una semana se cierra con menos muestras de las pedidas | — (manual) | no |
+
+**Diseño (decisiones de diseño, revisables):**
+- D24. Tabla `cl_incidents` por cuenta (RLS por `account_id`): tipo, conector, plan, estado (open / in_progress / resolved),
+  periodos afectados, responsable, notas, cómo se cerró (manual / automática), fechas. Las `cl_alerts` actuales se quedan
+  como señales técnicas; las incidencias se abren a partir de ellas y de la vigilancia del calendario.
+- D25. Vigilancia del calendario: un pg_cron horario compara el calendario de cada conector activo con las entregas
+  recibidas; margen por defecto 6 horas tras la hora de entrega (configurable por conector).
+- D26. Correo: cola `cl_notifications` → Edge Function que envía con Resend (como el informe de operación). El
+  destinatario carrier es un **correo de contacto técnico por conector** (campo nuevo, obligatorio para activar el
+  aviso). Idioma: el de la cuenta. Textos escuetos, en los 5 idiomas. Nunca datos de envíos, solo recuentos y periodos.
+- D27. Semana sin entrega: la semana se liquida igualmente 3 días después de su final con lo que haya (déficit al
+  arrastre de siempre); la incidencia sigue abierta según R31.
+- D28. Pantalla "Incidencias" dentro de Carrier Link (solo DEV, mismo interruptor); permiso nuevo `cl_incidents` solo en
+  DEMO2.
+
+## v4.2 (24/11/2026) — Diagnóstico (fase 4): respuestas del responsable
+
+- R33. En el diagnóstico entran **solo los envíos sorteados** (con todas sus lecturas si el plan tiene Diagnóstico), nunca el resto de la entrega (coherente con R25).
+- R34. Un número de seguimiento del carrier **nunca coincidirá** con una etiqueta RFID o de panelista: no se construye lógica de choques; basta con que el origen de cada lectura quede marcado (prefijo `cl:` en el identificador del evento y origen "carrier").
+- R35. Es aceptable que las lecturas del carrier tarden **hasta 30 minutos** en verse en el diagnóstico (mismo ritmo que el RFID, sin tocar ese proceso).
+- R36. Los puntos intermedios **sin centro postal** se **dejan fuera del diagnóstico con aviso** en el Monitor; el plan se activa igual.

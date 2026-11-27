@@ -1,0 +1,21 @@
+{
+  "mode": "local",
+  "base_url": "https://sehbnpgzqljrsqimwyuz.supabase.co/functions/v1/carrier-link-ingest",
+  "key_file": "out/carrier_key.txt",
+  "seed": "sim-2026",
+  "dataset_dir": "out/dataset",
+  "out_dir": "out/runs",
+  "formats": ["jsonl", "csv"],
+  "noise": {"unagreed_scans_share": 0.08, "invalid_rows": 2},
+  "pii_fields": [],
+  "poll_seconds": 60,
+  "poll_timeout_seconds": 3600,
+  "local": {
+    "host": "127.0.0.1",
+    "port": 5433,
+    "dbname": "onems_t",
+    "user": "postgres",
+    "password": "postgres",
+    "process_cmd": ["deno", "run", "--quiet", "--allow-read", "--allow-run", "--allow-env", "./e2e/local_worker.ts"]
+  }
+}

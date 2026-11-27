@@ -5404,6 +5404,8 @@ cl.error.cl_demand_not_open,"The demand is not open, so it cannot be changed."
 cl.error.cl_duplicate_quota,There is already a quota with the same values in this plan.
 cl.error.cl_feed_carrier_mismatch,The connector belongs to a different carrier than the plan.
 cl.error.cl_feed_paused,The connector is paused. Resume it to continue.
+cl.error.cl_body_too_large,The file is larger than 5 MB. Split it into smaller batches.
+cl.error.cl_feed_testing_dry_run_only,The connector is in testing: it only accepts test batches. Activate it to load real batches.
 cl.error.cl_mapping_incomplete,The field mapping is incomplete. Complete it before continuing.
 cl.error.cl_missing_points,Some cities in the plan are missing start or end points.
 cl.error.cl_no_feed,The plan has no connector assigned.
@@ -5411,8 +5413,9 @@ cl.error.cl_no_quotas,The plan has no quotas yet. Add at least one.
 cl.error.cl_plan_closed,The plan is closed and cannot be changed.
 cl.error.cl_plan_locked_field,This field can no longer be changed because the plan has already started.
 cl.error.cl_plan_not_draft,Only plans in draft status can be changed this way.
-cl.error.cl_quota_locked,This quota can no longer be changed because it already has samples.
+cl.error.cl_quota_locked,"This quota can no longer be changed: it already has samples or requests, or its week is inside the frozen period (already requested or about to be)."
 cl.error.cl_quota_not_found,The quota no longer exists. Reload the page.
+cl.error.cl_rebalance_total_changed,The proposal changes the total number of samples in the plan. Reload the page and try again.
 cl.error.cl_stratum_already_delivered,A stratum of this batch was already delivered for this demand.
 cl.error.cl_too_many_rows,The file has too many rows. Split it into smaller files.
 cl.error.cl_unknown_stratum,Some rows refer to a city or route that is not in the plan.
@@ -5420,10 +5423,25 @@ cl.error.cl_forbidden,You do not have permission to do this in Carrier Link.
 cl.error.cl_demand_testing_dry_run_only,This demand is in testing mode and only allows a trial run.
 cl.error.forbidden,You do not have permission to do this.
 cl.error.generic,Something went wrong. Please try again.
+cl.error.cl_bad_control_totals,The control totals are not valid.
+cl.error.cl_bad_period,The delivery period is not valid.
+cl.error.cl_bad_request,The request is incomplete or not valid.
+cl.error.cl_cursor_mismatch,Another process is loading the delivery. Try again in a minute.
+cl.error.cl_delivery_bad_transition,This change of delivery status is not allowed.
+cl.error.cl_delivery_immutable,The data that identifies a delivery cannot be changed.
+cl.error.cl_delivery_not_found,Delivery not found.
+cl.error.cl_delivery_not_loading,The delivery is no longer being loaded.
+cl.error.cl_feed_not_found,Connector not found.
+cl.error.cl_file_not_uploaded,Upload the file before completing the delivery.
+cl.error.cl_file_too_large,The file is larger than the connector allows.
+cl.error.cl_lease_lost,Another process took over this delivery.
+cl.error.cl_no_active_plan,No active plan of this connector covers this period.
+cl.error.cl_period_already_delivered,This period has already been delivered.
+cl.error.cl_period_not_closed,The period has not ended yet.
+cl.error.cl_period_not_in_calendar,The period does not match the delivery calendar of the connector.
+cl.error.cl_staging_not_empty,The delivery is still being processed.
 cl.select_account.title,Select an account
 cl.select_account.body,Choose an account in the top bar to work with Carrier Link.
-cl.plans.title,Sampling plans
-cl.plans.help,Define which routes and volumes are sampled from carrier scans.
 cl.samples.title,Samples
 cl.samples.help,Review the samples generated from carrier scans.
 cl.reading_points.title,Reading points
@@ -5431,7 +5449,7 @@ cl.reading_points.help,Manage the carrier points where scans are captured.
 cl.connectors.title,Connectors
 cl.connectors.help,Configure how carrier scan data reaches ONEMS.
 cl.monitor.title,Capture monitor
-cl.monitor.help,Follow the status of data capture from carriers.
+cl.monitor.help,"Follow the deliveries received from carriers, how they were processed, the open incidents and the alerts."
 cl.reading_points.carrier,Carrier
 cl.reading_points.add,Add reading point
 cl.reading_points.edit,Edit reading point
@@ -5450,7 +5468,7 @@ cl.reading_points.role.both,Start and end
 cl.reading_points.role.none,Intermediate
 cl.reading_points.name,Name (optional)
 cl.reading_points.empty,No reading points for this carrier yet.
-cl.reading_points.no_carriers,There are no active carriers in this account.
+cl.reading_points.no_carriers,There are no active carriers with Carrier Link capture in this account. Set the capture method in Carriers & Products.
 cl.reading_points.unknown_title,Places without a reading point
 cl.reading_points.unknown_help,Scans from the last 90 days arrived from these places and could not be matched.
 cl.reading_points.readings,Readings
@@ -5469,15 +5487,14 @@ cl.connectors.edit,Edit connector
 cl.connectors.empty,This carrier has no connector yet.
 cl.connectors.name,Name
 cl.connectors.extraction_model,Extraction model
-cl.connectors.emit_days,Request days
+cl.connectors.emit_days,Delivery days
 cl.connectors.emit_hour,Hour
 cl.connectors.emit_timezone,Time zone
 cl.connectors.account_timezone,(account time zone)
-cl.connectors.calendar_hint,Requests to the carrier are sent on these days and at this hour. Leave the time zone empty to use the account one (e.g. Europe/Madrid).
+cl.connectors.calendar_hint,"The carrier delivers a file on these days, at about this hour. Each delivery covers the days since the previous delivery day (daily: the day before; weekly: the previous 7 days). Leave the time zone empty to use the account one (e.g. Europe/Madrid)."
 cl.connectors.calendar,Calendar
-cl.connectors.last_batch,Last batch
 cl.connectors.last_error,Last error
-cl.connectors.testing_hint,In testing mode the connector only accepts trial runs; no samples are created.
+cl.connectors.testing_hint,"In testing, deliveries are checked and counted as if real, but no samples are created."
 cl.connectors.mapping_incomplete,The field equivalences are incomplete: the carrier data cannot be read yet.
 cl.connectors.status.testing,Testing
 cl.connectors.status.active,Active
@@ -5485,9 +5502,9 @@ cl.connectors.status.paused,Paused
 cl.connectors.set_status.testing,Back to testing
 cl.connectors.set_status.active,Activate
 cl.connectors.set_status.paused,Pause
-cl.connectors.status_confirm.testing,The connector will only accept trial runs again.
-cl.connectors.status_confirm.active,The connector will receive real batches and create samples. Open requests in testing mode will be closed.
-cl.connectors.status_confirm.paused,The connector will stop receiving batches and no requests will be sent until it is resumed.
+cl.connectors.status_confirm.testing,New deliveries will be checked and counted only: no samples will be created.
+cl.connectors.status_confirm.active,New deliveries will create samples for the active plans.
+cl.connectors.status_confirm.paused,The connector will not accept deliveries until it is resumed. Missing deliveries are not reported while it is paused.
 cl.connectors.delete_title,Delete connector
 cl.connectors.delete_confirm,Delete the connector {name}?
 cl.connectors.error.name_required,Enter a name for the connector.
@@ -5520,7 +5537,7 @@ cl.connectors.extras.help,Other carrier fields that are kept with each scan. Any
 cl.connectors.extras.empty,No extra fields.
 cl.connectors.extras.field,Carrier field
 cl.connectors.keys.title,Connector keys
-cl.connectors.keys.help,The carrier uses a key to send its batches. Only a superadmin or the UPU Account Manager can issue keys.
+cl.connectors.keys.help,The carrier uses a key to send its deliveries. Only a superadmin or the UPU Account Manager can issue keys.
 cl.connectors.keys.invalid,Check the name and the expiry date (it must be in the future).
 cl.connectors.keys.empty,This connector has no keys.
 cl.connectors.keys.name,Name
@@ -5533,21 +5550,6 @@ cl.connectors.keys.inactive,Deactivated
 cl.connectors.keys.deactivate_confirm,Deactivate this key? The carrier will no longer be able to use it.
 cl.connectors.keys.new,New key
 cl.connectors.keys.issue,Issue key
-cl.connectors.dry_run.title,Test a batch (trial run)
-cl.connectors.dry_run.help,Upload a batch file in JSON format. It is checked as if it were real but nothing is saved.
-cl.connectors.dry_run.choose,Choose JSON file
-cl.connectors.dry_run.running,Checking...
-cl.connectors.dry_run.bad_json,The file is not valid JSON.
-cl.connectors.dry_run.replayed,This batch was already tested: the result shown is the one saved at that time.
-cl.connectors.dry_run.validated,The batch would be accepted. Result per stratum:
-cl.connectors.dry_run.rejected,The batch would be rejected.
-cl.connectors.dry_run.bad_method,The selection method is not the expected one ({expected}).
-cl.connectors.dry_run.stratum,Stratum
-cl.connectors.dry_run.rows,Scans
-cl.connectors.dry_run.candidates,Candidates
-cl.connectors.dry_run.valid,Valid
-cl.connectors.dry_run.rejected_by_reason,Rejected by reason
-cl.connectors.dry_run.rows_rejected,Scans rejected
 cl.reason.already_sampled,Already sampled
 cl.reason.bad_timestamp,Wrong date or time
 cl.reason.bad_value,Wrong value
@@ -5560,41 +5562,22 @@ cl.reason.same_reading,Start and end are the same scan
 cl.reason.start_after_end,Start after end
 cl.reason.unknown_product,Unknown product
 cl.reason.unknown_reading_point,Unknown reading point
-cl.plans.new,New plan
-cl.plans.edit,Edit plan
-cl.plans.name,Name
-cl.plans.product,Product
-cl.plans.carrier,Carrier
 cl.plans.connector,Connector
 cl.plans.no_connector,No connector yet
 cl.plans.connector_hint,Only connectors of the same carrier. The plan cannot be activated without one.
 cl.plans.select,Select...
-cl.plans.start,Start date
-cl.plans.end,End date
-cl.plans.period,Period
-cl.plans.total,Total samples
-cl.plans.total_hint,"If you change the total or the dates, generate and save the quotas again."
 cl.plans.status,Status
 cl.plans.status.draft,Draft
 cl.plans.status.active,Active
 cl.plans.status.closed,Closed
-cl.plans.empty,There are no plans yet.
-cl.plans.samples,{count} samples
-cl.plans.feed_diagnosis,Connector diagnosis (keep extra data for analysis)
-cl.plans.locked_hint,"The plan is no longer a draft: carrier, product, connector and start date cannot be changed."
 cl.plans.error.no_account,Select an account first.
 cl.plans.error.bad_period,The end date cannot be before the start date.
 cl.plans.error.bad_total,The total must be a whole number of at least 1.
 cl.plans.error.missing_field,"Fill in the name, carrier, product and dates."
-cl.plans.generate,Generate quotas
 cl.plans.no_routes,The carrier has no active reading points with a start and an end city: there are no routes.
 cl.plans.preview_title,Preview (not saved yet)
-cl.plans.save_quotas,Save quotas
 cl.plans.saving_quotas,Saving {count} quotas...
 cl.plans.discard,Discard
-cl.plans.quotas_saved,{count} quotas saved.
-cl.plans.quotas_title,Quotas
-cl.plans.no_quotas,"This plan has no quotas yet. Use ""Generate quotas""."
 cl.plans.missing_points_title,Reading points missing
 cl.plans.missing_points_help,Register an active point of the carrier in these cities before activating the plan.
 cl.plans.missing.origin,no start point
@@ -5602,8 +5585,6 @@ cl.plans.missing.destination,no end point
 cl.plans.missing_standards_title,{count} routes without a delivery standard
 cl.plans.missing_standards_help,"These routes are sampled, but without a standard the on-time result cannot be calculated. It does not block activation."
 cl.plans.no_standard,counted without on-time
-cl.plans.more,and {count} more (marked with ⚠ in the table)
-cl.plans.activate,Activate plan
 cl.plans.activate_confirm,"Activate the plan {name}? Afterwards the carrier, product, connector, start date and quotas can no longer be changed."
 cl.plans.activate_blocked,The plan cannot be activated while reading points are missing.
 cl.plans.matrix.filter,Filter by route...
@@ -5618,7 +5599,6 @@ cl.plans.matrix.route,Route
 cl.plans.matrix.total,Total
 cl.plans.matrix.routes,{count} routes
 cl.plans.error.quotas_mismatch,The quotas do not match the plan dates: generate them again.
-cl.plans.regenerate_notice,The total or the dates have changed: generate and save the quotas again.
 cl.samples.plan,Plan
 cl.samples.week,Week
 cl.samples.all,All
@@ -5646,32 +5626,6 @@ cl.samples.no_scans,This sample has no scans.
 cl.samples.role.start,Start scan
 cl.samples.role.end,End scan
 cl.samples.role.intermediate,Intermediate scan
-cl.monitor.plan,Plan
-cl.monitor.all_plans,All plans
-cl.monitor.demands,Requests to the carrier (including test requests)
-cl.monitor.demand.open,Open
-cl.monitor.demand.fulfilled,Fulfilled
-cl.monitor.demand.partial,Partial
-cl.monitor.demand.failed,Failed
-cl.monitor.batches,Batches received
-cl.monitor.batches_empty,No batches yet.
-cl.monitor.col.date,Received
-cl.monitor.col.status,Status
-cl.monitor.col.shipments,Shipments
-cl.monitor.col.rejected,Rejected
-cl.monitor.col.selected,Selected
-cl.monitor.batch.received,Received
-cl.monitor.batch.validated,Validated
-cl.monitor.batch.sampled,Sampled
-cl.monitor.batch.rejected,Rejected
-cl.monitor.batch.undone,Undone
-cl.monitor.batch.expired,Expired
-cl.monitor.undo,Undo
-cl.monitor.undo_title,Undo this batch?
-cl.monitor.undo_effect,The samples selected from this batch will be removed from the E2E reports and the affected quotas will be recalculated.
-cl.monitor.undo_confirm,"Yes, undo batch"
-cl.monitor.undo_cancel,Cancel
-cl.monitor.undo_done,Batch undone. Quotas back to pending: {pending}; carried over (needs review): {carried}; kept open by another request: {kept}.
 cl.monitor.alerts,Alerts
 cl.monitor.alerts_empty,No alerts.
 cl.monitor.alert_filter_open,Open only
@@ -5695,7 +5649,7 @@ cl.alert.unknown_product,Unknown product
 cl.alert.unknown_reading_point,Unknown reading point
 cl.alert.possible_misrouting,Possible misrouted shipment
 cl.alert.missing_standard,Missing delivery standard
-cl.alert.rejected_ratio,Many readings rejected
+cl.alert.rejected_ratio,Many shipments rejected
 cl.alert.quota_unfilled,Quota not filled
 cl.alert.feed_silent,Carrier did not answer
 cl.alert.missing_points,Missing start or end points
@@ -5707,7 +5661,7 @@ cl.alert.undo_after_carry,Batch undone after quota carry-over
 cl.alert.route,Route: {origin} -> {destination}
 cl.alert.detail.insufficient_candidates,{valid} valid candidates for {required} samples required.
 cl.alert.detail.quota_unfilled,{missing} samples missing out of {planned} planned.
-cl.alert.detail.rejected_ratio,{rejected} of {candidates} readings rejected ({percent}%).
+cl.alert.detail.rejected_ratio,{rejected} of {candidates} shipments rejected ({percent}%).
 cl.alert.detail.population_incoherent,The carrier reports a population of {population} but sent {candidates} candidates.
 cl.alert.detail.suspicious_distribution,All {samples} samples were delivered on time.
 cl.alert.detail.missing_points,Start points: {start}; end points: {end}.
@@ -5725,6 +5679,270 @@ hc.delivery_standard_form.cl_last_mile_time,Last-leg equivalence time
 help_center.doc.carrier_link.title,Carrier Link
 help_center.doc.carrier_link.desc,"What Carrier Link is, the order to set it up in, what each screen does and what each alert means."
 cl.help_link,Help
+cl.capture_method.label,Capture method
+cl.capture_method.help,"Which captures the carrier accepts in the Allocation Generator: Panelists, Carrier Link (carrier scans; also enables its connectors and reading points) or Both."
+cl.capture_method.panelists,Panelists
+cl.capture_method.carrier_link,Carrier Link
+cl.capture_method.both,Both
+cl.generator.capture_column,Capture
+cl.generator.capture_hint,Choose the carrier first: its capture method decides the options.
+cl.generator.cl_hint,Carrier Link: no panelists. The cities come from the carrier’s active reading points. Generate the preview and save it as a draft plan.
+cl.generator.generate_preview,Generate preview
+cl.generator.save_plan,Save plan (draft)
+cl.generator.requested_vs_generated,Requested: {requested} · Generated: {generated}
+cl.generator.generated_less,{missing} samples could not be placed: there are not enough routes or working days in the period.
+cl.generator.saved,Plan {name} saved as a draft with {count} quotas. It appears in Generated Plans.
+cl.generator.no_quotas,This plan has no quotas.
+cl.generator.activated,Plan {name} applied (active).
+cl.generator.deleted,Plan {name} deleted.
+cl.generator.delete_confirm,Delete the draft plan {name} and its quotas?
+cl.generator.delete_not_allowed,The plan could not be deleted: it is no longer a draft or you do not have permission.
+cl.generator.more_routes,and {count} more
+cl.generator.csv.title,Import Carrier Link quotas (CSV)
+cl.generator.csv.help,"Fill in the name, carrier, product and dates first. Columns: origin_city, destination_city (code or name), week (2026-W05 or a date), samples. The total comes from the file."
+cl.generator.csv.errors_title,The file has {count} errors; nothing was imported.
+cl.generator.csv.more_errors,and {count} more errors
+cl.generator.csv.missing_columns,Missing columns: {columns}.
+cl.generator.csv.empty,The file has no row with samples.
+cl.generator.csv.unknown_city,"Row {row}: unknown city ""{city}""."
+cl.generator.csv.same_city,Row {row}: origin and destination are the same city.
+cl.generator.csv.bad_week,"Row {row}: invalid week ""{week}"" (use 2026-W05 or a date such as 2026-01-31)."
+cl.generator.csv.week_outside,Row {row}: week {week} is outside the plan dates.
+cl.generator.csv.duplicate,Row {row}: repeats the route and week of row {first}.
+cl.generator.csv.bad_samples,"Row {row}: invalid samples ""{value}"" (whole number, 0 or more)."
+cl.generator.csv.no_points,Row {row}: the route {origin} → {destination} has no active reading points of the carrier.
+cl.generator.connector_required,"Choose the connector: a Carrier Link plan cannot be applied without one, and saved plans cannot be edited."
+cl.generator.needs_connector,"This plan has no connector, so it cannot be applied. Delete it and generate it again choosing a connector."
+cl.records.heading,Plan records: route × week quotas ({count})
+cl.records.read_only_note,"This is a Carrier Link plan: its records are quotas per route and week, read-only here. They change with the Allocation Generator and Load Balancing."
+cl.records.view_table,Table
+cl.records.view_matrix,Matrix
+cl.records.planned,Planned
+cl.records.carried_in,Carried in
+cl.records.obtained,Obtained
+cl.records.view_samples,View samples
+cl.records.page_total,Total (this page)
+cl.records.empty,No records match these filters.
+cl.records.matrix_loading,Loading all the plan quotas...
+cl.records.matrix_scope,The matrix shows every quota of the plan (the table filters do not apply).
+cl.records.status.pending,Pending
+cl.records.status.open,Open
+cl.records.status.fulfilled,Fulfilled
+cl.records.status.carried,Carried over
+cl.records.status.unfilled,Unfilled
+cl.records.filter_total,Total (all quotas with these filters)
+cl.records.plan_total,Total (whole plan)
+cl.records.totals_unavailable,Full totals not available right now: the figures shown are for this page only.
+cl.balancing.plan_label,Plan
+cl.balancing.panelists_option,Panelists (by period)
+cl.balancing.no_max_note,Carrier Link plan: the nodes are the origin cities and the load is the planned samples per week. There is no per-panelist maximum: the reference is the expected average of each origin city according to the working days of each week.
+cl.balancing.draft_note,Draft plan: samples can be moved in any week.
+cl.balancing.fence_note,Active plan: only pending quotas of weeks starting after the fence date are moved.
+cl.balancing.deviation_hint,A week is High or Saturated when it exceeds the expected average by this percentage (x1.5 for Saturated).
+cl.balancing.fence_hint,From today up to this date (included) nothing is moved. Empty: from today.
+cl.balancing.loading,Loading the plan quotas...
+cl.balancing.empty,The plan has no quotas.
+cl.balancing.kpi_saturated,Saturated origin cities
+cl.balancing.kpi_high,Origin cities with high load
+cl.balancing.kpi_total,Planned samples
+cl.balancing.carried_in,+{count} carried over
+cl.balancing.preview_title,Balancing preview
+cl.balancing.preview_summary,"{moved} samples change week in {origins} origin cities ({changes} quotas: {created} new, {zeroed} to zero). The plan total and the totals of each city and each route do not change."
+cl.balancing.before_after,"{moved} moved, standard deviation {before} to {after}"
+cl.balancing.preview_matrix_note,The table below shows the proposed distribution. Nothing is saved until you apply it.
+cl.balancing.confirm,Apply balancing
+cl.balancing.applying,Applying...
+cl.balancing.applied,"Balancing applied: {changed} quotas changed, {created} new, {deleted} deleted."
+cl.balancing.nothing_to_do,Nothing to move: the distribution is already as balanced as possible with what can be moved.
+cl.balancing.matrix_title,Load by origin city and week
+cl.balancing.legend,Planned samples per week (+carried over). Green: normal; orange: high; red: saturated; grey: cannot be moved.
+cl.balancing.balance_all,Balance all origin cities
+cl.balancing.balance_origin,Balance
+cl.balancing.origin,Origin city
+cl.balancing.routes,Routes
+cl.balancing.total,Total
+cl.balancing.stddev,Std. dev.
+cl.balancing.cell_title,Expected: {expected}; cannot be moved: {locked}
+menu.cl_incidents,Carrier Link incidents
+cl.error.cl_incident_closed,This incident is already resolved and cannot be changed.
+cl.connectors.frequency.daily,Daily delivery
+cl.connectors.frequency.weekly,Weekly delivery
+cl.connectors.frequency.several_per_week,Several deliveries a week
+cl.connectors.per_week,{count} a week
+cl.connectors.next_period,Next delivery: {period} (expected by {due}).
+cl.connectors.next_period_now,Next delivery: {period}. The period is closed: it can be delivered now (expected by {due}).
+cl.connectors.no_next_period,No delivery is pending: no active plan uses this connector.
+cl.connectors.last_delivery,Last delivery: {period}
+cl.connectors.grace.label,Margin before a delivery counts as not received
+cl.connectors.grace.hours,{count} h
+cl.connectors.grace.help,"Hours after the expected delivery time. After that, ONEMS opens a ""Delivery not received"" incident and notifies the account (and the carrier, if it has a notification email)."
+cl.connectors.grace.invalid,Enter a whole number of hours between 0 and 168.
+cl.deliveries.title,Deliveries
+cl.deliveries.help,"Each delivery is one file with all the shipments of a period. ONEMS checks it, counts it and draws its own samples in the background."
+cl.deliveries.empty,No deliveries yet.
+cl.deliveries.col.period,Period
+cl.deliveries.col.status,Status
+cl.deliveries.col.rows,Rows
+cl.deliveries.col.valid,Valid shipments
+cl.deliveries.col.rejected,Rejected (rows / shipments)
+cl.deliveries.col.drawn,Drawn
+cl.deliveries.col.alerts,Alerts
+cl.deliveries.details,Details
+cl.deliveries.source.api,By API
+cl.deliveries.source.manual,Uploaded by hand
+cl.deliveries.test,test
+cl.deliveries.retrying,Will be retried automatically (attempt {attempts} of 3).
+cl.deliveries.rejected_hint,"Rejected rows are readings that could not be read; rejected shipments are those that could not be used (no start or end reading, etc.). Open a row to see the reasons."
+cl.deliveries.error,Reason
+cl.deliveries.rows_rejected_by_reason,Rows rejected by reason
+cl.deliveries.shipments_rejected_by_reason,Shipments rejected by reason
+cl.deliveries.shipments_total,Shipments in the file
+cl.deliveries.file,File
+cl.deliveries.created_at,Opened
+cl.deliveries.received_at,Received
+cl.deliveries.finished_at,Finished
+cl.deliveries.attempts,Attempts
+cl.delivery.status.pending_upload,Waiting for the file
+cl.delivery.status.received,Received
+cl.delivery.status.processing,Processing
+cl.delivery.status.processed,Processed
+cl.delivery.status.failed,Failed (will retry)
+cl.delivery.status.rejected,Rejected
+cl.delivery.status.unknown,Unknown status
+cl.delivery.phase.load,Reading the file
+cl.delivery.phase.resolve,Checking the readings
+cl.delivery.phase.items,Building the shipments
+cl.delivery.phase.strata,Counting by route and week
+cl.delivery.phase.draw,Drawing the samples
+cl.delivery.phase.transfer,Saving the samples
+cl.delivery.phase.finish,Closing the delivery
+cl.delivery.phase.cleanup,Cleaning up
+cl.deliveries.upload.title,Upload a delivery by hand
+cl.deliveries.upload.help,"For carriers that send the file by other means. Choose the period and a JSON Lines (.jsonl) or CSV file, without compression. It goes through exactly the same checks as a delivery by API."
+cl.deliveries.upload.paused,The connector is paused: resume it to upload deliveries.
+cl.deliveries.upload.testing,"The connector is in testing: the delivery will be checked and counted, but no samples will be created."
+cl.deliveries.upload.period_start,Period from
+cl.deliveries.upload.period_end,to
+cl.deliveries.upload.choose,Choose file
+cl.deliveries.upload.send,Upload delivery
+cl.deliveries.upload.confirm,The file will be delivered for the period {period}. A period is delivered only once: after it is received it cannot be replaced. Continue?
+cl.deliveries.upload.do_not_leave,Do not close or reload this page until the upload finishes.
+cl.deliveries.upload.hashing,Calculating the file fingerprint... {percent}%
+cl.deliveries.upload.step.opening,Opening the delivery...
+cl.deliveries.upload.step.uploading,Uploading the file...
+cl.deliveries.upload.step.completing,Marking the delivery as received...
+cl.deliveries.upload.received,Delivery received. It is processed in the background: follow it in the list below.
+cl.deliveries.upload.rejected,The delivery was rejected.
+cl.deliveries.upload.existing,This same file was already delivered for this period (status: {status}). Nothing was changed.
+cl.deliveries.upload.period_required,Choose the start and end dates of the period.
+cl.deliveries.upload.period_order,The period ends before it starts.
+cl.deliveries.upload.period_too_long,A delivery covers at most 7 days.
+cl.deliveries.upload.file_required,Choose the file to deliver.
+cl.deliveries.upload.bad_extension,The file must be JSON Lines (.jsonl) or CSV (.csv).
+cl.deliveries.upload.empty_file,The file is empty.
+cl.monitor.deliveries,Deliveries
+cl.monitor.all_connectors,All connectors
+cl.monitor.all_statuses,All statuses
+cl.monitor.period_from,Period from
+cl.monitor.period_to,to
+cl.monitor.incidents,Unresolved incidents: {count}
+cl.monitor.incidents_open_all,Open Incidents
+cl.alert.quota_already_settled,Week already closed
+cl.alert.delivery_retries_exhausted,Delivery failed after 3 attempts
+cl.alert.delivery_stuck,Delivery stuck in processing for more than 2 hours
+cl.alert.detail.quota_already_settled,{skipped} shipments arrived after the week had been closed and were not used.
+cl.alert.detail.retries_exhausted,The delivery was rejected. Samples removed: {voided}.
+cl.reason.bad_record,Unreadable row
+cl.reason.reader_without_city,Reading point without city
+cl.reason.no_stratum,Route or week not in the plan
+cl.error.cl_bad_csv_header,The CSV header does not have the configured columns.
+cl.error.cl_bad_encoding,The file is not valid UTF-8 text.
+cl.error.cl_bad_sha_state,Internal error while checking the file fingerprint; it will be retried.
+cl.error.cl_compression_unsupported,Compressed files are not accepted: send the file without compression.
+cl.error.cl_file_missing,The file was not found in storage.
+cl.error.cl_file_size_unknown,The size of the file could not be read; it will be retried.
+cl.error.cl_processing_error,Unexpected error while processing; it will be retried.
+cl.error.cl_record_too_long,A row of the file is too long.
+cl.error.cl_retries_exhausted,Processing failed 3 times: the delivery was rejected.
+cl.error.cl_sha256_mismatch,The file does not match the fingerprint (SHA-256) declared when the delivery was opened.
+cl.error.cl_staging_lost,The intermediate data was lost; it will be reloaded from the file.
+cl.error.cl_stopped,Processing was stopped.
+cl.error.cl_storage_error,The file could not be read from storage; it will be retried.
+cl.error.cl_storage_short_read,The file was read incompletely; it will be retried.
+cl.error.cl_superseded,Replaced by another file for the same period before it was uploaded.
+cl.error.cl_upload_expired,The file was not uploaded in time.
+cl.error.cl_worker_error,The background process failed; it will be retried.
+cl.error.cl_worker_lost,The background process stopped responding; it will be retried.
+cl.carrier.notification_email,Carrier Link notification email
+cl.carrier.notification_email_help,One address. The carrier is notified here of deliveries not received or rejected and of high rejection. Leave it empty to not notify the carrier.
+cl.carrier.notification_email_invalid,Enter a single valid email address.
+cl.incidents.title,Carrier Link incidents
+cl.incidents.help,"Problems with carrier deliveries that need attention. ONEMS opens them, notifies by email and closes them on its own when the problem is fixed; you can also close them by hand."
+cl.incidents.empty,No incidents.
+cl.incidents.type.missing_delivery,Delivery not received
+cl.incidents.type.delivery_rejected,Delivery rejected
+cl.incidents.type.high_rejection,High rejection
+cl.incidents.type.unknown_data,Unknown products or places
+cl.incidents.type.quota_unfilled,Quota not filled
+cl.incidents.type.unknown,Other
+cl.incidents.explain.missing_delivery,The carrier did not deliver these periods by the expected time plus the margin. It closes on its own when a delivery is received.
+cl.incidents.explain.delivery_rejected,The file of these periods was rejected (see the reason). It closes on its own when each period has a processed delivery.
+cl.incidents.explain.high_rejection,More than 20% of the shipments of a delivery could not be used. It closes on its own with the next delivery without high rejection.
+cl.incidents.explain.unknown_data,The carrier sent products or places that ONEMS does not know. Register them in Connectors (product equivalences) or Reading points; it closes on its own when all are registered.
+cl.incidents.explain.quota_unfilled,"A week of the plan ended without enough samples. It is only closed by hand, once reviewed."
+cl.incidents.status.open,Open
+cl.incidents.status.in_progress,In progress
+cl.incidents.status.resolved,Resolved
+cl.incidents.status.unknown,Unknown
+cl.incidents.closed.manual,Closed by hand
+cl.incidents.closed.auto,Closed automatically
+cl.incidents.filter.status,Status
+cl.incidents.filter.type,Type
+cl.incidents.filter.all_types,All types
+cl.incidents.filter.status.unresolved,Not resolved
+cl.incidents.filter.status.open,Open
+cl.incidents.filter.status.in_progress,In progress
+cl.incidents.filter.status.resolved,Resolved
+cl.incidents.filter.status.all,All
+cl.incidents.col.type,Incident
+cl.incidents.col.status,Status
+cl.incidents.col.periods,Periods
+cl.incidents.col.assignee,Assigned to
+cl.incidents.col.updated,Last change
+cl.incidents.unassigned,Nobody
+cl.incidents.opened_at,Opened {date}
+cl.incidents.plan,Plan: {plan}
+cl.incidents.periods,Periods ({count})
+cl.incidents.detected_at,detected {date}
+cl.incidents.detail.rejected_error,Reason: {error}
+cl.incidents.detail.high_rejection,{rejected} of {shipments} shipments rejected ({percent}%)
+cl.incidents.detail.unknown_data,new products: {products}; new places: {points}
+cl.incidents.detail.quota_unfilled,{missing} samples missing
+cl.incidents.unknown_products,Unknown products: {values}
+cl.incidents.unknown_points,Unknown places (place / mode): {values}
+cl.incidents.notices,Notices sent by email
+cl.incidents.no_notices,No notices yet.
+cl.incidents.recipient.account,Account (Account Managers and coordinators)
+cl.incidents.recipient.carrier,Carrier
+cl.incidents.notice_counts,"sent {sent}, pending {pending}, failed {failed}, not sent {skipped}"
+cl.incidents.carrier_without_email,The carrier is not notified: its record in Carriers has no Carrier Link notification email.
+cl.incidents.note,Note
+cl.incidents.note_too_long,The note can have at most 4000 characters.
+cl.incidents.saved,Saved
+cl.incidents.close,Close by hand
+cl.incidents.close_title,Close this incident?
+cl.incidents.close_effect.missing,"Its periods count as reviewed: they will not be notified again, even if the delivery never arrives."
+cl.incidents.close_effect.other,"Pending notices are cancelled. If the problem happens again, ONEMS opens a new incident."
+cl.incidents.close_note,Note (optional)
+cl.incidents.close_confirm,"Yes, close incident"
+cl.generator.diagnosis,Diagnosis
+cl.generator.diagnosis_hint,All the scans of the drawn shipments (intermediate points too) also go to the network diagnosis. Points without a postal center are left out.
+cl.alert.diagnosis_point_without_center,Reading points without a postal center left out of the diagnosis
+cl.alert.detail.diagnosis_skipped,Scans left out: {readings} ({shipments} shipments). Assign a postal center to these points to include them.
+cl.capture_origin.label,Origin
+cl.capture_origin.tooltip,Where the reading comes from: an RFID reader or the carrier scans (Carrier Link).
+cl.capture_origin.rfid,RFID
+cl.capture_origin.carrier,Carrier
 panelist_history.button,History
 panelist_history.title,Panelist history
 panelist_history.close,Close
@@ -5778,3 +5996,32 @@ panelist_history.leave_reason.personal,Personal reasons
 panelist_history.leave_reason.training,Training
 panelist_history.leave_reason.other,Other reason
 panelist_history.leave_reason.materials,Missing materials
+cl.csv.download,Download CSV
+cl.csv.error,The download failed. Try again.
+cl.csv.truncated,Only the first {max} rows were downloaded: narrow the filters.
+cl.csv.download_samples,Download samples (CSV)
+cl.csv.download_scans,Download scans (CSV)
+cl.csv.scan_role,Scan
+cl.csv.place,Place
+cl.csv.mode,Event code
+cl.csv.scan_at,Scan time
+cl.csv.period_start,Period start
+cl.csv.period_end,Period end
+cl.csv.source,Source
+cl.csv.test,Test
+cl.csv.phase,Phase
+cl.csv.rows_rejected,Rejected rows
+cl.csv.shipments,Shipments
+cl.csv.shipments_rejected,Rejected shipments
+cl.csv.received,Received
+cl.csv.finished,Finished
+cl.csv.error_message,Error
+cl.csv.date,Date
+cl.csv.alert,Alert
+cl.csv.severity,Severity
+cl.csv.details,Details
+cl.csv.closed_how,How it was closed
+cl.csv.last_period_start,Last period start
+cl.csv.last_period_end,Last period end
+cl.csv.opened,Opened
+cl.csv.closed,Closed

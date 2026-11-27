@@ -2,6 +2,7 @@
 -- Escenario construido con las funciones reales (cuotas, activacion, emision y entrada del lote).
 \set ON_ERROR_STOP on
 SET client_min_messages = error;
+\ir fixtures/cl_v3_demand_emitter.sql
 
 CREATE OR REPLACE FUNCTION pg_temp.ok(p_cond boolean, p_msg text) RETURNS void LANGUAGE plpgsql AS $$
 BEGIN IF p_cond IS NOT TRUE THEN RAISE EXCEPTION 'FAIL: %', p_msg; END IF; END $$;
@@ -325,3 +326,4 @@ BEGIN
   PERFORM pg_temp.ok(EXISTS (SELECT 1 FROM public.cl_alerts WHERE alert_type = 'suspicious_distribution' AND quota_id = v_q), 'alerta suspicious_distribution');
 END $$;
 ROLLBACK;
+DROP FUNCTION public.cl_emit_due_demands(timestamptz);
