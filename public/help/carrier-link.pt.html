@@ -227,6 +227,7 @@
     <nav class="nav" id="nav">
       <h3>Primeiros passos</h3>
       <a href="#overview">O que é o Carrier Link</a>
+      <a href="#carrier">Como funciona para a transportadora</a>
       <a href="#order">A ordem de trabalho</a>
       <h3>Os ecrãs</h3>
       <a href="#reading-points">Pontos de leitura</a>
@@ -242,7 +243,7 @@
       <a href="#alerts">O que significa cada alerta</a>
       <a href="#faq">Perguntas</a>
     </nav>
-    <div class="side-foot">Atualizado em 23 de novembro de 2026</div>
+    <div class="side-foot">Atualizado em 27 de novembro de 2026</div>
   </aside>
 
   <main class="main">
@@ -261,9 +262,44 @@
   <div class="card"><h4>Mesmos relatórios</h4><p>Não há relatórios novos: as amostras aparecem nos relatórios E2E e de diagnóstico de sempre, marcadas com a origem «carrier».</p></div>
 </div>
 <p>Em vez de um painelista de origem e outro de destino, cada amostra tem um <strong>ponto de leitura de início</strong> e um <strong>de fim</strong>. O tempo E2E vai da primeira leitura no início à última no fim.</p>
-<div class="callout info"><strong>Escala.</strong> Um plano pode chegar a cerca de <span dir="ltr">15 000</span> amostras por ano e por produto. Por isso as quotas repartem-se por rota (de cidade a cidade) e semana, sem que tenha de escolher os envios um a um.</div>
+<div class="callout info"><strong>Quantas amostras.</strong> Não há um limite fixo: o número é fixado pelo plano, e o teto real é o tráfego da transportadora em cada rota. As quotas repartem-se por rota (de cidade a cidade) e semana, sem que tenha de escolher os envios um a um.</div>
 <div class="callout warn"><strong>O que não se vê.</strong> Só entram envios que chegaram. Os que nunca chegam ou ficam noutra cidade não aparecem como amostra, e não há seguimento das saídas. Também não há rotas dentro da mesma cidade. O padrão de entrega só afeta a análise dos relatórios, nunca a captura nem o plano.</div>
 <div class="callout info"><strong>Não há uma secção à parte.</strong> O Carrier Link não é um módulo separado: tudo vive dentro do E2E. A única coisa que muda é a <strong>forma de captura</strong> do dado (painelistas ou transportadora), que se escolhe <strong>por transportadora</strong> em <strong>Transportadoras e produtos</strong>: <em>Painelistas</em>, <em>Carrier Link</em> ou <em>Ambos</em>. Uma mesma transportadora pode usar os dois sistemas ao mesmo tempo. As transportadoras que usam só painelistas funcionam exatamente como antes.</div>
+    </section>
+
+    <section id="carrier">
+    <h2>Como funciona para a transportadora</h2>
+<p>A transportadora <strong>não decide o que enviar: decide o plano</strong>. Antes de cada entrega, o programa dela pergunta ao ONEMS o que precisamos e, com essa resposta, executa as suas próprias consultas nos seus sistemas para extrair <strong>todos</strong> os envios que correspondem. Não sorteia, não filtra por conta própria e o ONEMS nunca entra nos seus sistemas.</p>
+<div class="flow">
+  <div class="node"><span class="tag">1 &middot; Regulador</span><b>O plano</b>Que produto, que rotas, que datas e quantas amostras.</div>
+  <div class="arrow">&rarr;</div>
+  <div class="node"><span class="tag">2 &middot; Transportadora</span><b>Consulta</b>Pergunta ao ONEMS o que precisamos para o próximo período.</div>
+  <div class="arrow">&rarr;</div>
+  <div class="node"><span class="tag">3 &middot; Transportadora</span><b>Entrega</b>Extrai e envia todos os envios completos do período.</div>
+  <div class="arrow">&rarr;</div>
+  <div class="node"><span class="tag">4 &middot; ONEMS</span><b>Sorteio</b>Verifica, sorteia e cria as amostras. A transportadora nunca sabe quais.</div>
+</div>
+<h3>O que o ONEMS diz à transportadora</h3>
+<div class="table-wrap"><table>
+<tr><th>O quê</th><th>De onde vem</th></tr>
+<tr><td>Produtos a enviar, com os códigos da transportadora</td><td>Produto do plano e equivalências de produto do <strong>Conector</strong></td></tr>
+<tr><td>Pontos de leitura e o seu papel (início, fim, intermédio)</td><td><strong>Pontos de leitura</strong> das cidades do plano</td></tr>
+<tr><td>Datas a entregar (o próximo período)</td><td>Datas do plano aplicado e calendário do conector</td></tr>
+<tr><td>Campos a enviar e formato de data e hora</td><td>Equivalências de campos do <strong>Conector</strong></td></tr>
+<tr><td>Se é preciso enviar todas as leituras</td><td>Opção de diagnóstico do plano</td></tr>
+<tr><td>A consulta SQL de extração já preenchida (opcional)</td><td>Tudo o anterior, para PostgreSQL, Oracle ou SQL Server</td></tr>
+</table></div>
+<div class="callout warn">Sem um plano aplicado que cubra essas datas, o ONEMS responde à transportadora que não há nada a entregar. Por isso é preciso um plano aplicado mesmo para as entregas de teste.</div>
+<h3>O que a transportadora tem de fazer</h3>
+<ul>
+  <li><strong>Um envio completo</strong> é um envio de um produto do plano cuja última leitura num ponto de fim cai dentro do período e que tem antes uma leitura num ponto de início. Vai com todas as suas leituras nos pontos acordados.</li>
+  <li>O ficheiro vai em <strong>JSON Lines ou CSV</strong>, sem compressão, com os nomes de campo da própria transportadora e <strong>sem dados pessoais</strong>.</li>
+  <li>Entrega os períodos <strong>por ordem</strong>, sem saltar nenhum, antes da hora do calendário mais a margem. Um período sem envios entrega-se na mesma, com o ficheiro vazio.</li>
+  <li>Não pode retirar envios pelo seu tempo de trânsito, por incidentes nem por erros de dados.</li>
+  <li>Um período <strong>rejeitado</strong> corrige-se e reenvia-se; um <strong>processado</strong> não se reenvia.</li>
+</ul>
+<p>Em troca, a transportadora vê o resultado de cada entrega (linhas lidas, envios válidos e rejeitados por motivo, e <strong>quantos</strong> foram sorteados, nunca quais) e recebe por e-mail os avisos dos seus próprios problemas.</p>
+<div class="callout info"><strong>Manual técnico.</strong> O detalhe para a equipa informática da transportadora (API, formato do ficheiro, erros e testes de conformidade) está no manual de ligação, que a equipa ONEMS fornece à transportadora.</div>
     </section>
 
     <section id="order">
@@ -277,7 +313,7 @@
   <li><strong>Ativar o conector.</strong> Quando tudo estiver pronto, passe o conector de Testes a Ativo. A partir daí cada entrega cria amostras.</li>
   <li><strong>Acompanhamento.</strong> Em <strong>Monitor de capturas</strong> acompanhe as entregas e os alertas, em <strong>Incidentes</strong> os problemas que requerem atenção, e em <strong>Amostras</strong> as amostras à medida que entram (menu Base de Dados ▸ Carrier Link).</li>
 </ol>
-<div class="callout ok"><strong>E depois:</strong> em cada dia de entrega a transportadora envia um ficheiro com todos os envios do período. O ONEMS verifica-o, conta-o, faz o seu próprio sorteio e coloca as amostras nos relatórios E2E. Se uma entrega não chega ou é rejeitada, o ONEMS abre um incidente e avisa por e-mail.</div>
+<div class="callout ok"><strong>E depois:</strong> em cada dia de entrega a transportadora pergunta ao ONEMS o que o plano precisa e envia um ficheiro com todos os envios do período. O ONEMS verifica-o, conta-o, faz o seu próprio sorteio e coloca as amostras nos relatórios E2E. Se uma entrega não chega ou é rejeitada, o ONEMS abre um incidente e avisa por e-mail.</div>
     </section>
 
     <section id="reading-points">
@@ -438,7 +474,8 @@
 
     <section id="faq">
     <h2>Perguntas</h2>
-<details><summary>Quantas amostras pode ter um plano?</summary><div>Um plano pode chegar a cerca de <span dir="ltr">15 000</span> amostras por ano e por produto.</div></details>
+<details><summary>Quantas amostras pode ter um plano?</summary><div>Não há um limite fixo: as que o plano fixar. O teto real é o tráfego da transportadora: se uma rota e semana não tiverem envios suficientes, aparece o aviso <em>Candidatos insuficientes</em> e o que falta passa para as entregas seguintes.</div></details>
+<details><summary>É preciso dizer à transportadora que envios queremos?</summary><div>Não é preciso enviar-lhe nada. O programa dela consulta o ONEMS antes de cada entrega e recebe o que o plano fixa: produtos, pontos de leitura e datas. Se o plano, os pontos ou as equivalências mudarem, a consulta seguinte já sai atualizada.</div></details>
 <details><summary>O transportador pode escolher que envios manda?</summary><div>Não. Em cada período envia todos os seus envios completos, sem escolher, e o ONEMS faz o sorteio com uma semente que guarda. O transportador nunca sabe que envios saíram.</div></details>
 <details><summary>Guardam-se dados pessoais?</summary><div>Não. Só se guardam os campos da lista de campos extra permitidos; o resto é descartado à entrada.</div></details>
 <details><summary>Quem pode criar chaves de conector?</summary><div>Só um superadmin ou o UPU Account Manager. A chave mostra-se uma única vez, ao criá-la.</div></details>

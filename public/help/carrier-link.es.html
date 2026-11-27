@@ -227,6 +227,7 @@
     <nav class="nav" id="nav">
       <h3>Primeros pasos</h3>
       <a href="#overview">Qué es Carrier Link</a>
+      <a href="#carrier">Cómo funciona para el carrier</a>
       <a href="#order">El orden de trabajo</a>
       <h3>Las pantallas</h3>
       <a href="#reading-points">Puntos de lectura</a>
@@ -242,7 +243,7 @@
       <a href="#alerts">Qué significa cada aviso</a>
       <a href="#faq">Preguntas</a>
     </nav>
-    <div class="side-foot">Actualizado el 23 de noviembre de 2026</div>
+    <div class="side-foot">Actualizado el 27 de noviembre de 2026</div>
   </aside>
 
   <main class="main">
@@ -261,9 +262,44 @@
   <div class="card"><h4>Mismos informes</h4><p>No hay informes nuevos: las muestras aparecen en los informes E2E y de diagnóstico de siempre, marcadas con el origen «carrier».</p></div>
 </div>
 <p>En lugar de un panelista de origen y otro de destino, cada muestra tiene un <strong>punto de lectura de inicio</strong> y uno de <strong>fin</strong>. El tiempo E2E va de la primera lectura en el inicio a la última en el fin.</p>
-<div class="callout info"><strong>Escala.</strong> Un plan puede llegar a unas <span dir="ltr">15.000</span> muestras al año por producto. Por eso las cuotas se reparten por ruta (ciudad a ciudad) y semana, sin que usted tenga que elegir los envíos uno a uno.</div>
+<div class="callout info"><strong>Cuántas muestras.</strong> No hay un límite fijo: el número lo fija el plan, y el tope real es el tráfico del carrier en cada ruta. Las cuotas se reparten por ruta (ciudad a ciudad) y semana, sin que usted tenga que elegir los envíos uno a uno.</div>
 <div class="callout warn"><strong>Qué no se ve.</strong> Solo entran envíos que han llegado. Los que nunca llegan o se quedan en otra ciudad no aparecen como muestra, y no hay seguimiento de las salidas. Tampoco hay rutas dentro de una misma ciudad. El estándar de entrega solo afecta al análisis de los informes, nunca a la captura ni al plan.</div>
 <div class="callout info"><strong>No hay una sección aparte.</strong> Carrier Link no es un módulo separado: todo vive dentro de E2E. Lo único que cambia es la <strong>forma de captura</strong> del dato (panelistas o carrier), que se elige <strong>por operador</strong> en <strong>Operadores y Productos</strong>: <em>Panelistas</em>, <em>Carrier Link</em> o <em>Ambos</em>. Un mismo operador puede usar los dos sistemas a la vez. Los operadores que usan solo panelistas funcionan exactamente como siempre.</div>
+    </section>
+
+    <section id="carrier">
+    <h2>Cómo funciona para el carrier</h2>
+<p>El carrier <strong>no decide qué enviar: lo decide el plan</strong>. Antes de cada entrega, su programa pregunta a ONEMS qué necesitamos y, con esa respuesta, lanza sus propias consultas sobre sus sistemas para extraer <strong>todos</strong> los envíos que encajan. No sortea, no filtra por su cuenta y ONEMS nunca entra en sus sistemas.</p>
+<div class="flow">
+  <div class="node"><span class="tag">1 &middot; Regulador</span><b>El plan</b>Qué producto, qué rutas, qué fechas y cuántas muestras.</div>
+  <div class="arrow">&rarr;</div>
+  <div class="node"><span class="tag">2 &middot; Carrier</span><b>Consulta</b>Pide a ONEMS qué necesitamos para el próximo periodo.</div>
+  <div class="arrow">&rarr;</div>
+  <div class="node"><span class="tag">3 &middot; Carrier</span><b>Entrega</b>Extrae y envía todos los envíos completos del periodo.</div>
+  <div class="arrow">&rarr;</div>
+  <div class="node"><span class="tag">4 &middot; ONEMS</span><b>Sorteo</b>Comprueba, sortea y crea las muestras. El carrier no sabe cuáles.</div>
+</div>
+<h3>Qué le dice ONEMS al carrier</h3>
+<div class="table-wrap"><table>
+<tr><th>Qué</th><th>De dónde sale</th></tr>
+<tr><td>Productos a enviar, con los códigos del carrier</td><td>Producto del plan y equivalencias de producto del <strong>Conector</strong></td></tr>
+<tr><td>Puntos de lectura y su papel (inicio, fin, intermedio)</td><td><strong>Puntos de lectura</strong> de las ciudades del plan</td></tr>
+<tr><td>Fechas a entregar (el próximo periodo)</td><td>Fechas del plan aplicado y calendario del conector</td></tr>
+<tr><td>Campos a enviar y formato de fecha y hora</td><td>Equivalencias de campos del <strong>Conector</strong></td></tr>
+<tr><td>Si hay que enviar todas las lecturas</td><td>Opción de diagnóstico del plan</td></tr>
+<tr><td>La consulta SQL de extracción ya rellenada (opcional)</td><td>Todo lo anterior, para PostgreSQL, Oracle o SQL Server</td></tr>
+</table></div>
+<div class="callout warn">Sin un plan aplicado que cubra esas fechas, ONEMS le responde al carrier que no hay nada que entregar. Por eso hace falta un plan aplicado incluso para las entregas de prueba.</div>
+<h3>Qué tiene que hacer el carrier</h3>
+<ul>
+  <li><strong>Un envío completo</strong> es un envío de un producto del plan cuya última lectura en un punto de fin cae dentro del periodo y que tiene antes una lectura en un punto de inicio. Va con todas sus lecturas en los puntos acordados.</li>
+  <li>El fichero va en <strong>JSON Lines o CSV</strong>, sin comprimir, con los nombres de campo del propio carrier y <strong>sin datos personales</strong>.</li>
+  <li>Entrega los periodos <strong>en orden</strong>, sin saltarse ninguno, antes de la hora del calendario más el margen. Un periodo sin envíos se entrega igual, con el fichero vacío.</li>
+  <li>No puede quitar envíos por su tiempo de tránsito, por incidencias ni por errores de datos.</li>
+  <li>Un periodo <strong>rechazado</strong> se corrige y se reenvía; uno <strong>procesado</strong> no se reenvía.</li>
+</ul>
+<p>A cambio, el carrier ve el resultado de cada entrega (filas leídas, envíos válidos y rechazados por motivo, y <strong>cuántos</strong> se sortearon, nunca cuáles) y recibe por correo los avisos de sus propios problemas.</p>
+<div class="callout info"><strong>Manual técnico.</strong> El detalle para el equipo informático del carrier (API, formato del fichero, errores y pruebas de conformidad) está en el manual de conexión, que el equipo ONEMS facilita al carrier.</div>
     </section>
 
     <section id="order">
@@ -277,7 +313,7 @@
   <li><strong>Activar el conector.</strong> Cuando todo esté listo, pase el conector de Pruebas a Activo. Desde entonces cada entrega crea muestras.</li>
   <li><strong>Seguimiento.</strong> En <strong>Monitor de capturas</strong> siga las entregas y los avisos, en <strong>Incidencias</strong> los problemas que requieren atención, y en <strong>Muestras</strong> las muestras que van entrando (menú Base de Datos ▸ Carrier Link).</li>
 </ol>
-<div class="callout ok"><strong>Y después:</strong> cada día de entrega el carrier envía un fichero con todos los envíos del periodo. ONEMS lo comprueba, lo cuenta, hace su propio sorteo y mete las muestras en los informes E2E. Si una entrega no llega o se rechaza, ONEMS abre una incidencia y avisa por correo.</div>
+<div class="callout ok"><strong>Y después:</strong> cada día de entrega el carrier consulta a ONEMS qué necesita el plan y envía un fichero con todos los envíos del periodo. ONEMS lo comprueba, lo cuenta, hace su propio sorteo y mete las muestras en los informes E2E. Si una entrega no llega o se rechaza, ONEMS abre una incidencia y avisa por correo.</div>
     </section>
 
     <section id="reading-points">
@@ -438,7 +474,8 @@
 
     <section id="faq">
     <h2>Preguntas</h2>
-<details><summary>¿Cuántas muestras puede tener un plan?</summary><div>Un plan puede llegar a unas <span dir="ltr">15.000</span> muestras al año por producto.</div></details>
+<details><summary>¿Cuántas muestras puede tener un plan?</summary><div>No hay un límite fijo: las que fije el plan. El tope real es el tráfico del carrier: si en una ruta y semana no hay envíos suficientes, aparece el aviso <em>Candidatos insuficientes</em> y lo que falta pasa a las entregas siguientes.</div></details>
+<details><summary>¿Hay que decirle al carrier qué envíos queremos?</summary><div>No hace falta mandarle nada. Su programa consulta a ONEMS antes de cada entrega y recibe lo que fija el plan: productos, puntos de lectura y fechas. Si cambia el plan, los puntos o las equivalencias, la siguiente consulta ya sale actualizada.</div></details>
 <details><summary>¿Puede el carrier elegir qué envíos manda?</summary><div>No. En cada periodo manda todos sus envíos completos, sin elegir, y ONEMS hace el sorteo con una semilla que guarda. El carrier nunca sabe qué envíos salieron.</div></details>
 <details><summary>¿Se guardan datos personales?</summary><div>No. Solo se guardan los campos de la lista de campos extra permitidos; el resto se descarta al entrar.</div></details>
 <details><summary>¿Quién puede crear claves de conector?</summary><div>Solo un superadmin o el UPU Account Manager. La clave se muestra una única vez al crearla.</div></details>
