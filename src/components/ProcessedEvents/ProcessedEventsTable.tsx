@@ -5,7 +5,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { SmartTooltip } from '../common/SmartTooltip';
 import { TablePagination } from '../common/TablePagination';
 import { CaptureSourceBadge } from '../carrier-link/CaptureSource';
-import { isCarrierLinkEnabled } from '@/lib/featureFlags';
+import { useCarrierLinkUi } from '@/hooks/useCarrierLinkUi';
 
 interface ProcessedEventsTableProps {
   records: ProcessedEvent[];
@@ -21,7 +21,7 @@ export function ProcessedEventsTable({
   onSelectAll,
 }: ProcessedEventsTableProps) {
   const { t } = useTranslation();
-  const showOrigin = isCarrierLinkEnabled();
+  const showOrigin = useCarrierLinkUi();
 
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);

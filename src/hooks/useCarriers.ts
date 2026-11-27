@@ -2,16 +2,15 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Carrier, Product, ProductMaterial } from '@/lib/types'
 import { carrierWritePayload, type CaptureMethod } from '@/lib/carrierCapture'
-import { isCarrierLinkEnabled } from '@/lib/featureFlags'
+import { useCarrierLinkUi } from './useCarrierLinkUi'
 import { useEffectiveAccountId } from './useEffectiveAccountId'
 import { useLatestRequest } from '@/lib/latestRequest'
-
-// Sin Carrier Link (producción) nunca se envía capture_method: funciona aunque la columna no exista.
-const carrierLinkOn = isCarrierLinkEnabled()
 
 export function useCarriers() {
   const effectiveAccountId = useEffectiveAccountId()
   const beginLoad = useLatestRequest()
+  // Sin Carrier Link en la cuenta nunca se envía capture_method ni el correo de avisos.
+  const carrierLinkOn = useCarrierLinkUi()
   const [carriers, setCarriers] = useState<Carrier[]>([])
   const [products, setProducts] = useState<Product[]>([])
   const [productMaterials, setProductMaterials] = useState<ProductMaterial[]>([])
