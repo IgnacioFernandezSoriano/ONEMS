@@ -227,6 +227,7 @@
     <nav class="nav" id="nav">
       <h3>Premiers pas</h3>
       <a href="#overview">Qu’est-ce que Carrier Link</a>
+      <a href="#carrier">Comment cela fonctionne pour le transporteur</a>
       <a href="#order">L’ordre de travail</a>
       <h3>Les écrans</h3>
       <a href="#reading-points">Points de lecture</a>
@@ -242,7 +243,7 @@
       <a href="#alerts">Que signifie chaque alerte</a>
       <a href="#faq">Questions</a>
     </nav>
-    <div class="side-foot">Mis à jour le 23 novembre 2026</div>
+    <div class="side-foot">Mis à jour le 27 novembre 2026</div>
   </aside>
 
   <main class="main">
@@ -261,9 +262,44 @@
   <div class="card"><h4>Mêmes rapports</h4><p>Il n’y a pas de nouveaux rapports : les échantillons apparaissent dans les rapports E2E et de diagnostic habituels, marqués avec l’origine « carrier ».</p></div>
 </div>
 <p>Au lieu d’un panéliste d’origine et d’un panéliste de destination, chaque échantillon a un <strong>point de lecture de départ</strong> et un <strong>point de lecture d’arrivée</strong>. Le temps E2E va de la première lecture au départ à la dernière à l’arrivée.</p>
-<div class="callout info"><strong>Échelle.</strong> Un plan peut atteindre environ <span dir="ltr">15 000</span> échantillons par an et par produit. C’est pourquoi les quotas sont répartis par trajet (de ville à ville) et par semaine, sans que vous ayez à choisir les envois un par un.</div>
+<div class="callout info"><strong>Combien d’échantillons.</strong> Il n’y a pas de limite fixe : le nombre est fixé par le plan, et le plafond réel est le trafic du transporteur sur chaque trajet. Les quotas sont répartis par trajet (de ville à ville) et par semaine, sans que vous ayez à choisir les envois un par un.</div>
 <div class="callout warn"><strong>Ce que l’on ne voit pas.</strong> Seuls les envois arrivés sont pris en compte. Ceux qui n’arrivent jamais ou restent dans une autre ville n’apparaissent pas comme échantillons, et les départs ne sont pas suivis. Il n’y a pas non plus de trajets à l’intérieur d’une même ville. La norme de livraison n’affecte que l’analyse des rapports, jamais la capture ni le plan.</div>
 <div class="callout info"><strong>Il n’y a pas de section à part.</strong> Carrier Link n’est pas un module séparé : tout se trouve dans E2E. La seule chose qui change est le <strong>mode de capture</strong> de la donnée (panélistes ou transporteur), qui se choisit <strong>par transporteur</strong> dans <strong>Transporteurs et produits</strong> : <em>Panélistes</em>, <em>Carrier Link</em> ou <em>Les deux</em>. Un même transporteur peut utiliser les deux systèmes à la fois. Les transporteurs qui n’utilisent que des panélistes fonctionnent exactement comme avant.</div>
+    </section>
+
+    <section id="carrier">
+    <h2>Comment cela fonctionne pour le transporteur</h2>
+<p>Le transporteur <strong>ne décide pas quoi envoyer : c’est le plan qui décide</strong>. Avant chaque livraison, son programme demande à ONEMS ce dont nous avons besoin et, avec cette réponse, lance ses propres requêtes sur ses systèmes pour extraire <strong>tous</strong> les envois qui correspondent. Il ne fait pas de tirage, ne filtre pas de lui-même, et ONEMS n’entre jamais dans ses systèmes.</p>
+<div class="flow">
+  <div class="node"><span class="tag">1 &middot; Régulateur</span><b>Le plan</b>Quel produit, quels trajets, quelles dates et combien d’échantillons.</div>
+  <div class="arrow">&rarr;</div>
+  <div class="node"><span class="tag">2 &middot; Transporteur</span><b>Requête</b>Demande à ONEMS ce dont nous avons besoin pour la prochaine période.</div>
+  <div class="arrow">&rarr;</div>
+  <div class="node"><span class="tag">3 &middot; Transporteur</span><b>Livraison</b>Extrait et envoie tous les envois complets de la période.</div>
+  <div class="arrow">&rarr;</div>
+  <div class="node"><span class="tag">4 &middot; ONEMS</span><b>Tirage</b>Vérifie, tire au sort et crée les échantillons. Le transporteur ne sait jamais lesquels.</div>
+</div>
+<h3>Ce que ONEMS indique au transporteur</h3>
+<div class="table-wrap"><table>
+<tr><th>Quoi</th><th>D’où cela vient</th></tr>
+<tr><td>Produits à envoyer, avec les codes du transporteur</td><td>Produit du plan et correspondances de produits du <strong>Connecteur</strong></td></tr>
+<tr><td>Points de lecture et leur rôle (début, fin, intermédiaire)</td><td><strong>Points de lecture</strong> des villes du plan</td></tr>
+<tr><td>Dates à livrer (la prochaine période)</td><td>Dates du plan appliqué et calendrier du connecteur</td></tr>
+<tr><td>Champs à envoyer et format de date et heure</td><td>Correspondances de champs du <strong>Connecteur</strong></td></tr>
+<tr><td>S’il faut envoyer toutes les lectures</td><td>Option de diagnostic du plan</td></tr>
+<tr><td>La requête SQL d’extraction déjà remplie (facultatif)</td><td>Tout ce qui précède, pour PostgreSQL, Oracle ou SQL Server</td></tr>
+</table></div>
+<div class="callout warn">Sans plan appliqué couvrant ces dates, ONEMS répond au transporteur qu’il n’y a rien à livrer. C’est pourquoi un plan appliqué est nécessaire même pour les livraisons de test.</div>
+<h3>Ce que doit faire le transporteur</h3>
+<ul>
+  <li><strong>Un envoi complet</strong> est un envoi d’un produit du plan dont la dernière lecture sur un point de fin tombe dans la période et qui a, avant, une lecture sur un point de début. Il est envoyé avec toutes ses lectures sur les points convenus.</li>
+  <li>Le fichier est en <strong>JSON Lines ou CSV</strong>, non compressé, avec les noms de champs du transporteur lui-même et <strong>sans données personnelles</strong>.</li>
+  <li>Il livre les périodes <strong>dans l’ordre</strong>, sans en sauter aucune, avant l’heure du calendrier plus la marge. Une période sans envois est livrée quand même, avec un fichier vide.</li>
+  <li>Il ne peut pas retirer d’envois en raison de leur temps de transit, d’incidents ou d’erreurs de données.</li>
+  <li>Une période <strong>rejetée</strong> est corrigée et renvoyée ; une période <strong>traitée</strong> n’est pas renvoyée.</li>
+</ul>
+<p>En retour, le transporteur voit le résultat de chaque livraison (lignes lues, envois valides et rejetés par motif, et <strong>combien</strong> ont été tirés, jamais lesquels) et reçoit par e-mail les alertes sur ses propres problèmes.</p>
+<div class="callout info"><strong>Manuel technique.</strong> Le détail pour l’équipe informatique du transporteur (API, format du fichier, erreurs et tests de conformité) se trouve dans le manuel de connexion, que l’équipe ONEMS fournit au transporteur.</div>
     </section>
 
     <section id="order">
@@ -277,7 +313,7 @@
   <li><strong>Activer le connecteur.</strong> Quand tout est prêt, passez le connecteur de Test à Actif. Dès lors, chaque livraison crée des échantillons.</li>
   <li><strong>Suivi.</strong> Dans <strong>Moniteur de captures</strong>, suivez les livraisons et les alertes ; dans <strong>Incidents</strong>, les problèmes à traiter ; dans <strong>Échantillons</strong>, les échantillons au fur et à mesure (menu Base de données ▸ Carrier Link).</li>
 </ol>
-<div class="callout ok"><strong>Ensuite :</strong> chaque jour de livraison, le transporteur envoie un fichier avec tous les envois de la période. ONEMS le vérifie, le compte, fait son propre tirage et intègre les échantillons aux rapports E2E. Si une livraison n’arrive pas ou est rejetée, ONEMS ouvre un incident et avertit par e-mail.</div>
+<div class="callout ok"><strong>Ensuite :</strong> chaque jour de livraison, le transporteur demande à ONEMS ce dont le plan a besoin et envoie un fichier avec tous les envois de la période. ONEMS le vérifie, le compte, fait son propre tirage et intègre les échantillons aux rapports E2E. Si une livraison n’arrive pas ou est rejetée, ONEMS ouvre un incident et avertit par e-mail.</div>
     </section>
 
     <section id="reading-points">
@@ -438,7 +474,8 @@
 
     <section id="faq">
     <h2>Questions</h2>
-<details><summary>Combien d’échantillons un plan peut-il avoir ?</summary><div>Un plan peut atteindre environ <span dir="ltr">15 000</span> échantillons par an et par produit.</div></details>
+<details><summary>Combien d’échantillons un plan peut-il avoir ?</summary><div>Il n’y a pas de limite fixe : autant que le plan en fixe. Le plafond réel est le trafic du transporteur : si un trajet et une semaine n’ont pas assez d’envois, l’alerte <em>Candidats insuffisants</em> apparaît et ce qui manque passe aux livraisons suivantes.</div></details>
+<details><summary>Faut-il dire au transporteur quels envois nous voulons ?</summary><div>Inutile de lui envoyer quoi que ce soit. Son programme interroge ONEMS avant chaque livraison et reçoit ce que fixe le plan : produits, points de lecture et dates. Si le plan, les points ou les correspondances changent, la requête suivante est déjà à jour.</div></details>
 <details><summary>Le transporteur peut-il choisir les envois qu’il envoie ?</summary><div>Non. Pour chaque période, il envoie tous ses envois complets, sans choisir, et ONEMS effectue le tirage avec une graine qu’il conserve. Le transporteur ne sait jamais quels envois ont été tirés.</div></details>
 <details><summary>Des données personnelles sont-elles conservées ?</summary><div>Non. Seuls les champs de la liste des champs supplémentaires autorisés sont conservés ; le reste est écarté à l’entrée.</div></details>
 <details><summary>Qui peut créer des clés de connecteur ?</summary><div>Seulement un superadmin ou l’UPU Account Manager. La clé n’est affichée qu’une seule fois, à sa création.</div></details>
